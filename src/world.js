@@ -1,4 +1,5 @@
 import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js';
+import { boxesFor,overlapsBlock,rayShape } from './shapes.js';
 export const CHUNK=16, WORLD_LIMIT=511, WORLD_BOTTOM=-64, WORLD_TOP=95, SEA_LEVEL=4;
 export const cellKey=(x,y,z)=>`${x},${y},${z}`;
 export class World {
@@ -22,6 +23,19 @@ export class World {
     const wrap=(n,span)=>((n+span/2)%span+span)%span-span/2,cx=Math.floor(x/52),cz=Math.floor(z/52),px=cx*52+20+hash(cx,cz,this.seed)*12,pz=cz*52+22;const v={h,biome,t1:-16+Math.sin(z*.047)*5,t2:-34+Math.sin(x*.039)*7,river,a2:(wrap(x-Math.sin(z*.033)*17,80)/3.2)**2,b2:(wrap(z-Math.sin(x*.035)*19,88)/4.4)**2,chamber:((x-px)/13)**2+((z-pz)/16)**2,cy:-22-hash(cz,cx,this.seed+7)*23,rock:this.noise(x+9,z-31,28)>.7?'granite':this.noise(x-67,z+84,34)>.64?'limestone':'stone'};this.columns.set(key,v);return v;
   }
   height(x,z){return this.column(Math.floor(x),Math.floor(z)).h;}
+  findSpawn(){
+    // A seed gives one repeatable, dry clearing. Existing saves keep their position.
+    for(let i=0;i<240;i++){
+      const x=Math.floor((hash(i*7919,173,this.seed)-.5)*560),z=Math.floor((hash(i*104729,941,this.seed+47)-.5)*560),y=this.height(x,z)+1;
+      if(Math.hypot(x,z)<65||y<SEA_LEVEL+3||y>65)continue;
+      let safe=true;
+      for(let dx=-1;dx<=1&&safe;dx++)for(let dz=-1;dz<=1;dz++){
+        if(Math.abs(this.height(x+dx,z+dz)+1-y)>1||!this.solid(x+dx,y-1,z+dz)||this.waterAt(x+dx,y,z+dz)||this.intersects(x+dx+.5,y,z+dz+.5))safe=false;
+      }
+      if(safe)return{x:x+.5,y,z:z+.5};
+    }
+    return{x:.5,y:7,z:20.5};
+  }
   inCave(x,y,z,column=this.column(x,z)){
     if(y>=column.h-4||y<WORLD_BOTTOM+5)return false;
     if(column.a2+((y-column.t1)/3.4)**2<1||column.b2+((y-column.t2)/4.5)**2<1||column.chamber+((y-column.cy)/8)**2<1)return true;
@@ -40,7 +54,7 @@ export class World {
     if(this.inCave(x,y,z,c))return null;
     if(y===h)return h<=SEA_LEVEL+1?'sand':h>48?'snow':BIOMES[c.biome].top;
     if(y>h-4)return c.biome==='desert'?'sand':y===h-3&&c.river<22?'clay':'dirt';
-    const rock=y<-38?'slate':c.rock;
+    const rock=y<-49?'basalt':y<-38?'slate':c.rock==='limestone'&&y<-5?'marble':c.rock;
     if(y>h-8)return rock;
     // Veins occur only beneath a substantial layer of soil/rock.
     const vein=hash(Math.floor(x/3)+Math.floor(y/3)*127,Math.floor(z/3),this.seed+93),fleck=hash(x+y*117,z-y*43,this.seed);
@@ -55,7 +69,7 @@ export class World {
     if(this.get(x,y,z)==='bedrock')return false;this.edits.set(cellKey(x,y,z),type);this.changes.push([cellKey(x,y,z),type]);
     for(const[a,b]of[[x,z],[x-1,z],[x+1,z],[x,z-1],[x,z+1]])this.dirty.add(`${Math.floor(a/16)},${Math.floor(b/16)}`);return true;
   }
-  ground(x,z,from=WORLD_TOP){x=Math.floor(x);z=Math.floor(z);for(let y=Math.min(WORLD_TOP,Math.floor(from));y>=WORLD_BOTTOM;y--)if(this.solid(x,y,z))return y+1;return WORLD_BOTTOM-1;}
+  ground(x,z,from=WORLD_TOP){const bx=Math.floor(x),bz=Math.floor(z),fx=x-bx,fz=z-bz;for(let y=Math.min(WORLD_TOP,Math.floor(from));y>=WORLD_BOTTOM;y--){const type=this.get(bx,y,bz);if(!BLOCKS[type]?.solid)continue;const tops=boxesFor(type).filter(b=>fx>=b[0]&&fx<=b[3]&&fz>=b[2]&&fz<=b[5]).map(b=>b[4]);if(tops.length)return y+Math.max(...tops);}return WORLD_BOTTOM-1;}
   prepare(cx,cz){
     const tag=`${cx},${cz}`;if(this.prepared.has(tag))return;this.prepared.add(tag);
     const put=(x,y,z,t)=>{if(Math.floor(x/16)===cx&&Math.floor(z/16)===cz){const k=cellKey(x,y,z);if(!this.structures.has(k)||this.structures.get(k)==='leaf'||this.structures.get(k)==='pine')this.structures.set(k,t);}};
@@ -64,7 +78,14 @@ export class World {
       if(camp||entrance||c.h<SEA_LEVEL+2||c.h>48)continue;
       const threshold=c.biome==='forest'?.982:c.biome==='snow'?.989:.993;
       if(c.biome==='desert'){if(n>.9985)for(let a=1;a<4;a++)put(x,c.h+a,z,'cactus');continue;}
-      if(n<threshold)continue;
+      if(n<threshold){
+        const flora=hash(x,z,this.seed+218);
+        if(c.biome!=='snow'&&c.biome!=='mountain'&&flora>.946){
+          const type=flora>.991?'wheat_crop':flora>.985?'carrot_crop':c.biome==='forest'?(flora>.975?'mushroom':'fern'):flora>.967?'flower_blue':'flower_red';
+          put(x,c.h+1,z,type);
+        }
+        continue;
+      }
       const birch=hash(z,x,this.seed+4)>.65,wood=c.biome==='snow'?'pinewood':birch?'birch':'wood',leaf=c.biome==='snow'?'pine':'leaf',tall=5+Math.floor(hash(x,z,this.seed+65)*3);
       for(let y=1;y<=tall;y++)put(x,c.h+y,z,wood);
       for(let a=-3;a<=3;a++)for(let b=-3;b<=3;b++)for(let dy=-1;dy<=3;dy++){
@@ -82,11 +103,11 @@ export class World {
     for(let x=-4;x<=4;x++)for(let z=-3;z<=3;z++)this.structures.set(cellKey(l.x+x,y+4+Math.floor((4-Math.abs(x))*.5),l.z+z),'pine_plank');
     if(!this.chests.some(c=>c.id==='starter'))this.chests.push({id:'starter',x:1,y,z:15,loot:{wood:6,apple:4,coal:4,wheat:6}});
   }
-  intersects(x,y,z,height=1.75,radius=.28){for(let a=Math.floor(x-radius);a<=Math.floor(x+radius);a++)for(let b=Math.floor(y+.001);b<=Math.floor(y+height-.001);b++)for(let c=Math.floor(z-radius);c<=Math.floor(z+radius);c++)if(this.solid(a,b,c))return true;return false;}
+  intersects(x,y,z,height=1.75,radius=.28){for(let a=Math.floor(x-radius);a<=Math.floor(x+radius);a++)for(let b=Math.floor(y+.001);b<=Math.floor(y+height-.001);b++)for(let c=Math.floor(z-radius);c<=Math.floor(z+radius);c++)if(overlapsBlock(this.get(a,b,c),a,b,c,x,y,z,height,radius))return true;return false;}
   raycast(origin,direction,max=6){
     let x=Math.floor(origin.x),y=Math.floor(origin.y),z=Math.floor(origin.z),distance=0,normal={x:0,y:0,z:0};
     const sx=Math.sign(direction.x),sy=Math.sign(direction.y),sz=Math.sign(direction.z),dx=Math.abs(1/direction.x),dy=Math.abs(1/direction.y),dz=Math.abs(1/direction.z);
     let tx=sx?(sx>0?x+1-origin.x:origin.x-x)*dx:Infinity,ty=sy?(sy>0?y+1-origin.y:origin.y-y)*dy:Infinity,tz=sz?(sz>0?z+1-origin.z:origin.z-z)*dz:Infinity;
-    for(let i=0;i<256&&distance<=max;i++){const type=this.get(x,y,z);if(type&&type!=='water')return{x,y,z,type,distance,normal};if(tx<ty&&tx<tz){x+=sx;distance=tx;tx+=dx;normal={x:-sx,y:0,z:0};}else if(ty<tz){y+=sy;distance=ty;ty+=dy;normal={x:0,y:-sy,z:0};}else{z+=sz;distance=tz;tz+=dz;normal={x:0,y:0,z:-sz};}}return null;
+    for(let i=0;i<256&&distance<=max;i++){const type=this.get(x,y,z);if(type&&type!=='water'){if(!BLOCKS[type].boxes)return{x,y,z,type,distance,normal};const hit=rayShape(origin,direction,x,y,z,type,max);if(hit)return{x,y,z,type,...hit};}if(tx<ty&&tx<tz){x+=sx;distance=tx;tx+=dx;normal={x:-sx,y:0,z:0};}else if(ty<tz){y+=sy;distance=ty;ty+=dy;normal={x:0,y:-sy,z:0};}else{z+=sz;distance=tz;tz+=dz;normal={x:0,y:0,z:-sz};}}return null;
   }
 }

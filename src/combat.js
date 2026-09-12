@@ -24,7 +24,7 @@ export function updateProjectiles(game,dt) {
     const distance=Math.hypot(p.vx,p.vy,p.vz)*dt,steps=Math.max(1,Math.ceil(distance/.18));
     for(let i=0;i<steps&&p.life>0;i++) {
       p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;p.z+=p.vz*dt/steps;
-      if(game.world.solid(Math.floor(p.x),Math.floor(p.y),Math.floor(p.z))){p.life=0;break;}
+      if(game.world.intersects(p.x,p.y,p.z,.02,.01)){p.life=0;break;}
       if(p.hostile&&Math.hypot(p.x-game.pos.x,p.z-game.pos.z)<.5&&p.y>game.pos.y&&p.y<game.pos.y+1.8){game.hurt(p.damage);p.life=0;}
       if(!p.hostile)for(const m of game.mobs)if(m.kind!=='grazer'&&Math.hypot(m.x-p.x,m.z-p.z)<(m.kind==='guardian'?1.3:.6)&&p.y>m.y&&p.y<m.y+(m.kind==='guardian'?4:2)){game.hit(m,p.damage);p.life=0;break;}
     }

@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import {connect,sleep} from './cdp.js';
+const c=await connect(),ev=c.evaluate;
+const terrain=async()=>{for(let i=0;i<150;i++){if(await ev('v.chunks.size>=9&&!v.inflight&&!v.queue.length&&!v.ready.length'))return;await sleep(100);}throw Error('Terrain did not finish');};
+const use=async()=>{await c.send('Input.dispatchKeyEvent',{type:'keyDown',code:'KeyE',key:'e'});await c.send('Input.dispatchKeyEvent',{type:'keyUp',code:'KeyE',key:'e'});await sleep(180);};
+try{
+  await c.send('Emulation.setTouchEmulationEnabled',{enabled:false});
+  await c.send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+  await c.send('Page.navigate',{url:'http://localhost:3001/'});await sleep(600);
+  await ev(`(async()=>{const m=await import('./src/main.js');window.g=m.game;window.v=m.renderer;window.ui=m.ui;g.start('adventure',true);g.pos={x:.5,y:7,z:9.5};g.yaw=0;g.pitch=-.95;g.add('stone_hoe');g.equip('stone_hoe');ui.render();})()`);
+  await terrain();await sleep(200);assert.equal(await ev('g.target?.type'),'grass');await use();
+  assert.equal(await ev('g.world.get(0,6,8)'),'farmland');
+  await ev("g.equip('seeds')");const before=await ev('g.state.inv.seeds');await use();
+  assert.equal(await ev('g.state.inv.seeds'),before-1);assert.equal(await ev('g.world.get(0,7,8)'),'wheat_sprout');
+  await ev('g.state.elapsed+=91');await sleep(1200);assert.equal(await ev('g.world.get(0,7,8)'),'wheat_crop');await use();assert.equal(await ev('g.state.inv.wheat'),3);
+  await ev(`g.world.set(1,7,9,'campfire');g.add('mushroom',2);g.add('wood',3);g.target={x:1,y:7,z:9,type:'campfire'};g.interact();ui.render()`);
+  assert.equal(await ev("document.querySelectorAll('[data-smelt=iron_ingot]').length"),0);await c.click('[data-smelt=roasted_mushroom]');assert.equal(await ev('g.state.inv.roasted_mushroom'),1);
+  await ev(`g.start('creative',true);g.pause('inventory');ui.filter='All';ui.search='';ui.render();document.querySelector('[data-item-search]').focus()`);
+  await c.send('Input.insertText',{text:'diamond'});assert.equal(await ev('document.querySelectorAll(".item-card").length'),5);
+  assert.ok(await ev(`Array.from(document.querySelectorAll('.item-card')).every(e=>e.textContent.toLowerCase().includes('diamond'))`));
+  await c.screenshot('wildfields-search');
+  await ev(`g.resume();ui.render();g.flying=true;g.pos={x:.5,y:29,z:58.5};g.yaw=Math.PI;g.pitch=-.45;g.state.time=110;g.equip('iron_pickaxe');document.querySelector('#toasts').replaceChildren()`);
+  await terrain();await sleep(250);await c.screenshot('wildfields-river');
+  assert.equal(await ev(`v.renderer.info.programs.filter(p=>p.diagnostics&&!p.diagnostics.runnable).length`),0);
+  await ev('g.state.time=450');await sleep(200);assert.ok(await ev('v.sun.intensity')<.3);await c.screenshot('wildfields-night');
+  const timing=await ev(`new Promise(resolve=>{let previous=performance.now(),frames=[];const sample=t=>{frames.push(t-previous);previous=t;if(frames.length<90)requestAnimationFrame(sample);else{frames.sort((a,b)=>a-b);resolve({median:frames[45],p95:frames[85],drawCalls:v.renderer.info.render.calls,triangles:v.renderer.info.render.triangles});}};requestAnimationFrame(sample);})`);
+  await ev(`g.state.time=110;g.pause('inventory');ui.search='';ui.filter='Gear';ui.render();document.querySelector('#toasts').replaceChildren()`);await c.screenshot('wildfields-gear');
+  await ev(`g.resume();ui.render();g.pos={x:.5,y:7,z:9.5};g.flying=false;g.vx=g.vz=g.velocity=0;g.yaw=0;g.pitch=-.95;g.world.set(0,7,8,null);g.equip('oak_stairs');g.buildRotation=0;g.audio.start()`);
+  await terrain();await sleep(180);assert.equal(await ev('g.preview?.valid'),true);assert.equal(await ev('v.ghostType'),'oak_stairs');
+  await c.send('Input.dispatchKeyEvent',{type:'keyDown',code:'KeyT',key:'t'});await c.send('Input.dispatchKeyEvent',{type:'keyUp',code:'KeyT',key:'t'});await sleep(120);assert.equal(await ev('v.ghostType'),'oak_stairs_e');await c.screenshot('wildfields-building');
+  await use();assert.equal(await ev('g.world.get(0,7,8)'),'oak_stairs_e');
+  await ev(`g.world.set(0,7,8,null);g.world.set(0,8,4,'stone');for(let z=5;z<=9;z++)g.world.set(0,8,z,null);g.yaw=0;g.pitch=0;g.equip('stonebrick');g.pos={x:.5,y:7,z:9.5}`);await sleep(200);
+  await c.send('Input.dispatchKeyEvent',{type:'keyDown',code:'KeyE',key:'e'});await sleep(950);await c.send('Input.dispatchKeyEvent',{type:'keyUp',code:'KeyE',key:'e'});
+  assert.equal(await ev('g.world.get(0,8,8)'),'stonebrick');assert.equal(await ev('g.placeHeld'),false);assert.equal(await ev('g.preview?.valid'),false);
+  assert.ok(await ev('!!g.audio.context&&!!g.audio.noiseBuffer'));await ev('g.pause();ui.render()');
+  assert.deepEqual(c.errors,[]);assert.deepEqual(c.failed,[]);
+  console.log('PASS: real-input tilling, planting, growth, harvest, campfire cooking, inventory search, water and grass shaders, day/night lighting, stair rotation, placement previews, hold-to-build controls and procedural audio. '+JSON.stringify(timing));
+}finally{c.socket.close();}

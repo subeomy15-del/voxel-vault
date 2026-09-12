@@ -3,7 +3,7 @@ const prefix='voxel-vault-v2-';
 export const defaultSettings={volume:.45,sensitivity:1,quality:'high',bobbing:true};
 export function freshState(seed=7821,mode='adventure') {
   const inv=starterInventory();if(mode==='creative')for(const k of Object.keys(ITEMS))inv[k]=999;
-  return {version:VERSION,seed,mode,inv,bar:[...STARTER_BAR],selected:0,hp:20,armor:null,pos:null,yaw:0,pitch:0,time:70,elapsed:0,seals:[],opened:[],discovered:['camp'],edits:[],victory:false,stats:{mined:0,built:0,kills:0,crafted:0,deaths:0,smelted:0},waypoint:'camp',spawn:null,containers:{},terrain:3};
+  return {version:VERSION,seed,mode,inv,bar:[...STARTER_BAR],selected:0,hp:20,armor:null,pos:null,yaw:0,pitch:0,time:70,elapsed:0,seals:[],opened:[],discovered:['camp'],edits:[],victory:false,stats:{mined:0,built:0,kills:0,crafted:0,deaths:0,smelted:0,harvested:0},waypoint:'home',spawn:null,origin:null,containers:{},crops:{},terrain:4};
 }
 export function slotKey(mode){return prefix+mode+(mode==='daily'?'-'+dailySeed():'');}
 export function loadState(storage,mode='adventure') {
@@ -19,6 +19,8 @@ export function loadState(storage,mode='adventure') {
     s.seals=s.seals.filter(k=>['grove','dunes','frost'].includes(k));
     s.edits=Array.isArray(raw.edits)?raw.edits.filter(e=>Array.isArray(e)&&e.length===2&&/^-?\d+,-?\d+,-?\d+$/.test(e[0])&&(e[1]===null||BLOCKS[e[1]])):[];
     if(raw.spawn&&['x','y','z'].every(k=>Number.isFinite(raw.spawn[k])))s.spawn={x:Math.max(-510,Math.min(510,raw.spawn.x)),y:Math.max(-63,Math.min(94,raw.spawn.y)),z:Math.max(-510,Math.min(510,raw.spawn.z))};
+    if(raw.origin&&['x','y','z'].every(k=>Number.isFinite(raw.origin[k])))s.origin={x:Math.max(-510,Math.min(510,raw.origin.x)),y:Math.max(-63,Math.min(94,raw.origin.y)),z:Math.max(-510,Math.min(510,raw.origin.z))};
+    for(const[k,c]of Object.entries(raw.crops||{}))if(/^-?\d+,-?\d+,-?\d+$/.test(k)&&['wheat','carrot'].includes(c?.kind)&&Number.isFinite(c.readyAt)&&c.readyAt>=0)s.crops[k]={kind:c.kind,readyAt:c.readyAt};
     for(const[key,items]of Object.entries(raw.containers||{})){if(!/^-?\d+,-?\d+,-?\d+$/.test(key)||!items||typeof items!=='object')continue;const bag={};for(const[k,n]of Object.entries(items))if(ITEMS[k]&&Number.isFinite(n)&&n>0)bag[k]=Math.min(999999,Math.floor(n));s.containers[key]=bag;}
     s.victory=raw.victory===true;s.waypoint=typeof raw.waypoint==='string'?raw.waypoint:'camp';
     for(const k of Object.keys(s.stats))if(Number.isFinite(raw.stats?.[k]))s.stats[k]=Math.max(0,raw.stats[k]);return s;

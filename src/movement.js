@@ -24,7 +24,10 @@ export function movePlayer(g,dt){
     const steps=Math.max(1,Math.ceil(Math.abs(amount)/.15));
     for(let i=0;i<steps;i++){
       const p={...g.pos,[key]:g.pos[key]+amount/steps};
-      if(g.world.intersects(p.x,p.y,p.z,height)){if(key==='x')g.vx=0;else g.vz=0;break;}
+      if(g.world.intersects(p.x,p.y,p.z,height)){
+        if(g.grounded&&!g.crouching&&!g.flying&&!g.world.intersects(p.x,p.y+.5,p.z,height)&&g.world.intersects(p.x,p.y+.45,p.z,.05)){g.pos.y+=.5;g.cameraOffset-=.5;g.pos[key]=p[key];continue;}
+        if(key==='x')g.vx=0;else g.vz=0;break;
+      }
       if(g.crouching&&g.grounded&&!g.flying&&!g.world.intersects(p.x,p.y-.12,p.z,.12))break;
       g.pos[key]=p[key];
     }
@@ -52,5 +55,5 @@ export function movePlayer(g,dt){
   g.pos.x=Math.max(-WORLD_LIMIT+.5,Math.min(WORLD_LIMIT-.5,g.pos.x));g.pos.z=Math.max(-WORLD_LIMIT+.5,Math.min(WORLD_LIMIT-.5,g.pos.z));
   if(g.pos.y<WORLD_BOTTOM-3){g.returnHome();g.hurt(3);}
   g.cameraOffset*=Math.exp(-dt*14);
-  if(g.moving){g.walk+=dt*(g.sprinting?1.35:1);g.stepTimer+=dt;if(g.stepTimer>.42&&g.grounded){g.stepTimer=0;g.audio.play('step');}}
+  if(g.moving){g.walk+=dt*(g.sprinting?1.35:1);g.stepTimer+=dt;if(g.stepTimer>.42&&g.grounded){g.stepTimer=0;g.audio.play('step',g.world.get(Math.floor(g.pos.x),Math.floor(g.pos.y-.03),Math.floor(g.pos.z))||'stone');}}
 }

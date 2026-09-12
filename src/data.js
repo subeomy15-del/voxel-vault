@@ -16,7 +16,7 @@ export const BLOCKS = {
   plank: { name: 'Timber planks', color: '#b18a59', solid: true, hardness: .7 },
   glass: { name: 'Sea glass', color: '#9cc7c3', solid: true, hardness: .5 },
   bedrock: { name: 'Worldstone', color: '#424d59', solid: true, hardness: Infinity },
-  torch: { name: 'Lantern', color: '#ffd890', solid: false, hardness: .3 },
+  torch: { name: 'Torch', color: '#ffd890', solid: false, hardness: .3 },
   bench: { name: 'Workbench', color: '#ab7c4d', solid: true, hardness: 1 },
 };
 const extraBlocks = {
@@ -27,8 +27,26 @@ const extraBlocks = {
   polished_granite:['Polished granite','#ae9b91',1.5],polished_slate:['Polished deepslate','#626b78',1.7],moss:['Mossy stone','#748767',1.2],
   furnace:['Furnace','#687270',1.5],chest:['Storage chest','#a38150',1],bed:['Bed','#af8173',.7],lantern:['Iron lantern','#deb972',.5],ladder:['Ladder','#9e8356',.4],
   cactus:['Cactus','#759359',.6],water:['Water','#497f9c',1],
+  gravel:['Gravel','#96958c',.6],cobblestone:['Cobblestone','#8a938e',1.4],sandstone:['Sandstone','#d6bf8f',1.2],
+  marble:['Marble','#d3d7cc',1.6],polished_marble:['Polished marble','#e0e3d7',1.5],basalt:['Basalt','#505c62',1.9],
+  copper_block:['Copper panels','#b98163',1.8],iron_block:['Iron panels','#b6c4c6',2],gold_block:['Gold panels','#d9b85e',2],
+  white_wool:['Ivory fabric','#ece5d1',.5],blue_wool:['Indigo fabric','#627a99',.5],green_wool:['Sage fabric','#82977a',.5],red_wool:['Rust fabric','#b17563',.5],
+  bookshelf:['Bookshelf','#927049',1],campfire:['Campfire','#d99750',.6],hedge:['Trimmed hedge','#597b4a',.4],
+  farmland:['Garden soil','#68513d',.6],fern:['Fern','#789658',.15],flower_red:['Wild poppy','#ca7965',.15],flower_blue:['Cornflower','#899fc9',.15],
+  mushroom:['Woodland mushroom','#b3977a',.2],wheat_crop:['Ripe wheat','#c9b273',.2],wheat_sprout:['Wheat seedling','#89a166',.15],
+  carrot_crop:['Ripe carrots','#91a66a',.2],carrot_sprout:['Carrot seedling','#89a166',.15],
 };
 for(const[k,[name,color,hardness]]of Object.entries(extraBlocks))BLOCKS[k]={name,color,hardness,solid:!['water','ladder','lantern'].includes(k)};
+export const PLANTS=['fern','flower_red','flower_blue','mushroom','wheat_crop','wheat_sprout','carrot_crop','carrot_sprout'];
+for(const k of PLANTS)Object.assign(BLOCKS[k],{solid:false,plant:true});
+BLOCKS.campfire.solid=false;
+export const BUILD_MATERIALS=[['oak','Oak','plank'],['birch','Birch','birch_plank'],['pine','Pine','pine_plank'],['stone','Stone','stonebrick'],['marble','Marble','polished_marble'],['basalt','Basalt','basalt']];
+for(const[id,label,texture]of BUILD_MATERIALS){
+  const base={...BLOCKS[texture],texture,drop:id+'_stairs',shape:'stairs'};
+  BLOCKS[id+'_slab']={...BLOCKS[texture],name:label+' slab',texture,shape:'slab',boxes:[[0,0,0,1,.5,1]]};
+  const tops=[[0,.5,0,1,1,.5],[.5,.5,0,1,1,1],[0,.5,.5,1,1,1],[0,.5,0,.5,1,1]];
+  for(let facing=0;facing<4;facing++)BLOCKS[id+'_stairs'+(['','_e','_s','_w'][facing])]={...base,name:label+' stairs',facing,hidden:facing>0,boxes:[[0,0,0,1,.5,1],tops[facing]]};
+}
 export const ITEMS = {
   ...Object.fromEntries(Object.entries(BLOCKS).map(([k,v]) => [k,{ ...v, place: true }])),
   wood_sword: { name: 'Trail sword', color: '#c2a47a', kind: 'sword', damage: 3, tier: 1, description: 'A trusty start. Left click to attack.' },
@@ -60,7 +78,24 @@ Object.assign(ITEMS, {
   wheat:{name:'Wheat',color:'#b6a071',kind:'material',description:'Bake grain in a furnace to make bread.'},
   bread:{name:'Bread',color:'#caa579',kind:'food',description:'Restores 6 health. Baked in a furnace.'},
   compass:{name:'Compass',color:'#c7b082',kind:'utility',description:'Shows your home direction and coordinates when held.'},
+  fiber:{name:'Plant fiber',color:'#b6b58b',kind:'material',description:'Gather from ferns and leaves. Weave into fabric.'},
+  cloth:{name:'Woven cloth',color:'#e0d6ba',kind:'material',description:'Woven from plant fiber for soft building materials.'},
+  seeds:{name:'Wheat seeds',color:'#acb277',kind:'seed',crop:'wheat',description:'Use on garden soil. Wheat ripens after 90 seconds of play.'},
+  carrot:{name:'Carrot',color:'#d79b61',kind:'food',heal:3,crop:'carrot',description:'Eat for 3 health, or plant on garden soil. Ripens in 75 seconds.'},
+  roasted_mushroom:{name:'Roasted mushrooms',color:'#ad805a',kind:'food',heal:6,description:'Roasted over a campfire or in a furnace. Restores 6 health.'},
+  vegetable_stew:{name:'Garden stew',color:'#d5aa77',kind:'food',heal:12,description:'Carrot, mushrooms and grain. Restores 12 health.'},
+  fruit_bowl:{name:'Apple crumble',color:'#ce9a71',kind:'food',heal:9,description:'Apples and bread make a hearty snack. Restores 9 health.'},
+  copper_sword:{name:'Copper saber',color:'#c9987b',kind:'sword',damage:6,tier:2,description:'A balanced copper blade. 6 damage.'},
+  copper_axe:{name:'Copper axe',color:'#c9987b',kind:'axe',speed:3.8,damage:4,tier:2,description:'An affordable forestry tool.'},
+  diamond_axe:{name:'Diamond axe',color:'#93cfcd',kind:'axe',speed:8,damage:8,tier:4,description:'Harvest timber and clear leaves quickly.'},
+  diamond_shovel:{name:'Diamond shovel',color:'#93cfcd',kind:'shovel',speed:8,tier:4,description:'Excavate earth, sand and gravel with ease.'},
+  stone_hoe:{name:'Stone hoe',color:'#a2b2ac',kind:'hoe',tier:2,description:'Use on grass or earth to prepare garden soil.'},
+  iron_hoe:{name:'Iron hoe',color:'#c6d1cc',kind:'hoe',tier:3,description:'Prepare a 3 × 3 garden patch with one use.'},
+  crossbow:{name:'Crossbow',color:'#a78b67',kind:'bow',damage:12,cooldown:1,tier:3,description:'A powerful, slower shot. Uses arrows; deals 12 damage.'},
 });
+for(const k of ['wheat_crop','wheat_sprout','carrot_crop','carrot_sprout'])ITEMS[k].hidden=true;
+Object.assign(ITEMS.apple,{heal:4});Object.assign(ITEMS.bread,{heal:6});Object.assign(ITEMS.potion,{heal:10});
+export const CROPS={wheat:{seed:'seeds',sprout:'wheat_sprout',mature:'wheat_crop',seconds:90,loot:{wheat:3,seeds:2}},carrot:{seed:'carrot',sprout:'carrot_sprout',mature:'carrot_crop',seconds:75,loot:{carrot:3}}};
 export const RECIPES = [
   { item: 'stone_sword', cost: { stone: 6, wood: 2 }, category: 'Gear' },
   { item: 'stone_pickaxe', cost: { stone: 5, wood: 2 }, category: 'Gear' },
@@ -98,9 +133,35 @@ RECIPES.push(
   {item:'diamond_sword',cost:{diamond:3,iron_ingot:2},category:'Gear'},
   {item:'compass',cost:{iron_ingot:2,copper_ingot:1},category:'Gear'}
 );
+RECIPES.push(
+  {item:'copper_sword',cost:{copper_ingot:4,wood:2},category:'Gear'},
+  {item:'copper_axe',cost:{copper_ingot:3,wood:2},category:'Gear'},
+  {item:'diamond_axe',cost:{diamond:3,wood:2},category:'Gear'},
+  {item:'diamond_shovel',cost:{diamond:2,wood:2},category:'Gear'},
+  {item:'stone_hoe',cost:{stone:2,wood:2},category:'Gear'},
+  {item:'iron_hoe',cost:{iron_ingot:2,wood:2},category:'Gear'},
+  {item:'crossbow',cost:{iron_ingot:5,wood:6,fiber:4},category:'Gear'},
+  {item:'cloth',count:2,cost:{fiber:4},category:'Supplies'},
+  {item:'vegetable_stew',cost:{carrot:2,mushroom:2,wheat:1},category:'Supplies'},
+  {item:'fruit_bowl',cost:{apple:2,bread:1},category:'Supplies'},
+  {item:'campfire',cost:{wood:3,stone:4,coal:1},category:'Building'},
+  {item:'cobblestone',count:4,cost:{stone:4},category:'Building'},
+  {item:'gravel',count:4,cost:{stone:4},category:'Building'},
+  {item:'sandstone',count:4,cost:{sand:4},category:'Building'},
+  {item:'polished_marble',count:4,cost:{marble:4},category:'Building'},
+  {item:'bookshelf',cost:{plank:6,cloth:2},category:'Building'},
+  {item:'hedge',count:4,cost:{leaf:8},category:'Building'},
+  ...['copper','iron','gold'].map(m=>({item:m+'_block',count:4,cost:{[m+'_ingot']:4},category:'Building'})),
+  {item:'white_wool',count:4,cost:{cloth:2},category:'Building'},
+  {item:'blue_wool',count:4,cost:{cloth:2,flower_blue:1},category:'Building'},
+  {item:'red_wool',count:4,cost:{cloth:2,flower_red:1},category:'Building'},
+  {item:'green_wool',count:4,cost:{cloth:2,fern:1},category:'Building'},
+);
+for(const[id,,material]of BUILD_MATERIALS){RECIPES.push({item:id+'_slab',count:6,cost:{[material]:3},category:'Building'},{item:id+'_stairs',count:4,cost:{[material]:4},category:'Building'});}
 export const SMELTING=[
   {input:'copper',output:'copper_ingot',count:1},{input:'iron',output:'iron_ingot',count:1},{input:'gold',output:'gold_ingot',count:1},
   {input:'sand',output:'glass',count:2},{input:'clay',output:'brick',count:4},{input:'wheat',output:'bread',count:2},
+  {input:'mushroom',output:'roasted_mushroom',count:1},
 ];
 export const LANDMARKS = [
   {id:'camp',name:'Base camp',subtitle:'A place to begin',x:0,z:14,color:'#c5b58a',type:'camp'},
@@ -116,7 +177,24 @@ export const BIOMES={
 };
 export function hash(x,z,seed=1) { let n = Math.imul(x ^ seed, 374761393) + Math.imul(z,668265263); n = Math.imul(n ^ n >>> 13,1274126177); return ((n ^ n >>> 16) >>> 0) / 4294967295; }
 export function dailySeed(date = new Date()) { return Number(date.toISOString().slice(0,10).replaceAll('-','')); }
-export function canCraft(inv, recipe) { return !!recipe && Object.entries(recipe.cost).every(([k,n]) => (inv[k] || 0) >= n); }
-export function craft(inv, item) { const recipe = RECIPES.find(r=>r.item===item); if (!canCraft(inv,recipe)) return false; for (const [k,n] of Object.entries(recipe.cost)) inv[k]-=n; inv[item]=(inv[item]||0)+(recipe.count||1); return true; }
-export function starterInventory() { return { wood_sword:1, wood_pickaxe:1, wood_axe:1, grass:32, wood:0, stone:0, torch:12, apple:5, potion:2 }; }
+export const TIMBER=['wood','birch','pinewood'];
+export const PLANKS=['plank','birch_plank','pine_plank'];
+export function ingredientKeys(key,recipe){
+  if(key==='wood'&&recipe?.item!=='plank')return TIMBER;
+  if(key==='plank'&&!['oak_slab','oak_stairs'].includes(recipe?.item))return PLANKS;
+  return [key];
+}
+export function ingredientCount(inv,key,recipe){return ingredientKeys(key,recipe).reduce((sum,k)=>sum+(inv[k]||0),0);}
+function craftingPlan(inv,recipe){
+  if(!recipe)return null;const left={...inv},cost={};
+  for(const[key,count]of Object.entries(recipe.cost)){
+    let remaining=count;
+    for(const k of ingredientKeys(key,recipe)){const take=Math.min(remaining,left[k]||0);if(take){left[k]-=take;cost[k]=(cost[k]||0)+take;remaining-=take;}}
+    if(remaining)return null;
+  }
+  return cost;
+}
+export function canCraft(inv,recipe){return craftingPlan(inv,recipe)!==null;}
+export function craft(inv,item){const recipe=RECIPES.find(r=>r.item===item),cost=craftingPlan(inv,recipe);if(!cost)return false;for(const[k,n]of Object.entries(cost))inv[k]-=n;inv[item]=(inv[item]||0)+(recipe.count||1);return true;}
+export function starterInventory() { return { wood_sword:1, wood_pickaxe:1, wood_axe:1, grass:32, wood:0, stone:0, torch:12, apple:5, potion:2,seeds:6,carrot:2 }; }
 export const STARTER_BAR = ['wood_sword','wood_pickaxe','wood_axe','grass','wood','stone','torch','apple','potion'];
