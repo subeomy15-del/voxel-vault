@@ -1,6 +1,6 @@
 import * as THREE from '../vendor/three.module.js';
-import { ITEMS,BLOCKS,hash } from './data.js?v=11';
-import { toolModel,bowModel,gliderModel } from './models.js?v=11';
+import { ITEMS,BLOCKS,hash } from './data.js?v=12';
+import { toolModel,bowModel,gliderModel } from './models.js?v=12';
 // The same models supply catalogue renders and held equipment.
 export function itemModel(r,name){
  const item=ITEMS[name]||{color:'#a6b4bc'},g=new THREE.Group(),color=item.color;
@@ -54,5 +54,10 @@ export function itemModel(r,name){
  }
  if(name==='compass'){const face=add(new THREE.CylinderGeometry(.4,.4,.09,24),'#cdb47d',0,0,0,.35);face.rotation.x=Math.PI/2;const needle=add(new THREE.ConeGeometry(.055,.5,4),'#b75155',0,0,.08);needle.rotation.z=-.4;return g;}
  if(name==='fiber'){for(let i=0;i<7;i++){const strand=box(i%2?color:'#bbae80',.025,.65,.025,(i-3)*.055,0,0);strand.rotation.z=(hash(i,7)-.5)*.25;}return g;}
- for(let i=0;i<3;i++){const shard=crystal(color,.25,(i-1)*.21,(i%2)*.18,0);shard.scale.y=1.3;}return g;
+ // A calm, readable fallback for small materials and quest items. Keeping
+ // this as one solid silhouette makes the catalogue feel like a game UI
+ // instead of a pile of unrelated decorative shards.
+ box(color,.62,.5,.42,0,-.03);
+ box('#ffffff',.38,.045,.025,0,.12,.225);
+ return g;
 }

@@ -1,6 +1,6 @@
-import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=11';
-import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=11';
-import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=11';
+import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=12';
+import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=12';
+import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=12';
 export const CHUNK=16, WORLD_LIMIT=511, WORLD_BOTTOM=-64, WORLD_TOP=95, SEA_LEVEL=4;
 export const cellKey=(x,y,z)=>`${x},${y},${z}`;
 export class World {

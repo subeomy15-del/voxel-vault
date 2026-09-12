@@ -1,13 +1,13 @@
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=11';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=11';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=11';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,craft,hash,dailySeed } from './data.js?v=11';
-import { freshState,loadState,saveState,importLegacy } from './save.js?v=11';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=11';
-import { movePlayer,requestJump } from './movement.js?v=11';
-import { overlapsBlock } from './shapes.js?v=11';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=11';
-import { ANIMALS,animalKind } from './wildlife.js?v=11';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=12';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=12';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=12';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,craft,hash,dailySeed } from './data.js?v=12';
+import { freshState,loadState,saveState,importLegacy } from './save.js?v=12';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=12';
+import { movePlayer,requestJump } from './movement.js?v=12';
+import { overlapsBlock } from './shapes.js?v=12';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=12';
+import { ANIMALS,animalKind } from './wildlife.js?v=12';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}

@@ -1,7 +1,7 @@
 import * as THREE from '../vendor/three.module.js';
-import { OUTPOSTS } from './expeditions.js?v=11';
-import { RIFT_ANCHORS } from './realms.js?v=11';
-import { hash } from './data.js?v=11';
+import { OUTPOSTS } from './expeditions.js?v=12';
+import { RIFT_ANCHORS } from './realms.js?v=12';
+import { hash } from './data.js?v=12';
 export class RiftEffects {
   constructor(r){
     this.r=r;this.root=new THREE.Group();r.scene.add(this.root);this.epoch=-1;this.time={value:0};this.markers=[];

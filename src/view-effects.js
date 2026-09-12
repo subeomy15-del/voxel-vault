@@ -1,7 +1,7 @@
 import * as THREE from '../vendor/three.module.js';
-import { ITEMS } from './data.js?v=11';
-import { icon } from './icons.js?v=11';
-import { gliderModel } from './models.js?v=11';
+import { ITEMS } from './data.js?v=12';
+import { icon } from './icons.js?v=12';
+import { gliderModel } from './models.js?v=12';
 const ORES={ruby:'#e2688b',sapphire:'#81bdeb',emerald:'#74d8a4',moonstone:'#baa1f2',coal:'#a0a6a0',copper:'#dc9971',iron:'#dfd8c6',gold:'#f5d67c',diamond:'#9be7e5',crystal:'#b1f3cc'};
 const cells=[];for(let x=-14;x<=14;x++)for(let y=-14;y<=14;y++)for(let z=-14;z<=14;z++)if(x*x+y*y+z*z<=196)cells.push([x,y,z]);cells.sort((a,b)=>a[0]**2+a[1]**2+a[2]**2-b[0]**2-b[1]**2-b[2]**2);
 export class ViewEffects {

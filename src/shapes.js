@@ -1,4 +1,4 @@
-import { BLOCKS } from './data.js?v=11';
+import { BLOCKS } from './data.js?v=12';
 const full=[[0,0,0,1,1,1]];
 export const boxesFor=type=>BLOCKS[type]?.boxes||full;
 export function overlapsBlock(type,bx,by,bz,x,y,z,height=1.75,radius=.28){
