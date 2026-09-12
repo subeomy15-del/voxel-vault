@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#17362e">
-  <meta name="description" content="An open voxel world with random starts, farming, forests, rivers, caves, mining and 116 items to craft and build with.">
+  <meta name="description" content="An open voxel world with random starts, farming, forests, rivers, caves, hunting, food effects, ore gliders, and a rich collection of items to craft and build with.">
   <title>Voxel Vault — Build Beyond the Horizon</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./style.css">
@@ -22,15 +22,16 @@
     <div id="target"></div><div id="build-hint"></div><div id="mining"><i></i></div>
     <div id="interaction" hidden></div>
 
-    <div id="survival"><div class="health-row"><span id="hearts"></span><span id="armor"></span></div><div class="stamina"><i></i></div></div>
+    <div id="survival"><div class="health-row"><span id="hearts"></span><span id="armor"></span></div><div class="food-row"><span id="food-label">Food 20/20</span><div class="food-meter"><i id="food-fill"></i><i id="reserve-fill"></i></div><small id="reserve-label">Energy 5</small></div><div class="stamina"><i></i></div></div>
+    <div id="active-effects"></div><div id="flight-status"></div><div id="action-progress" hidden><span></span><div><i></i></div></div>
     <div id="pickups" aria-live="polite"></div><div id="item-name"></div><div id="hotbar"></div>
     <div class="hud-bottom"><span><kbd>Tab</kbd> Backpack &nbsp; <kbd>C</kbd> Craft &nbsp; <kbd>M</kbd> Map</span><span id="save-state">Saved locally</span></div>
     <div id="combat-message"></div><div id="damage"></div>
   </div>
   <main id="overlay"></main>
   <div id="toasts" aria-live="polite"></div>
-  <div id="loading"><span class="loader-cube">⬡</span><strong>Growing your next adventure</strong><small>Carving valleys. Hiding treasures.</small></div>
-  <div id="touch-controls" hidden><div id="stick"><i></i></div><div class="touch-actions"><button data-touch="jump" aria-label="Jump">↑</button><button data-touch="attack" aria-label="Mine or attack">⚒</button><button data-touch="interact" aria-label="Interact or place">E</button><button data-action="inventory" aria-label="Backpack">▦</button><button data-touch="dash" aria-label="Dodge dash">»</button><button data-touch="heal" aria-label="Heal">♥</button></div></div>
+  <div id="loading"><span class="loader-cube">⬡</span><strong>Growing your next adventure</strong><small>Carving valleys. Planting woodlands.</small></div>
+  <div id="touch-controls" hidden><div id="stick"><i></i></div><div class="touch-actions"><button data-touch="jump" aria-label="Jump">↑</button><button data-touch="attack" aria-label="Mine or attack">⚒</button><button data-touch="interact" aria-label="Interact or place">E</button><button data-action="inventory" aria-label="Backpack">▦</button><button data-touch="dash" aria-label="Dodge dash">»</button><button data-touch="heal" aria-label="Eat food">♧</button><button data-touch="glide" aria-label="Toggle glider" hidden>△</button></div></div>
   <noscript>This adventure needs JavaScript enabled.</noscript>
   <script type="module" src="./src/main.js"></script>
 </body>

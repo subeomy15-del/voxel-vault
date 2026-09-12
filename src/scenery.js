@@ -51,17 +51,17 @@ export class Scenery {
     const underground=this.owner.underground;if(underground)return;
     const instances=[],high=this.owner.settings.quality==='high';
     for(let a=0;a<16;a++)for(let b=0;b<16;b++){
-      const x=cx*16+a,z=cz*16+b,n=hash(x,z,world.seed+718);if(n<(high?.62:.86))continue;
+      const x=cx*16+a,z=cz*16+b,n=hash(x,z,world.seed+718);const patch=world.noise(x+94,z-37,22);if(n<(high?(patch>.58?.86:.965):.975))continue;
       const y=world.height(x,z)+1;if(world.get(x,y-1,z)!=='grass'||world.get(x,y,z))continue;
       instances.push({x:x+.18+hash(x,z,91)*.64,y,z:z+.18+hash(z,x,52)*.64,n});
     }
     if(!instances.length)return;
     const geometry=new THREE.BufferGeometry();
-    geometry.setAttribute('position',new THREE.Float32BufferAttribute([-.16,0,0,.05,0,0,.08,.38,0, .01,0,-.13,.01,0,.12,.01,.3,.04, -.15,0,.09,-.06,0,.04,-.19,.26,.08],3));geometry.computeVertexNormals();
+    geometry.setAttribute('position',new THREE.Float32BufferAttribute([-.055,0,0,.015,0,0,.04,.28,0, .01,0,-.055,.01,0,.045,.01,.24,.015, -.09,0,.04,-.035,0,.025,-.12,.2,.035],3));geometry.computeVertexNormals();
     const mesh=new THREE.InstancedMesh(geometry,this.grassMaterial,instances.length),up=new THREE.Vector3(0,1,0);
     instances.forEach((p,i)=>{
       this.rotation.setFromAxisAngle(up,hash(p.x|0,p.z|0)*Math.PI*2);
-      this.scratch.compose(new THREE.Vector3(p.x,p.y,p.z),this.rotation,new THREE.Vector3(1,1+(p.n-.6)*1.8,1));mesh.setMatrixAt(i,this.scratch);
+      this.scratch.compose(new THREE.Vector3(p.x,p.y,p.z),this.rotation,new THREE.Vector3(1,.55+(p.n-.5)*.9,1));mesh.setMatrixAt(i,this.scratch);
       this.tint.set(p.n>.86?'#9ca66b':p.n>.73?'#7a995a':'#688948');mesh.setColorAt(i,this.tint);
     });
     mesh.receiveShadow=true;mesh.computeBoundingSphere();group.add(mesh);
@@ -77,7 +77,8 @@ export class Scenery {
     const r=this.owner;r.scene.background.copy(inCave?new THREE.Color('#162128'):uniforms.horizon.value);r.scene.fog.color.copy(r.scene.background);
     const range=r.settings.quality==='high'?1:.76;r.scene.fog.near=inCave?20:48*range;r.scene.fog.far=inCave?45:90*range;
     r.sun.intensity=inCave?.06:.14+day*1.65;r.sun.color.set('#b7cee7').lerp(new THREE.Color('#fff1d7'),day).lerp(new THREE.Color('#f7bd85'),dusk*.45);
-    r.ambient.intensity=inCave?.38:.6+day*1.2;r.ambient.color.set('#bdd4e0');r.ambient.groundColor.set('#7c8d6c');
+    r.ambient.intensity=game.effect('nightvision')?2.3:inCave?.38:.6+day*1.2;r.ambient.color.set('#bdd4e0');r.ambient.groundColor.set('#7c8d6c');
+    if(game.effect('nightvision')){r.scene.fog.near=45;r.scene.fog.far=95;r.lantern.intensity=Math.max(r.lantern.intensity,5);}
     const direction=uniforms.sunDirection.value;r.sun.position.set(game.pos.x+direction.x*50,game.pos.y+Math.max(.3,Math.abs(direction.y))*70,game.pos.z+direction.z*60);r.sun.target.position.set(game.pos.x,game.pos.y,game.pos.z);
   }
 }

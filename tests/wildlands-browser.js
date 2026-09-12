@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import { connect,sleep } from './cdp.js';
+const c=await connect(),ev=c.evaluate;
+const key=async(code,down=true)=>c.send('Input.dispatchKeyEvent',{type:down?'keyDown':'keyUp',code,key:code.slice(-1).toLowerCase()});
+const press=async code=>{await key(code);await key(code,false);};
+const terrain=async()=>{for(let i=0;i<180;i++){if(await ev('v.chunks.size>=9&&!v.inflight&&!v.queue.length&&!v.ready.length'))return;await sleep(100);}throw Error('Terrain not ready');};
+try{
+  await c.send('Emulation.setTouchEmulationEnabled',{enabled:false});await c.send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+  await c.send('Page.navigate',{url:'http://localhost:3001/'});await sleep(700);
+  await ev(`(async()=>{const m=await import('./src/main.js');window.g=m.game;window.v=m.renderer;window.ui=m.ui;g.start('adventure',true);g.pos={x:.5,y:7,z:9.5};g.yaw=0;g.pitch=0;g.mobs=[];g.add('swift_smoothie',2);g.equip('swift_smoothie');g.state.food=12;g.state.saturation=0;ui.render();})()`);await terrain();
+  await press('KeyF');await sleep(200);assert.equal(await ev('!!g.eating'),true);assert.ok(await ev("!document.querySelector('#action-progress').hidden"));await sleep(800);
+  assert.equal(await ev('g.state.inv.swift_smoothie'),1);assert.ok(await ev('g.effect("speed")'));assert.ok(await ev("document.querySelector('#active-effects').textContent.includes('Speed')"));assert.equal(await ev('g.state.food'),16);await c.screenshot('wildlands-food');
+  await ev(`g.add('longbow');g.add('iron_arrows',10);g.equip('longbow');g.equip('iron_arrows');g.yaw=0;g.pitch=-.1;g.pos={x:.5,y:7,z:9.5};g.vx=g.vz=0;window.cow=g.spawnMob(.5,4,'cow',7);cow.brain=99;cow.walkSpeed=0;`);
+  await c.send('Input.dispatchMouseEvent',{type:'mousePressed',x:720,y:500,button:'left',clickCount:1});await sleep(1100);
+  assert.ok(await ev('g.drawState?.time')>=1);assert.equal(await ev('g.state.inv.iron_arrows'),10);await c.screenshot('wildlands-bow');
+  await c.send('Input.dispatchMouseEvent',{type:'mouseReleased',x:720,y:500,button:'left',clickCount:1});await sleep(300);
+  assert.equal(await ev('g.state.inv.iron_arrows'),9);assert.equal(await ev('g.mobs.includes(cow)'),false);assert.ok(await ev("g.state.drops.some(d=>d.item==='raw_beef')"));assert.ok(await ev('v.viewEffects.drops.size')>=2);await c.screenshot('wildlands-drops');
+  await ev('g.pos={x:.5,y:7,z:4};g.velocity=0');await sleep(700);assert.ok(await ev('g.state.inv.raw_beef')>=2);assert.equal(await ev('g.state.drops.length'),0);
+  await ev(`g.pos={x:.5,y:7,z:9.5};g.world.set(1,7,9,'furnace');g.add('coal',5);g.target={x:1,y:7,z:9,type:'furnace'};g.interact();ui.render()`);await c.click('[data-smelt=cooked_beef]');assert.equal(await ev('g.state.inv.cooked_beef'),1);await c.screenshot('wildlands-furnace');
+  await ev(`g.start('creative',true);g.pause('inventory');ui.filter='Gear';ui.search='glider';ui.render();document.querySelector('#toasts').replaceChildren()`);
+  assert.equal(await ev('document.querySelectorAll(".item-card").length'),8);await c.click('[data-equip=gold_glider]');assert.equal(await ev('g.state.glider'),'gold_glider');await c.screenshot('wildlands-gliders');
+  await ev(`g.resume();ui.render();g.pos={x:.5,y:48,z:45.5};g.grounded=false;g.flying=true;g.velocity=g.vx=g.vz=0;g.yaw=Math.PI;g.pitch=-.15;g.state.time=90;`);await terrain();await press('KeyG');await sleep(600);
+  assert.equal(await ev('g.gliding'),true);assert.equal(await ev('v.viewEffects.wing.visible'),true);assert.equal(await ev('v.hand.visible'),false);assert.ok(await ev('g.pos.y')<48);assert.ok(await ev("document.querySelector('#flight-status').textContent.includes('m/s')"));await c.screenshot('wildlands-flight');
+  await press('KeyG');assert.equal(await ev('g.gliding'),false);
+  await ev(`g.flying=true;g.pos={x:.5,y:-15,z:9.5};g.yaw=0;g.pitch=0;for(let x=-2;x<=2;x++)for(let z=4;z<=11;z++)for(let y=-15;y<=-12;y++)g.world.set(x,y,z,null);g.world.set(0,-14,4,'stone');g.world.set(0,-14,3,'diamond');g.world.set(1,-14,3,'gold');g.equip('prospector_pie');g.state.time=450;`);await terrain();await press('KeyF');await sleep(2400);assert.ok(await ev('g.effect("xray")'));assert.ok(await ev('v.viewEffects.ores.count')>0);assert.equal(await ev('v.viewEffects.ores.material.depthTest'),false);await c.screenshot('wildlands-ore-sight');
+  await ev(`g.equip('moonberry_compote')`);await press('KeyF');await sleep(1000);assert.ok(await ev('v.ambient.intensity')>2);await ev(`g.equip('mist_stew')`);await press('KeyF');await sleep(1000);assert.ok(await ev(`(()=>{let faded=false;v.hand.traverse(o=>{if(o.material?.opacity<.3)faded=true;});return faded;})()`));
+  await ev(`g.state.effects.xray=.1`);await sleep(250);assert.equal(await ev('v.viewEffects.ores.count'),0);
+  // A fixed scene makes each species and crop easy to inspect without natural spawning changing the shot.
+  await ev(`(async()=>{const {CROPS}=await import('./src/data.js');g.state.effects={};g.flying=true;g.gliding=false;g.pos={x:.5,y:9,z:19.5};g.yaw=0;g.pitch=-.24;g.state.time=115;g.mobs=[];g.equip('gold_pickaxe');for(let x=-8;x<=8;x++)for(let z=5;z<=16;z++){for(let y=7;y<=10;y++)g.world.set(x,y,z,null);g.world.set(x,6,z,'grass');}['deer','pig','cow','sheep','chicken','rabbit'].forEach((kind,i)=>{const m=g.spawnMob(-5+i*2.1,12,kind,7);m.brain=999;m.walkSpeed=0;m.goalAngle=0;});Object.values(CROPS).forEach((crop,i)=>{g.world.set(-7+i*2,6,7,'farmland');g.world.set(-7+i*2,7,7,crop.mature);});document.querySelector('#toasts').replaceChildren();})()`);await terrain();await sleep(400);assert.equal(await ev('g.mobs.length'),6);assert.equal(await ev('[...v.mobMeshes.values()].filter(m=>m.userData.animal).length'),6);await c.screenshot('wildlands-wildlife');
+  const timing=await ev(`new Promise(resolve=>{let previous=performance.now(),frames=[];const sample=t=>{frames.push(t-previous);previous=t;if(frames.length<90)requestAnimationFrame(sample);else{frames.sort((a,b)=>a-b);resolve({median:frames[45],p95:frames[85],drawCalls:v.renderer.info.render.calls,triangles:v.renderer.info.render.triangles});}};requestAnimationFrame(sample);})`);
+  await ev(`g.pause('inventory');ui.filter='Gear';ui.search='gold';ui.render()`);assert.equal(await ev('document.querySelectorAll(".item-card").length'),9);await c.screenshot('wildlands-gold');
+  assert.equal(await ev(`v.renderer.info.programs.filter(p=>p.diagnostics&&!p.diagnostics.runnable).length`),0);assert.deepEqual(c.errors,[]);assert.deepEqual(c.failed,[]);
+  console.log('PASS: real food input, reserve/effect HUD, bow hold/release, hunting drops and collection, furnace cooking, eight equipped gliders, airborne G flight, ore sight, night vision, invisibility, six rendered animal species, nine crops and gold inventory. '+JSON.stringify(timing));
+}finally{c.socket.close();}

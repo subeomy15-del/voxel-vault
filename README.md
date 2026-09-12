@@ -1,6 +1,6 @@
-# Voxel Vault — Wildfields Update
+# Voxel Vault — Wildlands Update
 
-An open voxel sandbox with a 1,024 × 1,024 world, forests, hills, rivers, alpine terrain, dry underground caves, mining, smelting and building. The Wildfields update includes 116 usable items, farming, campfire cooking, varied world spawns, a searchable backpack, and a new lighting and texture pass.
+A browser voxel sandbox with 186 usable items, 109 crafting recipes, nine crops, six animal species, food effects, ranged weapons and eight hang gliders. Explore a 1,024 × 1,024 world with forests, meadows, rivers, mountains and dry underground caves. Mine, farm, cook, craft and build at your own pace.
 
 ## Play
 
@@ -12,81 +12,115 @@ For local development, use Node.js 20 or newer:
 npm start
 ```
 
-Open http://localhost:3001. No package installation or build step is required. The Three.js dependency is bundled locally. Serve the project over HTTP; opening index.html directly cannot load browser modules or the terrain worker.
+Open http://localhost:3001. No installation or build step is needed. Three.js is bundled locally. Serve over HTTP so browser modules and the terrain worker can load.
 
 ## Controls
 
-- **WASD** move, **mouse** look, **Space** jump, swim upward, or climb ladders. Hold Space for repeated jumps.
-- **Shift** sprint, **X** crouch or descend in Creative flight, **Z** hold to zoom.
-- **Left click** attack or hold to mine. **E/right click** use an item, interact with a station, or place a block.
-- **1–9/mouse wheel** select a hotbar slot. **Middle click** selects the targeted block if owned, or adds it in Creative.
+- **WASD** move, **mouse** look, **Space** jump, swim or climb. Hold Space for repeated jumps.
+- **Shift** sprint, **X** crouch, **Z** zoom, **R** short dodge.
+- **Left click** attack or hold to mine. Hold with a longbow or recurve bow, then release to shoot. Crossbows reload between shots.
+- **E/right click** interact, eat a held food, plant, harvest or place. Hold to place continuously. Crouch to place against a station.
+- **G** open or close an equipped glider while airborne. Look down to dive; up for a slower descent.
+- **1–9/wheel** select hotbar. **Middle click** selects an owned targeted block, or adds it in Creative.
 - **Tab** backpack, **C** crafting, **M** map, **J** field notes, **Esc** pause.
-- **F/Q** food/healing, **B** bridge block, **R** short dodge.
-- Creative flight: double tap Space, then Space to rise and X to descend.
+- **F** eat the held food or an available ordinary meal; **Q** drink a legacy healing tonic.
+- **T** rotate stairs; **B** place a bridge block.
+- Creative flight: double tap Space; Space to rise, X to descend.
 
-Touch controls provide a movement stick, drag-to-look, jumping, mining, interaction, healing and dodging.
+Touch controls provide a movement stick, drag look, jump, mine/attack, use, food, dodge and a glider button when equipped. Bow drawing supports looking around with a second finger.
 
-## Wildfields additions
+## Food, hunting and farming
 
-New Adventure and Creative worlds choose a random seed and a safe, dry starting clearing. Daily worlds share a repeatable seed and starting location. Continuing a saved world keeps your position and your bed spawn. Your home marker follows the starting clearing until you rest in a bed. Use Pause → Start a new adventure world to replace your Adventure save and try a fresh starting location.
+Deer drop raw venison and leather; pigs pork; cows beef and leather; sheep mutton and wool; chickens poultry and feathers; rabbits rabbit meat and hides. Animals wander, graze, flee when hurt and follow suitable held foods. Species vary by biome. Walk over their dropped items to collect them. Drops persist in saves and expire after ten minutes of active play.
 
-The backpack has search and category filters. The 116 usable items include copper tools, diamond axes and shovels, a crossbow, two hoes, marble, basalt, cobblestone, sandstone, metal panels, fabric blocks, bookshelves, hedges and wild plants. Each item family has a distinct SVG icon with material details.
+Craft a furnace from eight stone, place it and interact with it. Cooking a batch requires one ingredient and one coal or timber. All six raw meats cook in furnaces; cooked meat provides substantially more food and stored energy. Campfires cook bread, mushrooms, potatoes and corn. Furnaces also turn copper, iron and gold ore into ingots, sand into glass and clay into bricks.
 
-Use a stone hoe on clear grass or earth to prepare garden soil; an iron hoe prepares a clear 3 × 3 patch. Equip wheat seeds or carrots and use them on garden soil. Wheat matures after 90 seconds of active play, carrots after 75 seconds. Use E or mine a mature crop to harvest it. Growing crops survive saves and pause when the game is paused. An early harvest returns the planted seed. Wild wheat, carrots, ferns, flowers and mushrooms can be gathered in suitable biomes.
+Food refills a 20-point hunger meter and stores up to 20 points of energy. Movement, sprinting, jumping, mining and healing use energy before hunger. With at least 16 food, health recovers gradually: one point every 2.5 seconds with reserves, every five seconds without. Low hunger prevents sprinting. Ordinary meals do not heal instantly; the older healing tonic retains its direct healing behavior.
 
-Ferns provide fiber and seeds. Weave fiber into cloth and use flowers to make colored fabric blocks. Campfires cook mushrooms and bread using timber or coal; furnaces also smelt metals. Garden stew and apple crumble provide stronger healing.
+Use a hoe on clear grass or dirt to prepare garden soil. Iron and gold hoes till a clear 3 × 3 patch. Plant seeds, carrots or potatoes with E; harvest ripe plants with E or mining. Crops grow during active play, survive saves, and return their seed when harvested early. Water within four blocks when planting shortens growth time by 25%.
 
-## Building controls
+| Crop | Normal growth | Harvest |
+| --- | --- | --- |
+| Wheat | 90 s | Wheat and seeds |
+| Carrot | 75 s | Carrots |
+| Cotton | 100 s | Cotton and seeds |
+| Watermelon | 140 s | Watermelon and seeds |
+| Honey melon | 130 s | Melon and seeds |
+| Potato | 90 s | Potatoes |
+| Tomato | 90 s | Tomatoes and seeds |
+| Corn | 110 s | Corn and kernels |
+| Berries | 100 s | Berries and seeds |
 
-Oak, birch, pine, stone brick, marble and basalt each have slabs and stairs. Walk onto half-height steps without jumping. Press T while holding stairs to rotate their placement. Place a matching slab on top of another to combine them into a full block. Mining a rotated stair returns its original stair item.
+Wild plants grow in sparse local patches with open ground between them. Cotton makes cloth, which substitutes for ordinary cloth in recipes. Sugar cane refines into sugar. Melons cut into slices, which can also produce seeds. Gather ferns for fiber and wheat seeds. Flowers, lavender, mushrooms and cane add biome variety without covering every clearing.
 
-A placement preview shows the block’s shape and whether the space is clear. Hold E or right click to place continuously; release to stop. Hold X to crouch when placing against chests, workbenches and furnaces. Your body cannot be enclosed by a placement. Middle click picks the material under the crosshair, including rotated stairs.
+## Special meals
 
-General crafting recipes accept a mix of oak, birch and pine logs, and furnaces use any of those logs as fuel. Beds and bookshelves accept mixed planks. Recipes for a named wood’s planks, slabs or stairs preserve that species.
+Eat these crafted foods to gain an effect, including at full health. Timers pause with the game and persist in saves. The HUD shows remaining duration.
 
-Footsteps, mining and placement use different sounds for soft ground, wood and stone. Wind, river ambience and occasional daytime birds fade when the game is paused and follow the sound-volume setting.
+| Food | Effect |
+| --- | --- |
+| Swift melon smoothie | 50% faster movement for 90 s |
+| Springroot salad | Higher jumps for 90 s |
+| Mistberry stew | Invisibility for 75 s; attacks reveal you for 4 s; nearby enemies can still notice you |
+| Prospector pie | Ore sight through rock within 14 blocks for 60 s |
+| Miner’s lunch | 60% faster mining for 120 s |
+| Moonberry compote | Brighter caves and nights for 120 s |
+| Featherlight bread | Slow falling and no fall damage for 90 s |
 
-## Sandbox systems
+Garden salad, berry pie, trail mix and venison stew provide larger ordinary meals and energy reserves. Ingredients and exact food values appear in the crafting book and backpack.
 
-Collect timber and stone near camp. Craft a furnace with eight stone, place it, and interact to smelt ore with coal or timber fuel. Copper and iron produce ingots for tools. Sand produces glass, clay produces bricks, and grain produces bread.
+## Gliders, gold and ranged equipment
 
-Place a chest to store materials. Click a stack to transfer up to 64 items. Mining a storage chest returns its contents to your inventory. Use a placed bed to set your respawn point and rest until morning. Ladders help with mine shafts, and torches or lanterns light underground spaces.
+Gliders equip separately from the hotbar. Craft a canvas glider with cloth, timber and leather; upgrade it with an ore or metal ingots. They turn height into forward travel. Landing, water or G closes the wing.
 
-Materials include oak, birch and pine logs/planks, granite, limestone, deepslate, polished stone, bricks, terracotta, mossy stone and glass. Tools include axes, shovels, several pickaxe tiers, swords, a bow and a compass.
+| Glider | Level-look cruise | Descent |
+| --- | --- | --- |
+| Canvas | 11 blocks/s | 1.5 blocks/s |
+| Reinforced | 14 | 1.05 |
+| Coal | 11.5 | 1.4 |
+| Copper | 12.5 | 1.25 |
+| Iron | 14 | 1.1 |
+| Gold | 16 | 1.35 |
+| Diamond | 15 | 0.8 |
+| Aether crystal | 16 | 0.65 |
 
-The hillside entrance marked on the map slopes into dry caves. Ore occurs in veins at least eight blocks beneath the surface; deeper layers contain rarer materials. Water exists in river and lake cells, rather than a plane passing through the underground. The vertical world extends from Y −64 to 95.
+Gold also crafts a sword, pickaxe, axe, shovel, hoe, armor, recurve bow and crossbow. Gold tools dig quickly; gold armor reduces incoming damage by 30%.
 
-## Saving
+The ash longbow favors power and range; the recurve draws more quickly. Heavy and repeating crossbows trade damage for reload speed. Equip an ammunition stack in the backpack: iron arrows add damage; frost arrows slow targets for four seconds. Bows and crossbows fall back to ordinary arrows if the selected special ammunition runs out. Projectiles have gravity, collide with terrain and can hit animals.
 
-Adventure, Daily and Creative use separate localStorage saves. Daily worlds use the UTC date as a seed. Inventory, edits, growing crops, storage contents, bed spawn, starting location, position and settings persist. Saves happen every 15 seconds, when pausing and when leaving the page. Death preserves your inventory and builds.
+## World, building and saving
 
-Compatible inventories from the original `voxel-vault-player-v3` save are imported. Existing version 2 inventories and player edits remain readable. This update regenerates the natural terrain around retained edits; previous terrain and shrine geometry are not retained. Starting a new Adventure world requires the in-game replacement confirmation. Browser storage belongs to its URL/origin; clearing site data removes local saves.
+New worlds choose safe random starting locations; Daily worlds use the UTC date as a repeatable seed. Continue preserves your position and bed spawn. Home follows the starting clearing until you use a bed. Adventure, Daily and Creative have separate saves.
 
-## Rendering and performance
+The terrain reaches from Y −64 to 95. Ore veins occur underground, with rarer ores in deeper layers. Rivers contain actual water cells; caves beneath dry land stay dry. These are original voxel algorithms with familiar sandbox mechanics, not Minecraft source code.
 
-The sky changes through daylight, sunset and moonlight. Water has animated highlights and ripples. Grass is instanced per terrain chunk and sways in the wind. Clouds share a single instanced mesh. Block textures use a 32-pixel procedural atlas with dedicated patterns for bark, planks, masonry, metals, crops and stations. Held building blocks share the terrain textures; tools, lanterns, food and animals have more detailed models. Mining cracks and pickup notifications make actions easier to follow.
+Build with oak, birch and pine, masonry, polished stone, glass, metals and fabric. Six material families have slabs and directional stairs with matching collision and raycast shapes. Walk onto half steps smoothly. Matching slabs combine into full blocks. A placement ghost previews shape, orientation and blocked spaces.
 
-Terrain meshing runs in a Web Worker. Generated buffers transfer to the renderer without copying, and only exposed block faces are rendered. The renderer keeps a bounded neighborhood of chunks, prioritizes nearby and edited chunks, and uses a smaller radius underground. Worker epochs and chunk revision numbers prevent outdated work from replacing newer edits.
+General recipes accept mixed timber; named wood recipes preserve species. Chests transfer up to 64 items per click and return their contents when mined. Beds set home and rest until morning. Ladders, torches and lanterns help with underground exploration.
 
-Water and glass have separate geometry/materials. Textures use mipmaps and anisotropic filtering. Local sun shadows are enabled on High quality; Performance mode reduces resolution, view range and shadow cost. Tree and column caches are periodically bounded during exploration.
+Inventory, placed blocks, crop growth, containers, home, position, food reserves, effects, ammunition, gliders and item drops save every 15 seconds, on pause and when leaving. Animal populations regenerate on world load. Death preserves inventory and builds. Existing version 2 saves and compatible original inventories remain readable. Natural vegetation regenerates around retained player edits.
 
-## Verification
+Pause → Start a new adventure world asks before replacing an Adventure save. Browser storage belongs to the site origin; clearing site data removes saves.
+
+## Rendering and verification
+
+The game uses a procedural block atlas, SVG item icons, articulated voxel animals, textured glider sails, food models, arrows, swaying instanced grass, clouds, day/night lighting, sun shadows and animated water. Ore sight uses a bounded incremental scan and one instanced draw. Terrain meshes run in a Web Worker; epochs and revisions keep older meshes from overwriting new edits. High and Performance settings control resolution, view range and shadows.
 
 ```sh
 npm test
 ```
 
-The 28 tests cover slab and stair collision, rotation, raycasts, slab merging, mixed-timber recipes, safe and varied spawns, position retention, planting and harvest accounting, crop save persistence, campfire restrictions, healing, terrain determinism and bounds, buried ores, dry caves and river water, edits, raycasts, crafting, furnace requirements, storage, save validation/migration, jump height and momentum, jump buffering and coyote time, underground gravity, collisions, projectiles and worker mesh output.
+The 39 tests cover terrain, shapes, movement, crafting, saves, stations, all animals and meat drops, eating and regeneration, timed effects, bow charging/ammunition, every crop, hydration, glider tiers, gold armor and vegetation density.
 
-Browser scripts use an isolated Chrome profile with remote debugging on port 9224 and the local game server on port 3001:
+Browser scripts use an isolated Chrome profile on debugging port 9224 and the local server on 3001:
 
 ```sh
 npm run test:browser
 node tests/wildfields-browser.js
+node tests/wildlands-browser.js
 node tests/touch-check.js
-node tests/inspect.js
 ```
 
-The browser suite clears the isolated test profile’s game storage. Do not point it at a profile containing a world you want to preserve. It exercises actual keyboard/mouse controls, stations, world edits, reloads, menus and compact layouts. Screenshots are saved to `/private/tmp/voxel-vault-*.png`.
+These scripts reset the isolated profile’s test worlds. They exercise real keyboard, mouse and touch inputs, reload persistence, cooking, farming, hunting, gliding, visual effects and compact layouts. Screenshots go to `/private/tmp/voxel-vault-*.png`.
 
 Three.js r160 is bundled under its MIT license in `vendor/LICENSE`.

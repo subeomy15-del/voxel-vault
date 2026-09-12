@@ -1,3 +1,4 @@
+import { ANIMALS,updateAnimal } from './wildlife.js';
 
 export const ENEMIES = {
   sentinel: { name:'Grove sentinel', hp:18, speed:1.8, damage:3, color:'#66817c', glow:'#c1e9b2', xp:18 },
@@ -7,10 +8,11 @@ export const ENEMIES = {
   guardian: { name:'Vault guardian', hp:180, speed:1.6, damage:6, color:'#687b70', glow:'#a8efd9', xp:180 },
   grazer: { name:'Wild grazer', hp:5, speed:.45, damage:0, color:'#b9976e', glow:'#ead4a5', xp:0 },
 };
-export function launchBolt(game, origin, direction, damage=3, hostile=true) {
+Object.assign(ENEMIES,ANIMALS);
+export function launchBolt(game, origin, direction, damage=3, hostile=true,options={}) {
   if(game.projectiles.length>=50)return;
-  const len=Math.hypot(direction.x,direction.y,direction.z)||1, speed=hostile?8:23;
-  game.projectiles.push({id:++game.serial,x:origin.x,y:origin.y,z:origin.z,vx:direction.x/len*speed,vy:direction.y/len*speed,vz:direction.z/len*speed,damage,hostile,life:hostile?4:1.5});
+  const len=Math.hypot(direction.x,direction.y,direction.z)||1, speed=options.speed||(hostile?8:27);
+  game.projectiles.push({id:++game.serial,x:origin.x,y:origin.y,z:origin.z,vx:direction.x/len*speed,vy:direction.y/len*speed,vz:direction.z/len*speed,damage,hostile,gravity:options.gravity||0,slow:options.slow||0,color:options.color||'#c9b38a',life:hostile?4:4});
 }
 function shootAtPlayer(game,m,spread=0) {
   const origin={x:m.x,y:m.y+(m.kind==='guardian'?2.4:1.15),z:m.z};
@@ -20,13 +22,13 @@ function shootAtPlayer(game,m,spread=0) {
 }
 export function updateProjectiles(game,dt) {
   for(const p of game.projectiles) {
-    p.life-=dt;
+    p.life-=dt;p.vy-=(p.gravity||0)*dt;
     const distance=Math.hypot(p.vx,p.vy,p.vz)*dt,steps=Math.max(1,Math.ceil(distance/.18));
     for(let i=0;i<steps&&p.life>0;i++) {
       p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;p.z+=p.vz*dt/steps;
       if(game.world.intersects(p.x,p.y,p.z,.02,.01)){p.life=0;break;}
       if(p.hostile&&Math.hypot(p.x-game.pos.x,p.z-game.pos.z)<.5&&p.y>game.pos.y&&p.y<game.pos.y+1.8){game.hurt(p.damage);p.life=0;}
-      if(!p.hostile)for(const m of game.mobs)if(m.kind!=='grazer'&&Math.hypot(m.x-p.x,m.z-p.z)<(m.kind==='guardian'?1.3:.6)&&p.y>m.y&&p.y<m.y+(m.kind==='guardian'?4:2)){game.hit(m,p.damage);p.life=0;break;}
+      if(!p.hostile)for(const m of game.mobs)if(Math.hypot(m.x-p.x,m.z-p.z)<(m.kind==='guardian'?1.3:(ENEMIES[m.kind]?.radius||.35)+.2)&&p.y>m.y&&p.y<m.y+(m.kind==='guardian'?4:(ENEMIES[m.kind]?.height||1.7))){if(p.slow)m.slow=p.slow;game.hit(m,p.damage);p.life=0;break;}
     }
   }
   game.projectiles=game.projectiles.filter(p=>p.life>0);
@@ -35,7 +37,9 @@ export function updateEnemies(game,dt) {
   for(const m of [...game.mobs]) {
     m.flash=Math.max(0,m.flash-dt);m.cooldown-=dt;m.stun=Math.max(0,(m.stun||0)-dt);
     const d=Math.hypot(game.pos.x-m.x,game.pos.z-m.z), info=ENEMIES[m.kind]||ENEMIES.sentinel;
-    if(m.kind==='grazer'){m.wander+=dt*.3;game.moveMob(m,Math.sin(m.wander)*dt*.45,Math.cos(m.wander)*dt*.45);continue;}
+    if(info.passive){updateAnimal(game,m,dt);continue;}
+    m.slow=Math.max(0,(m.slow||0)-dt);
+    if(game.effect('invisibility')&&game.revealTime<=0&&d>2){m.windup=0;m.lunge=0;continue;}
     if(game.creative||m.stun>0)continue;
     m.angle=Math.atan2(game.pos.x-m.x,game.pos.z-m.z);
     if(m.kind==='guardian'){
@@ -64,7 +68,7 @@ export function updateEnemies(game,dt) {
     const range=m.kind==='wisp'?12:m.kind==='stalker'?4:m.kind==='brute'?2.6:1.9;
     if(d<range&&m.cooldown<=0){m.windup=m.kind==='brute'?.85:m.kind==='wisp'?.65:.5;m.windupMax=m.windup;continue;}
     if(m.kind==='wisp'&&d<5){game.moveMob(m,-Math.sin(m.angle)*dt*1.7,-Math.cos(m.angle)*dt*1.7);}
-    else if(d>(m.kind==='wisp'?8:1.5))game.moveMob(m,(game.pos.x-m.x)/Math.max(d,.1)*dt*info.speed,(game.pos.z-m.z)/Math.max(d,.1)*dt*info.speed);
+    else if(d>(m.kind==='wisp'?8:1.5))game.moveMob(m,(game.pos.x-m.x)/Math.max(d,.1)*dt*info.speed*(m.slow>0?.35:1),(game.pos.z-m.z)/Math.max(d,.1)*dt*info.speed*(m.slow>0?.35:1));
   }
   if(game.slam){game.slam.time-=dt;if(game.slam.time<=0){const s=game.slam;game.renderer.burst(s.x,s.y+.3,s.z,'#e2b0a0',40);if(Math.hypot(game.pos.x-s.x,game.pos.z-s.z)<s.radius&&game.pos.y-s.y<1.2)game.hurt(7);game.slam=null;}}
   updateProjectiles(game,dt);

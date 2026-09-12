@@ -63,6 +63,7 @@ export class World {
   }
   get(x,y,z){const k=cellKey(x,y,z);return this.edits.has(k)?this.edits.get(k):this.base(x,y,z);}
   solid(x,y,z){return !!BLOCKS[this.get(x,y,z)]?.solid;}
+  hydrated(x,y,z){for(let a=-4;a<=4;a++)for(let b=-4;b<=4;b++)if(this.waterAt(x+a,y,z+b)||this.waterAt(x+a,y-1,z+b))return true;return false;}
   waterAt(x,y,z){return this.get(Math.floor(x),Math.floor(y),Math.floor(z))==='water';}
   set(x,y,z,type){
     if(![x,y,z].every(Number.isInteger)||Math.abs(x)>WORLD_LIMIT||Math.abs(z)>WORLD_LIMIT||y<=WORLD_BOTTOM||y>WORLD_TOP-1||type&&!BLOCKS[type])return false;
@@ -75,13 +76,15 @@ export class World {
     const put=(x,y,z,t)=>{if(Math.floor(x/16)===cx&&Math.floor(z/16)===cz){const k=cellKey(x,y,z);if(!this.structures.has(k)||this.structures.get(k)==='leaf'||this.structures.get(k)==='pine')this.structures.set(k,t);}};
     for(let x=cx*16-3;x<cx*16+19;x++)for(let z=cz*16-3;z<cz*16+19;z++){
       const c=this.column(x,z),n=hash(x,z,this.seed+32),camp=Math.hypot(x,z-14)<9,entrance=x>16&&x<29&&z>-38&&z<16;
+      if(!camp&&!entrance&&c.h>=SEA_LEVEL&&c.h<=SEA_LEVEL+2&&c.river<14&&n>.982){put(x,c.h+1,z,'cane');continue;}
       if(camp||entrance||c.h<SEA_LEVEL+2||c.h>48)continue;
-      const threshold=c.biome==='forest'?.982:c.biome==='snow'?.989:.993;
+      const threshold=c.biome==='forest'?.988:c.biome==='snow'?.991:.996;
       if(c.biome==='desert'){if(n>.9985)for(let a=1;a<4;a++)put(x,c.h+a,z,'cactus');continue;}
       if(n<threshold){
-        const flora=hash(x,z,this.seed+218);
-        if(c.biome!=='snow'&&c.biome!=='mountain'&&flora>.946){
-          const type=flora>.991?'wheat_crop':flora>.985?'carrot_crop':c.biome==='forest'?(flora>.975?'mushroom':'fern'):flora>.967?'flower_blue':'flower_red';
+        const flora=hash(x,z,this.seed+218),patch=this.noise(x+312,z-119,28);
+        if(c.biome!=='snow'&&c.biome!=='mountain'&&patch>.63&&flora>.952){
+          const plants=c.biome==='forest'?['fern','fern','mushroom','berries_crop','daisy']:['flower_red','flower_blue','daisy','lavender','cotton_crop','wheat_crop','carrot_crop','potato_crop','corn_crop','tomato_crop','watermelon_crop','melon_crop'];
+          const pick=hash(Math.floor(x/24),Math.floor(z/24),this.seed+371),type=plants[Math.min(plants.length-1,Math.floor(pick*plants.length))];
           put(x,c.h+1,z,type);
         }
         continue;

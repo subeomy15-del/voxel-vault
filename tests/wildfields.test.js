@@ -40,10 +40,10 @@ test('iron hoe tills a clear 3 by 3 patch and unsupported seedlings cannot matur
   for(let x=-1;x<=1;x++)for(let z=7;z<=9;z++)assert.equal(g.world.get(x,6,z),'farmland');
   g.state.bar[0]='carrot';g.target.type='farmland';assert.ok(g.plant());g.world.set(0,6,8,null);g.state.elapsed=100;g.growCrops();assert.equal(g.world.get(0,7,8),null);assert.equal(g.state.crops['0,7,8'],undefined);
 });
-test('campfires cook food but cannot smelt metal; new foods restore their described health',()=>{
+test('campfires cook food but cannot smelt metal; meals store energy instead of healing instantly',()=>{
   const g=game();g.world.set(1,7,9,'campfire');g.station={x:1,y:7,z:9,type:'campfire'};g.add('wood',3);g.add('mushroom',2);g.add('iron');
   assert.equal(g.smelt('iron_ingot'),false);assert.equal(g.state.inv.wood,3);assert.ok(g.smelt('roasted_mushroom'));assert.equal(g.state.inv.wood,2);assert.equal(g.state.inv.mushroom,1);
-  g.state.hp=2;g.heal('roasted_mushroom');assert.equal(g.state.hp,8);
-  g.add('vegetable_stew');g.heal('vegetable_stew');assert.equal(g.state.hp,20);
+  g.state.hp=2;g.state.food=10;g.state.saturation=0;g.heal('roasted_mushroom');assert.equal(g.state.hp,2);assert.equal(g.state.food,15);assert.equal(g.state.saturation,6);
+  g.add('vegetable_stew');g.heal('vegetable_stew');assert.equal(g.state.hp,2);assert.equal(g.state.food,20);assert.equal(g.state.saturation,18);
   assert.ok(Object.values(ITEMS).filter(i=>!i.hidden).length>=100);
 });

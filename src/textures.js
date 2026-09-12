@@ -12,11 +12,12 @@ export function textureCanvas(){
     const stroke=(color,points,width=1)=>{ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();};
     if(b.plant){
       const sprout=type.includes('sprout'),wheat=type.startsWith('wheat'),carrot=type.startsWith('carrot');
-      if(type==='mushroom'){
+      if(type==='cane'){for(let x=5;x<32;x+=10){fill('#748d4f',x,1,4,31);fill('#b3bf7e',x,1,1,31);for(let y=6;y<32;y+=8)fill('#c1cd8e',x-1,y,6,2);}stroke('#7e9d57',[[8,13],[2,5]],2);stroke('#96af66',[[18,11],[26,4]],2);
+      }else if(type==='mushroom'){
         fill('#b5a183',13,18,6,14);fill('#ead9b8',14,19,2,12);
         fill('#9b8167',5,11,23,10);fill('#b49c7a',8,7,17,12);fill('#c7b18e',12,5,9,4);
         fill('#e4d5b6',10,10,4,3);fill('#e4d5b6',20,14,3,3);
-      }else if(type.startsWith('flower')){
+      }else if(type.startsWith('flower')||type==='daisy'||type==='lavender'){
         stroke('#638548',[[16,31],[17,10]],2);stroke('#7b9b54',[[16,25],[9,20],[7,16]],3);stroke('#829e5a',[[17,22],[24,17]],3);
         fill(b.color,11,4,11,10);fill(b.color,8,7,18,5);fill('#e7cf83',14,7,5,5);fill('#ffffff33',11,5,4,3);
       }else if(wheat){
@@ -28,12 +29,17 @@ export function textureCanvas(){
           stroke('#648746',[[16,31],[tip,top]],1.5);
           for(let j=0;j<3;j++){const f=.3+j*.22,x=16+(tip-16)*f,y=31+(top-31)*f;stroke(j%2?'#8eab68':'#789c56',[[x-5,y-5],[x,y],[x+4,y-6]],2);}
         }
+        if(!sprout&&type==='cotton_crop'){for(const[x,y]of[[8,14],[22,12],[15,6],[18,23]]){fill('#d2d6bf',x-3,y-2,7,6);fill('#ecebda',x-2,y-3,5,5);fill('#fff7e5',x-1,y-3,3,2);}}
+        if(!sprout&&type==='corn_crop'){stroke('#829557',[[16,32],[16,2]],3);for(const[x,y]of[[10,10],[18,16]]){fill('#b9984e',x,y,5,10);fill('#dec471',x+1,y,3,9);}}
+        if(!sprout&&['tomato_crop','berries_crop'].includes(type)){for(const[x,y]of[[7,12],[21,15],[13,22]]){fill(type==='tomato_crop'?'#b56c58':'#7d7b9d',x,y,5,5);fill(type==='tomato_crop'?'#dc9579':'#a3a1c0',x,y,3,2);}}
         if(carrot&&!sprout){fill('#b87943',13,27,7,5);fill('#e1a268',15,26,3,6);}
       }
       ctx.restore();continue;
     }
     fill(ores[type]?'#7e8887':type==='grass'&&side!==0?BLOCKS.dirt.color:b.color);
     for(let i=0;i<80;i++){const x=Math.floor(hash(i,index+71)*32),y=Math.floor(hash(index+23,i)*32);fill(hash(i,index)>.5?'#ffffff0c':'#15222110',x,y,1+Math.floor(hash(i,5)*4),1+Math.floor(hash(i,9)*3));}
+    if(type.startsWith('watermelon')){for(let x=1;x<32;x+=7)stroke('#42633f',[[x,0],[x+2,8],[x,18],[x+1,32]],3);if(side===0){fill('#638249',13,11,6,8);fill('#a8ae72',15,9,3,9);}}
+    if(type==='melon'||type==='melon_crop'){for(let i=0;i<11;i++){const x=hash(i,41)*32,y=hash(i,74)*32;stroke('#ebd8a77a',[[x-7,y],[x,y+4],[x+6,y-1],[x+12,y+4]]);}if(side===0)fill('#7b8753',14,11,4,7);}
     if(type==='grass'){
       if(side===0){for(let i=0;i<45;i++){const x=hash(i,index)*30,y=hash(i,index+2)*31;fill(i%3?'#b2c38b33':'#3d632c30',x,y,2,1);}}
       else if(side===1){fill('#769955',0,0,32,6);for(let x=0;x<32;x+=2)fill('#769955',x,6,2,2+hash(x,index)*4);stroke('#a2ba7b66',[[0,1],[32,1]]);}

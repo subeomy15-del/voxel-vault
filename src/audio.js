@@ -17,7 +17,7 @@ export class Audio {
   update(game,dt){
     if(!this.context)return;this.ambientTimer-=dt;this.birdTimer-=dt;if(this.ambientTimer>0)return;this.ambientTimer=.4;
     const c=this.context,column=game.world.column(Math.floor(game.pos.x),Math.floor(game.pos.z)),surface=game.pos.y>column.h-3,river=surface&&column.river<13,active=!game.screen;
-    const wind=active?(river?.095:surface?.033:.006)*this.settings.volume:0;this.windGain.gain.setTargetAtTime(wind,c.currentTime,.8);this.windFilter.frequency.setTargetAtTime(river?1600:surface?650:140,c.currentTime,.8);
+    const wind=active?(game.gliding?.13:river?.095:surface?.033:.006)*this.settings.volume:0;this.windGain.gain.setTargetAtTime(wind,c.currentTime,.8);this.windFilter.frequency.setTargetAtTime(game.gliding?1100:river?1600:surface?650:140,c.currentTime,.8);
     if(this.birdTimer<=0){this.birdTimer=8+Math.random()*13;if(active&&surface&&game.state.time%600<330&&!['desert','snow'].includes(column.biome)){this.tone(1900,.09,'sine',.016,750);setTimeout(()=>this.tone(2300,.09,'sine',.01,-650),160);}}
   }
   tone(freq=440,time=.1,type='sine',volume=.15,slide=0){

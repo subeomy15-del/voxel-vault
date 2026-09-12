@@ -40,6 +40,17 @@ for(const[k,[name,color,hardness]]of Object.entries(extraBlocks))BLOCKS[k]={name
 export const PLANTS=['fern','flower_red','flower_blue','mushroom','wheat_crop','wheat_sprout','carrot_crop','carrot_sprout'];
 for(const k of PLANTS)Object.assign(BLOCKS[k],{solid:false,plant:true});
 BLOCKS.campfire.solid=false;
+// Crop definitions drive planting, harvesting, save validation and the field guide.
+const newCrops=[['cotton','Cotton','#d7dfc4'],['watermelon','Watermelon','#69914c'],['melon','Melon','#c4aa68'],['potato','Potato','#98a873'],['tomato','Tomato','#b87861'],['corn','Corn','#bbae64'],['berries','Berry','#708666']];
+for(const[id,label,color]of newCrops){
+  for(const stage of ['sprout','crop']){
+    const fruit=['watermelon','melon'].includes(id)&&stage==='crop';
+    BLOCKS[id+'_'+stage]={name:label+(stage==='sprout'?' seedling':' plant'),color,hardness:.25,solid:fruit,plant:!fruit,hidden:true};
+    if(!fruit)PLANTS.push(id+'_'+stage);
+  }
+}
+for(const[id,name,color]of [['watermelon','Watermelon','#6f9551'],['melon','Honey melon','#c9b575']])BLOCKS[id]={name,color,hardness:.5,solid:true};
+for(const[id,name,color]of [['cane','Sugar cane','#97aa6c'],['lavender','Lavender','#a693b7'],['daisy','Daisy','#dedab9']]){BLOCKS[id]={name,color,hardness:.15,solid:false,plant:true};PLANTS.push(id);}
 export const BUILD_MATERIALS=[['oak','Oak','plank'],['birch','Birch','birch_plank'],['pine','Pine','pine_plank'],['stone','Stone','stonebrick'],['marble','Marble','polished_marble'],['basalt','Basalt','basalt']];
 for(const[id,label,texture]of BUILD_MATERIALS){
   const base={...BLOCKS[texture],texture,drop:id+'_stairs',shape:'stairs'};
@@ -93,9 +104,87 @@ Object.assign(ITEMS, {
   iron_hoe:{name:'Iron hoe',color:'#c6d1cc',kind:'hoe',tier:3,description:'Prepare a 3 × 3 garden patch with one use.'},
   crossbow:{name:'Crossbow',color:'#a78b67',kind:'bow',damage:12,cooldown:1,tier:3,description:'A powerful, slower shot. Uses arrows; deals 12 damage.'},
 });
+Object.assign(ITEMS,{
+  cotton:{name:'Raw cotton',color:'#e7e5cd',kind:'material',description:'Harvest ripe cotton. Weave it into cloth for gliders and building.'},
+  cotton_cloth:{name:'Cotton cloth',color:'#e5dfc8',kind:'material',description:'Strong, light fabric. Works wherever a recipe needs cloth.'},
+  leather:{name:'Leather',color:'#ad8059',kind:'material',description:'Deer and cows drop leather. Used for harnesses and equipment.'},
+  feather:{name:'Feather',color:'#e7ddc1',kind:'material',description:'Dropped by chickens. Fletch arrows or prepare featherfall food.'},
+  rabbit_hide:{name:'Rabbit hide',color:'#b5a28a',kind:'material',description:'Four hides can be stitched into leather.'},
+  sugar:{name:'Sugar',color:'#f0e9d1',kind:'material',description:'Refine sugar cane for food recipes.'},
+  cotton_seeds:{name:'Cotton seeds',color:'#d6d8ae',kind:'seed',crop:'cotton',description:'Plant in garden soil. Cotton ripens in 100 seconds.'},
+  watermelon_seeds:{name:'Watermelon seeds',color:'#627051',kind:'seed',crop:'watermelon',description:'Plant in garden soil. Fruit ripens in 140 seconds.'},
+  melon_seeds:{name:'Melon seeds',color:'#d9c5a0',kind:'seed',crop:'melon',description:'Plant in garden soil. Fruit ripens in 130 seconds.'},
+  tomato_seeds:{name:'Tomato seeds',color:'#bb9e6e',kind:'seed',crop:'tomato',description:'Plant in garden soil. Tomatoes ripen in 90 seconds.'},
+  corn_seeds:{name:'Corn kernels',color:'#d5bd71',kind:'seed',crop:'corn',description:'Plant in garden soil. Corn ripens in 110 seconds.'},
+  berry_seeds:{name:'Berry seeds',color:'#9e8a8d',kind:'seed',crop:'berries',description:'Plant in garden soil. Berries ripen in 100 seconds.'},
+  potato:{name:'Potato',color:'#bda270',kind:'food',nutrition:2,saturation:1,crop:'potato',description:'A small snack, or plant it in garden soil. Bakes well in a furnace.'},
+  baked_potato:{name:'Baked potato',color:'#c69e68',kind:'food',nutrition:6,saturation:7,description:'A filling furnace-baked potato.'},
+  tomato:{name:'Tomato',color:'#c57b64',kind:'food',nutrition:3,saturation:2,description:'A fresh garden snack. Used in salads and stews.'},
+  corn:{name:'Corn cob',color:'#d2b969',kind:'food',nutrition:3,saturation:2,description:'Roast it in a furnace for a more filling meal.'},
+  roasted_corn:{name:'Roasted corn',color:'#c8a45b',kind:'food',nutrition:6,saturation:7,description:'Warm roasted corn keeps you fed longer.'},
+  berries:{name:'Wild berries',color:'#9294ba',kind:'food',nutrition:2,saturation:1,description:'Gather berry plants in woodland clearings or grow your own.'},
+  watermelon_slice:{name:'Watermelon slice',color:'#d18b77',kind:'food',nutrition:3,saturation:1.5,description:'A refreshing snack. Cut a watermelon into six slices.'},
+  melon_slice:{name:'Honey melon slice',color:'#d9bc7b',kind:'food',nutrition:4,saturation:3,description:'Sweet golden melon. Cut a melon into four slices.'},
+  garden_salad:{name:'Garden salad',color:'#9bae77',kind:'food',nutrition:7,saturation:8,description:'Carrots, tomatoes and corn make a satisfying meal.'},
+  venison_stew:{name:'Venison stew',color:'#b58e6b',kind:'food',nutrition:12,saturation:16,description:'A substantial cooked meal for long journeys.'},
+  berry_pie:{name:'Berry pie',color:'#ab8c84',kind:'food',nutrition:8,saturation:10,description:'Berries, grain and sugar. A generous reserve of food.'},
+  trail_mix:{name:'Trail mix',color:'#b8a478',kind:'food',nutrition:6,saturation:10,description:'Fruit and grain packed for a day outdoors.'},
+  swift_smoothie:{name:'Swift melon smoothie',color:'#93ba96',kind:'food',nutrition:4,saturation:3,effect:'speed',duration:90,description:'Speed +50% for 90 seconds. Made with melon and sugar.'},
+  spring_salad:{name:'Springroot salad',color:'#c0bc80',kind:'food',nutrition:6,saturation:5,effect:'jump',duration:90,description:'Higher jumps for 90 seconds. Made with carrots, corn and crystal.'},
+  mist_stew:{name:'Mistberry stew',color:'#a6a8ba',kind:'food',nutrition:6,saturation:5,effect:'invisibility',duration:75,description:'Harder for animals and enemies to detect you for 75 seconds. Attacking briefly reveals you.'},
+  prospector_pie:{name:'Prospector pie',color:'#91c4b9',kind:'food',nutrition:7,saturation:6,effect:'xray',duration:60,description:'See nearby ore through rock for 60 seconds, within 14 blocks.'},
+  miners_lunch:{name:'Miner’s lunch',color:'#c9af79',kind:'food',nutrition:8,saturation:9,effect:'haste',duration:120,description:'Mine 60% faster for 120 seconds.'},
+  moonberry_compote:{name:'Moonberry compote',color:'#a7a4c6',kind:'food',nutrition:4,saturation:4,effect:'nightvision',duration:120,description:'Brightens caves and the night for 120 seconds.'},
+  feather_bread:{name:'Featherlight bread',color:'#ddd5b5',kind:'food',nutrition:5,saturation:5,effect:'slowfall',duration:90,description:'Gentle falling and no fall damage for 90 seconds.'},
+  longbow:{name:'Ash longbow',color:'#ba996a',kind:'bow',damage:13,drawTime:1.05,boltSpeed:34,tier:3,description:'Hold attack to draw; release to shoot. Long range, up to 13 damage.'},
+  recurve_bow:{name:'Recurve bow',color:'#ad9977',kind:'bow',damage:10,drawTime:.55,boltSpeed:29,tier:2,description:'A quick draw for hunting. Hold attack, then release.'},
+  heavy_crossbow:{name:'Heavy crossbow',color:'#7e9292',kind:'bow',damage:19,cooldown:1.5,boltSpeed:38,tier:4,description:'A powerful single bolt with a slower reload.'},
+  repeater_crossbow:{name:'Repeating crossbow',color:'#b8956f',kind:'bow',damage:8,cooldown:.36,boltSpeed:29,tier:3,description:'Fast follow-up shots. Every bolt consumes an arrow.'},
+  iron_arrows:{name:'Iron arrows',color:'#b9c5bf',kind:'ammo',bonus:3,description:'Sharper tips add 3 damage. Select to use with any bow or crossbow.'},
+  frost_arrows:{name:'Frost arrows',color:'#9acccc',kind:'ammo',bonus:1,slow:4,description:'Slow a target for four seconds. Select as ammunition.'},
+  hang_glider:{name:'Canvas hang glider',color:'#d6c59e',kind:'glider',glideSpeed:11,sink:1.5,description:'Equip, jump from a height, then press G to glide. Look down to dive; up to slow your descent.'},
+  sail_glider:{name:'Reinforced hang glider',color:'#96b6ac',kind:'glider',glideSpeed:14,sink:1.05,description:'A lighter reinforced wing for longer flights. Equip and press G while airborne.'},
+});
+for(const[animal,raw,cooked,nutrition,saturation]of [
+  ['venison','Raw venison','Roast venison',8,12],['pork','Raw porkchop','Cooked porkchop',8,12],['beef','Raw beef','Steak',8,13],
+  ['mutton','Raw mutton','Cooked mutton',7,10],['chicken','Raw chicken','Roast chicken',6,8],['rabbit','Raw rabbit','Roast rabbit',6,8],
+]){
+  ITEMS['raw_'+animal]={name:raw,color:animal==='chicken'?'#d1af95':'#bf8d7d',kind:'food',nutrition:2,saturation:.5,raw:true,description:'A small amount of food when raw. Cook it in a furnace for a much better meal.'};
+  ITEMS['cooked_'+animal]={name:cooked,color:'#aa7d57',kind:'food',nutrition,saturation,meat:true,description:'Cooked in a furnace. Restores hunger and stores energy for healing.'};
+}
+export const EFFECTS={
+  speed:{name:'Speed',color:'#a2c79a',duration:90},jump:{name:'Jump boost',color:'#d1c584',duration:90},
+  invisibility:{name:'Invisibility',color:'#b3b9cc',duration:75},xray:{name:'Ore sight',color:'#9ed8cd',duration:60},
+  haste:{name:'Haste',color:'#d3bb81',duration:120},nightvision:{name:'Night vision',color:'#aba6cf',duration:120},slowfall:{name:'Featherfall',color:'#e3dac1',duration:90},
+};
+export const ORE_GLIDERS=[
+  ['coal','Coal','#667775',11.5,1.4],['copper','Copper','#c18e6b',12.5,1.25],
+  ['iron','Iron','#bfcac5',14,1.1],['gold','Gold','#e2bf63',16,1.35],
+  ['diamond','Diamond','#92d3d1',15,.8],['crystal','Aether crystal','#a1e4c8',16,.65],
+];
+for(const[id,name,color,glideSpeed,sink]of ORE_GLIDERS)ITEMS[id+'_glider']={name:name+' hang glider',color,kind:'glider',glideSpeed,sink,ore:id,description:`${glideSpeed} blocks/s cruise · ${sink} blocks/s descent. Equip, then press G in the air. Look down to dive; up to float.`};
+for(const[kind,speed,damage]of [['pickaxe',5.8,3],['axe',6.5,6],['shovel',6.5,2],['hoe',1,2],['sword',1,7]])ITEMS['gold_'+kind]={name:'Gold '+kind,color:'#e2bf63',kind,speed,damage,tier:3,description:kind==='hoe'?'Prepare a clear 3 × 3 garden patch.':kind==='sword'?'A swift golden blade. 7 damage.':'Fast golden tools for your workshop.'};
+ITEMS.gold_armor={name:'Gold armor',color:'#e2bf63',kind:'armor',reduction:.3,description:'Equip to reduce damage by 30%.'};
+ITEMS.armor.reduction=.35;ITEMS.crystal_armor.reduction=.55;
+ITEMS.gold_bow={name:'Gold recurve bow',color:'#e2bf63',kind:'bow',damage:11,drawTime:.5,boltSpeed:32,description:'A fast golden bow. Hold attack to draw, then release.'};
+ITEMS.gold_crossbow={name:'Gold crossbow',color:'#e2bf63',kind:'bow',damage:14,cooldown:.8,boltSpeed:33,description:'A gold-fitted crossbow with a quick reload. Uses selected arrows.'};
+for(const[k,n,sat]of [['apple',4,3],['carrot',3,3],['bread',5,6],['roasted_mushroom',5,6],['vegetable_stew',9,12],['fruit_bowl',7,8]]){
+  Object.assign(ITEMS[k],{nutrition:n,saturation:sat,heal:0,description:`Restores ${n} food and stores energy for steady healing.`});
+}
 for(const k of ['wheat_crop','wheat_sprout','carrot_crop','carrot_sprout'])ITEMS[k].hidden=true;
-Object.assign(ITEMS.apple,{heal:4});Object.assign(ITEMS.bread,{heal:6});Object.assign(ITEMS.potion,{heal:10});
+Object.assign(ITEMS.potion,{heal:10});
 export const CROPS={wheat:{seed:'seeds',sprout:'wheat_sprout',mature:'wheat_crop',seconds:90,loot:{wheat:3,seeds:2}},carrot:{seed:'carrot',sprout:'carrot_sprout',mature:'carrot_crop',seconds:75,loot:{carrot:3}}};
+Object.assign(CROPS,{
+  cotton:{seed:'cotton_seeds',sprout:'cotton_sprout',mature:'cotton_crop',seconds:100,loot:{cotton:3,cotton_seeds:2}},
+  watermelon:{seed:'watermelon_seeds',sprout:'watermelon_sprout',mature:'watermelon_crop',seconds:140,loot:{watermelon:1,watermelon_seeds:2}},
+  melon:{seed:'melon_seeds',sprout:'melon_sprout',mature:'melon_crop',seconds:130,loot:{melon:1,melon_seeds:2}},
+  potato:{seed:'potato',sprout:'potato_sprout',mature:'potato_crop',seconds:90,loot:{potato:3}},
+  tomato:{seed:'tomato_seeds',sprout:'tomato_sprout',mature:'tomato_crop',seconds:90,loot:{tomato:4,tomato_seeds:2}},
+  corn:{seed:'corn_seeds',sprout:'corn_sprout',mature:'corn_crop',seconds:110,loot:{corn:3,corn_seeds:2}},
+  berries:{seed:'berry_seeds',sprout:'berries_sprout',mature:'berries_crop',seconds:100,loot:{berries:4,berry_seeds:2}},
+});
+export const CROP_BLOCKS=Object.values(CROPS).flatMap(c=>[c.sprout,c.mature]);
+export const MATURE_CROPS=Object.values(CROPS).map(c=>c.mature);
 export const RECIPES = [
   { item: 'stone_sword', cost: { stone: 6, wood: 2 }, category: 'Gear' },
   { item: 'stone_pickaxe', cost: { stone: 5, wood: 2 }, category: 'Gear' },
@@ -158,11 +247,44 @@ RECIPES.push(
   {item:'green_wool',count:4,cost:{cloth:2,fern:1},category:'Building'},
 );
 for(const[id,,material]of BUILD_MATERIALS){RECIPES.push({item:id+'_slab',count:6,cost:{[material]:3},category:'Building'},{item:id+'_stairs',count:4,cost:{[material]:4},category:'Building'});}
+RECIPES.push(
+  {item:'cotton_cloth',count:4,cost:{cotton:3},category:'Supplies'},
+  {item:'leather',cost:{rabbit_hide:4},category:'Supplies'},
+  {item:'sugar',count:2,cost:{cane:2},category:'Supplies'},
+  {item:'watermelon_slice',count:6,cost:{watermelon:1},category:'Supplies'},
+  {item:'melon_slice',count:4,cost:{melon:1},category:'Supplies'},
+  {item:'watermelon_seeds',count:2,cost:{watermelon_slice:1},category:'Supplies'},
+  {item:'melon_seeds',count:2,cost:{melon_slice:1},category:'Supplies'},
+  {item:'garden_salad',cost:{tomato:2,carrot:1,corn:1},category:'Supplies'},
+  {item:'venison_stew',cost:{cooked_venison:1,potato:1,tomato:1},category:'Supplies'},
+  {item:'berry_pie',cost:{berries:3,wheat:2,sugar:1},category:'Supplies'},
+  {item:'trail_mix',count:2,cost:{berries:2,wheat:2,apple:1},category:'Supplies'},
+  {item:'swift_smoothie',cost:{melon_slice:2,sugar:1},category:'Supplies'},
+  {item:'spring_salad',cost:{carrot:2,corn:1,crystal:1},category:'Supplies'},
+  {item:'mist_stew',cost:{berries:3,mushroom:2,crystal:1},category:'Supplies'},
+  {item:'prospector_pie',cost:{carrot:1,wheat:2,crystal:2,gold_ingot:1},category:'Supplies'},
+  {item:'miners_lunch',cost:{baked_potato:1,cooked_beef:1,crystal:1},category:'Supplies'},
+  {item:'moonberry_compote',cost:{berries:3,lavender:1,sugar:1},category:'Supplies'},
+  {item:'feather_bread',cost:{bread:1,feather:2,crystal:1},category:'Supplies'},
+  {item:'longbow',cost:{wood:8,cloth:2,iron_ingot:2},category:'Gear'},
+  {item:'recurve_bow',cost:{wood:5,fiber:5,copper_ingot:2},category:'Gear'},
+  {item:'heavy_crossbow',cost:{crossbow:1,iron_ingot:6,leather:2},category:'Gear'},
+  {item:'repeater_crossbow',cost:{crossbow:1,copper_ingot:5,iron_ingot:2},category:'Gear'},
+  {item:'iron_arrows',count:12,cost:{wood:2,iron_ingot:1,feather:1},category:'Supplies'},
+  {item:'frost_arrows',count:8,cost:{arrows:8,crystal:1,snow:1},category:'Supplies'},
+  {item:'hang_glider',cost:{cloth:6,wood:8,leather:2},category:'Gear'},
+  {item:'sail_glider',cost:{hang_glider:1,cotton_cloth:4,iron_ingot:3},category:'Gear'},
+);
 export const SMELTING=[
   {input:'copper',output:'copper_ingot',count:1},{input:'iron',output:'iron_ingot',count:1},{input:'gold',output:'gold_ingot',count:1},
   {input:'sand',output:'glass',count:2},{input:'clay',output:'brick',count:4},{input:'wheat',output:'bread',count:2},
   {input:'mushroom',output:'roasted_mushroom',count:1},
 ];
+for(const[id]of ORE_GLIDERS)RECIPES.push({item:id+'_glider',cost:{hang_glider:1,cloth:3,[['copper','iron','gold'].includes(id)?id+'_ingot':id]:4},category:'Gear'});
+for(const kind of ['pickaxe','axe','shovel','hoe','sword'])RECIPES.push({item:'gold_'+kind,cost:{gold_ingot:kind==='shovel'?2:3,wood:2},category:'Gear'});
+RECIPES.push({item:'gold_armor',cost:{gold_ingot:8,leather:3},category:'Gear'},{item:'gold_bow',cost:{gold_ingot:3,wood:5,cloth:2},category:'Gear'},{item:'gold_crossbow',cost:{gold_ingot:5,wood:6,fiber:4},category:'Gear'});
+for(const meat of ['venison','pork','beef','mutton','chicken','rabbit'])SMELTING.push({input:'raw_'+meat,output:'cooked_'+meat,count:1,furnaceOnly:true});
+SMELTING.push({input:'potato',output:'baked_potato',count:1},{input:'corn',output:'roasted_corn',count:1});
 export const LANDMARKS = [
   {id:'camp',name:'Base camp',subtitle:'A place to begin',x:0,z:14,color:'#c5b58a',type:'camp'},
   {id:'cave',name:'Hillside caves',subtitle:'A passage into the stone',x:22,z:8,color:'#aeb9b1',type:'cave'},
@@ -180,6 +302,7 @@ export function dailySeed(date = new Date()) { return Number(date.toISOString().
 export const TIMBER=['wood','birch','pinewood'];
 export const PLANKS=['plank','birch_plank','pine_plank'];
 export function ingredientKeys(key,recipe){
+  if(key==='cloth')return ['cloth','cotton_cloth'];
   if(key==='wood'&&recipe?.item!=='plank')return TIMBER;
   if(key==='plank'&&!['oak_slab','oak_stairs'].includes(recipe?.item))return PLANKS;
   return [key];
@@ -196,5 +319,5 @@ function craftingPlan(inv,recipe){
 }
 export function canCraft(inv,recipe){return craftingPlan(inv,recipe)!==null;}
 export function craft(inv,item){const recipe=RECIPES.find(r=>r.item===item),cost=craftingPlan(inv,recipe);if(!cost)return false;for(const[k,n]of Object.entries(cost))inv[k]-=n;inv[item]=(inv[item]||0)+(recipe.count||1);return true;}
-export function starterInventory() { return { wood_sword:1, wood_pickaxe:1, wood_axe:1, grass:32, wood:0, stone:0, torch:12, apple:5, potion:2,seeds:6,carrot:2 }; }
+export function starterInventory() { return { wood_sword:1, wood_pickaxe:1, wood_axe:1, grass:32, wood:0, stone:0, torch:12, apple:5, potion:2,seeds:6,carrot:2,cotton_seeds:3,watermelon_seeds:2 }; }
 export const STARTER_BAR = ['wood_sword','wood_pickaxe','wood_axe','grass','wood','stone','torch','apple','potion'];
