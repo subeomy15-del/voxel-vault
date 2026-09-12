@@ -1,31 +1,84 @@
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,craft,hash,dailySeed } from './data.js';
-import { freshState,loadState,saveState,importLegacy } from './save.js';
-import { ENEMIES,launchBolt,updateEnemies } from './combat.js';
-import { movePlayer,requestJump } from './movement.js';
-import { overlapsBlock } from './shapes.js';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js';
-import { ANIMALS,animalKind } from './wildlife.js';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=10';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=10';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=10';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,craft,hash,dailySeed } from './data.js?v=10';
+import { freshState,loadState,saveState,importLegacy } from './save.js?v=10';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=10';
+import { movePlayer,requestJump } from './movement.js?v=10';
+import { overlapsBlock } from './shapes.js?v=10';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=10';
+import { ANIMALS,animalKind } from './wildlife.js?v=10';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}
   resetRuntime(){
     this.pos={x:.5,y:7,z:20.5};this.yaw=0;this.pitch=0;this.velocity=0;this.vx=0;this.vz=0;this.grounded=false;this.coyote=0;this.jumpBuffer=0;this.cameraOffset=0;
-    this.walk=0;this.moving=false;this.stamina=100;this.flying=false;this.sprinting=false;this.crouching=false;this.target=null;this.attackHeld=false;this.placeHeld=false;this.mineProgress=0;this.mineKey='';
-    this.attackCooldown=0;this.hurtCooldown=0;this.dashCooldown=0;this.dashTime=0;this.saveTimer=0;this.stepTimer=0;this.spawnTimer=0;this.cropTimer=0;this.projectiles=[];this.mobs=[];this.keys.clear();this.boss=null;this.slam=null;this.containerKey=null;this.station=null;this.combo=0;this.buildRotation=0;this.placeTimer=0;this.eating=null;this.drawState=null;this.revealTime=0;this.gliding=false;this.regenTimer=0;this.hungerTimer=0;
+    this.walk=0;this.moving=false;this.stamina=100;this.flying=false;this.sprinting=false;this.crouching=false;this.target=null;this.mobTarget=null;this.attackHeld=false;this.placeHeld=false;this.mineProgress=0;this.mineKey='';
+    this.attackCooldown=0;this.hurtCooldown=0;this.dashCooldown=0;this.dashTime=0;this.saveTimer=0;this.stepTimer=0;this.spawnTimer=0;this.cropTimer=0;this.projectiles=[];this.mobs=[];this.keys.clear();this.boss=null;this.slam=null;this.containerKey=null;this.station=null;this.combo=0;this.buildRotation=0;this.placeTimer=0;this.eating=null;this.drawState=null;this.revealTime=0;this.gliding=false;this.regenTimer=0;this.hungerTimer=0;this.portalCooldown=3;this.pendingGlide=false;this.padCooldown=0;this.grapple=null;this.grappleCooldown=0;
   }
   loadWorld(){
-    this.resetRuntime();this.world=new World(this.state.seed,this.state.edits);
+    this.resetRuntime();this.world=new World(this.state.seed,this.state.edits,this.state.terrain,this.state.dimension);
     if(this.state.pos)this.pos={...this.state.pos};
-    else{this.pos=this.world.findSpawn();this.state.origin={...this.pos};this.state.spawn={...this.pos};this.state.yaw=hash(this.state.seed,55)*Math.PI*2;}
+    else{this.pos=this.world.findSpawn();this.state.origin={...this.pos};this.state.spawn={...this.pos};this.state.yaw=this.world.spawnFacing(this.pos);}
     this.yaw=this.state.yaw;this.pitch=this.state.pitch;
     if(this.world.intersects(this.pos.x,this.pos.y,this.pos.z))this.pos.y=this.world.ground(this.pos.x,this.pos.z);
-    this.state.origin??={...(this.state.spawn||{x:.5,y:7,z:20.5})};this.syncHome();
-    this.renderer.setWorld(this.world);for(const drop of this.state.drops)drop.id=++this.serial;this.spawnAmbient();
+    this.state.origin??={...(this.state.spawn||{x:.5,y:7,z:20.5})};this.syncHome();this.ensureGate();installOutposts(this);
+    this.renderer.setWorld(this.world);for(const drop of this.state.drops)drop.id=++this.serial;
+    if(this.state.animals.length){for(const a of this.state.animals){const m=this.spawnMob(a.x,a.z,a.kind,a.y);m.hp=a.hp;m.angle=a.angle;}}else this.spawnAmbient();
   }
   syncHome(){
     const p=this.state.spawn||this.state.origin,l={id:'home',name:'Your home',subtitle:'Your starting clearing or last bed',color:'#e3c994',type:'home',...p};
     const i=this.world.landmarks.findIndex(l=>l.id==='home');if(i<0)this.world.landmarks.push(l);else this.world.landmarks[i]=l;
+  }
+  ensureGate(){
+    if(this.state.dimension==='ender'){this.state.gate={x:0,y:19,z:0};return;}
+    if(this.state.gate)return;
+    const home=this.state.origin||this.pos;
+    for(let i=0;i<48;i++){
+      const a=this.yaw+i*Math.PI/12,r=7+Math.floor(i/12)*3,x=Math.floor(home.x-Math.sin(a)*r),z=Math.floor(home.z-Math.cos(a)*r),y=this.world.ground(x+.5,z+.5);
+      if(y<5||y>65||Math.abs(y-home.y)>3)continue;
+      let clear=true;for(let dx=-2;dx<=2;dx++)for(let dy=0;dy<=4;dy++)if(this.world.get(x+dx,y+dy,z)||this.world.edits.has(cellKey(x+dx,y+dy,z)))clear=false;
+      if(!clear)continue;
+      this.state.gate={x,y,z};
+      for(let dx=-2;dx<=2;dx++){this.world.set(x+dx,y-1,z,'obsidian');for(let dy=0;dy<=4;dy++)if(Math.abs(dx)===2||dy===4)this.world.set(x+dx,y+dy,z,'obsidian');}
+      this.world.set(x,y,z,'ender_gate');return;
+    }
+  }
+  travel(destination){
+    if(destination===this.state.dimension)return false;
+    this.save();this.state.realms[this.state.dimension]=captureRealm(this.state);
+    Object.assign(this.state,structuredClone(this.state.realms[destination]||emptyRealm()));this.state.dimension=destination;
+    if(destination==='ender'&&!this.state.rift.kit){
+      this.state.rift.kit=true;this.add('hang_glider');this.add('moonstone_orb',12);this.add('end_stone',96);this.add('ender_berry',12);this.state.glider||='hang_glider';
+      this.state.bar[3]='end_stone';this.state.bar[4]='moonstone_orb';this.state.bar[7]='ender_berry';this.state.rift.started=this.state.elapsed;
+    }
+    this.loadWorld();this.screen=null;this.portalCooldown=3;
+    const arrival=this.state.gate;if(arrival&&Math.hypot(this.pos.x-arrival.x-.5,this.pos.z-arrival.z-.5)<2){for(const dz of [3,-3,4,-4]){const x=arrival.x+.5,z=arrival.z+.5+dz,y=this.world.ground(x,z,arrival.y+2);if(y>arrival.y-4&&!this.world.intersects(x,y,z)){this.pos={x,y,z};break;}}}
+    this.save();this.audio.play('portal');
+    this.toast(destination==='ender'?'THE RIFT IS OPEN':'BACK HOME',destination==='ender'?'Activate 3 anchors. Jump on cyan launch pads to soar between islands.':'Your inventory and rewards travelled with you.','reward');this.emit('screen');return true;
+  }
+  collectAnchor(id){
+    if(this.state.dimension!=='ender')return false;const anchor=RIFT_ANCHORS.find(a=>a.id===id),rift=this.state.rift;
+    if(!anchor||rift.collected.includes(id)||Math.hypot(this.pos.x-anchor.x-.5,this.pos.z-anchor.z-.5)>3||Math.abs(this.pos.y-(this.world.height(anchor.x,anchor.z)+1))>4)return false;
+    rift.collected.push(id);this.add('relic_shard',2);this.add('moonstone',3);this.add('ender_berry',4);this.state.hp=Math.min(20,this.state.hp+5);this.state.food=Math.min(20,this.state.food+5);this.audio.play('reward');
+    this.renderer.burst(anchor.x+.5,this.pos.y+2,anchor.z+.5,anchor.color,35);
+    if(rift.collected.length===3){
+      rift.finished=this.state.elapsed;const time=Math.max(1,rift.finished-rift.started);rift.best=rift.best?Math.min(rift.best,time):time;rift.runs++;
+      if(!rift.rewarded){rift.rewarded=true;this.add('moonstone_sword');this.add('moonstone_glider');this.add('moonstone_armor');this.state.glider='moonstone_glider';this.state.bar[0]='moonstone_sword';}
+      this.toast('RIFT RUN COMPLETE',`${Math.floor(time/60)}:${String(Math.floor(time%60)).padStart(2,'0')} · Moonstone equipment unlocked. Take it home!`,'reward');this.emit('riftComplete');
+    }else this.toast(anchor.name+' activated',`${rift.collected.length} / 3 anchors · +3 Moonstone · Health restored`,'reward');
+    this.save();return true;
+  }
+  restartRift(){if(this.state.dimension!=='ender'||this.state.rift.collected.length!==3)return false;this.state.rift.collected=[];this.state.rift.started=this.state.elapsed;this.state.rift.finished=0;this.returnHome();this.save();return true;}
+  tickRift(dt){
+    this.portalCooldown=Math.max(0,this.portalCooldown-dt);this.padCooldown=Math.max(0,this.padCooldown-dt);
+    const gate=this.state.gate;
+    if(gate&&this.world.get(gate.x,gate.y,gate.z)==='ender_gate'&&this.portalCooldown<=0&&Math.hypot(this.pos.x-gate.x-.5,this.pos.z-gate.z-.5)<.85&&this.pos.y>=gate.y&&this.pos.y<gate.y+3){this.travel(this.state.dimension==='ender'?'overworld':'ender');return true;}
+    if(this.state.dimension==='ender'&&this.grounded&&this.padCooldown<=0&&this.world.get(Math.floor(this.pos.x),Math.floor(this.pos.y-.05),Math.floor(this.pos.z))==='launch_pad'){
+      this.velocity=21;this.grounded=false;this.gliding=false;this.pendingGlide=true;this.padCooldown=2;this.audio.play('launch');this.renderer.burst(this.pos.x,this.pos.y,this.pos.z,'#67e6ff',20);
+    }
+    if(this.pendingGlide&&this.velocity<2&&!this.grounded){this.pendingGlide=false;if(this.state.inv[this.state.glider])this.gliding=true;}
+    return false;
   }
   get held(){return this.state.bar[this.state.selected];}
   get creative(){return this.state.mode==='creative';}
@@ -34,9 +87,10 @@ export class Game {
   emit(type,data={}){this.events.push({type,...data});}
   toast(title,text='',kind='normal'){this.emit('toast',{title,text,kind});}
   start(mode='adventure',reset=false){
+    if(mode==='ender'){this.start('adventure',reset);if(this.state.dimension!=='ender')this.travel('ender');return;}
     let state=reset?null:loadState(this.storage,mode);
     if(!state){state=freshState(mode==='daily'?dailySeed():Math.floor(Math.random()*2147483646)+1,mode);if(mode==='adventure'&&!reset)importLegacy(this.storage,state);}
-    this.state=state;this.loadWorld();this.screen=null;this.save();this.toast(this.creative?'Creative world':'Make this place your own',this.creative?'Every material is available in your backpack.':'A new clearing, a new beginning. Gather timber, plant a garden, and build a place to return to.');
+    this.state=state;this.loadWorld();this.screen=null;this.save();this.toast(this.state.dimension==='ender'?'Ender Islands':this.creative?'Creative world':'Make this place your own',this.state.dimension==='ender'?'G to glide · Use Moonstone Orbs to blink · Use the arrival gate or pause menu to return.':this.creative?'Every material is available in your backpack.':'A new clearing, a new beginning. Gather timber, plant a garden, and build a place to return to.');
   }
   pause(screen='pause'){if(this.screen==='menu')return;this.audio.quiet?.();this.screen=screen;this.drawState=null;this.eating=null;this.attackHeld=false;this.placeHeld=false;this.mineProgress=0;this.keys.clear();this.touch={x:0,z:0};this.save();globalThis.document?.exitPointerLock?.();}
   resume(){this.screen=null;this.keys.clear();this.attackHeld=false;this.placeHeld=false;}
@@ -58,7 +112,7 @@ export class Game {
   }
   transfer(name,withdraw=false){
     if(!this.containerKey||!ITEMS[name])return false;
-    const store=this.state.containers[this.containerKey]??={},source=withdraw?store:this.state.inv,target=withdraw?this.state.inv:store;
+    const store=this.containerKey==='moon'?this.state.moonChest:(this.state.containers[this.containerKey]??={}),source=withdraw?store:this.state.inv,target=withdraw?this.state.inv:store;
     const n=Math.min(64,source[name]||0);if(!n)return false;source[name]-=n;if(withdraw&&!source[name])delete source[name];target[name]=(target[name]||0)+n;this.save();return true;
   }
   add(name,n=1){this.state.inv[name]=(this.state.inv[name]||0)+n;}
@@ -75,7 +129,7 @@ export class Game {
   }
   toggleGlide(){
     if(this.gliding){this.gliding=false;return true;}
-    if(!this.state.glider||!this.state.inv[this.state.glider]){this.toast('Equip a hang glider','Craft one with cloth, timber and leather.');return false;}
+    if(!this.state.glider||!this.state.inv[this.state.glider]){this.pause('inventory');this.emit('browse',{search:'glider'});return false;}
     if(this.grounded||this.world.waterAt(this.pos.x,this.pos.y+.5,this.pos.z)){this.toast('Find some height','Jump from a hill and press G while airborne.');return false;}
     this.gliding=true;this.flying=false;this.velocity=Math.min(0,this.velocity);this.audio.play('jump');return true;
   }
@@ -98,10 +152,13 @@ export class Game {
   }
   dash(){if(this.dashCooldown>0||this.stamina<25)return;this.dashTime=.2;this.dashCooldown=1.2;this.stamina-=25;}
   jump(){requestJump(this);}
-  save(){this.state.pos={...this.pos};this.state.yaw=this.yaw;this.state.pitch=this.pitch;this.state.edits=[...this.world.edits];const ok=saveState(this.storage,this.state);this.emit('saved',{ok});return ok;}
+  save(){this.state.pos={...this.pos};this.state.yaw=this.yaw;this.state.pitch=this.pitch;this.state.edits=[...this.world.edits];this.state.animals=this.mobs.filter(m=>ANIMALS[m.kind]&&m.hp>0).slice(0,128).map(({kind,x,y,z,hp,angle})=>({kind,x,y,z,hp,angle}));const ok=saveState(this.storage,this.state);this.emit('saved',{ok});return ok;}
   nearest(){
     const t=this.target;
-    if(t&&['furnace','campfire','bench','chest','bed',...MATURE_CROPS].includes(t.type))return {...t,name:BLOCKS[t.type].name,placed:true};
+    if(t?.type==='treasure_chest'){const chest=this.world.chests.find(c=>c.x===t.x&&c.y===t.y&&c.z===t.z&&!this.state.opened.includes(c.id));if(chest)return{...chest,type:'supply',name:chest.name};}
+    if(t&&['relic_forge','ender_gate','moonstone_chest','furnace','campfire','bench','chest','bed',...MATURE_CROPS].includes(t.type))return {...t,name:BLOCKS[t.type].name,placed:true};
+    if(this.state.dimension==='ender')for(const anchor of RIFT_ANCHORS)if(!this.state.rift.collected.includes(anchor.id)&&Math.hypot(this.pos.x-anchor.x-.5,this.pos.z-anchor.z-.5)<3&&Math.abs(this.pos.y-this.world.height(anchor.x,anchor.z)-1)<4)return{...anchor,type:'anchor',y:this.world.height(anchor.x,anchor.z)+1};
+    const gate=this.state.gate;if(gate&&this.world.get(gate.x,gate.y,gate.z)==='ender_gate'&&Math.hypot(this.pos.x-gate.x-.5,this.pos.z-gate.z-.5)<3&&Math.abs(this.pos.y-gate.y)<4)return{...gate,type:'ender_gate',name:this.state.dimension==='ender'?'Return home':'Enter the Rift',placed:true};
     let best=null,dist=3;
     for(const c of this.world.chests){if(this.state.opened.includes(c.id))continue;const d=Math.hypot(c.x+.5-this.pos.x,c.z+.5-this.pos.z);if(d<dist&&Math.abs(c.y-this.pos.y)<3){best={...c,type:'supply',name:'Supply chest'};dist=d;}}
     const camp=this.world.landmarks[0];if(!best&&Math.hypot(camp.x-this.pos.x,camp.z-this.pos.z)<2.5)best=camp;return best;
@@ -111,14 +168,41 @@ export class Game {
     if(ITEMS[this.held]?.kind==='hoe'&&['grass','dirt','farmland'].includes(this.target?.type)){this.till();return;}
     if(ITEMS[this.held]?.crop&&this.target?.type==='farmland'){this.plant();return;}
     const n=this.nearest();
+    if(n?.type==='anchor')return this.collectAnchor(n.id);
     if(n&&MATURE_CROPS.includes(n.type)){this.harvest(n);return;}
-    if(n?.type==='supply'){this.state.opened.push(n.id);for(const[k,v]of Object.entries(n.loot))this.add(k,v);this.audio.play('craft');this.toast('Supplies collected','Timber, food and fuel for your first shelter.');this.save();return;}
+    if(n?.type==='supply'){this.state.opened.push(n.id);for(const[k,v]of Object.entries(n.loot))this.add(k,v);if(n.block)this.world.set(n.x,n.y,n.z,'chest');this.audio.play('craft');this.toast(n.block?n.name+' discovered':'Supplies collected',n.block?'Relic shards and rare materials collected. Visit the Relic Forge.':'Timber, food and fuel for your first shelter.',n.block?'reward':'normal');this.save();return;}
     if(n?.type==='camp'){this.state.hp=20;this.save();this.toast('Rested at camp','Health restored.');return;}
     if(n?.type==='furnace'||n?.type==='campfire'){this.station=n;this.pause('furnace');this.emit('screen');return;}
+    if(n?.type==='relic_forge'){this.station=n;this.pause('forge');this.emit('screen');return;}
     if(n?.type==='bench'){this.pause('craft');this.emit('screen');return;}
-    if(n?.type==='chest'){this.containerKey=cellKey(n.x,n.y,n.z);this.state.containers[this.containerKey]??={};this.pause('storage');this.emit('screen');return;}
+    if(n?.type==='ender_gate'){this.travel(this.state.dimension==='ender'?'overworld':'ender');return;}
+    if(n?.type==='chest'||n?.type==='moonstone_chest'){this.containerKey=n.type==='moonstone_chest'?'moon':cellKey(n.x,n.y,n.z);if(this.containerKey!=='moon')this.state.containers[this.containerKey]??={};this.pause('storage');this.emit('screen');return;}
     if(n?.type==='bed'){this.state.spawn={x:n.x+.5,y:n.y+1,z:n.z+.5};this.syncHome();this.state.hp=20;this.state.time=Math.ceil(this.state.time/600)*600+70;this.toast('Spawn point set','You rested until morning.');this.save();return;}
+    if(ITEMS[this.held]?.kind==='grapple')return this.useGrapple();
+    if(ITEMS[this.held]?.kind==='orb')return this.useOrb();
     if(ITEMS[this.held]?.kind==='food'){this.eat(this.held);return;}if(this.held==='compass'){this.pause('map');this.emit('screen');return;}return this.place();
+  }
+  useGrapple(){
+    if(ITEMS[this.held]?.kind!=='grapple'||!this.state.inv[this.held]||this.grappleCooldown>0)return false;
+    const origin={x:this.pos.x,y:this.pos.y+1.58,z:this.pos.z},dir=this.direction(),hit=this.world.raycast(origin,dir,24);
+    if(!hit||!BLOCKS[hit.type]?.solid||hit.distance<2){this.toast('Aim at solid terrain','Hook onto a wall or ledge within 24 blocks.');return false;}
+    this.grapple={x:hit.x+.5+hit.normal.x*.8,y:hit.y+1.3,z:hit.z+.5+hit.normal.z*.8,time:1.6};this.grappleCooldown=2;this.gliding=false;this.pendingGlide=false;this.audio.play('launch');return true;
+  }
+  forge(name){
+    const offer=FORGE_OFFERS.find(([item])=>item===name),station=this.station;
+    if(!offer||!station||this.world.get(station.x,station.y,station.z)!=='relic_forge'||Math.hypot(this.pos.x-station.x,this.pos.y-station.y,this.pos.z-station.z)>6||(this.state.inv.relic_shard||0)<offer[1])return false;
+    this.state.inv.relic_shard-=offer[1];this.add(name);this.audio.play('craft');this.toast(ITEMS[name].name+' forged','Equip your new gear in the backpack.','reward');this.save();return true;
+  }
+  useOrb(){
+    if(ITEMS[this.held]?.kind!=='orb'||!(this.state.inv[this.held]>0)||this.attackCooldown>0)return false;
+    const dir=this.direction(),origin={x:this.pos.x,y:this.pos.y+1.58,z:this.pos.z};
+    const hit=this.world.raycast(origin,dir,18),reach=Math.min(18,hit?hit.distance-.6:18);
+    for(let d=reach;d>=2;d-=.5){
+      const x=origin.x+dir.x*d,z=origin.z+dir.z*d,y=this.world.ground(x,z,origin.y+dir.y*d+2);
+      if(y<-55||Math.abs(y-this.pos.y)>12||this.world.waterAt(x,y,z)||this.world.intersects(x,y,z))continue;
+      if(!this.creative)this.state.inv[this.held]--;this.pos={x,y,z};this.vx=this.vz=this.velocity=0;this.gliding=false;this.attackCooldown=.6;this.save();this.renderer.burst(x,y+1,z,'#b29aff',16);return true;
+    }
+    this.toast('No safe landing','Aim toward solid ground within 18 blocks.');return false;
   }
   till(){
     const t=this.target;if(!t||!['grass','dirt','farmland'].includes(t.type))return false;
@@ -180,7 +264,6 @@ export class Game {
     if(this.attackCooldown>0||this.eating)return;const item=ITEMS[this.held];
     if(item?.drawTime&&!release){this.drawState??={item:this.held,time:0};return;}
     this.renderer.swing=1;
-    if(item?.kind==='food'){this.eat(this.held);this.attackCooldown=.7;return;}
     const dir=this.direction();
     if(item?.kind==='bow'){
       const ammo=(this.state.inv[this.state.ammo]>0||this.creative)?this.state.ammo:this.state.inv.arrows>0?'arrows':null;
@@ -190,13 +273,13 @@ export class Game {
       launchBolt(this,{x:this.pos.x,y:this.pos.y+1.5,z:this.pos.z},dir,power,false,{speed:(item.boltSpeed||27)*(.45+.55*charge),gravity:4,slow:ITEMS[ammo].slow||0,color:ITEMS[ammo].color});
       this.attackCooldown=item.cooldown||.45;this.audio.play('shoot');return;
     }
-    let nearest=null,dist=3.8;
-    for(const m of this.mobs){const info=ENEMIES[m.kind]||ENEMIES.sentinel;const dx=m.x-this.pos.x,dy=m.y+(info.height||1.7)*.6-this.pos.y-1.58,dz=m.z-this.pos.z,along=dx*dir.x+dy*dir.y+dz*dir.z;if(along<0||along>dist||Math.hypot(dx-dir.x*along,dy-dir.y*along,dz-dir.z*along)>.75)continue;const wall=this.world.raycast({x:this.pos.x,y:this.pos.y+1.58,z:this.pos.z},dir,along);if(!wall||wall.distance>along-.6){nearest=m;dist=along;}}
+    const nearest=targetMob(this,4)?.mob;
     this.revealTime=4;
-    if(nearest){this.hit(nearest,item?.damage||2);this.attackCooldown=.36;}else if(item?.kind==='sword')this.attackCooldown=.36;
+    if(nearest){this.hit(nearest,item?.damage||2);if(item?.leech)this.state.hp=Math.min(20,this.state.hp+item.leech);if(item?.slow)nearest.slow=Math.max(nearest.slow||0,item.slow);this.attackCooldown=item?.cooldown||.36;}else if(item?.kind==='sword')this.attackCooldown=item.cooldown||.36;
   }
   hit(m,power){
     if(!this.mobs.includes(m))return;m.hp-=power;m.flash=.18;m.stun=.18;m.panic=6;m.brain=0;this.revealTime=4;
+    if(ANIMALS[m.kind])for(const other of this.mobs)if(other!==m&&other.kind===m.kind&&Math.hypot(other.x-m.x,other.z-m.z)<7){other.panic=Math.max(other.panic||0,3);other.brain=0;}
     this.audio.play('hit');this.renderer.burst(m.x,m.y+(ENEMIES[m.kind]?.height||1.5)*.5,m.z,'#bdb89e',5);this.emit('damageNumber',{mob:m,power});
     if(m.hp<=0){
       this.mobs=this.mobs.filter(v=>v!==m);this.state.stats.kills++;
@@ -208,7 +291,7 @@ export class Game {
   returnHome(){this.pos={...(this.state.spawn||this.state.origin||{x:.5,y:7,z:20.5})};if(this.world.intersects(this.pos.x,this.pos.y,this.pos.z))this.pos.y=this.world.ground(this.pos.x,this.pos.z);this.velocity=0;this.vx=this.vz=0;this.gliding=false;}
   respawn(){this.state.hp=20;this.state.food=20;this.state.saturation=5;this.state.effects={};this.returnHome();this.projectiles=[];this.mobs=this.mobs.filter(m=>ENEMIES[m.kind]?.passive);this.hurtCooldown=3;this.resume();this.save();}
   spawnMob(x,z,kind='sentinel',y=null){if(kind==='grazer')kind='deer';const info=ENEMIES[kind]||ENEMIES.sentinel;const m={id:++this.serial,x,z,y:y??this.world.ground(x,z),kind,hp:info.hp,maxHp:info.hp,cooldown:1,flash:0,windup:0,stun:0,angle:0,walk:0,wander:hash(x|0,z|0,this.state.seed)*6};this.mobs.push(m);return m;}
-  spawnAmbient(){
+  spawnAmbient(){if(this.state.dimension==='ender')return;
     for(const[dx,dz]of[[-12,4],[10,11],[-24,-12],[17,-15],[-9,-18],[22,8]]){
       const x=this.pos.x+dx,z=this.pos.z+dz,y=this.world.ground(x,z,this.world.height(x,z)+1);
       if(y>5&&!this.world.waterAt(x,y,z)&&!this.world.intersects(x,y,z,1.6,.4))this.spawnMob(x,z,animalKind(this.world,x,z),y);
@@ -217,18 +300,19 @@ export class Game {
   direction(){return{x:-Math.sin(this.yaw)*Math.cos(this.pitch),y:Math.sin(this.pitch),z:-Math.cos(this.yaw)*Math.cos(this.pitch)};}
   update(dt){
     this.renderer.stream(this.pos);if(this.screen)return;
-    this.state.time+=dt;this.state.elapsed+=dt;tickSurvival(this,dt);this.updateDrops(dt);for(const k of['attackCooldown','hurtCooldown','dashCooldown','dashTime'])this[k]=Math.max(0,this[k]-dt);
+    this.state.time+=dt;this.state.elapsed+=dt;tickSurvival(this,dt);this.updateDrops(dt);for(const k of['grappleCooldown','attackCooldown','hurtCooldown','dashCooldown','dashTime'])this[k]=Math.max(0,this[k]-dt);
     this.cropTimer+=dt;if(this.cropTimer>1){this.cropTimer=0;this.growCrops();}
-    this.move(dt);this.updateMobs(dt);if(this.screen)return;
+    this.move(dt);if(this.tickRift(dt))return;this.updateMobs(dt);if(this.screen)return;
     this.target=this.world.raycast({x:this.pos.x,y:this.pos.y+(this.crouching?1.15:1.58),z:this.pos.z},this.direction(),6);
     if(this.placeHeld){this.placeTimer-=dt;if(this.placeTimer<=0){this.place();this.placeTimer=.16;}}
     if(this.drawState){if(this.drawState.item!==this.held)this.drawState=null;else this.drawState.time+=dt;}
-    if(this.attackHeld){if(['sword','bow','food'].includes(ITEMS[this.held]?.kind))this.attack();else this.mine(dt);}else{this.mineProgress=0;this.mineKey='';}
+    this.mobTarget=targetMob(this,6);
+    if(this.attackHeld){if(['sword','bow'].includes(ITEMS[this.held]?.kind)||this.mobTarget?.distance<=4){this.mineProgress=0;this.attack();}else this.mine(dt);}else{this.mineProgress=0;this.mineKey='';}
     for(const l of this.world.landmarks)if(Math.hypot(l.x-this.pos.x,l.z-this.pos.z)<14&&!this.state.discovered.includes(l.id)){this.state.discovered.push(l.id);this.toast(l.name,l.subtitle);}
     this.spawnTimer+=dt;if(this.spawnTimer>14){
-      this.spawnTimer=0;this.mobs=this.mobs.filter(m=>Math.hypot(m.x-this.pos.x,m.z-this.pos.z)<85);
-      const hostile=!this.creative&&(this.pos.y<-7||this.state.time%600>420),cap=hostile?5:10,group=this.mobs.filter(m=>!!ENEMIES[m.kind]?.passive!==hostile);
-      if(group.length<cap&&this.mobs.length<18){const a=hash(Math.floor(this.state.time),this.serial,this.state.seed)*Math.PI*2,x=this.pos.x+Math.sin(a)*22,z=this.pos.z+Math.cos(a)*22,y=this.world.ground(x,z,hostile?this.pos.y+3:this.world.height(x,z)+1);if(Math.abs(y-this.pos.y)<10&&y>-60&&!this.world.waterAt(x,y,z)&&!this.world.intersects(x,y,z,1.7,.4))this.spawnMob(x,z,hostile?(this.pos.y<-25?'brute':'stalker'):animalKind(this.world,x,z,this.serial),y);}
+      this.spawnTimer=0;this.mobs=this.mobs.filter(m=>ANIMALS[m.kind]||Math.hypot(m.x-this.pos.x,m.z-this.pos.z)<85);
+      const hostile=!this.creative&&(this.pos.y<-7||this.state.time%600>420),cap=hostile?5:10,group=this.mobs.filter(m=>!!ENEMIES[m.kind]?.passive!==hostile&&Math.hypot(m.x-this.pos.x,m.z-this.pos.z)<70);
+      if(group.length<cap&&(hostile||this.mobs.filter(m=>ANIMALS[m.kind]).length<128)){const a=hash(Math.floor(this.state.time),this.serial,this.state.seed)*Math.PI*2,x=this.pos.x+Math.sin(a)*22,z=this.pos.z+Math.cos(a)*22,y=this.world.ground(x,z,hostile?this.pos.y+3:this.world.height(x,z)+1);if(Math.abs(y-this.pos.y)<10&&y>-60&&!this.world.waterAt(x,y,z)&&!this.world.intersects(x,y,z,1.7,.4))this.spawnMob(x,z,hostile?(this.pos.y<-25?'brute':'stalker'):animalKind(this.world,x,z,this.serial),y);}
     }
     this.saveTimer+=dt;if(this.saveTimer>15){this.saveTimer=0;this.save();}
   }
@@ -241,7 +325,7 @@ export class Game {
       if(CROP_BLOCKS.includes(t.type)){this.harvest(t);this.mineProgress=0;return;}
       if(t.type==='chest'){const store=this.state.containers[key]||{};for(const[k,n]of Object.entries(store))this.add(k,n);delete this.state.containers[key];}
       this.world.set(t.x,t.y,t.z,null);this.state.stats.mined++;this.state.exhaustion+=.025;
-      if(['leaf','pine','autumnleaf'].includes(t.type)){this.add('leaf');this.add('fiber');if(hash(t.x+t.y,t.z,this.state.seed)<.22)this.add('apple');}else {this.add(BLOCKS[t.type].drop||t.type);if(t.type==='fern'){this.add('fiber',2);this.add('seeds');}}
+      if(this.held==='moonstone_pickaxe'){this.add(BLOCKS[t.type].drop||t.type);}else if(['leaf','pine','autumnleaf'].includes(t.type)){this.add('leaf');this.add('fiber');if(hash(t.x+t.y,t.z,this.state.seed)<.22)this.add('apple');}else {this.add(BLOCKS[t.type].drop||t.type);if(t.type==='fern'){this.add('fiber',2);this.add('seeds');}}
       this.emit('pickup',{item:BLOCKS[t.type].drop||t.type,count:1});
       this.renderer.burst(t.x+.5,t.y+.5,t.z+.5,BLOCKS[t.type].color,8);this.renderer.swing=1;this.audio.play('mine',t.type);this.mineProgress=0;this.mineKey='';this.emit('hud');
     }

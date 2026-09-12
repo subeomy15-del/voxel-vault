@@ -1,4 +1,5 @@
-import { ANIMALS,updateAnimal } from './wildlife.js';
+import { ANIMALS,updateAnimal } from './wildlife.js?v=10';
+import { visibleBetween,findMobPath } from './navigation.js?v=10';
 
 export const ENEMIES = {
   sentinel: { name:'Grove sentinel', hp:18, speed:1.8, damage:3, color:'#66817c', glow:'#c1e9b2', xp:18 },
@@ -9,6 +10,21 @@ export const ENEMIES = {
   grazer: { name:'Wild grazer', hp:5, speed:.45, damage:0, color:'#b9976e', glow:'#ead4a5', xp:0 },
 };
 Object.assign(ENEMIES,ANIMALS);
+export function targetMob(game,reach=4){
+  const origin={x:game.pos.x,y:game.pos.y+(game.crouching?1.15:1.58),z:game.pos.z},dir=game.direction();let best=null;
+  for(const mob of game.mobs){
+    const info=ENEMIES[mob.kind]||ENEMIES.sentinel,r=(info.radius||.35)+.15,h=info.height||1.8;
+    let near=0,far=best?.distance??reach;
+    for(const axis of ['x','y','z']){
+      const low=axis==='y'?mob.y:mob[axis]-r,high=axis==='y'?mob.y+h+.12:mob[axis]+r;
+      if(Math.abs(dir[axis])<1e-8){if(origin[axis]<low||origin[axis]>high){far=-1;break;}continue;}
+      let a=(low-origin[axis])/dir[axis],b=(high-origin[axis])/dir[axis];if(a>b)[a,b]=[b,a];near=Math.max(near,a);far=Math.min(far,b);
+    }
+    if(near>far||far<0)continue;
+    const point={x:origin.x+dir.x*near,y:origin.y+dir.y*near,z:origin.z+dir.z*near};
+    if(visibleBetween(game.world,origin,point))best={mob,distance:near,point};
+  }return best;
+}
 export function launchBolt(game, origin, direction, damage=3, hostile=true,options={}) {
   if(game.projectiles.length>=50)return;
   const len=Math.hypot(direction.x,direction.y,direction.z)||1, speed=options.speed||(hostile?8:27);
@@ -37,10 +53,17 @@ export function updateEnemies(game,dt) {
   for(const m of [...game.mobs]) {
     m.flash=Math.max(0,m.flash-dt);m.cooldown-=dt;m.stun=Math.max(0,(m.stun||0)-dt);
     const d=Math.hypot(game.pos.x-m.x,game.pos.z-m.z), info=ENEMIES[m.kind]||ENEMIES.sentinel;
+    if(d>75)continue;
     if(info.passive){updateAnimal(game,m,dt);continue;}
     m.slow=Math.max(0,(m.slow||0)-dt);
     if(game.effect('invisibility')&&game.revealTime<=0&&d>2){m.windup=0;m.lunge=0;continue;}
     if(game.creative||m.stun>0)continue;
+    m.sightTimer=(m.sightTimer||0)-dt;
+    if(m.sightTimer<=0){m.sightTimer=.25;m.canSee=visibleBetween(game.world,{x:m.x,y:m.y+1.25,z:m.z},{x:game.pos.x,y:game.pos.y+1.3,z:game.pos.z});if(m.canSee){m.memory=5;m.lastSeen={...game.pos};}}
+    m.memory=Math.max(0,(m.memory||0)-dt);
+    if(!m.canSee){m.windup=0;m.lunge=0;if(m.memory>0&&m.lastSeen){m.pathTimer=(m.pathTimer||0)-dt;if(m.pathTimer<=0){m.pathTimer=1;m.path=findMobPath(game.world,m,m.lastSeen,info);}
+      const next=m.path?.[0];if(next){const dx=next.x-m.x,dz=next.z-m.z,length=Math.hypot(dx,dz);if(length<.2)m.path.shift();else{const step=Math.min(length,dt*info.speed);game.moveMob(m,dx/length*step,dz/length*step);}}}continue;}
+
     m.angle=Math.atan2(game.pos.x-m.x,game.pos.z-m.z);
     if(m.kind==='guardian'){
       if(d>35){game.boss=null;game.slam=null;game.mobs=game.mobs.filter(e=>e!==m);game.toast('The guardian returns to the vault','Come closer when you’re ready.');continue;}

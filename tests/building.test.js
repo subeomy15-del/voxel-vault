@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js';
-import { World } from '../src/world.js';
-import { craft,ingredientCount,RECIPES } from '../src/data.js';
-import { meshChunk } from '../src/mesh.js';
+import { Game } from '../src/game.js?v=10';
+import { World } from '../src/world.js?v=10';
+import { craft,ingredientCount,RECIPES } from '../src/data.js?v=10';
+import { meshChunk } from '../src/mesh.js?v=10';
 const renderer={setWorld(){},stream(){},burst(){}},audio={play(){}};
 const game=()=>{const g=new Game(renderer,audio,{getItem:()=>null,setItem(){}});g.pos={x:.5,y:7,z:9.5};g.screen=null;g.yaw=0;g.mobs=[];return g;};
 

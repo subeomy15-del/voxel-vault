@@ -32,6 +32,8 @@ export class Audio {
     if(name==='step'){this.noise(.09,soft?.26:.15,soft?800:2200);this.tone((wood?110:soft?65:155)*pitch,.045,'triangle',.055,-40);}
     if(name==='place'){this.noise(.07,.2,900);this.tone((wood?165:soft?95:220)*pitch,.08,'triangle',.13,-80);}
     if(name==='hit'){this.noise(.11,.45,180);this.tone(95,.1,'triangle',.16,-55);}
+    if(name==='portal'){this.tone(110,.7,'sine',.1,440);this.tone(220,.8,'triangle',.04,330);}
+    if(name==='launch'){this.tone(220,.35,'sine',.09,550);this.noise(.2,.1,900);}
     if(name==='hurt')this.tone(125,.17,'triangle',.2,-80);
     if(name==='click')this.tone(510,.035,'sine',.06);
     if(name==='jump')this.noise(.08,.12,600);

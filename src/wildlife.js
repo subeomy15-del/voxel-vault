@@ -1,4 +1,5 @@
-import { hash } from './data.js';
+import { hash } from './data.js?v=10';
+import { findMobPath } from './navigation.js?v=10';
 export const ANIMALS={
   deer:{name:'Deer',passive:true,hp:12,speed:1.15,flee:5.4,height:1.6,radius:.38,color:'#a88b68',glow:'#d9c6a4',food:['wheat','carrot'],drops:{raw_venison:[2,3],leather:[1,2]}},
   pig:{name:'Pig',passive:true,hp:12,speed:.95,flee:3.9,height:.9,radius:.4,color:'#c79f95',glow:'#dec0ac',food:['carrot','potato'],drops:{raw_pork:[2,3]}},
@@ -15,14 +16,23 @@ export function updateAnimal(game,m,dt){
   const info=ANIMALS[m.kind]||ANIMALS.deer,dx=game.pos.x-m.x,dz=game.pos.z-m.z,d=Math.hypot(dx,dz),invisible=game.effect('invisibility')&&game.revealTime<=0;
   m.panic=Math.max(0,(m.panic||0)-dt);m.slow=Math.max(0,(m.slow||0)-dt);m.brain=(m.brain||0)-dt;
   if(m.brain<=0){
-    m.brain=.5+hash(m.id,Math.floor(game.state.time),game.state.seed)*.8;
-    if(m.panic>0){m.goalAngle=Math.atan2(-dx,-dz);m.walkSpeed=info.flee;}
-    else if(!invisible&&info.food.includes(game.held)&&game.state.inv[game.held]>0&&d<9){m.goalAngle=Math.atan2(dx,dz);m.walkSpeed=d>1.9?info.speed*1.6:0;}
-    else{const choice=hash(m.id,Math.floor(game.state.time/2),game.state.seed+7);m.walkSpeed=choice>.42?info.speed*.5:0;if(choice>.83||m.goalAngle===undefined)m.goalAngle=choice*Math.PI*2;}
+    m.brain=1+hash(m.id,Math.floor(game.state.time),game.state.seed)*.7;let target=null;
+    if(m.panic>0){const distance=Math.max(d,.1);target={x:m.x-dx/distance*8,z:m.z-dz/distance*8};m.walkSpeed=info.flee;}
+    else if(!invisible&&info.food.includes(game.held)&&game.state.inv[game.held]>0&&d<10){if(d>1.9)target=game.pos;m.walkSpeed=target?info.speed*1.6:0;}
+    else{
+      const choice=hash(m.id,Math.floor(game.state.time/3),game.state.seed+7);m.walkSpeed=choice>.43?info.speed*.6:0;
+      if(m.walkSpeed){const herd=game.mobs.find(other=>other!==m&&other.kind===m.kind&&Math.hypot(other.x-m.x,other.z-m.z)>5&&Math.hypot(other.x-m.x,other.z-m.z)<11);
+        target=herd&&choice>.7?herd:{x:m.x+Math.sin(choice*18)*4,z:m.z+Math.cos(choice*18)*4};}
+    }
+    m.path=target?findMobPath(game.world,m,target,info):[];if(!m.path.length)m.walkSpeed=0;
   }
   if(m.stun>0)return;
-  const speed=(m.walkSpeed||0)*(m.slow>0?.35:1),angle=m.goalAngle||0,beforeX=m.x,beforeZ=m.z;
-  if(speed>0){game.moveMob(m,Math.sin(angle)*dt*speed,Math.cos(angle)*dt*speed);if(Math.hypot(m.x-beforeX,m.z-beforeZ)<dt*speed*.2){m.goalAngle=angle+1.2;m.brain=.1;}}
-  if(speed===0)m.angle+=(Math.atan2(Math.sin(angle-m.angle),Math.cos(angle-m.angle)))*Math.min(1,dt*3);
-  m.grazing=speed===0&&m.panic<=0;
+  let point=m.path?.[0];if(point&&Math.hypot(point.x-m.x,point.z-m.z)<.18){m.path.shift();point=m.path[0];}
+  const speed=(m.walkSpeed||0)*(m.slow>0?.35:1);m.grazing=!point&&m.panic<=0;
+  if(point&&speed>0){
+    const dx=point.x-m.x,dz=point.z-m.z,distance=Math.hypot(dx,dz),step=Math.min(distance,dt*speed),angle=Math.atan2(dx,dz),before={x:m.x,z:m.z,angle:m.angle};
+    game.moveMob(m,dx/distance*step,dz/distance*step);
+    m.angle=before.angle+Math.atan2(Math.sin(angle-before.angle),Math.cos(angle-before.angle))*Math.min(1,dt*9);
+    if(Math.hypot(m.x-before.x,m.z-before.z)<step*.15){m.brain=Math.min(m.brain,.15);m.path=[];}
+  }else m.walkSpeed=0;
 }

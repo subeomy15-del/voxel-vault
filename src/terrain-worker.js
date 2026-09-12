@@ -1,8 +1,8 @@
-import { World } from './world.js';
-import { meshChunk } from './mesh.js';
+import { World } from './world.js?v=10';
+import { meshChunk } from './mesh.js?v=10';
 let world,epoch=0;
 self.onmessage=({data})=>{
-  if(data.type==='init'){world=new World(data.seed,data.edits);epoch=data.epoch;return;}
+  if(data.type==='init'){world=new World(data.seed,data.edits,data.terrain,data.dimension);epoch=data.epoch;return;}
   if(data.type==='edits'){for(const[k,t]of data.edits)world.edits.set(k,t);return;}
   if(data.type==='mesh'&&data.epoch===epoch){
     const geometry=meshChunk(world,data.cx,data.cz,data.underground);

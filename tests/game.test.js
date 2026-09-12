@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { World,WORLD_BOTTOM,WORLD_LIMIT } from '../src/world.js';
-import { Game } from '../src/game.js';
-import { ITEMS,craft,starterInventory,dailySeed } from '../src/data.js';
-import { freshState,loadState,saveState,slotKey,importLegacy } from '../src/save.js';
-import { updateProjectiles } from '../src/combat.js';
-import { meshChunk } from '../src/mesh.js';
+import { World,WORLD_BOTTOM,WORLD_LIMIT } from '../src/world.js?v=10';
+import { Game } from '../src/game.js?v=10';
+import { ITEMS,craft,starterInventory,dailySeed } from '../src/data.js?v=10';
+import { freshState,loadState,saveState,slotKey,importLegacy } from '../src/save.js?v=10';
+import { updateProjectiles } from '../src/combat.js?v=10';
+import { meshChunk } from '../src/mesh.js?v=10';
 const storage=()=>{const m=new Map();return{getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v)};};
 const renderer={setWorld(){},stream(){},burst(){},swing:0},audio={play(){},tone(){}};
-const game=()=>{const g=new Game(renderer,audio,storage());g.screen=null;return g;};
+const game=()=>{const g=new Game(renderer,audio,storage());g.screen=null;g.yaw=0;return g;};
 
 test('deterministic terrain extends well beyond the old island',()=>{
  const a=new World(7821),b=new World(7821),c=new World(27);

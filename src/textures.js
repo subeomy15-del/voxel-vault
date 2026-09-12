@@ -1,11 +1,11 @@
-import { BLOCKS, hash } from './data.js';
+import { BLOCKS, hash } from './data.js?v=10';
 export const TILE=32,ATLAS_COLS=16;
 export const ATLAS_ROWS=2**Math.ceil(Math.log2(Math.ceil(Object.keys(BLOCKS).length*3/ATLAS_COLS)));
 export const ATLAS_WIDTH=TILE*ATLAS_COLS,ATLAS_HEIGHT=TILE*ATLAS_ROWS;
 export function textureCanvas(){
   const canvas=document.createElement('canvas');canvas.width=ATLAS_WIDTH;canvas.height=ATLAS_HEIGHT;
   const ctx=canvas.getContext('2d');let index=0;
-  const ores={iron:'#cab6a0',copper:'#c18f71',gold:'#dfbf6c',coal:'#394344',diamond:'#9ed8d8',crystal:'#9fded3'};
+  const ores={ruby:'#df6b8b',sapphire:'#71bcea',emerald:'#76d8a3',moonstone:'#d7c5ff',iron:'#cab6a0',copper:'#c18f71',gold:'#dfbf6c',coal:'#394344',diamond:'#9ed8d8',crystal:'#9fded3'};
   for(const[type,b]of Object.entries(BLOCKS))for(let side=0;side<3;side++,index++){
     ctx.save();ctx.translate(index%ATLAS_COLS*TILE,Math.floor(index/ATLAS_COLS)*TILE);
     const fill=(c,x=0,y=0,w=32,h=32)=>{ctx.fillStyle=c;ctx.fillRect(x,y,w,h);};
@@ -36,13 +36,26 @@ export function textureCanvas(){
       }
       ctx.restore();continue;
     }
-    fill(ores[type]?'#7e8887':type==='grass'&&side!==0?BLOCKS.dirt.color:b.color);
-    for(let i=0;i<80;i++){const x=Math.floor(hash(i,index+71)*32),y=Math.floor(hash(index+23,i)*32);fill(hash(i,index)>.5?'#ffffff0c':'#15222110',x,y,1+Math.floor(hash(i,5)*4),1+Math.floor(hash(i,9)*3));}
+    const bright={grass:'#79bb46',leaf:'#5fa53d',pine:'#438545',autumnleaf:'#d89c43',dirt:'#98714c',sand:'#e7d39a',stone:'#929aa2'};
+    fill(ores[type]?'#89929a':type==='grass'&&side!==0?bright.dirt:bright[type]||b.color);
+    for(let i=0;i<28;i++){const x=Math.floor(hash(i,index+71)*32),y=Math.floor(hash(index+23,i)*32);fill(hash(i,index)>.5?'#ffffff0c':'#15222110',x,y,1+Math.floor(hash(i,5)*4),1+Math.floor(hash(i,9)*3));}
+    if(['end_stone','end_bricks'].includes(type)){
+      for(let i=0;i<20;i++){const x=Math.floor(hash(i,index)*28),y=Math.floor(hash(index,i)*28);fill('#82785b30',x,y,3,2);fill('#fff8dc40',x,y-1,3,1);}
+      if(type==='end_bricks')for(let y=0;y<32;y+=8){fill('#73665060',0,y,32,1);fill('#73665060',(y*2)%24,y,1,8);}
+    }
+    if(type==='obsidian')for(let i=0;i<12;i++){const x=hash(i,index)*32,y=hash(index,i)*32;stroke('#79619566',[[x,y],[x+4,y+3],[x+7,y+2]],1);}
+    if(['moonstone_block','violet_crystal','ender_gate'].includes(type)){
+      for(let i=0;i<6;i++){const x=hash(i,index)*27,y=hash(index,i)*27;stroke('#ebd6ff99',[[x,y],[x+4,y+4],[x+1,y+7]],1);}
+      if(type==='ender_gate'){fill('#30203e',4,4,24,24);ctx.strokeStyle='#d5b0ff';ctx.lineWidth=2;ctx.strokeRect(7,7,18,18);ctx.strokeRect(12,12,8,8);}
+    }
+    if(type==='launch_pad'){fill('#23434b');ctx.strokeStyle='#8bf5ff';ctx.lineWidth=2;ctx.strokeRect(2,2,28,28);stroke('#b5ffff',[[7,23],[16,13],[25,23]],3);stroke('#64d7e3',[[7,15],[16,5],[25,15]],3);}
+    if(type==='treasure_chest'||type==='relic_forge'){fill(type==='treasure_chest'?'#997c52':'#576477');fill('#293748',0,12,32,3);fill('#dec48b',0,0,3,32);fill('#dec48b',29,0,3,32);fill('#f3dba6',13,11,6,10);fill('#634e43',15,15,2,3);if(type==='relic_forge'){fill('#243e49',5,18,22,10);stroke('#8bdddf',[[9,25],[16,20],[23,25]],2);}}
+    if(type==='moonstone_chest'){fill('#433450',0,13,32,3);fill('#dbc5ff',13,11,6,9);fill('#624486',15,14,2,3);stroke('#d7c8ef88',[[1,1],[30,1],[30,30]],2);}
     if(type.startsWith('watermelon')){for(let x=1;x<32;x+=7)stroke('#42633f',[[x,0],[x+2,8],[x,18],[x+1,32]],3);if(side===0){fill('#638249',13,11,6,8);fill('#a8ae72',15,9,3,9);}}
     if(type==='melon'||type==='melon_crop'){for(let i=0;i<11;i++){const x=hash(i,41)*32,y=hash(i,74)*32;stroke('#ebd8a77a',[[x-7,y],[x,y+4],[x+6,y-1],[x+12,y+4]]);}if(side===0)fill('#7b8753',14,11,4,7);}
     if(type==='grass'){
       if(side===0){for(let i=0;i<45;i++){const x=hash(i,index)*30,y=hash(i,index+2)*31;fill(i%3?'#b2c38b33':'#3d632c30',x,y,2,1);}}
-      else if(side===1){fill('#769955',0,0,32,6);for(let x=0;x<32;x+=2)fill('#769955',x,6,2,2+hash(x,index)*4);stroke('#a2ba7b66',[[0,1],[32,1]]);}
+      else if(side===1){fill('#79bb46',0,0,32,6);for(let x=0;x<32;x+=2)fill('#79bb46',x,6,2,2+hash(x,index)*4);stroke('#a2ba7b66',[[0,1],[32,1]]);}
     }
     const log=['wood','birch','pinewood'].includes(type),plank=type.includes('plank')||type==='bench'||type==='bookshelf'||type==='chest';
     if(log){
@@ -59,7 +72,7 @@ export function textureCanvas(){
       for(let i=0;i<(marble?3:5);i++){const y=hash(i,index+17)*32;stroke(marble?'#7a979342':'#26343423',[[0,y],[9,y+3],[17,y+1],[25,y+7],[32,y+5]],marble?1.5:1);}
       if(type.startsWith('polished')){fill('#ffffff24',0,0,32,1);fill('#1c35332b',0,31,32,1);}
     }
-    if(['stonebrick','brick','sandstone','tile','ruin','cobblestone'].includes(type)){
+    if(['dark_bricks','ivory_bricks','stonebrick','brick','sandstone','tile','ruin','cobblestone'].includes(type)){
       for(let y=0;y<32;y+=8){fill('#3b454342',0,y,32,1);fill('#ffffff20',0,y+1,32,1);for(let x=y%16?8:0;x<32;x+=16)fill('#3b454342',x,y,1,8);}
     }
     if(type.endsWith('_block')){fill('#263e3b55',0,0,32,1);fill('#263e3b55',0,0,1,32);fill('#ffffff50',1,1,30,1);for(const x of[3,27])for(const y of[3,27]){fill('#48545077',x,y,2,2);fill('#ffffff77',x,y,1,1);}}

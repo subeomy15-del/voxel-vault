@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { connect,sleep } from './cdp.js';
 const c=await connect(),{evaluate:ev,click,screenshot}=c;
-const importGame=()=>ev(`(async()=>{const m=await import('/src/main.js');window.g=m.game;window.v=m.renderer;window.ui=m.ui;})()`);
+const importGame=()=>ev(`(async()=>{const m=await import('/src/main.js?v=10');window.g=m.game;window.v=m.renderer;window.ui=m.ui;})()`);
 const waitTerrain=async()=>{await sleep(120);for(let i=0;i<120;i++){if(await ev('v.chunks.size>=9&&!v.inflight&&v.queue.length===0&&v.ready.length===0'))return;await sleep(100);}throw Error('Terrain worker did not finish');};
 const key=async(code,down=true)=>c.send('Input.dispatchKeyEvent',{type:down?'keyDown':'keyUp',code,key:code==='Space'?' ':code.slice(-1).toLowerCase()});
 try{
@@ -23,7 +23,7 @@ try{
  const snapshot=await ev(`JSON.stringify({inv:g.state.inv,edits:[...g.world.edits],spawn:g.state.spawn,containers:g.state.containers})`);
  await c.send('Page.reload');await sleep(650);await importGame();await waitTerrain();assert.equal(await ev(`JSON.stringify({inv:g.state.inv,edits:[...g.world.edits],spawn:g.state.spawn,containers:g.state.containers})`),snapshot);
  await click('[data-action="creative"]');await waitTerrain();assert.equal(await ev('g.creative'),true);await ev(`g.pause('inventory');ui.render()`);assert.ok(await ev('document.querySelectorAll(".item-card").length')>=68);await screenshot('frontier-materials');
- await click('[data-action="map"]');assert.equal(await ev('document.querySelectorAll("[data-waypoint]").length'),6);await screenshot('frontier-map');await click('[data-action="journal"]');assert.ok(await ev("document.querySelector('.modal').textContent.includes('no shrine requirements')"));
+ await click('[data-action="map"]');assert.equal(await ev('document.querySelectorAll("[data-waypoint]").length'),9);await screenshot('frontier-map');await click('[data-action="journal"]');assert.ok(await ev("document.querySelector('.modal').textContent.includes('no shrine requirements')"));
  await c.send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await click('[data-action="inventory"]');assert.ok(await ev("document.querySelector('.modal').getBoundingClientRect().right<=innerWidth"));await screenshot('frontier-mobile');
  await ev('g.pause();g.screen="menu";ui.render()');await c.send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
  assert.deepEqual(c.errors,[]);assert.deepEqual(c.failed,[]);console.log('PASS: worker terrain, real sprint/jump/mining/placement, pause, crafting, furnace, storage, bed/respawn, dry caves, expanded-world edits, reload persistence, 68+ creative items, map, journal, compact layout; no runtime errors or missing assets.');

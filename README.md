@@ -1,6 +1,28 @@
-# Voxel Vault — Wildlands Update
+# Voxel Vault — Relic Trails
 
-A browser voxel sandbox with 186 usable items, 109 crafting recipes, nine crops, six animal species, food effects, ranged weapons and eight hang gliders. Explore a 1,024 × 1,024 world with forests, meadows, rivers, mountains and dry underground caves. Mine, farm, cook, craft and build at your own pace.
+A playable browser voxel adventure with connected Overworld and Ender dimensions, building, farming, crafting, gliding and a three-anchor expedition. Original block-world visuals take direction from the requested bloxd.io reference. Single player, with local saves.
+
+## Relic Trails update
+
+237 usable items and 145 crafting recipes, with rendered 3D item artwork throughout the backpack and hotbar. Find three treasure outposts near home: Wayfarer Lodge, Old Watchtower and Crystal Sanctuary. Follow the map markers, open their chests with E and spend relic shards at a Relic Forge. The lodge chest gives enough shards to buy your first grappling hook. Equip it, aim at solid terrain within 24 blocks and press E to pull yourself toward it.
+
+Forge ruby and sapphire blades, a heavy warhammer, Vanguard armor, Storm Glider and Starfall Bow. Ruby blades restore health on a hit; sapphire blades slow enemies. New deep gem veins and building materials expand crafting. Rift anchors award relic shards too, connecting both dimensions to the same equipment progression.
+
+## Show it in class
+
+1. Run `npm start` and open http://localhost:3001.
+2. Choose **Adventure** and walk through the glowing portal near home, or use **Enter the Rift** in the lobby to resume the same adventure in its Ender dimension.
+3. Walk onto the cyan launch pad on the north side of the arrival island. Hold W and look slightly down. Your starter glider opens near the top of the jump.
+4. Follow the colored beacons. Press E near each of the three anchors. Every anchor awards moonstone and food; the third unlocks a Moonstone Sword, Armor and Glider.
+5. Walk through the home portal, or choose **Return home with your gear** from Pause. Your inventory, equipment, health and rewards travel with you. Buildings and chests stay in their respective dimensions.
+
+Press **V / F5** to cycle first person, third person behind, and third person front. The camera button works on touch devices too. **G** closes the glider to land; launch pads open it automatically near the apex. **E/right click** activates anchors, enters gates, uses orbs or places blocks. **Tab** opens inventory. A completed Rift Run can be replayed from its HUD button; best time is saved and the equipment reward is awarded once.
+
+## Visual update
+
+Animated portals, glowing crystals and navigation beams, a ringed planet, an animated Ender sky, drifting particles, improved shadows, textured materials and a subtle glow pass in High quality. Performance mode skips post-processing and reduces terrain range. The lobby uses captures from the actual game renderer. Third-person views include an animated character, held tools and glider, with camera collision near walls.
+
+The adventure now has one shared player inventory and separate geographic snapshots for the two dimensions. Existing Overworld saves are supported. Creative and Daily remain separate game modes. The old standalone Ender save slot is left untouched; the new lobby enters the connected adventure.
 
 ## Play
 
@@ -28,6 +50,18 @@ Open http://localhost:3001. No installation or build step is needed. Three.js is
 - Creative flight: double tap Space; Space to rise, X to descend.
 
 Touch controls provide a movement stick, drag look, jump, mine/attack, use, food, dodge and a glider button when equipped. Bow drawing supports looking around with a second finger.
+
+## Horizon improvements
+
+Holding attack with a pickaxe, axe, building block or food now keeps hitting an animal in range. Animal targeting uses the visible body bounds, ignores flowers and respects solid walls. The crosshair shows the animal’s health and whether it is close enough to hit. Left click attacks; use E/right click or F to eat.
+
+The backpack now has an **All items** catalogue. Its **Gliders** and **Cotton** buttons show those items even when you do not own them. Inspect an item to equip an owned stack or jump directly to its crafting recipe. Pressing G without an equipped wing opens the glider catalogue. Cotton seeds can also be separated from harvested cotton in crafting.
+
+New worlds blend hills and alpine terrain smoothly and use spaced, varied oak, birch and pine trees. New spawns face an open view. Existing worlds retain their previous terrain layout. Animals use bounded local pathfinding to navigate around obstacles, avoid water and stay near their herds; nearby herd members flee together when attacked. Animals save their positions and health, including when you leave their area. Distant animals stop simulating, and each world has a 128-animal cap.
+
+Enemies use line of sight and follow their last known sighting briefly after losing you. Item icons have shaded materials and more distinct meat, seed and plant designs. Held tools have shaped, beveled heads and visible grips. The brand mark, catalogue and glider camera motion have also been refined.
+
+Browser modules and worker imports carry the same release version so refreshing loads a consistent update. For future releases, run `node scripts/stamp.mjs RELEASE` before publishing.
 
 ## Food, hunting and farming
 
@@ -90,7 +124,7 @@ The ash longbow favors power and range; the recurve draws more quickly. Heavy an
 
 ## World, building and saving
 
-New worlds choose safe random starting locations; Daily worlds use the UTC date as a repeatable seed. Continue preserves your position and bed spawn. Home follows the starting clearing until you use a bed. Adventure, Daily and Creative have separate saves.
+New worlds choose safe random starting locations; Daily worlds use the UTC date as a repeatable seed. Continue preserves your position and bed spawn. Home follows the starting clearing until you use a bed. Adventure, Daily and Creative have separate saves; Overworld and Ender are connected dimensions inside each mode.
 
 The terrain reaches from Y −64 to 95. Ore veins occur underground, with rarer ores in deeper layers. Rivers contain actual water cells; caves beneath dry land stay dry. These are original voxel algorithms with familiar sandbox mechanics, not Minecraft source code.
 
@@ -98,19 +132,19 @@ Build with oak, birch and pine, masonry, polished stone, glass, metals and fabri
 
 General recipes accept mixed timber; named wood recipes preserve species. Chests transfer up to 64 items per click and return their contents when mined. Beds set home and rest until morning. Ladders, torches and lanterns help with underground exploration.
 
-Inventory, placed blocks, crop growth, containers, home, position, food reserves, effects, ammunition, gliders and item drops save every 15 seconds, on pause and when leaving. Animal populations regenerate on world load. Death preserves inventory and builds. Existing version 2 saves and compatible original inventories remain readable. Natural vegetation regenerates around retained player edits.
+Inventory, placed blocks, crop growth, containers, home, position, food reserves, effects, ammunition, gliders and item drops save every 15 seconds, on pause and when leaving. Animal positions and health persist across reloads. Death preserves inventory and builds. Existing version 2 saves and compatible original inventories remain readable. Existing terrain generation stays attached to its save; the new terrain and tree generator applies to new worlds.
 
 Pause → Start a new adventure world asks before replacing an Adventure save. Browser storage belongs to the site origin; clearing site data removes saves.
 
 ## Rendering and verification
 
-The game uses a procedural block atlas, SVG item icons, articulated voxel animals, textured glider sails, food models, arrows, swaying instanced grass, clouds, day/night lighting, sun shadows and animated water. Ore sight uses a bounded incremental scan and one instanced draw. Terrain meshes run in a Web Worker; epochs and revisions keep older meshes from overwriting new edits. High and Performance settings control resolution, view range and shadows.
+The game uses a procedural block atlas, rendered 3D item icons, articulated voxel animals, textured glider sails, food models, arrows, swaying instanced grass, clouds, day/night lighting, sun shadows and animated water. Ore sight uses a bounded incremental scan and one instanced draw. Terrain meshes run in a Web Worker; epochs and revisions keep older meshes from overwriting new edits. High and Performance settings control resolution, view range and shadows.
 
 ```sh
 npm test
 ```
 
-The 39 tests cover terrain, shapes, movement, crafting, saves, stations, all animals and meat drops, eating and regeneration, timed effects, bow charging/ammunition, every crop, hydration, glider tiers, gold armor and vegetation density.
+The 62 automated tests include outpost generation, one-time treasure, forge payment and proximity, grappling collision, weapon effects, complete item artwork, connected realms and the full Rift route. They also cover terrain, shapes, movement, crafting, saves, stations, all animals and meat drops, eating and regeneration, timed effects, bow charging/ammunition, every crop, hydration, glider tiers, gold armor, vegetation density, repeated tool attacks, animal navigation and persistence, terrain compatibility, smooth elevation transitions and consistent tree generation.
 
 Browser scripts use an isolated Chrome profile on debugging port 9224 and the local server on 3001:
 
@@ -118,9 +152,12 @@ Browser scripts use an isolated Chrome profile on debugging port 9224 and the lo
 npm run test:browser
 node tests/wildfields-browser.js
 node tests/wildlands-browser.js
+node tests/horizon-browser.js
 node tests/touch-check.js
 ```
 
 These scripts reset the isolated profile’s test worlds. They exercise real keyboard, mouse and touch inputs, reload persistence, cooking, farming, hunting, gliding, visual effects and compact layouts. Screenshots go to `/private/tmp/voxel-vault-*.png`.
 
 Three.js r160 is bundled under its MIT license in `vendor/LICENSE`.
+
+The browser suite also verifies treasure interaction, forging, grappling, all catalogue images and mobile inventory. Regenerate item artwork with `npm run render:items` using the isolated test browser described above.

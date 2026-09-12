@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js';
-import { World } from '../src/world.js';
-import { ITEMS,BLOCKS,CROPS,RECIPES,ORE_GLIDERS,canCraft,craft } from '../src/data.js';
-import { ANIMALS,animalKind } from '../src/wildlife.js';
-import { tickSurvival,canEat } from '../src/survival.js';
-import { updateProjectiles } from '../src/combat.js';
-import { loadState } from '../src/save.js';
+import { Game } from '../src/game.js?v=10';
+import { World } from '../src/world.js?v=10';
+import { ITEMS,BLOCKS,CROPS,RECIPES,ORE_GLIDERS,canCraft,craft } from '../src/data.js?v=10';
+import { ANIMALS,animalKind } from '../src/wildlife.js?v=10';
+import { tickSurvival,canEat } from '../src/survival.js?v=10';
+import { updateProjectiles } from '../src/combat.js?v=10';
+import { loadState } from '../src/save.js?v=10';
 const make=()=>{const data=new Map(),g=new Game({setWorld(){},stream(){},burst(){}},{play(){}},{getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)});g.screen=null;g.pos={x:.5,y:7,z:9.5};g.yaw=0;g.pitch=0;g.mobs=[];return g;};
 const ticks=(fn,seconds)=>{for(let t=0;t<seconds-1e-8;t+=.05)fn(.05);};
 
@@ -36,7 +36,7 @@ test('food has a chewing action, stores reserves and gradually regenerates healt
 });
 test('all effect foods work at full health, expire, pause and persist with equipment and drops',()=>{
   const g=make();g.state.hp=20;g.state.food=20;g.state.saturation=20;
-  for(const[name,item]of Object.entries(ITEMS).filter(([,i])=>i.effect)){g.add(name);assert.ok(g.eat(name));tickSurvival(g,.9);assert.equal(g.state.effects[item.effect],item.duration);assert.equal(g.state.inv[name],0);}
+  for(const[name,item]of Object.entries(ITEMS).filter(([,i])=>i.effect)){delete g.state.effects[item.effect];g.add(name);assert.ok(g.eat(name));tickSurvival(g,.9);assert.equal(g.state.effects[item.effect],item.duration);assert.equal(g.state.inv[name],0);}
   g.add('gold_glider');g.equip('gold_glider');g.add('gold_armor');g.equip('gold_armor');g.add('frost_arrows',4);g.equip('frost_arrows');g.dropItem('raw_venison',2,2,7,9);g.save();
   const saved=loadState(g.storage);assert.deepEqual(saved.effects,g.state.effects);assert.equal(saved.glider,'gold_glider');assert.equal(saved.armor,'gold_armor');assert.equal(saved.ammo,'frost_arrows');assert.equal(saved.drops[0].item,'raw_venison');
   g.pause();const before={...g.state.effects};g.update(1);assert.deepEqual(g.state.effects,before);g.resume();ticks(dt=>tickSurvival(g,dt),121);assert.deepEqual(g.state.effects,{});

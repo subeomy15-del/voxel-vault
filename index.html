@@ -4,19 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#17362e">
-  <meta name="description" content="An open voxel world with random starts, farming, forests, rivers, caves, hunting, food effects, ore gliders, and a rich collection of items to craft and build with.">
-  <title>Voxel Vault — Build Beyond the Horizon</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css">
+  <meta name="description" content="Explore treasure outposts, forge powerful gear, grapple across cliffs and soar through connected Ender islands. A voxel adventure with 237 items, building and three camera views.">
+  <title>Voxel Vault — Relic Trails</title>
+  <link rel="icon" href="./favicon.svg?v=10" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css?v=10">
 </head>
 <body>
   <div id="world"></div>
   <div id="vignette"></div>
   <div id="hud" hidden>
-    <div class="hud-top"><button class="brand small" data-action="pause"><span class="brand-cube">⬡</span> VOXEL VAULT</button><div class="compass" id="compass"></div><button class="icon-button" data-action="pause" aria-label="Pause game">Ⅱ</button></div>
-    <div id="location"><span class="eyebrow">THE OVERWORLD</span><strong>Verdant Wilds</strong><small>Day 1 · Morning</small></div>
+    <div class="hud-top"><button class="brand small" data-action="pause"><svg class="brand-mark" width="28" height="28" viewBox="0 0 48 48" aria-hidden="true"><path d="M5 16 24 5l19 11v19L24 46 5 35Z" fill="#5e8463"/><path d="m5 16 19 11 19-11L24 5Z" fill="#e4d197"/><path d="M24 27v19L5 35V16Z" fill="#274d3b"/><path d="m11 24 8 5v7l-8-5Zm18 5 8-5v7l-8 5Z" fill="#a6c796"/></svg> VOXEL VAULT</button><div class="compass" id="compass"></div><button class="icon-button camera-button" data-action="camera" aria-label="Switch camera view" title="Camera view (V / F5)">▣</button><button class="icon-button" data-action="pause" aria-label="Pause game">Ⅱ</button></div>
+    <div id="location"><span class="eyebrow">SURVIVAL WORLD</span><strong>Verdant Wilds</strong><small>Day 1 · Morning</small></div>
     <div id="quick-guide"><span><kbd>WASD</kbd> Move <kbd>Mouse</kbd> Look</span><span><kbd>Space</kbd> Jump <kbd>Shift</kbd> Sprint</span><span><kbd>E</kbd> Use, plant, harvest / place</span></div>
-    <button id="quest" data-action="journal"></button>
+    <div id="rift-objective" hidden></div><button id="quest" data-action="journal"></button>
     <div id="boss" hidden><div><span>THE VAULT GUARDIAN</span><small id="boss-phase"></small></div><div class="meter"><i id="boss-fill"></i></div></div>
     <div id="crosshair"><i></i><i></i><i></i><i></i></div>
     <div id="target"></div><div id="build-hint"></div><div id="mining"><i></i></div>
@@ -30,9 +30,9 @@
   </div>
   <main id="overlay"></main>
   <div id="toasts" aria-live="polite"></div>
-  <div id="loading"><span class="loader-cube">⬡</span><strong>Growing your next adventure</strong><small>Carving valleys. Planting woodlands.</small></div>
+  <div id="loading"><span class="loader-cube">⬡</span><strong>Loading your world</strong><small>Getting your blocks ready.</small></div>
   <div id="touch-controls" hidden><div id="stick"><i></i></div><div class="touch-actions"><button data-touch="jump" aria-label="Jump">↑</button><button data-touch="attack" aria-label="Mine or attack">⚒</button><button data-touch="interact" aria-label="Interact or place">E</button><button data-action="inventory" aria-label="Backpack">▦</button><button data-touch="dash" aria-label="Dodge dash">»</button><button data-touch="heal" aria-label="Eat food">♧</button><button data-touch="glide" aria-label="Toggle glider" hidden>△</button></div></div>
   <noscript>This adventure needs JavaScript enabled.</noscript>
-  <script type="module" src="./src/main.js"></script>
+  <script type="module" src="./src/main.js?v=10"></script>
 </body>
 </html>

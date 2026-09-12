@@ -58,6 +58,24 @@ for(const[id,label,texture]of BUILD_MATERIALS){
   const tops=[[0,.5,0,1,1,.5],[.5,.5,0,1,1,1],[0,.5,.5,1,1,1],[0,.5,0,.5,1,1]];
   for(let facing=0;facing<4;facing++)BLOCKS[id+'_stairs'+(['','_e','_s','_w'][facing])]={...base,name:label+' stairs',facing,hidden:facing>0,boxes:[[0,0,0,1,.5,1],tops[facing]]};
 }
+for(const[id,name,color,hardness]of [
+ ['end_stone','End Stone','#cfc9a2',1.7],['end_bricks','End Stone Bricks','#b6ae8b',1.8],
+ ['obsidian','Obsidian','#302a46',4],['moonstone','Moonstone','#c0b4ff',2.8],
+ ['moonstone_block','Moonstone Block','#a694e4',2],['purple_wool','Purple Wool','#8459b5',.5],
+ ['cyan_wool','Cyan Wool','#37b9c7',.5],['black_wool','Black Wool','#343745',.5],
+ ['white_concrete','White Concrete','#e0e5ec',1.2],['blue_concrete','Blue Concrete','#3e74b6',1.2],
+ ['purple_concrete','Purple Concrete','#7655a5',1.2],['moonstone_chest','Moonstone Chest','#8a75be',1.5],
+ ['ender_gate','Ender Gate','#875ac8',2],['violet_crystal','Violet Crystal','#d78aff',1.8]
+])BLOCKS[id]={name,color,hardness,solid:true};
+BLOCKS.ender_gate.solid=false;
+BLOCKS.launch_pad={name:'Launch Pad',color:'#4bcfd7',hardness:1.5,solid:true};
+for(const[id,name,color]of [
+ ['ruby','Ruby Ore','#c34d65'],['sapphire','Sapphire Ore','#4f93d2'],['emerald','Emerald Ore','#48a67d'],
+ ['ruby_block','Ruby Block','#b64162'],['sapphire_block','Sapphire Block','#437daf'],['emerald_block','Emerald Block','#398568'],
+ ['treasure_chest','Relic Chest','#b39058'],['relic_forge','Relic Forge','#67738a'],
+ ['dark_bricks','Dark Bricks','#4b5363'],['ivory_bricks','Ivory Bricks','#d5cfbb'],['copper_tiles','Copper Roof Tiles','#9c6854'],
+ ['teal_tiles','Teal Roof Tiles','#487b7c'],['amber_glass','Amber Glass','#d7ad66'],['violet_glass','Violet Glass','#9f8cc0']
+])BLOCKS[id]={name,color,solid:true,hardness:1.8};
 export const ITEMS = {
   ...Object.fromEntries(Object.entries(BLOCKS).map(([k,v]) => [k,{ ...v, place: true }])),
   wood_sword: { name: 'Trail sword', color: '#c2a47a', kind: 'sword', damage: 3, tier: 1, description: 'A trusty start. Left click to attack.' },
@@ -185,6 +203,32 @@ Object.assign(CROPS,{
 });
 export const CROP_BLOCKS=Object.values(CROPS).flatMap(c=>[c.sprout,c.mature]);
 export const MATURE_CROPS=Object.values(CROPS).map(c=>c.mature);
+Object.assign(ITEMS,{
+ moonstone_pickaxe:{name:'Moonstone Pickaxe',color:'#bdb1fb',kind:'pickaxe',speed:8.5,tier:5,description:'Fast mining. Harvests leaf blocks intact.'},
+ moonstone_sword:{name:'Moonstone Sword',color:'#c8b7ff',kind:'sword',damage:15,tier:5,description:'A powerful blade forged from moonstone.'},
+ moonstone_axe:{name:'Moonstone Axe',color:'#b9a2e9',kind:'axe',speed:8,damage:9,tier:5,description:'Quick timber harvesting and a heavy melee hit.'},
+ moonstone_armor:{name:'Moonstone Armor',color:'#b1a0ea',kind:'armor',reduction:.6,description:'Reduces incoming damage by 60%.'},
+ moonstone_orb:{name:'Moonstone Orb',color:'#b9a8ff',kind:'orb',description:'Use to blink up to 18 blocks toward your aim. Requires safe ground.'},
+ moonstone_glider:{name:'Moonstone Glider',color:'#ae8bed',kind:'glider',ore:'moonstone',glideSpeed:16,sink:.7,description:'A light wing for crossing the Ender islands.'},
+ diamond_bow:{...ITEMS.bow,name:'Diamond Bow',color:'#70dae2',damage:11,kind:'bow',drawTime:.8,description:'Hold attack to draw, release to fire. Uses arrows.'},
+ ender_berry:{name:'Ender Berry',color:'#b478e0',kind:'food',nutrition:5,saturation:6,description:'An otherworldly fruit. Restores food and energy.'}
+});
+Object.assign(ITEMS,{
+ relic_shard:{name:'Relic Shard',color:'#e7bb67',kind:'material',description:'Treasure from outposts and Rift anchors. Trade at a Relic Forge.'},
+ grappling_hook:{name:'Grappling Hook',color:'#b5c3cb',kind:'grapple',description:'Aim at solid terrain and press E to pull yourself up. 24-block reach, 2-second cooldown.'},
+ ruby_blade:{name:'Ruby Lifeblade',color:'#e26581',kind:'sword',damage:11,leech:1,tier:5,description:'Melee hits restore one health. A relic-forged ruby blade.'},
+ sapphire_blade:{name:'Sapphire Frostblade',color:'#77c6ee',kind:'sword',damage:10,slow:2,tier:5,description:'Melee hits slow your target for two seconds.'},
+ warhammer:{name:'Iron Warhammer',color:'#a5b9c8',kind:'sword',model:'hammer',damage:19,cooldown:.85,tier:5,description:'A heavy, slower hit. 19 damage with a 0.85-second recovery.'},
+ ruby_pickaxe:{name:'Ruby Pickaxe',color:'#dc6f87',kind:'pickaxe',speed:9,tier:5,description:'A high-speed pickaxe made from ruby and iron.'},
+ emerald_axe:{name:'Emerald Axe',color:'#67c999',kind:'axe',speed:9,damage:8,tier:5,description:'Rapid timber harvesting with an emerald cutting edge.'},
+ sapphire_shovel:{name:'Sapphire Shovel',color:'#76b7e3',kind:'shovel',speed:9,tier:5,description:'Excavate dirt and sand quickly.'},
+ vanguard_armor:{name:'Vanguard Armor',color:'#e4c783',kind:'armor',reduction:.65,description:'Relic-forged armor reduces incoming damage by 65%.'},
+ storm_glider:{name:'Stormwing Glider',color:'#70cace',kind:'glider',ore:'sapphire',glideSpeed:18,sink:.65,description:'Fast, efficient flight. Redeem relic shards at a forge.'},
+ starfall_bow:{...ITEMS.bow,name:'Starfall Bow',color:'#e4c189',kind:'bow',damage:14,drawTime:.75,boltSpeed:35,cooldown:.6,description:'A quick-drawing relic bow with fast arrows.'},
+ golden_apple:{name:'Golden Apple',color:'#e8c35e',kind:'food',nutrition:8,saturation:12,heal:5,description:'Restores food, energy and five health.'},
+ explorer_cookie:{name:'Explorer Cookie',color:'#b98655',kind:'food',nutrition:5,saturation:5,description:'A compact sweet snack for long journeys.'},
+ crystal_carrot:{name:'Crystal Carrot',color:'#a9dbc8',kind:'food',nutrition:6,saturation:8,effect:'nightvision',duration:120,description:'Food and two minutes of night vision.'}
+});
 export const RECIPES = [
   { item: 'stone_sword', cost: { stone: 6, wood: 2 }, category: 'Gear' },
   { item: 'stone_pickaxe', cost: { stone: 5, wood: 2 }, category: 'Gear' },
@@ -248,6 +292,7 @@ RECIPES.push(
 );
 for(const[id,,material]of BUILD_MATERIALS){RECIPES.push({item:id+'_slab',count:6,cost:{[material]:3},category:'Building'},{item:id+'_stairs',count:4,cost:{[material]:4},category:'Building'});}
 RECIPES.push(
+  {item:'cotton_seeds',count:3,cost:{cotton:1},category:'Supplies'},
   {item:'cotton_cloth',count:4,cost:{cotton:3},category:'Supplies'},
   {item:'leather',cost:{rabbit_hide:4},category:'Supplies'},
   {item:'sugar',count:2,cost:{cane:2},category:'Supplies'},
@@ -285,6 +330,32 @@ for(const kind of ['pickaxe','axe','shovel','hoe','sword'])RECIPES.push({item:'g
 RECIPES.push({item:'gold_armor',cost:{gold_ingot:8,leather:3},category:'Gear'},{item:'gold_bow',cost:{gold_ingot:3,wood:5,cloth:2},category:'Gear'},{item:'gold_crossbow',cost:{gold_ingot:5,wood:6,fiber:4},category:'Gear'});
 for(const meat of ['venison','pork','beef','mutton','chicken','rabbit'])SMELTING.push({input:'raw_'+meat,output:'cooked_'+meat,count:1,furnaceOnly:true});
 SMELTING.push({input:'potato',output:'baked_potato',count:1},{input:'corn',output:'roasted_corn',count:1});
+for(const kind of ['pickaxe','sword','axe'])RECIPES.push({item:'moonstone_'+kind,cost:{moonstone:3,wood:2},category:'Gear'});
+RECIPES.push(
+ {item:'moonstone_armor',cost:{moonstone:8,leather:3},category:'Gear'},
+ {item:'moonstone_glider',cost:{hang_glider:1,moonstone:4,cloth:3},category:'Gear'},
+ {item:'moonstone_orb',count:3,cost:{moonstone:1,violet_crystal:1},category:'Gear'},
+ {item:'diamond_bow',cost:{diamond:3,wood:5,fiber:3},category:'Gear'},
+ {item:'moonstone_chest',cost:{moonstone:2,plank:6},category:'Building'},
+ {item:'end_bricks',count:4,cost:{end_stone:4},category:'Building'},
+ {item:'moonstone_block',cost:{moonstone:4},category:'Building'},
+ {item:'ender_gate',cost:{obsidian:6,moonstone:3},category:'Building'}
+);
+for(const material of ['purple_wool','cyan_wool','black_wool'])RECIPES.push({item:material,count:4,cost:{cotton_cloth:2,violet_crystal:1},category:'Building'});
+for(const material of ['white_concrete','blue_concrete','purple_concrete'])RECIPES.push({item:material,count:8,cost:{sand:4,gravel:4},category:'Building'});
+RECIPES.push(
+ {item:'ruby_blade',cost:{ruby:3,iron_ingot:2,wood:2},category:'Gear'},
+ {item:'sapphire_blade',cost:{sapphire:3,iron_ingot:2,wood:2},category:'Gear'},
+ {item:'ruby_pickaxe',cost:{ruby:3,iron_ingot:2,wood:2},category:'Gear'},
+ {item:'emerald_axe',cost:{emerald:3,iron_ingot:2,wood:2},category:'Gear'},
+ {item:'sapphire_shovel',cost:{sapphire:2,wood:2},category:'Gear'},
+ {item:'relic_forge',cost:{stonebrick:6,iron_ingot:3},category:'Building'},
+ {item:'golden_apple',cost:{apple:1,gold_ingot:4},category:'Food'},
+ {item:'explorer_cookie',count:4,cost:{wheat:2,sugar:1},category:'Food'},
+ {item:'crystal_carrot',cost:{carrot:1,crystal:2},category:'Food'}
+);
+for(const ore of ['ruby','sapphire','emerald'])RECIPES.push({item:ore+'_block',cost:{[ore]:4},category:'Building'});
+for(const material of ['dark_bricks','ivory_bricks','copper_tiles','teal_tiles','amber_glass','violet_glass'])RECIPES.push({item:material,count:8,cost:{stone:4,sand:2},category:'Building'});
 export const LANDMARKS = [
   {id:'camp',name:'Base camp',subtitle:'A place to begin',x:0,z:14,color:'#c5b58a',type:'camp'},
   {id:'cave',name:'Hillside caves',subtitle:'A passage into the stone',x:22,z:8,color:'#aeb9b1',type:'cave'},
@@ -293,6 +364,7 @@ export const LANDMARKS = [
   {id:'reach',name:'Northern range',subtitle:'Pine forests and snowfields',x:24,z:-215,color:'#d3e1e2',type:'landscape'},
 ];
 export const BIOMES={
+  ender:{name:'Ender Islands',color:'#9582bd',top:'end_stone'},
   meadow:{name:'Meadows',color:'#76965e',top:'grass'},forest:{name:'Woodlands',color:'#59784b',top:'grass'},
   desert:{name:'Drylands',color:'#c9b489',top:'sand'},snow:{name:'Alpine forest',color:'#cfddda',top:'snow'},
   mountain:{name:'Highlands',color:'#8c9890',top:'stone'},

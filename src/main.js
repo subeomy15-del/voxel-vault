@@ -1,9 +1,9 @@
-import { ITEMS,BLOCKS } from './data.js';
-import { Renderer } from './render.js';
-import { Game } from './game.js';
-import { Audio } from './audio.js';
-import { UI } from './ui.js';
-import { loadSettings } from './save.js';
+import { ITEMS,BLOCKS } from './data.js?v=10';
+import { Renderer } from './render.js?v=10';
+import { Game } from './game.js?v=10';
+import { Audio } from './audio.js?v=10';
+import { UI } from './ui.js?v=10';
+import { loadSettings } from './save.js?v=10';
 let storage;try{storage=localStorage;}catch{storage={getItem:()=>null,setItem:()=>{throw Error('Storage unavailable');}};}
 export const settings=loadSettings(storage);
 if(matchMedia('(prefers-reduced-motion: reduce)').matches)settings.bobbing=false;
@@ -15,11 +15,11 @@ try{
   const open=screen=>{if(game.screen===screen){ui.resume();return;}game.pause(screen);ui.render();};
   addEventListener('keydown',e=>{
     if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName))return;if(e.code==='Tab'&&game.screen)return;
-    if(['Tab','Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+    if(['F5','Tab','Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
     if(e.code==='Escape'){if(game.screen==='menu')return;if(game.screen==='death'||game.screen==='victory')return;if(game.screen){if(['settings','help'].includes(game.screen))ui.action('back');else ui.resume();}else{game.pause();ui.render();}return;}
     if(e.repeat)return;
     const screens={Tab:'inventory',KeyC:'craft',KeyM:'map',KeyJ:'journal'};if(screens[e.code]&&game.screen!=='menu'&&!['death','victory','confirm'].includes(game.screen)){open(screens[e.code]);return;}
-    if(game.screen)return;game.keys.add(e.code);
+    if(game.screen)return;if(e.code==='KeyV'||e.code==='F5'){ui.action('camera');return;}game.keys.add(e.code);
     if(/^Digit[1-9]$/.test(e.code))game.select(Number(e.code.at(-1))-1);
     if(e.code==='Space'){if(game.creative&&performance.now()-lastSpace<300){game.flying=!game.flying;game.toast(game.flying?'Taking the scenic route':'Back on solid ground',game.flying?'Space to rise · X to descend':'');}lastSpace=performance.now();game.jump();}
     if(e.code==='KeyG')game.toggleGlide();if(e.code==='KeyR')game.dash();if(e.code==='KeyT')game.rotateBuilding();if(e.code==='KeyE')use();if(e.code==='KeyB')game.place(true);if(e.code==='KeyF')game.eatAvailable();if(e.code==='KeyQ')game.eat('potion');

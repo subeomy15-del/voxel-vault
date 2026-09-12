@@ -1,5 +1,5 @@
-import { ITEMS } from './data.js';
-import { WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js';
+import { ITEMS } from './data.js?v=10';
+import { WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=10';
 const approach=(current,target,amount)=>current<target?Math.min(target,current+amount):Math.max(target,current-amount);
 export function requestJump(game){game.jumpBuffer=.14;tryJump(game);}
 function tryJump(g){
@@ -24,6 +24,11 @@ export function movePlayer(g,dt){
   const acceleration=g.gliding?9:g.grounded?42:inWater?18:22;
   g.vx=approach(g.vx,(-Math.sin(g.yaw)*f+Math.cos(g.yaw)*s)*speed,acceleration*dt);
   g.vz=approach(g.vz,(-Math.cos(g.yaw)*f-Math.sin(g.yaw)*s)*speed,acceleration*dt);
+  if(g.grapple){
+    g.grapple.time-=dt;const dx=g.grapple.x-g.pos.x,dy=g.grapple.y-g.pos.y,dz=g.grapple.z-g.pos.z,d=Math.hypot(dx,dy,dz);
+    if(g.grapple.time<=0||d<.8)g.grapple=null;
+    else{g.vx=dx/Math.max(1,d)*16;g.vz=dz/Math.max(1,d)*16;g.velocity=Math.max(-8,Math.min(13,dy*5));g.grounded=false;}
+  }
   const height=g.crouching?1.3:1.75;
   for(const[key,amount]of[['x',g.vx*dt],['z',g.vz*dt]]){
     const steps=Math.max(1,Math.ceil(Math.abs(amount)/.15));
