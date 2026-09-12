@@ -1,0 +1,71 @@
+
+export const ENEMIES = {
+  sentinel: { name:'Grove sentinel', hp:18, speed:1.8, damage:3, color:'#66817c', glow:'#c1e9b2', xp:18 },
+  stalker: { name:'Ember prowler', hp:14, speed:3.2, damage:3, color:'#a06443', glow:'#ffd38a', xp:20 },
+  wisp: { name:'Frost wisp', hp:14, speed:1.7, damage:3, color:'#82afc2', glow:'#cef5ff', xp:22 },
+  brute: { name:'Ruinbreaker', hp:38, speed:1.1, damage:6, color:'#7e718e', glow:'#e2b4ff', xp:32 },
+  guardian: { name:'Vault guardian', hp:180, speed:1.6, damage:6, color:'#687b70', glow:'#a8efd9', xp:180 },
+  grazer: { name:'Wild grazer', hp:5, speed:.45, damage:0, color:'#b9976e', glow:'#ead4a5', xp:0 },
+};
+export function launchBolt(game, origin, direction, damage=3, hostile=true) {
+  if(game.projectiles.length>=50)return;
+  const len=Math.hypot(direction.x,direction.y,direction.z)||1, speed=hostile?8:23;
+  game.projectiles.push({id:++game.serial,x:origin.x,y:origin.y,z:origin.z,vx:direction.x/len*speed,vy:direction.y/len*speed,vz:direction.z/len*speed,damage,hostile,life:hostile?4:1.5});
+}
+function shootAtPlayer(game,m,spread=0) {
+  const origin={x:m.x,y:m.y+(m.kind==='guardian'?2.4:1.15),z:m.z};
+  const dx=game.pos.x-origin.x,dz=game.pos.z-origin.z,a=Math.atan2(dx,dz)+spread;
+  launchBolt(game,origin,{x:Math.sin(a),y:(game.pos.y+1-origin.y)/Math.max(1,Math.hypot(dx,dz)),z:Math.cos(a)},m.kind==='guardian'?4:3);
+  game.audio.play('shoot');
+}
+export function updateProjectiles(game,dt) {
+  for(const p of game.projectiles) {
+    p.life-=dt;
+    const distance=Math.hypot(p.vx,p.vy,p.vz)*dt,steps=Math.max(1,Math.ceil(distance/.18));
+    for(let i=0;i<steps&&p.life>0;i++) {
+      p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;p.z+=p.vz*dt/steps;
+      if(game.world.solid(Math.floor(p.x),Math.floor(p.y),Math.floor(p.z))){p.life=0;break;}
+      if(p.hostile&&Math.hypot(p.x-game.pos.x,p.z-game.pos.z)<.5&&p.y>game.pos.y&&p.y<game.pos.y+1.8){game.hurt(p.damage);p.life=0;}
+      if(!p.hostile)for(const m of game.mobs)if(m.kind!=='grazer'&&Math.hypot(m.x-p.x,m.z-p.z)<(m.kind==='guardian'?1.3:.6)&&p.y>m.y&&p.y<m.y+(m.kind==='guardian'?4:2)){game.hit(m,p.damage);p.life=0;break;}
+    }
+  }
+  game.projectiles=game.projectiles.filter(p=>p.life>0);
+}
+export function updateEnemies(game,dt) {
+  for(const m of [...game.mobs]) {
+    m.flash=Math.max(0,m.flash-dt);m.cooldown-=dt;m.stun=Math.max(0,(m.stun||0)-dt);
+    const d=Math.hypot(game.pos.x-m.x,game.pos.z-m.z), info=ENEMIES[m.kind]||ENEMIES.sentinel;
+    if(m.kind==='grazer'){m.wander+=dt*.3;game.moveMob(m,Math.sin(m.wander)*dt*.45,Math.cos(m.wander)*dt*.45);continue;}
+    if(game.creative||m.stun>0)continue;
+    m.angle=Math.atan2(game.pos.x-m.x,game.pos.z-m.z);
+    if(m.kind==='guardian'){
+      if(d>35){game.boss=null;game.slam=null;game.mobs=game.mobs.filter(e=>e!==m);game.toast('The guardian returns to the vault','Come closer when you’re ready.');continue;}
+      m.phase=m.hp<m.maxHp/3?3:m.hp<m.maxHp*2/3?2:1;
+      if(!game.slam&&m.cooldown<=0){
+        m.pattern=(m.pattern||0)+1;
+        if(m.pattern%2===0){for(let i=-2;i<=2;i++)shootAtPlayer(game,m,i*.22);game.emit('warning',{text:'SHARD VOLLEY — KEEP MOVING'});m.cooldown=2.8;}
+        else{game.slam={x:game.pos.x,y:game.world.ground(game.pos.x,game.pos.z,game.pos.y),z:game.pos.z,radius:m.phase===3?5:4,time:m.phase===3?.95:1.25};m.cooldown=m.phase===3?2.7:3.5;game.audio.play('warning');game.emit('warning',{text:'SHOCKWAVE — DODGE!'});}
+      }
+      if(d>3&&!game.slam)game.moveMob(m,(game.pos.x-m.x)/d*dt*1.7,(game.pos.z-m.z)/d*dt*1.7);
+      if(d<2.3&&m.cooldown<1)game.hurt(4);continue;
+    }
+    if((d>15&&!m.trial)||Math.abs(game.pos.y-m.y)>10)continue;
+    if(m.windup>0){
+      m.windup-=dt;
+      if(m.windup<=0){
+        if(m.kind==='wisp')shootAtPlayer(game,m);
+        else if(m.kind==='stalker'){m.lunge=.35;m.lungeX=(game.pos.x-m.x)/Math.max(d,.1);m.lungeZ=(game.pos.z-m.z)/Math.max(d,.1);}
+        else if(d<(m.kind==='brute'?2.8:2.1)&&Math.abs(game.pos.y-m.y)<2.5)game.hurt(info.damage);
+        m.cooldown=m.kind==='brute'?2:m.kind==='wisp'?2.6:1.4;
+      }
+      continue;
+    }
+    if(m.lunge>0){m.lunge-=dt;game.moveMob(m,m.lungeX*dt*9,m.lungeZ*dt*9);if(d<1.6)game.hurt(info.damage);continue;}
+    const range=m.kind==='wisp'?12:m.kind==='stalker'?4:m.kind==='brute'?2.6:1.9;
+    if(d<range&&m.cooldown<=0){m.windup=m.kind==='brute'?.85:m.kind==='wisp'?.65:.5;m.windupMax=m.windup;continue;}
+    if(m.kind==='wisp'&&d<5){game.moveMob(m,-Math.sin(m.angle)*dt*1.7,-Math.cos(m.angle)*dt*1.7);}
+    else if(d>(m.kind==='wisp'?8:1.5))game.moveMob(m,(game.pos.x-m.x)/Math.max(d,.1)*dt*info.speed,(game.pos.z-m.z)/Math.max(d,.1)*dt*info.speed);
+  }
+  if(game.slam){game.slam.time-=dt;if(game.slam.time<=0){const s=game.slam;game.renderer.burst(s.x,s.y+.3,s.z,'#e2b0a0',40);if(Math.hypot(game.pos.x-s.x,game.pos.z-s.z)<s.radius&&game.pos.y-s.y<1.2)game.hurt(7);game.slam=null;}}
+  updateProjectiles(game,dt);
+}
