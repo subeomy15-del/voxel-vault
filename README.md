@@ -116,7 +116,7 @@ Gliders equip separately from the hotbar. Craft a canvas glider with cloth, timb
 | Iron | 14 | 1.1 |
 | Gold | 16 | 1.35 |
 | Diamond | 15 | 0.8 |
-| Aether crystal | 16 | 0.65 |
+| Diamond | 16 | 0.65 |
 
 Gold also crafts a sword, pickaxe, axe, shovel, hoe, armor, recurve bow and crossbow. Gold tools dig quickly; gold armor reduces incoming damage by 30%.
 

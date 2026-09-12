@@ -1,5 +1,5 @@
-import { ANIMALS,updateAnimal } from './wildlife.js?v=10';
-import { visibleBetween,findMobPath } from './navigation.js?v=10';
+import { ANIMALS,updateAnimal } from './wildlife.js?v=11';
+import { visibleBetween,findMobPath } from './navigation.js?v=11';
 
 export const ENEMIES = {
   sentinel: { name:'Grove sentinel', hp:18, speed:1.8, damage:3, color:'#66817c', glow:'#c1e9b2', xp:18 },

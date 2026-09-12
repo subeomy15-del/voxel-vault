@@ -1,11 +1,11 @@
-import { BLOCKS, hash } from './data.js?v=10';
+import { BLOCKS, hash } from './data.js?v=11';
 export const TILE=32,ATLAS_COLS=16;
 export const ATLAS_ROWS=2**Math.ceil(Math.log2(Math.ceil(Object.keys(BLOCKS).length*3/ATLAS_COLS)));
 export const ATLAS_WIDTH=TILE*ATLAS_COLS,ATLAS_HEIGHT=TILE*ATLAS_ROWS;
 export function textureCanvas(){
   const canvas=document.createElement('canvas');canvas.width=ATLAS_WIDTH;canvas.height=ATLAS_HEIGHT;
   const ctx=canvas.getContext('2d');let index=0;
-  const ores={ruby:'#df6b8b',sapphire:'#71bcea',emerald:'#76d8a3',moonstone:'#d7c5ff',iron:'#cab6a0',copper:'#c18f71',gold:'#dfbf6c',coal:'#394344',diamond:'#9ed8d8',crystal:'#9fded3'};
+  const ores={ruby:'#df6b8b',sapphire:'#71bcea',emerald:'#76d8a3',moonstone:'#d7c5ff',iron:'#cab6a0',copper:'#c18f71',gold:'#dfbf6c',coal:'#394344',diamond:'#9ed8d8',crystal:'#9ed8d8'};
   for(const[type,b]of Object.entries(BLOCKS))for(let side=0;side<3;side++,index++){
     ctx.save();ctx.translate(index%ATLAS_COLS*TILE,Math.floor(index/ATLAS_COLS)*TILE);
     const fill=(c,x=0,y=0,w=32,h=32)=>{ctx.fillStyle=c;ctx.fillRect(x,y,w,h);};

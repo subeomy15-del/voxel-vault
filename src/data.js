@@ -11,7 +11,9 @@ export const BLOCKS = {
   pine: { name: 'Pine needles', color: '#426e65', solid: true, hardness: .3 },
   iron: { name: 'Iron ore', color: '#b6a08b', solid: true, hardness: 1.6 },
   gold: { name: 'Gold ore', color: '#d6bb64', solid: true, hardness: 1.8 },
-  crystal: { name: 'Aether crystal', color: '#80d9cd', solid: true, hardness: 1.7 },
+  // Keep the `crystal` id so existing saves and recipes continue to work,
+  // while presenting the resource as the requested diamond material.
+  crystal: { name: 'Diamond', color: '#9ed8d8', solid: true, hardness: 1.7 },
   ruin: { name: 'Ancient stone', color: '#9da990', solid: true, hardness: 1.5 },
   plank: { name: 'Timber planks', color: '#b18a59', solid: true, hardness: .7 },
   glass: { name: 'Sea glass', color: '#9cc7c3', solid: true, hardness: .5 },
@@ -178,7 +180,7 @@ export const EFFECTS={
 export const ORE_GLIDERS=[
   ['coal','Coal','#667775',11.5,1.4],['copper','Copper','#c18e6b',12.5,1.25],
   ['iron','Iron','#bfcac5',14,1.1],['gold','Gold','#e2bf63',16,1.35],
-  ['diamond','Diamond','#92d3d1',15,.8],['crystal','Aether crystal','#a1e4c8',16,.65],
+ ['diamond','Diamond','#92d3d1',15,.8],['crystal','Diamond','#9ed8d8',16,.65],
 ];
 for(const[id,name,color,glideSpeed,sink]of ORE_GLIDERS)ITEMS[id+'_glider']={name:name+' hang glider',color,kind:'glider',glideSpeed,sink,ore:id,description:`${glideSpeed} blocks/s cruise · ${sink} blocks/s descent. Equip, then press G in the air. Look down to dive; up to float.`};
 for(const[kind,speed,damage]of [['pickaxe',5.8,3],['axe',6.5,6],['shovel',6.5,2],['hoe',1,2],['sword',1,7]])ITEMS['gold_'+kind]={name:'Gold '+kind,color:'#e2bf63',kind,speed,damage,tier:3,description:kind==='hoe'?'Prepare a clear 3 × 3 garden patch.':kind==='sword'?'A swift golden blade. 7 damage.':'Fast golden tools for your workshop.'};

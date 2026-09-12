@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import { hash } from './data.js?v=10';
+import { hash } from './data.js?v=11';
 export class Scenery {
   constructor(renderer){
     this.owner=renderer;this.time={value:0};this.wind={value:1};
