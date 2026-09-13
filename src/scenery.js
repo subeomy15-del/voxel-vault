@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import { hash } from './data.js?v=19';
+import { hash } from './data.js?v=20';
 export class Scenery {
   constructor(renderer){
     this.owner=renderer;this.time={value:0};this.wind={value:1};
@@ -85,6 +85,11 @@ export class Scenery {
       uniforms.zenith.value.set('#100d29');uniforms.horizon.value.set('#51416c');uniforms.night.value=.65;
       this.sky.visible=true;this.clouds.visible=false;r.scene.background.set('#30233f');r.scene.fog.color.set('#51416c');r.scene.fog.near=35;r.scene.fog.far=115;
       r.ambient.intensity=1.6;r.ambient.color.set('#c4b6ed');r.ambient.groundColor.set('#756894');r.sun.intensity=1.4;r.sun.color.set('#e5d9ff');
+    }
+    if(game.state.dimension==='nether'){
+      uniforms.zenith.value.set('#211b22');uniforms.horizon.value.set('#875248');uniforms.night.value=.4;
+      this.sky.visible=true;this.clouds.visible=false;r.scene.background.set('#583b3b');r.scene.fog.color.set('#875248');r.scene.fog.near=25;r.scene.fog.far=105;
+      r.ambient.intensity=1.5;r.ambient.color.set('#e2b29a');r.ambient.groundColor.set('#754849');r.sun.intensity=1.2;r.sun.color.set('#f6b686');
     }
     const direction=uniforms.sunDirection.value;r.sun.position.set(game.pos.x+direction.x*50,game.pos.y+Math.max(.3,Math.abs(direction.y))*70,game.pos.z+direction.z*60);r.sun.target.position.set(game.pos.x,game.pos.y,game.pos.z);
   }

@@ -1,7 +1,7 @@
-import { VERSION, ITEMS, STARTER_BAR, starterInventory, dailySeed, BLOCKS,CROPS,EFFECTS } from './data.js?v=19';
-import { ANIMALS } from './wildlife.js?v=19';
-import { normalizeResources } from './resource-map.js?v=19';
-import { REALM_FIELDS,captureRealm } from './realms.js?v=19';
+import { VERSION, ITEMS, STARTER_BAR, starterInventory, dailySeed, BLOCKS,CROPS,EFFECTS } from './data.js?v=20';
+import { ANIMALS } from './wildlife.js?v=20';
+import { normalizeResources } from './resource-map.js?v=20';
+import { REALM_FIELDS,captureRealm } from './realms.js?v=20';
 const prefix='voxel-vault-v2-';
 export const defaultSettings={volume:.45,sensitivity:1,quality:'high',bobbing:true,perspective:0};
 export function freshState(seed=7821,mode='adventure') {
@@ -34,10 +34,10 @@ export function loadState(storage,mode='adventure') {
     for(const d of (Array.isArray(raw.drops)?raw.drops:[]).slice(0,128))if(ITEMS[d?.item]&&['x','y','z','count'].every(k=>Number.isFinite(d[k]))&&d.count>=1&&Math.abs(d.x)<=512&&Math.abs(d.z)<=512&&d.y>=-64&&d.y<=96)s.drops.push({id:s.drops.length+1,item:d.item,count:Math.min(999,Math.floor(d.count)),x:d.x,y:d.y,z:d.z,age:Math.max(0,Math.min(599,Number.isFinite(d.age)?d.age:0))});
     for(const a of (Array.isArray(raw.animals)?raw.animals:[]).slice(0,128))if(ANIMALS[a?.kind]&&['x','y','z','hp'].every(k=>Number.isFinite(a[k]))&&a.hp>0&&Math.abs(a.x)<=511&&Math.abs(a.z)<=511&&a.y>=-63&&a.y<=94)s.animals.push({kind:a.kind,x:a.x,y:a.y,z:a.z,hp:Math.min(ANIMALS[a.kind].hp,a.hp),angle:Number.isFinite(a.angle)?a.angle:0});
     s.outposts=(Array.isArray(raw.outposts)?raw.outposts:[]).filter(p=>['lodge','tower','ruins'].includes(p?.id)&&['x','y','z'].every(k=>Number.isFinite(p[k]))&&Math.abs(p.x)<491&&Math.abs(p.z)<491&&p.y>5&&p.y<79).slice(0,3).map(({id,x,y,z})=>({id,x:x|0,y:y|0,z:z|0}));
-    s.dimension=raw.dimension==='ender'||mode==='ender'?'ender':'overworld';
+    s.dimension=['overworld','nether','ender'].includes(raw.dimension)?raw.dimension:(mode==='ender'?'ender':'overworld');
     const point=p=>p&&['x','y','z'].every(k=>Number.isFinite(p[k]))&&Math.abs(p.x)<=508&&Math.abs(p.z)<=508&&p.y>=-60&&p.y<=89;
     if(point(raw.gate))s.gate={x:raw.gate.x|0,y:raw.gate.y|0,z:raw.gate.z|0};
-    for(const dimension of ['overworld','ender'])if(raw.realms?.[dimension]&&typeof raw.realms[dimension]==='object'){
+    for(const dimension of ['overworld','nether','ender'])if(raw.realms?.[dimension]&&typeof raw.realms[dimension]==='object'){
       const fields=Object.fromEntries(REALM_FIELDS.filter(k=>k in raw.realms[dimension]).map(k=>[k,raw.realms[dimension][k]]));
       const realm=loadState({getItem:()=>JSON.stringify({...fields,version:VERSION,seed:s.seed,dimension,realms:{}})},mode==='creative'?'creative':'adventure');
       if(realm)s.realms[dimension]=captureRealm(realm);

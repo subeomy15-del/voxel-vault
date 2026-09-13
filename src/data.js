@@ -1,4 +1,4 @@
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=19';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=20';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },
@@ -395,6 +395,7 @@ export const LANDMARKS = [
   {id:'reach',name:'Northern range',subtitle:'Pine forests and snowfields',x:24,z:-215,color:'#d3e1e2',type:'landscape'},
 ];
 export const BIOMES={
+  nether:{name:'Ashen Nether',color:'#9c6755',top:'dark_bricks'},
   ender:{name:'Ender Islands',color:'#9582bd',top:'end_stone'},
   meadow:{name:'Meadows',color:'#76965e',top:'grass'},forest:{name:'Woodlands',color:'#59784b',top:'grass'},
   desert:{name:'Drylands',color:'#c9b489',top:'sand'},snow:{name:'Alpine forest',color:'#cfddda',top:'snow'},

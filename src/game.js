@@ -1,15 +1,16 @@
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=19';
-import { canonicalItem,normalizeResources } from './resource-map.js?v=19';
-import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=19';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=19';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=19';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,craft,hash,dailySeed } from './data.js?v=19';
-import { freshState,loadState,saveState,importLegacy } from './save.js?v=19';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=19';
-import { movePlayer,requestJump } from './movement.js?v=19';
-import { overlapsBlock } from './shapes.js?v=19';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=19';
-import { ANIMALS,animalKind } from './wildlife.js?v=19';
+import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=20';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=20';
+import { canonicalItem,normalizeResources } from './resource-map.js?v=20';
+import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=20';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=20';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=20';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,craft,hash,dailySeed } from './data.js?v=20';
+import { freshState,loadState,saveState,importLegacy } from './save.js?v=20';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=20';
+import { movePlayer,requestJump } from './movement.js?v=20';
+import { overlapsBlock } from './shapes.js?v=20';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=20';
+import { ANIMALS,animalKind } from './wildlife.js?v=20';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}
@@ -34,6 +35,7 @@ export class Game {
     const i=this.world.landmarks.findIndex(l=>l.id==='home');if(i<0)this.world.landmarks.push(l);else this.world.landmarks[i]=l;
   }
   ensureGate(){
+    if(this.state.dimension==='nether'){this.state.gate={...NETHER_EXIT};return;}
     if(this.state.dimension==='ender'){this.state.gate={x:0,y:19,z:0};return;}
     if(this.state.gate)return;
     const home=this.state.origin||this.pos;
@@ -48,7 +50,8 @@ export class Game {
     }
   }
   travel(destination){
-    if(destination===this.state.dimension)return false;
+    if(!['overworld','nether','ender'].includes(destination)||destination===this.state.dimension)return false;
+    const source=this.state.dimension;
     this.save();this.state.realms[this.state.dimension]=captureRealm(this.state);
     Object.assign(this.state,structuredClone(this.state.realms[destination]||emptyRealm()));this.state.dimension=destination;
     if(destination==='ender'&&!this.state.rift.kit){
@@ -56,9 +59,10 @@ export class Game {
       this.state.bar[3]='end_stone';this.state.bar[4]='moonstone_orb';this.state.bar[7]='ender_berry';this.state.rift.started=this.state.elapsed;
     }
     this.loadWorld();this.screen=null;this.portalCooldown=3;
+    if(destination==='nether'&&source==='ender')this.pos={x:NETHER_END.x+.5,y:NETHER_END.y,z:NETHER_END.z+3.5};
     const arrival=this.state.gate;if(arrival&&Math.hypot(this.pos.x-arrival.x-.5,this.pos.z-arrival.z-.5)<2){for(const dz of [3,-3,4,-4]){const x=arrival.x+.5,z=arrival.z+.5+dz,y=this.world.ground(x,z,arrival.y+2);if(y>arrival.y-4&&!this.world.intersects(x,y,z)){this.pos={x,y,z};break;}}}
     this.save();this.audio.play('portal');
-    this.toast(destination==='ender'?'THE RIFT IS OPEN':'BACK HOME',destination==='ender'?'Activate 3 anchors. Jump on cyan launch pads to soar between islands.':'Your inventory and rewards travelled with you.','reward');this.emit('screen');return true;
+    this.toast(destination==='nether'?'THE NETHER':destination==='ender'?'THE RIFT IS OPEN':'BACK HOME',destination==='nether'?'Find the Ashen Fortress. Its portal leads to the Ender.':destination==='ender'?'Activate 3 anchors. Jump on cyan launch pads to soar between islands.':'Your inventory and rewards travelled with you.','reward');this.emit('screen');return true;
   }
   collectAnchor(id){
     if(this.state.dimension!=='ender')return false;const anchor=RIFT_ANCHORS.find(a=>a.id===id),rift=this.state.rift;
@@ -75,8 +79,9 @@ export class Game {
   restartRift(){if(this.state.dimension!=='ender'||this.state.rift.collected.length!==3)return false;this.state.rift.collected=[];this.state.rift.started=this.state.elapsed;this.state.rift.finished=0;this.returnHome();this.save();return true;}
   tickRift(dt){
     this.portalCooldown=Math.max(0,this.portalCooldown-dt);this.padCooldown=Math.max(0,this.padCooldown-dt);
+    if(this.state.dimension==='nether'&&this.portalCooldown<=0&&Math.hypot(this.pos.x-72.5,this.pos.z+47.5)<.85&&this.pos.y>=25&&this.pos.y<28&&this.world.get(72,25,-48)==='ender_gate'){this.travel('ender');return true;}
     const gate=this.state.gate;
-    if(gate&&this.world.get(gate.x,gate.y,gate.z)==='ender_gate'&&this.portalCooldown<=0&&Math.hypot(this.pos.x-gate.x-.5,this.pos.z-gate.z-.5)<.85&&this.pos.y>=gate.y&&this.pos.y<gate.y+3){this.travel(this.state.dimension==='ender'?'overworld':'ender');return true;}
+    if(gate&&this.world.get(gate.x,gate.y,gate.z)==='ender_gate'&&this.portalCooldown<=0&&Math.hypot(this.pos.x-gate.x-.5,this.pos.z-gate.z-.5)<.85&&this.pos.y>=gate.y&&this.pos.y<gate.y+3){this.travel(realmDestination(this));return true;}
     if(this.state.dimension==='ender'&&this.grounded&&this.padCooldown<=0&&this.world.get(Math.floor(this.pos.x),Math.floor(this.pos.y-.05),Math.floor(this.pos.z))==='launch_pad'){
       this.velocity=21;this.grounded=false;this.gliding=false;this.pendingGlide=true;this.padCooldown=2;this.audio.play('launch');this.renderer.burst(this.pos.x,this.pos.y,this.pos.z,'#67e6ff',20);
     }
@@ -157,6 +162,7 @@ export class Game {
   jump(){requestJump(this);}
   save(){this.state.pos={...this.pos};this.state.yaw=this.yaw;this.state.pitch=this.pitch;this.state.edits=[...this.world.edits];this.state.animals=this.mobs.filter(m=>ANIMALS[m.kind]&&m.hp>0).slice(0,128).map(({kind,x,y,z,hp,angle})=>({kind,x,y,z,hp,angle}));const ok=saveState(this.storage,this.state);this.emit('saved',{ok});return ok;}
   nearest(){
+    if(this.state.dimension==='nether'&&Math.hypot(this.pos.x-72.5,this.pos.y-25,this.pos.z+47.5)<3&&this.world.get(72,25,-48)==='ender_gate')return {...NETHER_END,type:'ender_gate',name:'Enter the Ender',placed:true};
     const t=this.target;
     if(this.state.dimension==='ender'&&!this.state.dragon.active&&this.world.get(0,19,-7)==='dragon_altar'&&Math.hypot(this.pos.x-.5,this.pos.y-19,this.pos.z+6.5)<4)return{...DRAGON_ALTAR,type:'dragon_altar',name:this.state.dragon.defeated?'Challenge the dragon again':'Awaken the Ender Dragon'};
     if(t?.type==='treasure_chest'){const chest=this.world.chests.find(c=>c.x===t.x&&c.y===t.y&&c.z===t.z&&!this.state.opened.includes(c.id));if(chest)return{...chest,type:'supply',name:chest.name};}
@@ -182,7 +188,7 @@ export class Game {
     if(n?.type==='furnace'||n?.type==='campfire'){this.station=n;this.pause('furnace');this.emit('screen');return;}
     if(n?.type==='relic_forge'){this.station=n;this.pause('forge');this.emit('screen');return;}
     if(n?.type==='bench'){this.pause('craft');this.emit('screen');return;}
-    if(n?.type==='ender_gate'){this.travel(this.state.dimension==='ender'?'overworld':'ender');return;}
+    if(n?.type==='ender_gate'){this.travel(realmDestination(this,n));return;}
     if(n?.type==='chest'||n?.type==='moonstone_chest'){this.containerKey=n.type==='moonstone_chest'?'moon':cellKey(n.x,n.y,n.z);if(this.containerKey!=='moon')this.state.containers[this.containerKey]??={};this.pause('storage');this.emit('screen');return;}
     if(n?.type==='bed'){this.state.spawn={x:n.x+.5,y:n.y+1,z:n.z+.5};this.syncHome();this.state.hp=20;this.state.time=Math.ceil(this.state.time/600)*600+70;this.toast('Spawn point set','You rested until morning.');this.save();return;}
     if(ITEMS[this.held]?.kind==='grapple')return this.useGrapple();
@@ -331,7 +337,7 @@ export class Game {
   returnHome(){this.pos={...(this.state.spawn||this.state.origin||{x:.5,y:7,z:20.5})};if(this.world.intersects(this.pos.x,this.pos.y,this.pos.z))this.pos.y=this.world.ground(this.pos.x,this.pos.z);this.velocity=0;this.vx=this.vz=0;this.gliding=false;}
   respawn(){this.state.hp=20;this.state.food=20;this.state.saturation=5;this.state.effects={};this.returnHome();this.projectiles=[];this.mobs=this.mobs.filter(m=>ENEMIES[m.kind]?.passive);this.boss=null;this.slam=null;if(this.state.dragon){this.state.dragon.active=false;this.state.dragon.hp=260;}this.hurtCooldown=3;this.resume();this.save();}
   spawnMob(x,z,kind='sentinel',y=null){if(kind==='grazer')kind='deer';const info=ENEMIES[kind]||ENEMIES.sentinel;const m={id:++this.serial,x,z,y:y??this.world.ground(x,z),kind,hp:info.hp,maxHp:info.hp,cooldown:1,flash:0,windup:0,stun:0,angle:0,walk:0,wander:hash(x|0,z|0,this.state.seed)*6};this.mobs.push(m);return m;}
-  spawnAmbient(){if(this.state.dimension==='ender')return;
+  spawnAmbient(){if(this.state.dimension!=='overworld')return;
     for(const[dx,dz]of[[-12,4],[10,11],[-24,-12],[17,-15],[-9,-18],[22,8]]){
       const x=this.pos.x+dx,z=this.pos.z+dz,y=this.world.ground(x,z,this.world.height(x,z)+1);
       if(y>5&&!this.world.waterAt(x,y,z)&&!this.world.intersects(x,y,z,1.6,.4))this.spawnMob(x,z,animalKind(this.world,x,z),y);
@@ -351,8 +357,8 @@ export class Game {
     for(const l of this.world.landmarks)if(Math.hypot(l.x-this.pos.x,l.z-this.pos.z)<14&&!this.state.discovered.includes(l.id)){this.state.discovered.push(l.id);this.toast(l.name,l.subtitle);}
     this.spawnTimer+=dt;if(this.spawnTimer>14){
       this.spawnTimer=0;this.mobs=this.mobs.filter(m=>ANIMALS[m.kind]||Math.hypot(m.x-this.pos.x,m.z-this.pos.z)<85);
-      const ender=this.state.dimension==='ender',hostile=!this.creative&&(ender||this.pos.y<-7||this.state.time%600>420),cap=hostile?(ender?7:5):10,group=this.mobs.filter(m=>!!ENEMIES[m.kind]?.passive!==hostile&&Math.hypot(m.x-this.pos.x,m.z-this.pos.z)<70);
-      if(group.length<cap&&(hostile||this.mobs.filter(m=>ANIMALS[m.kind]).length<128)){const a=hash(Math.floor(this.state.time),this.serial,this.state.seed)*Math.PI*2,x=this.pos.x+Math.sin(a)*22,z=this.pos.z+Math.cos(a)*22,y=this.world.ground(x,z,hostile?this.pos.y+3:this.world.height(x,z)+1);if(Math.abs(y-this.pos.y)<10&&y>-60&&!this.world.waterAt(x,y,z)&&!this.world.intersects(x,y,z,1.7,.4)){const biome=this.world.biome?.(x,z);const kind=ender?(this.serial%3===0?'void_archer':'enderling'):(this.pos.y<-25?'brute':biome==='snow'?'frost_howler':'stalker');this.spawnMob(x,z,kind,y);}}
+      const ender=this.state.dimension==='ender',hostile=!this.creative&&(ender||this.state.dimension==='nether'||this.pos.y<-7||this.state.time%600>420),cap=hostile?(ender?7:5):10,group=this.mobs.filter(m=>!!ENEMIES[m.kind]?.passive!==hostile&&Math.hypot(m.x-this.pos.x,m.z-this.pos.z)<70);
+      if(group.length<cap&&(hostile||this.mobs.filter(m=>ANIMALS[m.kind]).length<128)){const a=hash(Math.floor(this.state.time),this.serial,this.state.seed)*Math.PI*2,x=this.pos.x+Math.sin(a)*22,z=this.pos.z+Math.cos(a)*22,y=this.world.ground(x,z,hostile?this.pos.y+3:this.world.height(x,z)+1);if(Math.abs(y-this.pos.y)<10&&y>-60&&!this.world.waterAt(x,y,z)&&!this.world.intersects(x,y,z,1.7,.4)){const biome=this.world.biome?.(x,z);const kind=this.state.dimension==='nether'?(this.serial%3===0?'brute':'stalker'):ender?(this.serial%3===0?'void_archer':'enderling'):(this.pos.y<-25?'brute':biome==='snow'?'frost_howler':'stalker');this.spawnMob(x,z,hostile?kind:animalKind(this.world,x,z,this.serial),y);}}
     }
     this.saveTimer+=dt;if(this.saveTimer>15){this.saveTimer=0;this.save();}
   }

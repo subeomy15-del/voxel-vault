@@ -1,8 +1,9 @@
+import { NETHER_END } from './nether.js?v=20';
 import * as THREE from '../vendor/three.module.js';
-import { OUTPOSTS } from './expeditions.js?v=19';
-import { RIFT_ANCHORS } from './realms.js?v=19';
-import { hash } from './data.js?v=19';
-import { DRAGON_TOWERS } from './dragon.js?v=19';
+import { OUTPOSTS } from './expeditions.js?v=20';
+import { RIFT_ANCHORS } from './realms.js?v=20';
+import { hash } from './data.js?v=20';
+import { DRAGON_TOWERS } from './dragon.js?v=20';
 export class RiftEffects {
   constructor(r){
     this.r=r;this.root=new THREE.Group();r.scene.add(this.root);this.epoch=-1;this.time={value:0};this.markers=[];
@@ -20,8 +21,9 @@ export class RiftEffects {
     if(gate&&g.world.get(gate.x,gate.y,gate.z)==='ender_gate'){
       this.portal=new THREE.Mesh(new THREE.PlaneGeometry(2.9,3.75),this.portalMaterial);this.portal.position.set(gate.x+.5,gate.y+2,gate.z+.51);this.root.add(this.portal);
       const light=new THREE.PointLight('#9e75ff',9,14,1.6);light.position.copy(this.portal.position);this.root.add(light);
-      marker(g.state.dimension==='ender'?'HOME PORTAL':'ENTER THE RIFT',{x:gate.x+.5,y:gate.y+5,z:gate.z+.5},'#c0a6ff');
+      marker(g.state.dimension==='overworld'?'ENTER THE NETHER':g.state.dimension==='ender'?'RETURN TO NETHER':'RETURN HOME',{x:gate.x+.5,y:gate.y+5,z:gate.z+.5},'#c0a6ff');
     }
+    if(g.state.dimension==='nether'){const p=NETHER_END;const portal=new THREE.Mesh(new THREE.PlaneGeometry(2.9,3.75),this.portalMaterial);portal.position.set(p.x+.5,p.y+2,p.z+.51);this.root.add(portal);marker('ASHEN FORTRESS · ENDER PORTAL',{x:p.x+.5,y:p.y+8,z:p.z+.5},'#d2aecc');}
     if(g.state.dimension==='overworld')for(const p of g.state.outposts||[]){const def=OUTPOSTS.find(d=>d.id===p.id);if(def&&!g.state.opened.includes('outpost-'+p.id))marker(def.name.toUpperCase(),{x:p.x,y:p.y+10,z:p.z},def.color);}
     if(g.state.dimension==='ender'){
       marker('DRAGON ALTAR',{x:.5,y:22,z:-6.5},'#b6a4ce');

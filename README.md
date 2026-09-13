@@ -1,12 +1,12 @@
 # Voxel Vault — Dragon Isles
 
-A single-player browser voxel adventure with connected Overworld and Ender dimensions, a fightable Ender Dragon, building, crafting, farming and gliders. Cool forest greens, muted blue skies, textured blocks and simple item silhouettes give the game a calmer look. Saves stay in your browser.
+A single-player browser voxel adventure with connected Overworld, Nether and Ender dimensions, a fightable Ender Dragon, building, crafting, farming and gliders. Cool forest greens, muted blue skies, textured blocks and simple item silhouettes give the game a calmer look. Saves stay in your browser.
 
 Play: https://subeomy15-del.github.io/voxel-vault/
 
 ## Fight the Ender Dragon
 
-1. Choose **Enter the Rift** in the lobby or walk through the glowing portal near home.
+1. Walk through the portal near home to enter the **Nether**. Find the **Ashen Fortress** at X 72, Z −48 and use its portal to reach the Ender. Ender portals return you to the fortress; the Nether arrival portal leads home.
 2. Find the **Dragon Altar** at X 0, Z −7 on the arrival island. Press **E** nearby to awaken the dragon. Your first challenge supplies a longbow and 64 arrows.
 3. Shoot the four healing crystals on the obsidian pillars. Each surviving crystal slowly restores the dragon's health.
 4. Use a bow while it circles. Keep moving during breath attacks, dodge its swoop, and attack with a sword when it lands. Step outside the marked circle before a tail slam.
@@ -78,3 +78,5 @@ Browser scripts use an isolated Chrome profile on debugging port 9224 and the lo
 Regenerate 3D item artwork with `npm run render:items`. Before publishing, run `node scripts/stamp.mjs RELEASE` to keep browser modules, the terrain worker and assets on the same release.
 
 Inventory, terrain edits, containers, crops, food, gear, animals and realm progress save locally. Clearing site storage removes those saves. Starting a new Adventure asks before replacing that save.
+
+The backpack uses square item slots, an equipment area with a character preview, and a separate nine-slot hotbar. Select a hotbar destination, then select an item. Crafting opens the recipe book. All-item browsing and search remain available.

@@ -1,7 +1,8 @@
-import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=19';
-import { canonicalItem } from './resource-map.js?v=19';
-import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=19';
-import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=19';
+import { netherHeight,netherBlock } from './nether.js?v=20';
+import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=20';
+import { canonicalItem } from './resource-map.js?v=20';
+import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=20';
+import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=20';
 export const CHUNK=16, WORLD_LIMIT=511, WORLD_BOTTOM=-64, WORLD_TOP=95, SEA_LEVEL=4;
 export const cellKey=(x,y,z)=>`${x},${y},${z}`;
 export class World {
@@ -9,12 +10,14 @@ export class World {
     this.seed=seed;this.terrain=terrain;this.dimension=dimension;this.edits=new Map(edits);this.structures=new Map();this.columns=new Map();this.prepared=new Set();this.dirty=new Set();this.chests=[];this.changes=[];
     this.landmarks=LANDMARKS.map(l=>({...l,y:this.height(l.x,l.z)+1}));
     if(dimension==='ender')this.landmarks=[{id:'camp',name:'Arrival island',subtitle:'Ender Gate: use E to return to Survival',x:0,y:19,z:0,type:'landscape',color:'#b9a3ff'},{id:'spire',name:'Obsidian spires',subtitle:'Moonstone and violet crystal',x:48,y:24,z:0,type:'landscape',color:'#ac83e8'}];
+    if(dimension==='nether')this.landmarks=[{id:'nether-camp',name:'Nether Gate',subtitle:'Find the gateway to the Ender world',x:0,y:20,z:0,type:'landscape',color:'#e77d5d'},{id:'nether-fortress',name:'Ashen Fortress',subtitle:'A dangerous route lies beyond',x:72,y:25,z:-48,type:'landscape',color:'#d59a70'}];
     this.makeCamp();
   }
   noise(x,z,scale){const a=Math.floor(x/scale),b=Math.floor(z/scale);let u=x/scale-a,v=z/scale-b;u=u*u*(3-2*u);v=v*v*(3-2*v);return (hash(a,b,this.seed)*(1-u)+hash(a+1,b,this.seed)*u)*(1-v)+(hash(a,b+1,this.seed)*(1-u)+hash(a+1,b+1,this.seed)*u)*v;}
-  biome(x,z){if(this.dimension==='ender')return 'ender';const n=this.noise(x+170,z-85,160);if(z<-155&&n>.32)return 'snow';if(x>115&&n>.46)return 'desert';if(n<.24||x<-55&&z>-135)return 'forest';if(n>.76&&Math.hypot(x,z)>95)return 'mountain';return 'meadow';}
+  biome(x,z){if(this.dimension==='ender')return 'ender';if(this.dimension==='nether')return 'nether';const n=this.noise(x+170,z-85,160);if(z<-155&&n>.32)return 'snow';if(x>115&&n>.46)return 'desert';if(n<.24||x<-55&&z>-135)return 'forest';if(n>.76&&Math.hypot(x,z)>95)return 'mountain';return 'meadow';}
   column(x,z){
     const key=`${x},${z}`;if(this.columns.has(key))return this.columns.get(key);
+    if(this.dimension==='nether'){const h=netherHeight(this,x,z),c={h,biome:'nether',bottom:-18};this.columns.set(key,c);return c;}
     if(this.dimension==='ender'){
       const gx=Math.round(x/48),gz=Math.round(z/48),dx=x-gx*48,dz=z-gz*48;
       const central=gx===0&&gz===0,radius=central?24:15+hash(gx,gz,this.seed)*5;
@@ -33,7 +36,7 @@ export class World {
     const wrap=(n,span)=>((n+span/2)%span+span)%span-span/2,cx=Math.floor(x/52),cz=Math.floor(z/52),px=cx*52+20+hash(cx,cz,this.seed)*12,pz=cz*52+22;const v={h,biome,t1:-16+Math.sin(z*.047)*5,t2:-34+Math.sin(x*.039)*7,river,a2:(wrap(x-Math.sin(z*.033)*17,80)/3.2)**2,b2:(wrap(z-Math.sin(x*.035)*19,88)/4.4)**2,chamber:((x-px)/13)**2+((z-pz)/16)**2,cy:-22-hash(cz,cx,this.seed+7)*23,rock:this.noise(x+9,z-31,28)>.7?'granite':this.noise(x-67,z+84,34)>.64?'limestone':'stone'};this.columns.set(key,v);return v;
   }
   height(x,z){return this.column(Math.floor(x),Math.floor(z)).h;}
-  findSpawn(){if(this.dimension==='ender')return{x:.5,y:19,z:8.5};
+  findSpawn(){if(this.dimension==='ender')return{x:.5,y:19,z:8.5};if(this.dimension==='nether')return{x:.5,y:25,z:8.5};
     // A seed gives one repeatable, dry clearing. Existing saves keep their position.
     for(let i=0;i<240;i++){
       const x=Math.floor((hash(i*7919,173,this.seed)-.5)*560),z=Math.floor((hash(i*104729,941,this.seed+47)-.5)*560),y=this.height(x,z)+1;
@@ -61,6 +64,7 @@ export class World {
   }
   base(x,y,z){
     if(Math.abs(x)>WORLD_LIMIT||Math.abs(z)>WORLD_LIMIT||y<WORLD_BOTTOM||y>WORLD_TOP)return null;
+    if(this.dimension==='nether')return netherBlock(this,x,y,z);
     if(this.dimension==='ender'){
       const c=this.column(x,z);if(!c.exists)return null;
       if(x===0&&z===0&&y===19)return 'ender_gate';
@@ -100,7 +104,7 @@ export class World {
     for(const[a,b]of[[x,z],[x-1,z],[x+1,z],[x,z-1],[x,z+1]])this.dirty.add(`${Math.floor(a/16)},${Math.floor(b/16)}`);return true;
   }
   ground(x,z,from=WORLD_TOP){const bx=Math.floor(x),bz=Math.floor(z),fx=x-bx,fz=z-bz;for(let y=Math.min(WORLD_TOP,Math.floor(from));y>=WORLD_BOTTOM;y--){const type=this.get(bx,y,bz);if(!BLOCKS[type]?.solid)continue;const tops=boxesFor(type).filter(b=>fx>=b[0]&&fx<=b[3]&&fz>=b[2]&&fz<=b[5]).map(b=>b[4]);if(tops.length)return y+Math.max(...tops);}return WORLD_BOTTOM-1;}
-  prepare(cx,cz){if(this.dimension==='ender')return;
+  prepare(cx,cz){if(this.dimension!=='overworld')return;
     if(this.terrain<6)return this.prepareLegacy(cx,cz);
     const tag=`${cx},${cz}`;if(this.prepared.has(tag))return;this.prepared.add(tag);
     const put=(x,y,z,type)=>{if(Math.floor(x/16)!==cx||Math.floor(z/16)!==cz)return;const key=cellKey(x,y,z),old=this.structures.get(key);if(!old||['leaf','pine','autumnleaf'].includes(old))this.structures.set(key,type);};
@@ -141,7 +145,7 @@ export class World {
       }
     }
   }
-  makeCamp(){if(this.dimension==='ender')return;
+  makeCamp(){if(this.dimension!=='overworld')return;
     // One modest starter shelter. The landscape is for the player to build on.
     const l=this.landmarks[0],y=l.y;
     for(let x=-3;x<=3;x++)for(let z=-2;z<=2;z++)this.structures.set(cellKey(l.x+x,y-1,l.z+z),'plank');

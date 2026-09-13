@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { World } from '../src/world.js?v=19';
-import { Game } from '../src/game.js?v=19';
-import { freshState,loadState,saveState } from '../src/save.js?v=19';
-import { ITEMS,RECIPES,craft } from '../src/data.js?v=19';
-import { cameraPosition } from '../src/perspective.js?v=19';
-import { meshChunk } from '../src/mesh.js?v=19';
+import { World } from '../src/world.js?v=20';
+import { Game } from '../src/game.js?v=20';
+import { freshState,loadState,saveState } from '../src/save.js?v=20';
+import { ITEMS,RECIPES,craft } from '../src/data.js?v=20';
+import { cameraPosition } from '../src/perspective.js?v=20';
+import { meshChunk } from '../src/mesh.js?v=20';
 const storage=()=>{const m=new Map();return{getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v)};};
 const game=()=>new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},storage());
 test('Ender islands have a safe arrival, real voids, resources and visible undersides',()=>{
@@ -15,7 +15,7 @@ test('Ender islands have a safe arrival, real voids, resources and visible under
 });
 test('Connected dimensions preserve builds and one shared inventory through gate travel',()=>{
  const g=game();g.start('adventure');g.world.set(2,40,2,'stonebrick');g.add('diamond',7);g.save();g.start('ender');assert.equal(g.world.dimension,'ender');g.world.set(2,25,2,'moonstone_block');g.state.inv.moonstone_orb=4;g.save();
- g.pos={x:.5,y:19,z:2.5};g.target={x:0,y:19,z:0,type:'ender_gate'};g.interact();assert.equal(g.state.mode,'adventure');assert.equal(g.world.get(2,40,2),'stonebrick');assert.equal(g.state.inv.diamond,7);
+ g.pos={x:.5,y:19,z:2.5};g.target={x:0,y:19,z:0,type:'ender_gate'};g.interact();assert.equal(g.state.mode,'adventure');assert.equal(g.state.dimension,'nether');g.travel('overworld');assert.equal(g.world.get(2,40,2),'stonebrick');assert.equal(g.state.inv.diamond,7);
  g.start('ender');assert.equal(g.world.get(2,25,2),'moonstone_block');assert.equal(g.state.inv.moonstone_orb,4);assert.equal(g.state.glider,'hang_glider');
 });
 test('moonstone orb spends one item only for a safe landing and never crosses a wall',()=>{
@@ -39,7 +39,7 @@ test('realm travel carries the same inventory, health and equipment and persists
  const loaded=new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},g.storage);assert.equal(loaded.state.dimension,'ender');assert.equal(loaded.world.get(4,36,4),'moonstone_block');loaded.travel('overworld');assert.deepEqual(loaded.pos,home);assert.equal(loaded.world.get(3,44,3),'gold_block');assert.equal(loaded.state.inv.moonstone,8);assert.equal(loaded.state.inv.diamond,13);assert.equal(loaded.state.armor,'armor');const kit=loaded.state.inv.moonstone_orb;loaded.travel('ender');assert.equal(loaded.state.inv.moonstone_orb,kit);assert.equal(loaded.world.get(4,36,4),'moonstone_block');
 });
 test('Rift Run requires reaching each anchor, rewards once, and saves completion',async()=>{
- const {RIFT_ANCHORS}=await import('../src/realms.js?v=19');const g=game();g.start('ender');assert.equal(g.collectAnchor('dawn'),false);g.state.elapsed+=20;
+ const {RIFT_ANCHORS}=await import('../src/realms.js?v=20');const g=game();g.start('ender');assert.equal(g.collectAnchor('dawn'),false);g.state.elapsed+=20;
  for(const a of RIFT_ANCHORS){g.pos={x:a.x+.5,y:g.world.height(a.x,a.z)+1,z:a.z+.5};assert.equal(g.collectAnchor(a.id),true);assert.equal(g.collectAnchor(a.id),false);g.state.elapsed+=25;}
  assert.equal(g.state.rift.collected.length,3);assert.equal(g.state.inv.moonstone_sword,1);assert.equal(g.state.glider,'moonstone_glider');assert.ok(g.state.rift.best>0);g.travel('overworld');assert.equal(g.state.inv.moonstone_sword,1);assert.equal(loadState(g.storage).rift.rewarded,true);g.travel('ender');assert.equal(g.restartRift(),true);
  for(const a of RIFT_ANCHORS){g.pos={x:a.x+.5,y:g.world.height(a.x,a.z)+1,z:a.z+.5};g.collectAnchor(a.id);g.state.elapsed+=10;}assert.equal(g.state.inv.moonstone_sword,1);assert.equal(g.state.rift.runs,2);
@@ -47,8 +47,8 @@ test('Rift Run requires reaching each anchor, rewards once, and saves completion
 test('launch pads propel the player and open the glider near the apex',()=>{
  const g=game();g.start('ender');g.pos={x:.5,y:19,z:10.5};g.grounded=true;g.tickRift(.02);assert.equal(g.velocity,21);assert.equal(g.grounded,false);assert.equal(g.pendingGlide,true);g.velocity=1;g.tickRift(.02);assert.equal(g.gliding,true);assert.equal(g.pendingGlide,false);
 });
-test('walking through the home portal connects to the Ender realm without consuming inventory',()=>{
- const g=game();g.start('adventure');assert.ok(g.state.gate);const gate=g.state.gate;assert.equal(g.world.get(gate.x,gate.y,gate.z),'ender_gate');g.add('diamond',11);g.pos={x:gate.x+.5,y:gate.y,z:gate.z+.5};g.portalCooldown=0;assert.equal(g.tickRift(.05),true);assert.equal(g.state.dimension,'ender');assert.equal(g.state.inv.diamond,11);assert.ok(g.portalCooldown>0);
+test('walking through the home portal connects to the Nether realm without consuming inventory',()=>{
+ const g=game();g.start('adventure');assert.ok(g.state.gate);const gate=g.state.gate;assert.equal(g.world.get(gate.x,gate.y,gate.z),'ender_gate');g.add('diamond',11);g.pos={x:gate.x+.5,y:gate.y,z:gate.z+.5};g.portalCooldown=0;assert.equal(g.tickRift(.05),true);assert.equal(g.state.dimension,'nether');assert.equal(g.state.inv.diamond,11);assert.ok(g.portalCooldown>0);
 });
 
 test('the first island is reachable by ordinary movement and the starter glider across seeds',()=>{
