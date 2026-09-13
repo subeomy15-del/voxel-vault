@@ -1,16 +1,16 @@
-import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=20';
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=20';
-import { canonicalItem,normalizeResources } from './resource-map.js?v=20';
-import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=20';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=20';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=20';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,craft,hash,dailySeed } from './data.js?v=20';
-import { freshState,loadState,saveState,importLegacy } from './save.js?v=20';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=20';
-import { movePlayer,requestJump } from './movement.js?v=20';
-import { overlapsBlock } from './shapes.js?v=20';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=20';
-import { ANIMALS,animalKind } from './wildlife.js?v=20';
+import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=21';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=21';
+import { canonicalItem,normalizeResources } from './resource-map.js?v=21';
+import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=21';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=21';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=21';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,hash,dailySeed } from './data.js?v=21';
+import { freshState,loadState,saveState,importLegacy } from './save.js?v=21';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=21';
+import { movePlayer,requestJump } from './movement.js?v=21';
+import { overlapsBlock } from './shapes.js?v=21';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=21';
+import { ANIMALS,animalKind } from './wildlife.js?v=21';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}
@@ -104,7 +104,14 @@ export class Game {
   resume(){this.screen=null;this.keys.clear();this.attackHeld=false;this.placeHeld=false;}
   select(i){this.drawState=null;this.eating=null;this.state.selected=(i+9)%9;this.mineProgress=0;this.audio.play('click');this.emit('hud');}
   equip(name){name=BLOCKS[name]?.drop||name;if(!ITEMS[name]||!this.state.inv[name])return;this.drawState=null;this.eating=null;if(ITEMS[name].kind==='glider'){this.state.glider=name;this.toast('Glider equipped','Press G while airborne. Look down to dive, up to slow your descent.');this.save();return;}if(ITEMS[name].kind==='ammo'){this.state.ammo=name;this.toast(ITEMS[name].name+' selected','Used by your bows and crossbows.');this.save();return;}if(ITEMS[name].kind==='armor'){this.state.armor=name;this.toast('Armor equipped',ITEMS[name].description);}else{const i=this.state.bar.indexOf(name);if(i>=0)this.state.selected=i;else this.state.bar[this.state.selected]=name;}this.save();}
+  nearbyWorkbench(){
+    const p=this.pos;
+    for(let x=Math.floor(p.x)-3;x<=Math.floor(p.x)+3;x++)for(let y=Math.floor(p.y)-2;y<=Math.floor(p.y)+2;y++)for(let z=Math.floor(p.z)-3;z<=Math.floor(p.z)+3;z++)if(Math.hypot(x+.5-p.x,y-p.y,z+.5-p.z)<=3.5&&this.world.get(x,y,z)==='bench')return true;
+    return false;
+  }
   craft(name){
+    const recipe=RECIPES.find(r=>r.item===name);
+    if(recipe?.station==='bench'&&!this.nearbyWorkbench()){this.toast('Crafting table required','Craft a workbench from 6 timber, place it, and stand within 3 blocks.');return false;}
     if(!craft(this.state.inv,name)){this.toast('More materials needed','The crafting book shows exactly what is missing.');return false;}
     this.state.stats.crafted++;this.audio.play('craft');this.toast(ITEMS[name].name+' crafted','Stored in your backpack.');
     const kind=ITEMS[name].kind;if(['sword','pickaxe','armor','axe','shovel','hoe','bow'].includes(kind)){const i=this.state.bar.findIndex(k=>ITEMS[k].kind===kind);if(i>=0)this.state.bar[i]=name;else if(kind==='armor')this.state.armor=name;}
@@ -366,7 +373,9 @@ export class Game {
     const t=this.target;if(!t||!Number.isFinite(BLOCKS[t.type]?.hardness)){this.mineProgress=0;return;}const key=cellKey(t.x,t.y,t.z);if(key!==this.mineKey){this.mineKey=key;this.mineProgress=0;}
     const item=ITEMS[this.held],kind=item?.kind,wood=['wood','birch','pinewood','plank','birch_plank','pine_plank','leaf','pine','autumnleaf','bookshelf','hedge'].includes(BLOCKS[t.type].texture||t.type),soil=['grass','dirt','sand','clay','snow','gravel','farmland'].includes(t.type);
     const correct=kind==='axe'&&wood||kind==='shovel'&&soil||kind==='pickaxe'&&!wood&&!soil;
-    this.mineProgress+=dt*(this.creative?40:(correct?item.speed:1)*(this.effect('haste')?1.6:1))/BLOCKS[t.type].hardness;
+    const soft=soil||wood||BLOCKS[t.type].plant,hardness=BLOCKS[t.type].hardness*(soft?1.8:3.5);
+    const before=this.mineProgress;this.mineProgress+=dt*(this.creative?40:(correct?(item.speed||1):soft?.8:.3)*(this.effect('haste')?1.6:1))/hardness;
+    if(Math.floor(before*12)!==Math.floor(this.mineProgress*12)&&this.mineProgress<1){this.renderer.burst(t.x+.5,t.y+.65,t.z+.5,BLOCKS[t.type].color,3);this.audio.play('mine',t.type);}
     if(this.mineProgress>=1){
       if(CROP_BLOCKS.includes(t.type)){this.harvest(t);this.mineProgress=0;return;}
       if(t.type==='chest'){const store=this.state.containers[key]||{};for(const[k,n]of Object.entries(store))this.add(k,n);delete this.state.containers[key];}

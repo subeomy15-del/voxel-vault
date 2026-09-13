@@ -1,4 +1,4 @@
-import { hash } from './data.js?v=20';
+import { hash } from './data.js?v=21';
 const blend=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
 export function terrainHeight(world,x,z){
   const noise=(a,b,s)=>world.noise(a,b,s),climate=noise(x+170,z-85,160);

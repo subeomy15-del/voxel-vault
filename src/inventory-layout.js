@@ -1,5 +1,5 @@
-import { ITEMS } from './data.js?v=20';
-import { icon } from './icons.js?v=20';
+import { ITEMS } from './data.js?v=21';
+import { icon } from './icons.js?v=21';
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 export function inventoryLayout(g,items){
  const s=g.state;

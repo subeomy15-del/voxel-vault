@@ -4,11 +4,17 @@ const c=await connect(),ev=c.evaluate;
 try{
  await c.send('Emulation.setDeviceMetricsOverride',{width:1280,height:900,deviceScaleFactor:1,mobile:false});
  await c.send('Page.navigate',{url:'http://localhost:3001/'});await sleep(1500);
- await ev(`(async()=>{const m=await import('/src/main.js?v=20');window.g=m.game;window.ui=m.ui;ui.settings.perspective=0;g.start('adventure',true);g.pause('inventory');ui.render();})()`);
+ await ev(`(async()=>{const m=await import('/src/main.js?v=21');window.g=m.game;window.ui=m.ui;ui.settings.perspective=0;g.start('adventure',true);g.pause('inventory');ui.render();})()`);
  assert.equal(await ev('document.querySelectorAll(".pack-hotbar .pack-slot").length'),9);
  await c.click('[data-action="pack-slot-4"]');assert.equal(await ev('g.state.selected'),4);
  await ev("g.add('diamond',3);ui.render()");await c.click('.pack-storage [data-equip="diamond"]');assert.equal(await ev('g.state.bar[4]'),'diamond');
  await c.screenshot('classic-inventory');await c.click('[data-action="craft"]');assert.equal(await ev('g.screen'),'craft');
+ await ev("g.pos={x:150.5,y:70,z:150.5};g.add('stone',16);ui.render()");
+ assert.equal(await ev(`document.querySelector('[data-craft="furnace"]').disabled`),true);
+ await ev("g.world.set(151,70,150,'bench');ui.render()");
+ assert.equal(await ev(`document.querySelector('[data-craft="furnace"]').disabled`),false);
+ await c.click('[data-craft="furnace"]');assert.equal(await ev('g.state.inv.furnace'),1);
+
  await c.send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await ev("g.pause('inventory');ui.render()");await sleep(200);
  assert.ok(await ev('document.querySelector(".classic-pack").getBoundingClientRect().right<=innerWidth'));
  await c.screenshot('classic-inventory-mobile');

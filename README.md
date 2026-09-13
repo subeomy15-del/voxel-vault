@@ -80,3 +80,5 @@ Regenerate 3D item artwork with `npm run render:items`. Before publishing, run `
 Inventory, terrain edits, containers, crops, food, gear, animals and realm progress save locally. Clearing site storage removes those saves. Starting a new Adventure asks before replacing that save.
 
 The backpack uses square item slots, an equipment area with a character preview, and a separate nine-slot hotbar. Select a hotbar destination, then select an item. Crafting opens the recipe book. All-item browsing and search remain available.
+
+Advanced recipes require a placed workbench within 3.5 blocks. Craft the workbench by hand from 6 timber. Planks, torches, basic arrows, cloth and simple ingredient preparation remain hand recipes. Mining stone by hand is slow; use pickaxes for rock, axes for timber and shovels for soil. Cracks, chips and the mining progress meter show your progress.

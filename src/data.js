@@ -1,4 +1,4 @@
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=20';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=21';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },
@@ -387,6 +387,8 @@ for(const r of RECIPES){const cost={};for(const[k,n]of Object.entries(r.cost)){c
 RECIPES.push({item:'diamond_armor',cost:{diamond:8,iron_ingot:4},category:'Gear'},{item:'diamond_block',cost:{diamond:4},category:'Building'});
 SMELTING.splice(0,SMELTING.length,...SMELTING.filter(r=>r.input!=='copper'));
 ORE_GLIDERS.splice(0,ORE_GLIDERS.length,...ORE_GLIDERS.filter(([id])=>['iron','gold','diamond'].includes(id)));
+const HAND_RECIPES=new Set(['bench','plank','birch_plank','pine_plank','torch','arrows','cloth','cotton_cloth','sugar','watermelon_slice','melon_slice','seeds']);
+for(const recipe of RECIPES)recipe.station=HAND_RECIPES.has(recipe.item)?'hand':'bench';
 export const LANDMARKS = [
   {id:'camp',name:'Base camp',subtitle:'A place to begin',x:0,z:14,color:'#c5b58a',type:'camp'},
   {id:'cave',name:'Hillside caves',subtitle:'A passage into the stone',x:22,z:8,color:'#aeb9b1',type:'cave'},

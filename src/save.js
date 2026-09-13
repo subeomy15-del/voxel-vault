@@ -1,7 +1,7 @@
-import { VERSION, ITEMS, STARTER_BAR, starterInventory, dailySeed, BLOCKS,CROPS,EFFECTS } from './data.js?v=20';
-import { ANIMALS } from './wildlife.js?v=20';
-import { normalizeResources } from './resource-map.js?v=20';
-import { REALM_FIELDS,captureRealm } from './realms.js?v=20';
+import { VERSION, ITEMS, STARTER_BAR, starterInventory, dailySeed, BLOCKS,CROPS,EFFECTS } from './data.js?v=21';
+import { ANIMALS } from './wildlife.js?v=21';
+import { normalizeResources } from './resource-map.js?v=21';
+import { REALM_FIELDS,captureRealm } from './realms.js?v=21';
 const prefix='voxel-vault-v2-';
 export const defaultSettings={volume:.45,sensitivity:1,quality:'high',bobbing:true,perspective:0};
 export function freshState(seed=7821,mode='adventure') {

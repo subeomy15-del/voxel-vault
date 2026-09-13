@@ -1,4 +1,4 @@
-import { BLOCKS, hash } from './data.js?v=20';
+import { BLOCKS, hash } from './data.js?v=21';
 export const TILE=32,ATLAS_COLS=16;
 export const ATLAS_ROWS=2**Math.ceil(Math.log2(Math.ceil(Object.keys(BLOCKS).length*3/ATLAS_COLS)));
 export const ATLAS_WIDTH=TILE*ATLAS_COLS,ATLAS_HEIGHT=TILE*ATLAS_ROWS;
@@ -71,6 +71,10 @@ export function textureCanvas(){
     }
     if(['stone','slate','basalt','granite','limestone','marble','polished_granite','polished_slate','polished_marble'].includes(type)){
       const marble=type.includes('marble');
+      if(!marble&&!type.startsWith('polished'))for(let i=0;i<18;i++){
+        const x=hash(i,index+211)*32,y=hash(i,index+313)*32,w=2+hash(i,index+411)*7,h=2+hash(i,index+513)*5;
+        fill(i%3?'#101b2620':'#f4ead623',x,y,w,h);stroke('#101b2635',[[x,y+h],[x+w,y+h],[x+w+1,y+h-2]],.7);
+      }
       for(let i=0;i<(marble?3:5);i++){const y=hash(i,index+17)*32;stroke(marble?'#7a979342':'#26343423',[[0,y],[9,y+3],[17,y+1],[25,y+7],[32,y+5]],marble?1.5:1);}
       if(type.startsWith('polished')){fill('#ffffff24',0,0,32,1);fill('#1c35332b',0,31,32,1);}
     }
