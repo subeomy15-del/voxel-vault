@@ -1,6 +1,6 @@
-import { ANIMALS,updateAnimal } from './wildlife.js?v=26';
-import { visibleBetween,findMobPath } from './navigation.js?v=26';
-import { updateDragon } from './dragon.js?v=26';
+import { ANIMALS,updateAnimal } from './wildlife.js?v=27';
+import { visibleBetween,findMobPath } from './navigation.js?v=27';
+import { updateDragon } from './dragon.js?v=27';
 
 export const ENEMIES = {
   dragon: {name:'Ender Dragon',hp:420,speed:7,damage:5,color:'#383442',glow:'#c6a5ff',radius:3.6,height:2.7,xp:300},
@@ -52,7 +52,7 @@ export function updateProjectiles(game,dt) {
         if(!p.hostile&&game.world.get(x,y,z)==='dragon_crystal'){game.world.set(x,y,z,null);game.renderer.burst(x+.5,y+.5,z+.5,'#b9a2e2',24);game.audio.play('break');game.toast('Healing crystal destroyed','The dragon recovers less health.');}
         p.life=0;break;
       }
-      if(p.hostile&&Math.hypot(p.x-game.pos.x,p.z-game.pos.z)<.5&&p.y>game.pos.y&&p.y<game.pos.y+1.8){game.hurt(p.damage);p.life=0;}
+      if(p.hostile&&Math.hypot(p.x-game.pos.x,p.z-game.pos.z)<.5&&p.y>game.pos.y&&p.y<game.pos.y+1.8){game.hurt(p.damage,true);p.life=0;}
       if(!p.hostile)for(const m of game.mobs)if(Math.hypot(m.x-p.x,m.z-p.z)<(m.kind==='guardian'?1.3:(ENEMIES[m.kind]?.radius||.35)+.2)&&p.y>m.y&&p.y<m.y+(m.kind==='guardian'?4:(ENEMIES[m.kind]?.height||1.7))){if(p.slow)m.slow=p.slow;game.hit(m,p.damage);p.life=0;break;}
     }
   }
@@ -61,7 +61,7 @@ export function updateProjectiles(game,dt) {
 export function updateEnemies(game,dt) {
   for(const m of [...game.mobs]) {
     if(m.kind==='dragon'){m.flash=Math.max(0,m.flash-dt);updateDragon(game,m,dt,launchBolt);continue;}
-    m.flash=Math.max(0,m.flash-dt);m.cooldown-=dt;m.stun=Math.max(0,(m.stun||0)-dt);
+    m.flash=Math.max(0,m.flash-dt);m.cooldown-=dt*(game.hardAdventure&&!ENEMIES[m.kind]?.passive?1.2:1);m.stun=Math.max(0,(m.stun||0)-dt);
     const d=Math.hypot(game.pos.x-m.x,game.pos.z-m.z), info=ENEMIES[m.kind]||ENEMIES.sentinel;
     if(d>75)continue;
     if(info.passive){updateAnimal(game,m,dt);continue;}
@@ -72,7 +72,7 @@ export function updateEnemies(game,dt) {
     if(m.sightTimer<=0){m.sightTimer=.25;m.canSee=visibleBetween(game.world,{x:m.x,y:m.y+1.25,z:m.z},{x:game.pos.x,y:game.pos.y+1.3,z:game.pos.z});if(m.canSee){m.memory=5;m.lastSeen={...game.pos};}}
     m.memory=Math.max(0,(m.memory||0)-dt);
     if(!m.canSee){m.windup=0;m.lunge=0;if(m.memory>0&&m.lastSeen){m.pathTimer=(m.pathTimer||0)-dt;if(m.pathTimer<=0){m.pathTimer=1;m.path=findMobPath(game.world,m,m.lastSeen,info);}
-      const next=m.path?.[0];if(next){const dx=next.x-m.x,dz=next.z-m.z,length=Math.hypot(dx,dz);if(length<.2)m.path.shift();else{const step=Math.min(length,dt*info.speed);game.moveMob(m,dx/length*step,dz/length*step);}}}continue;}
+      const next=m.path?.[0];if(next){const dx=next.x-m.x,dz=next.z-m.z,length=Math.hypot(dx,dz);if(length<.2)m.path.shift();else{const step=Math.min(length,dt*(info.speed*(game.hardAdventure?1.15:1)));game.moveMob(m,dx/length*step,dz/length*step);}}}continue;}
 
     m.angle=Math.atan2(game.pos.x-m.x,game.pos.z-m.z);
     if(m.kind==='guardian'){
@@ -84,7 +84,7 @@ export function updateEnemies(game,dt) {
         else{game.slam={x:game.pos.x,y:game.world.ground(game.pos.x,game.pos.z,game.pos.y),z:game.pos.z,radius:m.phase===3?5:4,time:m.phase===3?.95:1.25};m.cooldown=m.phase===3?2.7:3.5;game.audio.play('warning');game.emit('warning',{text:'SHOCKWAVE — DODGE!'});}
       }
       if(d>3&&!game.slam)game.moveMob(m,(game.pos.x-m.x)/d*dt*1.7,(game.pos.z-m.z)/d*dt*1.7);
-      if(d<2.3&&m.cooldown<1)game.hurt(4);continue;
+      if(d<2.3&&m.cooldown<1)game.hurt(4,true);continue;
     }
     if((d>15&&!m.trial)||Math.abs(game.pos.y-m.y)>10)continue;
     if(m.windup>0){
@@ -92,17 +92,17 @@ export function updateEnemies(game,dt) {
       if(m.windup<=0){
         if(m.kind==='wisp'||m.kind==='void_archer')shootAtPlayer(game,m);
         else if(m.kind==='stalker'){m.lunge=.35;m.lungeX=(game.pos.x-m.x)/Math.max(d,.1);m.lungeZ=(game.pos.z-m.z)/Math.max(d,.1);}
-        else if(d<(m.kind==='brute'?2.8:2.1)&&Math.abs(game.pos.y-m.y)<2.5)game.hurt(info.damage);
+        else if(d<(m.kind==='brute'?2.8:2.1)&&Math.abs(game.pos.y-m.y)<2.5)game.hurt(info.damage,true);
         m.cooldown=m.kind==='brute'?2:(m.kind==='wisp'||m.kind==='void_archer')?2.6:1.4;
       }
       continue;
     }
-    if(m.lunge>0){m.lunge-=dt;game.moveMob(m,m.lungeX*dt*9,m.lungeZ*dt*9);if(d<1.6)game.hurt(info.damage);continue;}
+    if(m.lunge>0){m.lunge-=dt;game.moveMob(m,m.lungeX*dt*9,m.lungeZ*dt*9);if(d<1.6)game.hurt(info.damage,true);continue;}
     const range=m.kind==='wisp'?12:m.kind==='void_archer'?14:m.kind==='stalker'?4:m.kind==='brute'?2.6:1.9;
     if(d<range&&m.cooldown<=0){m.windup=m.kind==='brute'?.85:(m.kind==='wisp'||m.kind==='void_archer')?.65:.5;m.windupMax=m.windup;continue;}
     if((m.kind==='wisp'&&d<5)||(m.kind==='void_archer'&&d<7)){game.moveMob(m,-Math.sin(m.angle)*dt*1.7,-Math.cos(m.angle)*dt*1.7);}
-    else if(d>(m.kind==='wisp'?8:1.5))game.moveMob(m,(game.pos.x-m.x)/Math.max(d,.1)*dt*info.speed*(m.slow>0?.35:1),(game.pos.z-m.z)/Math.max(d,.1)*dt*info.speed*(m.slow>0?.35:1));
+    else if(d>(m.kind==='wisp'?8:1.5))game.moveMob(m,(game.pos.x-m.x)/Math.max(d,.1)*dt*(info.speed*(game.hardAdventure?1.15:1))*(m.slow>0?.35:1),(game.pos.z-m.z)/Math.max(d,.1)*dt*(info.speed*(game.hardAdventure?1.15:1))*(m.slow>0?.35:1));
   }
-  if(game.slam){game.slam.time-=dt;if(game.slam.time<=0){const s=game.slam;game.renderer.burst(s.x,s.y+.3,s.z,'#e2b0a0',40);if(Math.hypot(game.pos.x-s.x,game.pos.z-s.z)<s.radius&&game.pos.y-s.y<1.2)game.hurt(7);game.slam=null;}}
+  if(game.slam){game.slam.time-=dt;if(game.slam.time<=0){const s=game.slam;game.renderer.burst(s.x,s.y+.3,s.z,'#e2b0a0',40);if(Math.hypot(game.pos.x-s.x,game.pos.z-s.z)<s.radius&&game.pos.y-s.y<1.2)game.hurt(7,true);game.slam=null;}}
   updateProjectiles(game,dt);
 }

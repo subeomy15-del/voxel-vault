@@ -1,8 +1,8 @@
-import { netherHeight,netherBlock } from './nether.js?v=26';
-import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=26';
-import { canonicalItem } from './resource-map.js?v=26';
-import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=26';
-import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=26';
+import { netherHeight,netherBlock } from './nether.js?v=27';
+import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=27';
+import { canonicalItem } from './resource-map.js?v=27';
+import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=27';
+import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=27';
 export const CHUNK=16, WORLD_LIMIT=511, WORLD_BOTTOM=-64, WORLD_TOP=95, SEA_LEVEL=4;
 export const cellKey=(x,y,z)=>`${x},${y},${z}`;
 export class World {
@@ -75,7 +75,7 @@ export class World {
       if(!c.central&&c.dz===4&&y>c.h&&y<=c.h+4&&(Math.abs(c.dx)===4||y===c.h+4&&Math.abs(c.dx)<4))return 'end_bricks';
       if(y>c.h||y<c.bottom)return null;
       if(y===c.h)return 'end_stone';
-      return hash(x+y*127,z,this.seed)<.085?'moonstone':y<c.bottom+2?'obsidian':'end_stone';
+      return hash(Math.floor(x/3)+Math.floor(y/3)*127,Math.floor(z/3),this.seed+52)>.6&&hash(x+y*127,z,this.seed)<.07?'moonstone':y<c.bottom+2?'obsidian':'end_stone';
     }
     this.prepare(Math.floor(x/16),Math.floor(z/16));
     const key=cellKey(x,y,z);if(this.structures.has(key))return this.structures.get(key);
@@ -91,7 +91,9 @@ export class World {
     if(y>h-8)return rock;
     // Veins occur only beneath a substantial layer of soil/rock.
     const vein=hash(Math.floor(x/3)+Math.floor(y/3)*127,Math.floor(z/3),this.seed+93),fleck=hash(x+y*117,z-y*43,this.seed);
-    if(fleck<.72){if(vein<.04&&y<-30)return 'diamond';if(vein<.075&&y<-18)return 'gold';if(vein<.175)return 'iron';if(vein<.235)return 'coal';}
+    // Broad barren patches separate smaller, broken veins. The seed keeps them stable.
+    const region=hash(Math.floor(x/24)+Math.floor(y/18)*73,Math.floor(z/24),this.seed+517);
+    if(region>.35&&fleck<.55){if(vein<.025&&y<-30)return 'diamond';if(vein<.05&&y<-18)return 'gold';if(vein<.125)return 'iron';if(vein<.19)return 'coal';}
     return rock;
   }
   get(x,y,z){const k=cellKey(x,y,z),type=this.edits.has(k)?this.edits.get(k):this.base(x,y,z);return canonicalItem(type);}

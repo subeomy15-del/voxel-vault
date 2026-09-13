@@ -1,17 +1,17 @@
-import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=26';
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=26';
-import { canonicalItem,normalizeResources } from './resource-map.js?v=26';
-import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=26';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=26';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=26';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,hash,dailySeed } from './data.js?v=26';
-import { freshState,loadState,saveState,importLegacy } from './save.js?v=26';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=26';
-import { movePlayer,requestJump } from './movement.js?v=26';
-import { overlapsBlock } from './shapes.js?v=26';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=26';
-import { ANIMALS,animalKind } from './wildlife.js?v=26';
-import { CHAPTERS,journeyStage } from './journey.js?v=26';
+import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=27';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=27';
+import { canonicalItem,normalizeResources } from './resource-map.js?v=27';
+import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=27';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=27';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=27';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,hash,dailySeed } from './data.js?v=27';
+import { freshState,loadState,saveState,importLegacy } from './save.js?v=27';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=27';
+import { movePlayer,requestJump } from './movement.js?v=27';
+import { overlapsBlock } from './shapes.js?v=27';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=27';
+import { ANIMALS,animalKind } from './wildlife.js?v=27';
+import { CHAPTERS,journeyStage } from './journey.js?v=27';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}
@@ -92,6 +92,7 @@ export class Game {
   }
   get held(){return this.state.bar[this.state.selected];}
   get creative(){return this.state.mode==='creative';}
+  get hardAdventure(){return this.state.mode==='adventure';}
   get maxHp(){return 20;}
   effect(name){return activeEffect(this,name);}
   emit(type,data={}){this.events.push({type,...data});}
@@ -343,10 +344,10 @@ export class Game {
       for(const[item,[low,high]]of Object.entries(drops)){const count=low+Math.min(high-low,Math.floor(hash(m.id+offset,Math.floor(this.state.elapsed),this.state.seed)*(high-low+1)));this.dropItem(item,count,m.x+offset*.25,m.y,m.z);offset++;}
     }
   }
-  hurt(amount){if(this.creative||this.hurtCooldown>0||this.dashTime>0)return;const reduction=1-(ITEMS[this.state.armor]?.reduction||0);this.state.hp=Math.max(0,this.state.hp-amount*reduction);this.hurtCooldown=.7;this.audio.play('hurt');this.emit('hurt');if(this.state.hp<=0){this.state.stats.deaths++;this.pause('death');this.emit('screen');}}
+  hurt(amount,combat=false){if(this.creative||this.hurtCooldown>0||this.dashTime>0)return;const reduction=1-(ITEMS[this.state.armor]?.reduction||0);this.state.hp=Math.max(0,this.state.hp-amount*reduction*(combat&&this.hardAdventure?1.65:1));this.hurtCooldown=.7;this.audio.play('hurt');this.emit('hurt');if(this.state.hp<=0){this.state.stats.deaths++;this.pause('death');this.emit('screen');}}
   returnHome(){this.pos={...(this.state.spawn||this.state.origin||{x:.5,y:7,z:20.5})};if(this.world.intersects(this.pos.x,this.pos.y,this.pos.z))this.pos.y=this.world.ground(this.pos.x,this.pos.z);this.velocity=0;this.vx=this.vz=0;this.gliding=false;}
   respawn(){this.state.hp=20;this.state.food=20;this.state.saturation=5;this.state.effects={};this.returnHome();this.projectiles=[];this.mobs=this.mobs.filter(m=>ENEMIES[m.kind]?.passive);this.boss=null;this.slam=null;if(this.state.dragon){this.state.dragon.active=false;this.state.dragon.hp=420;}this.hurtCooldown=3;this.resume();this.save();}
-  spawnMob(x,z,kind='sentinel',y=null){if(kind==='grazer')kind='deer';const info=ENEMIES[kind]||ENEMIES.sentinel;const m={id:++this.serial,x,z,y:y??this.world.ground(x,z),kind,hp:info.hp,maxHp:info.hp,cooldown:1,flash:0,windup:0,stun:0,angle:0,walk:0,wander:hash(x|0,z|0,this.state.seed)*6};this.mobs.push(m);return m;}
+  spawnMob(x,z,kind='sentinel',y=null){if(kind==='grazer')kind='deer';const info=ENEMIES[kind]||ENEMIES.sentinel;const m={id:++this.serial,x,z,y:y??this.world.ground(x,z),kind,hp:Math.ceil(info.hp*(this.hardAdventure&&!info.passive&&kind!=='dragon'?1.4:1)),maxHp:Math.ceil(info.hp*(this.hardAdventure&&!info.passive&&kind!=='dragon'?1.4:1)),cooldown:1,flash:0,windup:0,stun:0,angle:0,walk:0,wander:hash(x|0,z|0,this.state.seed)*6};this.mobs.push(m);return m;}
   spawnAmbient(){if(this.state.dimension!=='overworld')return;
     for(const[dx,dz]of[[-12,4],[10,11],[-24,-12],[17,-15],[-9,-18],[22,8]]){
       const x=this.pos.x+dx,z=this.pos.z+dz,y=this.world.ground(x,z,this.world.height(x,z)+1);
@@ -381,9 +382,9 @@ export class Game {
     this.mobTarget=targetMob(this,6);
     if(this.attackHeld){if(['sword','bow'].includes(ITEMS[this.held]?.kind)||this.mobTarget?.distance<=4){this.mineProgress=0;this.attack();}else this.mine(dt);}else{this.mineProgress=0;this.mineKey='';}
     for(const l of this.world.landmarks)if(Math.hypot(l.x-this.pos.x,l.z-this.pos.z)<14&&!this.state.discovered.includes(l.id)){this.state.discovered.push(l.id);this.toast(l.name,l.subtitle);}
-    this.spawnTimer+=dt;if(this.spawnTimer>14){
+    this.spawnTimer+=dt;if(this.spawnTimer>(this.hardAdventure?8:14)){
       this.spawnTimer=0;this.mobs=this.mobs.filter(m=>ANIMALS[m.kind]||Math.hypot(m.x-this.pos.x,m.z-this.pos.z)<85);
-      const ender=this.state.dimension==='ender',hostile=!this.creative&&(ender||this.state.dimension==='nether'||this.pos.y<-7||this.state.time%600>420),cap=hostile?(ender?7:5):10,group=this.mobs.filter(m=>!!ENEMIES[m.kind]?.passive!==hostile&&Math.hypot(m.x-this.pos.x,m.z-this.pos.z)<70);
+      const ender=this.state.dimension==='ender',hostile=!this.creative&&(ender||this.state.dimension==='nether'||this.pos.y<-7||this.state.time%600>(this.hardAdventure?300:420)),cap=hostile?(this.hardAdventure?(ender?11:9):(ender?7:5)):10,group=this.mobs.filter(m=>!!ENEMIES[m.kind]?.passive!==hostile&&Math.hypot(m.x-this.pos.x,m.z-this.pos.z)<70);
       if(group.length<cap&&(hostile||this.mobs.filter(m=>ANIMALS[m.kind]).length<128)){const a=hash(Math.floor(this.state.time),this.serial,this.state.seed)*Math.PI*2,x=this.pos.x+Math.sin(a)*22,z=this.pos.z+Math.cos(a)*22,y=this.world.ground(x,z,hostile?this.pos.y+3:this.world.height(x,z)+1);if(Math.abs(y-this.pos.y)<10&&y>-60&&!this.world.waterAt(x,y,z)&&!this.world.intersects(x,y,z,1.7,.4)){const biome=this.world.biome?.(x,z);const kind=this.state.dimension==='nether'?(this.serial%3===0?'brute':'stalker'):ender?(this.serial%3===0?'void_archer':'enderling'):(this.pos.y<-25?'brute':biome==='snow'?'frost_howler':'stalker');this.spawnMob(x,z,hostile?kind:animalKind(this.world,x,z,this.serial),y);}}
     }
     this.saveTimer+=dt;if(this.saveTimer>15){this.saveTimer=0;this.save();}
@@ -406,7 +407,7 @@ export class Game {
   }
   updateFortress(){
     if(this.state.dimension!=='nether'||this.creative||this.state.fortressCleared||Math.hypot(this.pos.x-72,this.pos.z+48)>18||this.mobs.some(m=>m.fortress))return;
-    const m=this.spawnMob(72,-44,'guardian',25);m.fortress=true;m.hp=m.maxHp=180;this.boss=m;
+    const m=this.spawnMob(72,-44,'guardian',25);m.fortress=true;this.boss=m;
     this.toast('Fortress guardian awakened','Defeat it to unseal the Ender portal. Dodge its shockwaves and shard volleys.');
   }
   move(dt){movePlayer(this,dt);}

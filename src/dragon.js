@@ -52,7 +52,7 @@ export function updateDragon(g,m,dt,launchBolt){
  const blend=Math.min(1,dt*(m.stage==='perch'?2:4));
  const nx=m.x+(x-m.x)*blend,ny=m.y+(y-m.y)*blend,nz=m.z+(z-m.z)*blend;
  if(!g.world.intersects(nx,ny,nz,2.3,1.5)){if(m.stage==='circle'||m.stage==='swoop')m.angle=Math.atan2(nx-m.x,nz-m.z);m.x=nx;m.y=ny;m.z=nz;}
- if(m.stage==='swoop'&&Math.hypot(g.pos.x-m.x,g.pos.z-m.z)<2.5&&Math.abs(g.pos.y-m.y)<3)g.hurt(7);
+ if(m.stage==='swoop'&&Math.hypot(g.pos.x-m.x,g.pos.z-m.z)<2.5&&Math.abs(g.pos.y-m.y)<3)g.hurt(7,true);
  const crystals=DRAGON_TOWERS.filter(([x,z])=>g.world.get(x,25,z)==='dragon_crystal').length;m.crystals=crystals;
  m.hp=Math.min(DRAGON_HP,m.hp+crystals*.7*dt);g.state.dragon.hp=m.hp;
 }

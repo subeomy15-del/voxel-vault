@@ -31,7 +31,7 @@ export function netherBlock(w,x,y,z){
     return null;
   }
   if(y===h&&Math.hypot(x,z)>16&&!(x>=0&&x<=72&&Math.abs(z+x*2/3)<4)){const n=w.noise(x+90,z,18);if(n>.64)return 'magma';if(w.noise(x-40,z+30,15)>.64)return 'soul_sand';}
-  if(y<h-5&&w.noise(x+y*3,z,9)>.78)return 'gold';
+  if(y<h-5&&w.noise(x+y*3,z,9)>.86&&w.noise(x-170,z+80,31)>.5)return 'gold';
   return y>=h-3?'netherrack':'basalt';
 }
 export function realmDestination(g,portal=g.state.gate){

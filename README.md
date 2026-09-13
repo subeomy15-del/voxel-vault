@@ -2,6 +2,8 @@
 
 ## The Long Way Home — release 14
 
+Adventure now has 65% stronger enemy hits, 40% more health for non-dragon hostiles, 15% faster enemy movement and 20% faster attack cooldown recovery. Spawn checks occur every 8 seconds, with nearby hostile limits of 9 (11 in the End); enemies appear throughout the night. Hunger exhaustion is 75% faster and natural healing takes twice as long. Daily and Creative keep their combat balance. Ore generation across all modes uses smaller, rarer veins with barren regions; Nether gold and End moonstone are also scarcer. Existing inventory, mined blocks and builds are retained, while unedited ore locations use the new distribution.
+
 An eight-chapter adventure now guides your first timber, workshop and iron pickaxe through the Nether fortress, Ender Dragon and journey home. Completed chapters stay completed after you spend materials or reload. The HUD shows your next objective; the Journal records the full route. Creative has its own building guidance. The Rift Run remains an optional End activity, with the dragon as the main objective.
 
 This release includes natural green foliage, neutral portal lighting, no bloom, revised branding, lava hazards, six new building materials, and refreshed previews and item artwork. Existing worlds and inventory remain compatible.
@@ -77,7 +79,7 @@ npm run test:browser
 node tests/dragon-browser.js
 ```
 
-The 82 unit tests cover connected saves, migration of old resources, the five-ore progression, furnace fuel, dragon phases and projectiles, destroyed healing crystals, persistent boss health, one-time rewards, terrain, building, movement, combat, farming and gliding.
+The 85 unit tests cover connected saves, migration of old resources, the five-ore progression, furnace fuel, dragon phases and projectiles, destroyed healing crystals, persistent boss health, one-time rewards, terrain, building, movement, combat, farming and gliding.
 
 Browser scripts use an isolated Chrome profile on debugging port 9224 and the local server on 3001. They reset only the isolated profile's test worlds and exercise real controls, rendering, item images, save reloads and compact layouts. Screenshots go to /private/tmp/voxel-vault-*.png.
 

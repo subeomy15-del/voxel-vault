@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { World,WORLD_BOTTOM,WORLD_LIMIT } from '../src/world.js?v=26';
-import { Game } from '../src/game.js?v=26';
-import { ITEMS,craft,starterInventory,dailySeed } from '../src/data.js?v=26';
-import { freshState,loadState,saveState,slotKey,importLegacy } from '../src/save.js?v=26';
-import { updateProjectiles } from '../src/combat.js?v=26';
-import { meshChunk } from '../src/mesh.js?v=26';
+import { World,WORLD_BOTTOM,WORLD_LIMIT } from '../src/world.js?v=27';
+import { Game } from '../src/game.js?v=27';
+import { ITEMS,craft,starterInventory,dailySeed } from '../src/data.js?v=27';
+import { freshState,loadState,saveState,slotKey,importLegacy } from '../src/save.js?v=27';
+import { updateProjectiles } from '../src/combat.js?v=27';
+import { meshChunk } from '../src/mesh.js?v=27';
 const storage=()=>{const m=new Map();return{getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v)};};
 const renderer={setWorld(){},stream(){},burst(){},swing:0},audio={play(){},tone(){}};
 const game=()=>{const g=new Game(renderer,audio,storage());g.screen=null;g.yaw=0;return g;};
@@ -69,7 +69,7 @@ test('walls block movement and placement cannot intersect the player',()=>{
  g.select(3);g.target={x:0,y:6,z:9,normal:{x:0,y:1,z:0}};assert.equal(g.place(),false);
 });
 test('bow projectiles travel, hit enemies, and consume arrows',()=>{
- const g=game();g.pos={x:.5,y:7,z:9.5};g.mobs=[];const m=g.spawnMob(.5,6.5,'sentinel',7);g.state.bar[0]='bow';g.add('arrows',1);g.attack();assert.equal(m.hp,18);assert.equal(g.state.inv.arrows,0);for(let i=0;i<30;i++)updateProjectiles(g,.01);assert.equal(m.hp,11);
+ const g=game();g.pos={x:.5,y:7,z:9.5};g.mobs=[];const m=g.spawnMob(.5,6.5,'sentinel',7);g.state.bar[0]='bow';g.add('arrows',1);g.attack();assert.equal(m.hp,m.maxHp);assert.equal(g.state.inv.arrows,0);for(let i=0;i<30;i++)updateProjectiles(g,.01);assert.equal(m.hp,m.maxHp-7);
 });
 test('creative has every item and death preserves inventory',()=>{
  const g=game();g.state=freshState(20,'creative');for(const k of Object.keys(ITEMS))assert.ok(g.state.inv[k]>0);g.hurt(200);assert.equal(g.state.hp,20);g.state.mode='adventure';g.add('diamond',7);const n=g.state.inv.diamond;g.hurt(200);assert.equal(g.screen,'death');g.respawn();assert.equal(g.state.inv.diamond,n);assert.equal(g.state.hp,20);

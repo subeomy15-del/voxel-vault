@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js?v=26';
-import { World } from '../src/world.js?v=26';
-import { ITEMS,BLOCKS,CROPS,RECIPES,ORE_GLIDERS,canCraft,craft } from '../src/data.js?v=26';
-import { ANIMALS,animalKind } from '../src/wildlife.js?v=26';
-import { tickSurvival,canEat } from '../src/survival.js?v=26';
-import { updateProjectiles } from '../src/combat.js?v=26';
-import { loadState } from '../src/save.js?v=26';
+import { Game } from '../src/game.js?v=27';
+import { World } from '../src/world.js?v=27';
+import { ITEMS,BLOCKS,CROPS,RECIPES,ORE_GLIDERS,canCraft,craft } from '../src/data.js?v=27';
+import { ANIMALS,animalKind } from '../src/wildlife.js?v=27';
+import { tickSurvival,canEat } from '../src/survival.js?v=27';
+import { updateProjectiles } from '../src/combat.js?v=27';
+import { loadState } from '../src/save.js?v=27';
 const make=()=>{const data=new Map(),g=new Game({setWorld(){},stream(){},burst(){}},{play(){}},{getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)});g.screen=null;g.pos={x:.5,y:7,z:9.5};g.yaw=0;g.pitch=0;g.mobs=[];return g;};
 const ticks=(fn,seconds)=>{for(let t=0;t<seconds-1e-8;t+=.05)fn(.05);};
 
@@ -29,7 +29,7 @@ test('raw animal meats require a placed furnace and provide much more energy aft
 test('food has a chewing action, stores reserves and gradually regenerates health',()=>{
   const g=make();g.state.hp=8;g.state.food=9;g.state.saturation=0;g.add('cooked_beef',2);
   assert.ok(g.eat('cooked_beef'));assert.equal(g.eat('cooked_beef'),false);tickSurvival(g,.4);assert.equal(g.state.inv.cooked_beef,2);tickSurvival(g,.5);assert.equal(g.state.inv.cooked_beef,1);assert.equal(g.state.food,17);assert.equal(g.state.saturation,13);assert.equal(g.state.hp,8);
-  ticks(dt=>tickSurvival(g,dt),3);assert.equal(g.state.hp,9);assert.ok(g.state.exhaustion>1);
+  ticks(dt=>tickSurvival(g,dt),5);assert.equal(g.state.hp,9);assert.ok(g.state.exhaustion>1);
   g.state.food=20;g.state.saturation=20;assert.equal(canEat(g,'cooked_beef'),false);
   g.state.food=10;g.eat('cooked_beef');g.select(2);tickSurvival(g,1);assert.equal(g.state.inv.cooked_beef,1);
   g.state.food=0;g.state.saturation=0;g.state.hp=2;ticks(dt=>tickSurvival(g,dt),15);assert.equal(g.state.hp,1);

@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import { ANIMALS } from './wildlife.js?v=26';
+import { ANIMALS } from './wildlife.js?v=27';
 const sailTextures=new Map();
 function sailTexture(color){
   if(sailTextures.has(color))return sailTextures.get(color);
