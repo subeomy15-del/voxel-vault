@@ -1,4 +1,4 @@
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=14';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=15';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },
@@ -236,7 +236,7 @@ Object.assign(ITEMS,{
  explorer_cookie:{name:'Explorer Cookie',color:'#b98655',kind:'food',nutrition:5,saturation:5,description:'A compact sweet snack for long journeys.'},
   crystal_carrot:{name:'Crystal Carrot',color:'#a9dbc8',kind:'food',nutrition:6,saturation:8,effect:'nightvision',duration:120,description:'Food and two minutes of night vision.'}
 });
-ITEMS.firecracker={name:'Firecracker',color:'#c96958',kind:'firecracker',description:'Coal and sunstone sand packed into a bright celebration. Press E to light it.'};
+ITEMS.firecracker={name:'Firecracker',color:'#c96958',kind:'firecracker',description:'Press E for a celebration burst. While gliding, it boosts you forward and upward.'};
 export const RECIPES = [
   { item:'firecracker', count:4, cost:{coal:1,sand:2}, category:'Supplies' },
   { item: 'stone_sword', cost: { stone: 6, wood: 2 }, category: 'Gear' },

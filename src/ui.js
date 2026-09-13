@@ -1,9 +1,9 @@
-import { FORGE_OFFERS,OUTPOSTS } from './expeditions.js?v=14';
-import { ITEMS, BLOCKS, RECIPES, BIOMES, SMELTING, CROPS, EFFECTS, canCraft, ingredientCount, dailySeed } from './data.js?v=14';
-import { brandMark } from './brand.js?v=14';
-import { ENEMIES } from './combat.js?v=14';
-import { loadState, saveSettings } from './save.js?v=14';
-import { icon } from './icons.js?v=14';
+import { FORGE_OFFERS,OUTPOSTS } from './expeditions.js?v=15';
+import { ITEMS, BLOCKS, RECIPES, BIOMES, SMELTING, CROPS, EFFECTS, canCraft, ingredientCount, dailySeed } from './data.js?v=15';
+import { brandMark } from './brand.js?v=15';
+import { ENEMIES } from './combat.js?v=15';
+import { loadState, saveSettings } from './save.js?v=15';
+import { icon } from './icons.js?v=15';
 export { icon };
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const heldBow=g=>ITEMS[g.held]?.kind==='bow'&&g.attackCooldown>0;

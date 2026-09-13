@@ -1,8 +1,8 @@
 import * as THREE from '../vendor/three.module.js';
-import { OUTPOSTS } from './expeditions.js?v=14';
-import { RIFT_ANCHORS } from './realms.js?v=14';
-import { hash } from './data.js?v=14';
-import { DRAGON_TOWERS } from './dragon.js?v=14';
+import { OUTPOSTS } from './expeditions.js?v=15';
+import { RIFT_ANCHORS } from './realms.js?v=15';
+import { hash } from './data.js?v=15';
+import { DRAGON_TOWERS } from './dragon.js?v=15';
 export class RiftEffects {
   constructor(r){
     this.r=r;this.root=new THREE.Group();r.scene.add(this.root);this.epoch=-1;this.time={value:0};this.markers=[];

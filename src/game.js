@@ -1,22 +1,22 @@
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=14';
-import { canonicalItem,normalizeResources } from './resource-map.js?v=14';
-import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=14';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=14';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=14';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,craft,hash,dailySeed } from './data.js?v=14';
-import { freshState,loadState,saveState,importLegacy } from './save.js?v=14';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=14';
-import { movePlayer,requestJump } from './movement.js?v=14';
-import { overlapsBlock } from './shapes.js?v=14';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=14';
-import { ANIMALS,animalKind } from './wildlife.js?v=14';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=15';
+import { canonicalItem,normalizeResources } from './resource-map.js?v=15';
+import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=15';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=15';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=15';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,craft,hash,dailySeed } from './data.js?v=15';
+import { freshState,loadState,saveState,importLegacy } from './save.js?v=15';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=15';
+import { movePlayer,requestJump } from './movement.js?v=15';
+import { overlapsBlock } from './shapes.js?v=15';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=15';
+import { ANIMALS,animalKind } from './wildlife.js?v=15';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}
   resetRuntime(){
     this.pos={x:.5,y:7,z:20.5};this.yaw=0;this.pitch=0;this.velocity=0;this.vx=0;this.vz=0;this.grounded=false;this.coyote=0;this.jumpBuffer=0;this.cameraOffset=0;
     this.walk=0;this.moving=false;this.stamina=100;this.flying=false;this.sprinting=false;this.crouching=false;this.target=null;this.mobTarget=null;this.attackHeld=false;this.placeHeld=false;this.mineProgress=0;this.mineKey='';
-    this.attackCooldown=0;this.hurtCooldown=0;this.dashCooldown=0;this.dashTime=0;this.saveTimer=0;this.stepTimer=0;this.spawnTimer=0;this.cropTimer=0;this.projectiles=[];this.mobs=[];this.keys.clear();this.boss=null;this.slam=null;this.containerKey=null;this.station=null;this.combo=0;this.buildRotation=0;this.placeTimer=0;this.eating=null;this.drawState=null;this.revealTime=0;this.gliding=false;this.regenTimer=0;this.hungerTimer=0;this.portalCooldown=3;this.pendingGlide=false;this.padCooldown=0;this.grapple=null;this.grappleCooldown=0;
+    this.attackCooldown=0;this.hurtCooldown=0;this.dashCooldown=0;this.dashTime=0;this.firecrackerCooldown=0;this.saveTimer=0;this.stepTimer=0;this.spawnTimer=0;this.cropTimer=0;this.projectiles=[];this.mobs=[];this.keys.clear();this.boss=null;this.slam=null;this.containerKey=null;this.station=null;this.combo=0;this.buildRotation=0;this.placeTimer=0;this.eating=null;this.drawState=null;this.revealTime=0;this.gliding=false;this.regenTimer=0;this.hungerTimer=0;this.portalCooldown=3;this.pendingGlide=false;this.padCooldown=0;this.grapple=null;this.grappleCooldown=0;
   }
   loadWorld(){
     normalizeResources(this.state);
@@ -195,9 +195,17 @@ export class Game {
     this.grapple={x:hit.x+.5+hit.normal.x*.8,y:hit.y+1.3,z:hit.z+.5+hit.normal.z*.8,time:1.6};this.grappleCooldown=2;this.gliding=false;this.pendingGlide=false;this.audio.play('launch');return true;
   }
   useFirecracker(){
-    if(ITEMS[this.held]?.kind!=='firecracker'||!this.state.inv.firecracker)return false;
-    const d=this.direction(),x=this.pos.x+d.x*5,y=this.pos.y+1.1+d.y*5,z=this.pos.z+d.z*5;
-    this.state.inv.firecracker--;this.renderer.burst(x,y,z,'#efaa66',34);this.renderer.burst(x,y+.7,z,'#f5d18a',18);this.audio.play('firecracker');this.toast('Firecracker!','A bright little burst. Craft more with coal and sunstone sand.','reward');this.save();return true;
+    if(ITEMS[this.held]?.kind!=='firecracker'||!this.state.inv.firecracker||this.firecrackerCooldown>0)return false;
+    const d=this.direction();this.state.inv.firecracker--;this.firecrackerCooldown=this.gliding?.8:.25;
+    if(this.gliding){
+      // Rocket-like boost: preserve the glider's steering direction while
+      // adding a small lift so a well-timed cracker clears the next ridge.
+      const boost=10;this.vx+=d.x*boost;this.vz+=d.z*boost;this.velocity=Math.min(14,Math.max(this.velocity,2.8)+1.8);
+      const x=this.pos.x-d.x*1.2,y=this.pos.y+1.15-d.y*.3,z=this.pos.z-d.z*1.2;this.renderer.burst(x,y,z,'#f2a05c',22);this.renderer.burst(x,y+.35,z,'#ead38f',12);this.audio.play('firecracker');this.toast('Glider boost!','Firecracker burn complete · steer toward your next island.','reward');
+    }else{
+      const x=this.pos.x+d.x*5,y=this.pos.y+1.1+d.y*5,z=this.pos.z+d.z*5;this.renderer.burst(x,y,z,'#efaa66',34);this.renderer.burst(x,y+.7,z,'#f5d18a',18);this.audio.play('firecracker');this.toast('Firecracker!','A bright little burst. Craft more with coal and sunstone sand.','reward');
+    }
+    this.save();return true;
   }
   forge(name){
     const offer=FORGE_OFFERS.find(([item])=>item===name),station=this.station;
@@ -313,7 +321,7 @@ export class Game {
   direction(){return{x:-Math.sin(this.yaw)*Math.cos(this.pitch),y:Math.sin(this.pitch),z:-Math.cos(this.yaw)*Math.cos(this.pitch)};}
   update(dt){
     this.renderer.stream(this.pos);if(this.screen)return;
-    this.state.time+=dt;this.state.elapsed+=dt;tickSurvival(this,dt);this.updateDrops(dt);for(const k of['grappleCooldown','attackCooldown','hurtCooldown','dashCooldown','dashTime'])this[k]=Math.max(0,this[k]-dt);
+    this.state.time+=dt;this.state.elapsed+=dt;tickSurvival(this,dt);this.updateDrops(dt);for(const k of['grappleCooldown','attackCooldown','hurtCooldown','dashCooldown','dashTime','firecrackerCooldown'])this[k]=Math.max(0,this[k]-dt);
     this.cropTimer+=dt;if(this.cropTimer>1){this.cropTimer=0;this.growCrops();}
     this.move(dt);if(this.tickRift(dt))return;this.updateMobs(dt);if(this.screen)return;
     this.target=this.world.raycast({x:this.pos.x,y:this.pos.y+(this.crouching?1.15:1.58),z:this.pos.z},this.direction(),6);

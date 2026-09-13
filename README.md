@@ -40,7 +40,7 @@ Nine crops grow during active play. Plant on tilled soil; nearby water speeds gr
 - **Shift:** sprint. **X:** crouch. **R:** dodge. **Z:** zoom.
 - **Left click:** attack or hold to mine. Hold with a bow, then release to shoot.
 - **E / right click:** interact, grapple, eat, plant, harvest or place.
-- **Firecrackers:** craft 4 with 1 coal and 2 sunstone sand, equip them, then press E for a bright burst.
+- **Firecrackers:** craft 4 with 1 coal and 2 sunstone sand, equip them, then press E for a bright burst. While gliding, press E to boost forward and upward; each boost has a short recovery.
 - **V / F5:** first person, third person behind, third person front.
 - **G:** open or close an equipped glider while airborne.
 - **1–9 / wheel:** select hotbar. **Middle click:** select a targeted owned block.
