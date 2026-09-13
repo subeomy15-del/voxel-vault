@@ -7,7 +7,7 @@ try{
   await c.send('Emulation.setTouchEmulationEnabled',{enabled:false});
   await c.send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
   await c.send('Page.navigate',{url:'http://localhost:3001/'});await sleep(600);
-  await ev(`(async()=>{const m=await import('./src/main.js?v=13');window.g=m.game;window.v=m.renderer;window.ui=m.ui;g.start('adventure',true);g.pos={x:.5,y:7,z:9.5};g.yaw=0;g.pitch=-.95;g.add('stone_hoe');g.equip('stone_hoe');ui.render();})()`);
+  await ev(`(async()=>{const m=await import('./src/main.js?v=14');window.g=m.game;window.v=m.renderer;window.ui=m.ui;g.start('adventure',true);g.pos={x:.5,y:7,z:9.5};g.yaw=0;g.pitch=-.95;g.add('stone_hoe');g.equip('stone_hoe');ui.render();})()`);
   await terrain();await sleep(200);assert.equal(await ev('g.target?.type'),'grass');await use();
   assert.equal(await ev('g.world.get(0,6,8)'),'farmland');
   await ev("g.equip('seeds')");const before=await ev('g.state.inv.seeds');await use();

@@ -1,4 +1,4 @@
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=13';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=14';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },
@@ -234,9 +234,11 @@ Object.assign(ITEMS,{
  starfall_bow:{...ITEMS.bow,name:'Starfall Bow',color:'#e4c189',kind:'bow',damage:14,drawTime:.75,boltSpeed:35,cooldown:.6,description:'A quick-drawing relic bow with fast arrows.'},
  golden_apple:{name:'Golden Apple',color:'#e8c35e',kind:'food',nutrition:8,saturation:12,heal:5,description:'Restores food, energy and five health.'},
  explorer_cookie:{name:'Explorer Cookie',color:'#b98655',kind:'food',nutrition:5,saturation:5,description:'A compact sweet snack for long journeys.'},
- crystal_carrot:{name:'Crystal Carrot',color:'#a9dbc8',kind:'food',nutrition:6,saturation:8,effect:'nightvision',duration:120,description:'Food and two minutes of night vision.'}
+  crystal_carrot:{name:'Crystal Carrot',color:'#a9dbc8',kind:'food',nutrition:6,saturation:8,effect:'nightvision',duration:120,description:'Food and two minutes of night vision.'}
 });
+ITEMS.firecracker={name:'Firecracker',color:'#c96958',kind:'firecracker',description:'Coal and sunstone sand packed into a bright celebration. Press E to light it.'};
 export const RECIPES = [
+  { item:'firecracker', count:4, cost:{coal:1,sand:2}, category:'Supplies' },
   { item: 'stone_sword', cost: { stone: 6, wood: 2 }, category: 'Gear' },
   { item: 'stone_pickaxe', cost: { stone: 5, wood: 2 }, category: 'Gear' },
   { item: 'iron_sword', cost: { iron_ingot: 5, wood: 2 }, category: 'Gear' },
@@ -258,7 +260,7 @@ RECIPES.push(
   {item:'chest',cost:{wood:6},category:'Building'},
   {item:'bed',cost:{plank:6,leaf:8},category:'Building'},
   {item:'ladder',count:8,cost:{wood:3},category:'Building'},
-  {item:'lantern',count:4,cost:{iron_ingot:1,coal:1},category:'Building'},
+  {item:'lantern',count:4,cost:{iron_ingot:1},category:'Building'},
   {item:'birch_plank',count:4,cost:{birch:1},category:'Building'},
   {item:'pine_plank',count:4,cost:{pinewood:1},category:'Building'},
   {item:'stonebrick',count:4,cost:{stone:4},category:'Building'},
@@ -284,7 +286,7 @@ RECIPES.push(
   {item:'cloth',count:2,cost:{fiber:4},category:'Supplies'},
   {item:'vegetable_stew',cost:{carrot:2,mushroom:2,wheat:1},category:'Supplies'},
   {item:'fruit_bowl',cost:{apple:2,bread:1},category:'Supplies'},
-  {item:'campfire',cost:{wood:3,stone:4,coal:1},category:'Building'},
+  {item:'campfire',cost:{wood:3,stone:4},category:'Building'},
   {item:'cobblestone',count:4,cost:{stone:4},category:'Building'},
   {item:'gravel',count:4,cost:{stone:4},category:'Building'},
   {item:'sandstone',count:4,cost:{sand:4},category:'Building'},
@@ -374,10 +376,10 @@ Object.assign(ITEMS.ruby_blade,{name:'Moonstone Lifeblade',color:'#b2a6cf',descr
 Object.assign(ITEMS.sapphire_blade,{name:'Moonstone Frostblade',color:'#91b5c8'});
 ITEMS.copper_tiles.name=BLOCKS.copper_tiles.name='Weathered Roof Tiles';
 ITEMS.spring_salad.description='Higher jumps for 90 seconds. Made with carrots, corn and diamond.';
-for(const name of ['grass','leaf','pine','hedge']){const color={grass:'#64836e',leaf:'#4b7064',pine:'#3e625a',hedge:'#547568'}[name];BLOCKS[name].color=color;ITEMS[name].color=color;}
+for(const name of ['grass','leaf','pine','hedge']){const color={grass:'#738866',leaf:'#567259',pine:'#4e665f',hedge:'#60785f'}[name];BLOCKS[name].color=color;ITEMS[name].color=color;}
 const retained=RECIPES.filter(r=>!RESOURCE_ALIASES[r.item]);
 RECIPES.splice(0,RECIPES.length,...retained);
-for(const r of RECIPES){const cost={};for(const[k,n]of Object.entries(r.cost)){const key=k==='coal'?'wood':canonicalItem(k);cost[key]=(cost[key]||0)+n;}r.cost=cost;}
+for(const r of RECIPES){const cost={};for(const[k,n]of Object.entries(r.cost)){const key=canonicalItem(k);cost[key]=(cost[key]||0)+n;}r.cost=cost;}
 RECIPES.push({item:'diamond_armor',cost:{diamond:8,iron_ingot:4},category:'Gear'},{item:'diamond_block',cost:{diamond:4},category:'Building'});
 SMELTING.splice(0,SMELTING.length,...SMELTING.filter(r=>r.input!=='copper'));
 ORE_GLIDERS.splice(0,ORE_GLIDERS.length,...ORE_GLIDERS.filter(([id])=>['iron','gold','diamond'].includes(id)));

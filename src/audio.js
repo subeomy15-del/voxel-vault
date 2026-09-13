@@ -42,5 +42,6 @@ export class Audio {
     if(name==='heal')this.tone(380,.22,'sine',.065,130);
     if(name==='reward')this.tone(660,.22,'sine',.06,110);
     if(name==='warning')this.tone(110,.5,'triangle',.07,50);
+    if(name==='firecracker'){this.noise(.22,.45,1200);this.tone(180,.18,'triangle',.12,720);setTimeout(()=>this.tone(720,.22,'sine',.08,-90),90);}
   }
 }

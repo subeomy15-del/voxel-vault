@@ -4,7 +4,7 @@ const c=await connect();
 try{
  await c.send('Page.navigate',{url:'http://localhost:3001/'});await sleep(900);
  await c.evaluate(`(async()=>{
-  const main=await import('/src/main.js?v=13'),THREE=await import('/vendor/three.module.js'),{ITEMS}=await import('/src/data.js?v=13'),{itemModel}=await import('/src/item-model.js?v=13');
+  const main=await import('/src/main.js?v=14'),THREE=await import('/vendor/three.module.js'),{ITEMS}=await import('/src/data.js?v=14'),{itemModel}=await import('/src/item-model.js?v=14');
   const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:true});renderer.setSize(160,160);renderer.setClearColor(0,0);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;
   const scene=new THREE.Scene();scene.add(new THREE.HemisphereLight('#f5faff','#59636b',1.6));const key=new THREE.DirectionalLight('#fff0d4',2.4);key.position.set(-3,5,5);scene.add(key);const rim=new THREE.DirectionalLight('#9bbff4',1.2);rim.position.set(4,2,-3);scene.add(rim);
   const camera=new THREE.OrthographicCamera(-.78,.78,.78,-.78,.1,30);camera.position.set(3,2.1,5);camera.lookAt(0,0,0);

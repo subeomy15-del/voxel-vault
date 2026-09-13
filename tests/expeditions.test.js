@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js?v=13';
-import { freshState,loadState } from '../src/save.js?v=13';
-import { ITEMS,RECIPES } from '../src/data.js?v=13';
+import { Game } from '../src/game.js?v=14';
+import { freshState,loadState } from '../src/save.js?v=14';
+import { ITEMS,RECIPES } from '../src/data.js?v=14';
 import { existsSync } from 'node:fs';
 const make=()=>{const data=new Map();return new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},{getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)});};
 test('all three outposts generate across terrain seeds and preserve player edits on reload',()=>{

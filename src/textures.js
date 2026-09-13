@@ -1,4 +1,4 @@
-import { BLOCKS, hash } from './data.js?v=13';
+import { BLOCKS, hash } from './data.js?v=14';
 export const TILE=32,ATLAS_COLS=16;
 export const ATLAS_ROWS=2**Math.ceil(Math.log2(Math.ceil(Object.keys(BLOCKS).length*3/ATLAS_COLS)));
 export const ATLAS_WIDTH=TILE*ATLAS_COLS,ATLAS_HEIGHT=TILE*ATLAS_ROWS;
@@ -36,7 +36,7 @@ export function textureCanvas(){
       }
       ctx.restore();continue;
     }
-    const bright={grass:'#64836e',leaf:'#4b7064',pine:'#3e625a',autumnleaf:'#a59162',dirt:'#887767',sand:'#c6c5ad',stone:'#8a969e'};
+    const bright={grass:'#738866',leaf:'#567259',pine:'#4e665f',autumnleaf:'#a59162',dirt:'#92785b',sand:'#c7b889',stone:'#8a969e'};
     fill(ores[type]?'#89929a':type==='grass'&&side!==0?bright.dirt:bright[type]||b.color);
     for(let i=0;i<28;i++){const x=Math.floor(hash(i,index+71)*32),y=Math.floor(hash(index+23,i)*32);fill(hash(i,index)>.5?'#ffffff0c':'#15222110',x,y,1+Math.floor(hash(i,5)*4),1+Math.floor(hash(i,9)*3));}
     if(['end_stone','end_bricks'].includes(type)){

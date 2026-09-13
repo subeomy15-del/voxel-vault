@@ -1,15 +1,15 @@
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=13';
-import { canonicalItem,normalizeResources } from './resource-map.js?v=13';
-import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=13';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=13';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=13';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,craft,hash,dailySeed } from './data.js?v=13';
-import { freshState,loadState,saveState,importLegacy } from './save.js?v=13';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=13';
-import { movePlayer,requestJump } from './movement.js?v=13';
-import { overlapsBlock } from './shapes.js?v=13';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=13';
-import { ANIMALS,animalKind } from './wildlife.js?v=13';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=14';
+import { canonicalItem,normalizeResources } from './resource-map.js?v=14';
+import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=14';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=14';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=14';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,craft,hash,dailySeed } from './data.js?v=14';
+import { freshState,loadState,saveState,importLegacy } from './save.js?v=14';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=14';
+import { movePlayer,requestJump } from './movement.js?v=14';
+import { overlapsBlock } from './shapes.js?v=14';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=14';
+import { ANIMALS,animalKind } from './wildlife.js?v=14';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}
@@ -173,6 +173,7 @@ export class Game {
     if(ITEMS[this.held]?.crop&&this.target?.type==='farmland'){this.plant();return;}
     const n=this.nearest();
     if(n?.type==='dragon_altar')return summonDragon(this);
+    if(ITEMS[this.held]?.kind==='firecracker')return this.useFirecracker();
     if(n?.type==='anchor')return this.collectAnchor(n.id);
     if(n&&MATURE_CROPS.includes(n.type)){this.harvest(n);return;}
     if(n?.type==='supply'){this.state.opened.push(n.id);for(const[k,v]of Object.entries(n.loot))this.add(k,v);if(n.block)this.world.set(n.x,n.y,n.z,'chest');this.audio.play('craft');this.toast(n.block?n.name+' discovered':'Supplies collected',n.block?'Relic shards and rare materials collected. Visit the Relic Forge.':'Timber, food and fuel for your first shelter.',n.block?'reward':'normal');this.save();return;}
@@ -192,6 +193,11 @@ export class Game {
     const origin={x:this.pos.x,y:this.pos.y+1.58,z:this.pos.z},dir=this.direction(),hit=this.world.raycast(origin,dir,24);
     if(!hit||!BLOCKS[hit.type]?.solid||hit.distance<2){this.toast('Aim at solid terrain','Hook onto a wall or ledge within 24 blocks.');return false;}
     this.grapple={x:hit.x+.5+hit.normal.x*.8,y:hit.y+1.3,z:hit.z+.5+hit.normal.z*.8,time:1.6};this.grappleCooldown=2;this.gliding=false;this.pendingGlide=false;this.audio.play('launch');return true;
+  }
+  useFirecracker(){
+    if(ITEMS[this.held]?.kind!=='firecracker'||!this.state.inv.firecracker)return false;
+    const d=this.direction(),x=this.pos.x+d.x*5,y=this.pos.y+1.1+d.y*5,z=this.pos.z+d.z*5;
+    this.state.inv.firecracker--;this.renderer.burst(x,y,z,'#efaa66',34);this.renderer.burst(x,y+.7,z,'#f5d18a',18);this.audio.play('firecracker');this.toast('Firecracker!','A bright little burst. Craft more with coal and sunstone sand.','reward');this.save();return true;
   }
   forge(name){
     const offer=FORGE_OFFERS.find(([item])=>item===name),station=this.station;

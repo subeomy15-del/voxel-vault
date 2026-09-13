@@ -1,4 +1,4 @@
-import { ITEMS, BLOCKS } from './data.js?v=13';
+import { ITEMS, BLOCKS } from './data.js?v=14';
 const cache=new Map();let iconSerial=0;
 const shade=(hex,amount)=>'#'+[1,3,5].map(i=>Math.round(Math.max(0,Math.min(255,parseInt(hex.slice(i,i+2),16)+amount))).toString(16).padStart(2,'0')).join('');
 const path=(d,fill,stroke='',width=1.3)=>`<path d="${d}" fill="${fill}"${stroke?` stroke="${stroke}" stroke-width="${width}" stroke-linejoin="round" stroke-linecap="round"`:''}/>`;
@@ -7,6 +7,7 @@ const line=(d,c='#ffffff66',w=1.2)=>path(d,'none',c,w);
 function art(name){
   const it=ITEMS[name]||{},c='url(#itemTint)',edge='#283d3e',metal='#f1f0d9';
   if(name==='ender_berry')return '<circle cx="13" cy="22" r="9" fill="#9865c2" stroke="#513c69"/><circle cx="24" cy="22" r="9" fill="#b985dd" stroke="#513c69"/>'+path('m18 16-8-9 9 2 8-5-3 12Z','#81a891',edge)+line('m20 19 4-2','#e4cbff',2);
+  if(name==='firecracker')return path('M11 33h14V10H11Z',c,edge)+rect(10,8,16,5,'#d2b473',1)+line('M18 8V2m0 2 4-2','#e7d9a8',1.5)+line('M14 18v10m5-10v10m5-10v10','#f2b06b',1.2);
   if(it.kind==='orb')return path('m18 2 12 6 5 12-8 12-14 2L3 24 4 11Z',c,edge)+path('m9 12 10-6 7 7-4 9-10 3Z','#efe5ff88')+line('m9 17 8-7 8 5-5 10-8-1','#ffffff',1.7);
   if(it.kind==='glider')return path('m2 23 16-21 18 21-18-6Z',c,edge)+path('m18 2 0 15-16 6Z','#fff7de70')+line('m2 23 16-21 18 21M18 2v29M7 27l11-10 10 10Z','#697774',1.7)+(it.ore?path('m18 7 4 4-4 5-4-5Z',c,edge)+line('m18 8 2 3-2 3','#fffbe3',.8):'');
   if(name==='cotton')return line('m18 34-1-17m1 11-8-10m8 6 9-10','#829064',2)+[[9,13],[18,9],[26,14]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="7" fill="#e8e6d2" stroke="#869178" stroke-width="1"/>`).join('')+path('m5 13 4-5 5 1m0-1 3-5 6 1','none','#fffbee',2);

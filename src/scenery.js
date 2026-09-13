@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import { hash } from './data.js?v=13';
+import { hash } from './data.js?v=14';
 export class Scenery {
   constructor(renderer){
     this.owner=renderer;this.time={value:0};this.wind={value:1};
@@ -64,7 +64,7 @@ export class Scenery {
     instances.forEach((p,i)=>{
       this.rotation.setFromAxisAngle(up,hash(p.x|0,p.z|0)*Math.PI*2);
       this.scratch.compose(new THREE.Vector3(p.x,p.y,p.z),this.rotation,new THREE.Vector3(1,.55+(p.n-.5)*.9,1));mesh.setMatrixAt(i,this.scratch);
-      this.tint.set(p.n>.86?'#8b9b86':p.n>.73?'#698775':'#597963');mesh.setColorAt(i,this.tint);
+      this.tint.set(p.n>.86?'#9aa17b':p.n>.73?'#7d916e':'#6d825f');mesh.setColorAt(i,this.tint);
     });
     mesh.receiveShadow=true;mesh.computeBoundingSphere();group.add(mesh);
   }
