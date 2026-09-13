@@ -1,18 +1,18 @@
 import * as THREE from '../vendor/three.module.js';
-import { BLOCKS, ITEMS, hash } from './data.js?v=16';
-import { CHUNK, WORLD_LIMIT } from './world.js?v=16';
-import { ENEMIES } from './combat.js?v=16';
-import { textureCanvas,TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=16';
-import { Scenery } from './scenery.js?v=16';
-import { boxesFor } from './shapes.js?v=16';
-import { animalModel,bowModel,arrowModel,toolModel } from './models.js?v=16';
-import { itemModel } from './item-model.js?v=16';
-import { dragonModel,animateDragon } from './dragon-model.js?v=16';
-import { RiftEffects } from './rift-effects.js?v=16';
-import { PostProcess } from './post-process.js?v=16';
-import { PlayerModel } from './player-model.js?v=16';
-import { cameraPosition } from './perspective.js?v=16';
-import { ViewEffects } from './view-effects.js?v=16';
+import { BLOCKS, ITEMS, hash } from './data.js?v=18';
+import { CHUNK, WORLD_LIMIT } from './world.js?v=18';
+import { ENEMIES } from './combat.js?v=18';
+import { textureCanvas,TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=18';
+import { Scenery } from './scenery.js?v=18';
+import { boxesFor } from './shapes.js?v=18';
+import { animalModel,bowModel,arrowModel,toolModel } from './models.js?v=18';
+import { itemModel } from './item-model.js?v=18';
+import { dragonModel,animateDragon } from './dragon-model.js?v=18';
+import { RiftEffects } from './rift-effects.js?v=18';
+import { PostProcess } from './post-process.js?v=18';
+import { PlayerModel } from './player-model.js?v=18';
+import { cameraPosition } from './perspective.js?v=18';
+import { ViewEffects } from './view-effects.js?v=18';
 export class Renderer {
   constructor(container,settings){
     this.settings=settings;this.scene=new THREE.Scene();this.scene.background=new THREE.Color('#b6cddd');this.scene.fog=new THREE.Fog('#b6cddd',62,125);
@@ -23,7 +23,7 @@ export class Renderer {
     this.waterMaterial=new THREE.MeshStandardMaterial({color:'#42a7dd',roughness:.6,metalness:0,transparent:true,opacity:.78,vertexColors:true});
     this.glassMaterial=new THREE.MeshLambertMaterial({color:'#ffffff',transparent:true,opacity:.28,vertexColors:true});
     this.epoch=0;this.revision=0;this.chunkVersions=new Map();this.ready=[];this.inflight=false;this.underground=false;
-    this.worker=new Worker(new URL('./terrain-worker.js?v=16',import.meta.url),{type:'module'});
+    this.worker=new Worker(new URL('./terrain-worker.js?v=18',import.meta.url),{type:'module'});
     this.worker.onmessage=({data})=>{if(data.epoch!==this.epoch)return;this.inflight=false;if(data.revision<(this.chunkVersions.get(`${data.cx},${data.cz}`)||0))return;this.ready.push(data);};
     this.worker.onerror=e=>{console.error('Terrain worker failed',e);document.querySelector('#loading').hidden=false;document.querySelector('#loading').textContent='Terrain could not load. Reload the page to try again.';};
     this.projectileMeshes=new Map();
@@ -99,7 +99,11 @@ export class Renderer {
     g.add(this.part(light,.22,.7,.3,-.5,.86,0),this.part(light,.22,.7,.3,.5,.86,0));
     for(const x of [-.16,.16])g.add(this.part(animal?'#2e3e34':'#c6fff1',.12,.09,.03,x,1.47,.25));
     if(!animal){g.add(this.part('#8adde0',.23,.3,.04,0,.9,.25));for(const x of [-.21,.21])g.add(this.part('#d5cda8',.14,.3,.14,x,1.78,0));}
-    if(mob.kind==='brute')g.scale.set(1.4,1.3,1.3);if(mob.kind==='wisp')g.scale.set(.7,.8,.7);if(mob.kind==='stalker')g.scale.set(.85,.8,1.1);if(animal){g.scale.set(1,.65,1);g.add(this.part(light,.1,.3,.15,-.19,1.78,0),this.part(light,.1,.3,.15,.19,1.78,0));}
+    if(mob.kind==='brute')g.scale.set(1.4,1.3,1.3);if(mob.kind==='wisp')g.scale.set(.7,.8,.7);if(mob.kind==='stalker')g.scale.set(.85,.8,1.1);
+    if(mob.kind==='enderling'){g.scale.set(.9,1.15,.9);g.add(this.part(light,.12,.34,.12,-.22,1.93,0),this.part(light,.12,.34,.12,.22,1.93,0));}
+    if(mob.kind==='void_archer'){g.scale.set(.86,1.12,.86);g.add(this.part('#b9d1cf',.62,.08,.08,0,1.08,.28),this.part(light,.08,.3,.08,-.32,1.56,-.18),this.part(light,.08,.3,.08,.32,1.56,-.18));}
+    if(mob.kind==='frost_howler'){g.scale.set(1.25,1.05,1.2);g.add(this.part(light,.92,.18,.62,0,1.55,-.05),this.part('#f4e9d5',.12,.18,.08,-.18,1.28,.27),this.part('#f4e9d5',.12,.18,.08,.18,1.28,.27));}
+    if(animal){g.scale.set(1,.65,1);g.add(this.part(light,.1,.3,.15,-.19,1.78,0),this.part(light,.1,.3,.15,.19,1.78,0));}
     this.scene.add(g);this.mobMeshes.set(mob.id,g);return g;
   }
   setHand(name){if(name===this.heldName)return;this.heldName=name;for(const c of [...this.hand.children])this.disposeGroup(c);const item=ITEMS[name];if(!item)return;

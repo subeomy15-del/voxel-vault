@@ -25,7 +25,7 @@ export function summonDragon(g){
 }
 export function defeatDragon(g,m){
  const s=g.state.dragon;s.active=false;s.hp=0;s.wins++;g.boss=null;g.slam=null;g.projectiles=g.projectiles.filter(p=>!p.hostile);
- if(!s.defeated){s.defeated=true;g.add('dragon_egg');g.add('moonstone',16);g.add('relic_shard',10);}
+ if(!s.defeated){s.defeated=true;g.add('dragon_egg');g.add('moonstone',16);g.add('relic_shard',10);g.add('forge_seal');}
  g.renderer.burst(m.x,m.y+2,m.z,'#bda6ed',70);g.audio.play('reward');g.toast('ENDER DRAGON DEFEATED',s.wins===1?'Dragon Egg +16 Moonstone +10 Relic Shards. Take your trophy home!':'Dragon defeated again. Your first victory trophy is saved.','reward');g.emit('dragonDefeated');g.save();
 }
 export function updateDragon(g,m,dt,launchBolt){

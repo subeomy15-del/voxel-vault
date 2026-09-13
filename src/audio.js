@@ -43,5 +43,7 @@ export class Audio {
     if(name==='reward')this.tone(660,.22,'sine',.06,110);
     if(name==='warning')this.tone(110,.5,'triangle',.07,50);
     if(name==='firecracker'){this.noise(.22,.45,1200);this.tone(180,.18,'triangle',.12,720);setTimeout(()=>this.tone(720,.22,'sine',.08,-90),90);}
+    if(name==='fuse'){this.tone(640,.08,'square',.05,-80);setTimeout(()=>this.tone(820,.08,'square',.04,-80),130);}
+    if(name==='explosion'){this.noise(.5,.8,180);this.tone(72,.4,'sawtooth',.16,-40);}
   }
 }

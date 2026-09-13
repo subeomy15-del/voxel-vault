@@ -1,6 +1,6 @@
-import { ANIMALS,updateAnimal } from './wildlife.js?v=16';
-import { visibleBetween,findMobPath } from './navigation.js?v=16';
-import { updateDragon } from './dragon.js?v=16';
+import { ANIMALS,updateAnimal } from './wildlife.js?v=18';
+import { visibleBetween,findMobPath } from './navigation.js?v=18';
+import { updateDragon } from './dragon.js?v=18';
 
 export const ENEMIES = {
   dragon: {name:'Ender Dragon',hp:260,speed:7,damage:5,color:'#383442',glow:'#c6a5ff',radius:3.6,height:2.7,xp:300},
@@ -8,6 +8,9 @@ export const ENEMIES = {
   stalker: { name:'Ember prowler', hp:14, speed:3.2, damage:3, color:'#a06443', glow:'#ffd38a', xp:20 },
   wisp: { name:'Frost wisp', hp:14, speed:1.7, damage:3, color:'#82afc2', glow:'#cef5ff', xp:22 },
   brute: { name:'Ruinbreaker', hp:38, speed:1.1, damage:6, color:'#7e718e', glow:'#e2b4ff', xp:32 },
+  enderling: { name:'Enderling', hp:24, speed:2.5, damage:4, color:'#624b77', glow:'#d5a4ee', xp:28 },
+  void_archer: { name:'Void archer', hp:16, speed:1.45, damage:4, color:'#3e536c', glow:'#8dd5e6', xp:34 },
+  frost_howler: { name:'Frost howler', hp:30, speed:1.3, damage:5, color:'#657a86', glow:'#c9e4f0', xp:40 },
   guardian: { name:'Vault guardian', hp:180, speed:1.6, damage:6, color:'#687b70', glow:'#a8efd9', xp:180 },
   grazer: { name:'Wild grazer', hp:5, speed:.45, damage:0, color:'#b9976e', glow:'#ead4a5', xp:0 },
 };
@@ -33,7 +36,7 @@ export function launchBolt(game, origin, direction, damage=3, hostile=true,optio
   game.projectiles.push({id:++game.serial,x:origin.x,y:origin.y,z:origin.z,vx:direction.x/len*speed,vy:direction.y/len*speed,vz:direction.z/len*speed,damage,hostile,gravity:options.gravity||0,slow:options.slow||0,color:options.color||'#c9b38a',life:hostile?4:4});
 }
 function shootAtPlayer(game,m,spread=0) {
-  const origin={x:m.x,y:m.y+(m.kind==='guardian'?2.4:1.15),z:m.z};
+  const origin={x:m.x,y:m.y+(m.kind==='guardian'?2.4:m.kind==='void_archer'?1.8:1.15),z:m.z};
   const dx=game.pos.x-origin.x,dz=game.pos.z-origin.z,a=Math.atan2(dx,dz)+spread;
   launchBolt(game,origin,{x:Math.sin(a),y:(game.pos.y+1-origin.y)/Math.max(1,Math.hypot(dx,dz)),z:Math.cos(a)},m.kind==='guardian'?4:3);
   game.audio.play('shoot');
@@ -87,17 +90,17 @@ export function updateEnemies(game,dt) {
     if(m.windup>0){
       m.windup-=dt;
       if(m.windup<=0){
-        if(m.kind==='wisp')shootAtPlayer(game,m);
+        if(m.kind==='wisp'||m.kind==='void_archer')shootAtPlayer(game,m);
         else if(m.kind==='stalker'){m.lunge=.35;m.lungeX=(game.pos.x-m.x)/Math.max(d,.1);m.lungeZ=(game.pos.z-m.z)/Math.max(d,.1);}
         else if(d<(m.kind==='brute'?2.8:2.1)&&Math.abs(game.pos.y-m.y)<2.5)game.hurt(info.damage);
-        m.cooldown=m.kind==='brute'?2:m.kind==='wisp'?2.6:1.4;
+        m.cooldown=m.kind==='brute'?2:(m.kind==='wisp'||m.kind==='void_archer')?2.6:1.4;
       }
       continue;
     }
     if(m.lunge>0){m.lunge-=dt;game.moveMob(m,m.lungeX*dt*9,m.lungeZ*dt*9);if(d<1.6)game.hurt(info.damage);continue;}
-    const range=m.kind==='wisp'?12:m.kind==='stalker'?4:m.kind==='brute'?2.6:1.9;
-    if(d<range&&m.cooldown<=0){m.windup=m.kind==='brute'?.85:m.kind==='wisp'?.65:.5;m.windupMax=m.windup;continue;}
-    if(m.kind==='wisp'&&d<5){game.moveMob(m,-Math.sin(m.angle)*dt*1.7,-Math.cos(m.angle)*dt*1.7);}
+    const range=m.kind==='wisp'?12:m.kind==='void_archer'?14:m.kind==='stalker'?4:m.kind==='brute'?2.6:1.9;
+    if(d<range&&m.cooldown<=0){m.windup=m.kind==='brute'?.85:(m.kind==='wisp'||m.kind==='void_archer')?.65:.5;m.windupMax=m.windup;continue;}
+    if((m.kind==='wisp'&&d<5)||(m.kind==='void_archer'&&d<7)){game.moveMob(m,-Math.sin(m.angle)*dt*1.7,-Math.cos(m.angle)*dt*1.7);}
     else if(d>(m.kind==='wisp'?8:1.5))game.moveMob(m,(game.pos.x-m.x)/Math.max(d,.1)*dt*info.speed*(m.slow>0?.35:1),(game.pos.z-m.z)/Math.max(d,.1)*dt*info.speed*(m.slow>0?.35:1));
   }
   if(game.slam){game.slam.time-=dt;if(game.slam.time<=0){const s=game.slam;game.renderer.burst(s.x,s.y+.3,s.z,'#e2b0a0',40);if(Math.hypot(game.pos.x-s.x,game.pos.z-s.z)<s.radius&&game.pos.y-s.y<1.2)game.hurt(7);game.slam=null;}}

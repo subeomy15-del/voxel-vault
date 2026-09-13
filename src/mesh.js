@@ -1,6 +1,6 @@
-import { BLOCKS } from './data.js?v=16';
-import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=16';
-import { TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=16';
+import { BLOCKS } from './data.js?v=18';
+import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=18';
+import { TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=18';
 export const BLOCK_TYPES=Object.keys(BLOCKS);
 const ids=Object.fromEntries(BLOCK_TYPES.map((t,i)=>[t,i+1]));
 const faces=[

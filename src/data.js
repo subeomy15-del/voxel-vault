@@ -1,4 +1,4 @@
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=16';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=18';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },
@@ -221,7 +221,8 @@ Object.assign(ITEMS,{
  ender_berry:{name:'Ender Berry',color:'#b478e0',kind:'food',nutrition:5,saturation:6,description:'An otherworldly fruit. Restores food and energy.'}
 });
 Object.assign(ITEMS,{
- relic_shard:{name:'Relic Shard',color:'#e7bb67',kind:'material',description:'Treasure from outposts and Rift anchors. Trade at a Relic Forge.'},
+  relic_shard:{name:'Relic Shard',color:'#e7bb67',kind:'material',description:'Treasure from outposts and Rift anchors. Trade at a Relic Forge.'},
+  forge_seal:{name:'Forge Seal',color:'#9ec9d6',kind:'material',description:'A rare seal earned from the Ender Dragon or a completed Rift Run. Required for sacred forge gear.'},
  grappling_hook:{name:'Grappling Hook',color:'#b5c3cb',kind:'grapple',description:'Aim at solid terrain and press E to pull yourself up. 24-block reach, 2-second cooldown.'},
  ruby_blade:{name:'Ruby Lifeblade',color:'#e26581',kind:'sword',damage:11,leech:1,tier:5,description:'Melee hits restore one health. A relic-forged ruby blade.'},
  sapphire_blade:{name:'Sapphire Frostblade',color:'#77c6ee',kind:'sword',damage:10,slow:2,tier:5,description:'Melee hits slow your target for two seconds.'},
@@ -237,9 +238,11 @@ Object.assign(ITEMS,{
   crystal_carrot:{name:'Crystal Carrot',color:'#a9dbc8',kind:'food',nutrition:6,saturation:8,effect:'nightvision',duration:120,description:'Food and two minutes of night vision.'}
 });
 ITEMS.firecracker={name:'Firecracker',color:'#c96958',kind:'firecracker',description:'Press E for a celebration burst. While gliding, it boosts you forward and upward.'};
+ITEMS.blast_charge={name:'Blast Charge',color:'#d88658',kind:'explosive',description:'A compact mining charge. Press E to place it ahead, then sprint clear before it detonates.'};
 Object.assign(ITEMS,{dawnblade:{name:'Dawnblade',color:'#f0c878',kind:'sword',damage:22,leech:2,tier:6,description:'Sacred sunsteel blade. Hits restore two health.'},aegis_armor:{name:'Aegis Armor',color:'#d8c996',kind:'armor',reduction:.78,description:'Sacred armor that reduces incoming damage by 78%.'},seraph_glider:{name:'Seraph Glider',color:'#e2c58e',kind:'glider',ore:'gold',glideSpeed:21,sink:.5,description:'Sacred wings with exceptional speed and gentle descent.'},sacred_orb:{name:'Sacred Orb',color:'#f0d18c',kind:'orb',description:'A sacred focus orb. Use it to blink safely across the islands.'}});
 export const RECIPES = [
   { item:'firecracker', count:4, cost:{coal:1,sand:2}, category:'Supplies' },
+  { item:'blast_charge', count:1, cost:{coal:3,iron_ingot:2,sand:2}, category:'Supplies' },
   { item: 'stone_sword', cost: { stone: 6, wood: 2 }, category: 'Gear' },
   { item: 'stone_pickaxe', cost: { stone: 5, wood: 2 }, category: 'Gear' },
   { item: 'iron_sword', cost: { iron_ingot: 5, wood: 2 }, category: 'Gear' },

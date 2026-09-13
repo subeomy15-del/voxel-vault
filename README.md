@@ -30,7 +30,7 @@ The release has 218 usable catalogue items and 131 recipes. Older copper stacks 
 
 Find Wayfarer Lodge, Old Watchtower and Crystal Sanctuary near home. Open treasure chests with E and trade relic shards at a Relic Forge. The lodge chest supplies enough shards for a grappling hook: equip it, aim at solid terrain within 24 blocks, and press E.
 
-The Relic Forge also offers sacred gear: Dawnblade, Aegis Armor, Seraph Glider and Sacred Orb. Save relic shards from the outposts and Rift anchors for these final-tier rewards.
+The Relic Forge also offers sacred gear: Dawnblade, Aegis Armor, Seraph Glider and Sacred Orb. Save relic shards from the outposts and Rift anchors for these final-tier rewards. Ender islands now spawn swift Enderlings and ranged Void Archers; cold Overworld nights can call in Frost Howlers.
 
 Build with wood, masonry, slabs, stairs, glass, fabrics and metals. Matching slabs stack, stairs rotate, ladders climb and beds set your respawn point. Chests store stacks; moonstone chests share storage across dimensions. The placement preview shows blocked spaces before spending a block.
 
@@ -43,6 +43,7 @@ Nine crops grow during active play. Plant on tilled soil; nearby water speeds gr
 - **Left click:** attack or hold to mine. Hold with a bow, then release to shoot.
 - **E / right click:** interact, grapple, eat, plant, harvest or place.
 - **Firecrackers:** craft 4 with 1 coal and 2 sunstone sand, equip them, then press E for a bright burst. While gliding, press E to boost forward and upward; each boost has a short recovery.
+- **Blast Charges:** craft one with 3 coal, 2 iron ingots and 2 sand. Equip it and press E to arm a timed mining explosion. Clear the area before it detonates.
 - **V / F5:** first person, third person behind, third person front.
 - **G:** open or close an equipped glider while airborne.
 - **1–9 / wheel:** select hotbar. **Middle click:** select a targeted owned block.

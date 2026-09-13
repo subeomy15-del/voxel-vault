@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=16';
-import {World} from '../src/world.js?v=16';
-import {ITEMS,RECIPES,craft} from '../src/data.js?v=16';
-import {freshState,saveState,loadState} from '../src/save.js?v=16';
-import {summonDragon,DRAGON_TOWERS} from '../src/dragon.js?v=16';
-import {launchBolt,updateProjectiles} from '../src/combat.js?v=16';
+import {Game} from '../src/game.js?v=18';
+import {World} from '../src/world.js?v=18';
+import {ITEMS,RECIPES,craft} from '../src/data.js?v=18';
+import {freshState,saveState,loadState} from '../src/save.js?v=18';
+import {summonDragon,DRAGON_TOWERS} from '../src/dragon.js?v=18';
+import {launchBolt,updateProjectiles} from '../src/combat.js?v=18';
 const make=()=>{const data=new Map();return new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},{getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)});};
 const arena=()=>{const g=make();g.start('ender');g.pos={x:.5,y:19,z:-4.5};return g;};
 test('dragon requires its altar, grants a bow once and cycles flight, breath, swoop and melee landing',()=>{
@@ -37,7 +37,7 @@ test('older resources merge without losing stacks, equipment, containers or plac
 });
 test('coal only fuels furnaces and current recipes never require retired ores',()=>{
  assert.equal(new Set(RECIPES.map(r=>r.item)).size,RECIPES.length);
- for(const r of RECIPES){assert.ok(!ITEMS[r.item].hidden,r.item);for(const key of Object.keys(r.cost)){assert.ok(!['copper','copper_ingot','crystal','ruby','emerald','sapphire'].includes(key),r.item+': '+key);if(key==='coal')assert.equal(r.item,'firecracker');}}
+ for(const r of RECIPES){assert.ok(!ITEMS[r.item].hidden,r.item);for(const key of Object.keys(r.cost)){assert.ok(!['copper','copper_ingot','crystal','ruby','emerald','sapphire'].includes(key),r.item+': '+key);if(key==='coal')assert.ok(['firecracker','blast_charge'].includes(r.item),r.item);}}
  assert.equal(ITEMS.coal.place,false);assert.equal(craft({coal:20},'coal_glider'),false);
  const g=arena();g.pos={x:3.5,y:19,z:3.5};g.world.set(3,19,2,'campfire');g.station={x:3,y:19,z:2};g.add('coal',3);g.add('wheat',2);assert.equal(g.smelt('bread'),false);g.add('wood',1);assert.equal(g.smelt('bread'),true);assert.equal(g.state.inv.coal,3);g.world.set(3,19,2,'furnace');assert.equal(g.smelt('bread'),true);assert.equal(g.state.inv.coal,2);
 });
