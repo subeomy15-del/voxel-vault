@@ -1,18 +1,18 @@
 import * as THREE from '../vendor/three.module.js';
-import { BLOCKS, ITEMS, hash } from './data.js?v=24';
-import { CHUNK, WORLD_LIMIT } from './world.js?v=24';
-import { ENEMIES } from './combat.js?v=24';
-import { textureCanvas,TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=24';
-import { Scenery } from './scenery.js?v=24';
-import { boxesFor } from './shapes.js?v=24';
-import { animalModel,bowModel,arrowModel,toolModel } from './models.js?v=24';
-import { itemModel } from './item-model.js?v=24';
-import { dragonModel,animateDragon } from './dragon-model.js?v=24';
-import { RiftEffects } from './rift-effects.js?v=24';
-import { PostProcess } from './post-process.js?v=24';
-import { PlayerModel } from './player-model.js?v=24';
-import { cameraPosition } from './perspective.js?v=24';
-import { ViewEffects } from './view-effects.js?v=24';
+import { BLOCKS, ITEMS, hash } from './data.js?v=26';
+import { CHUNK, WORLD_LIMIT } from './world.js?v=26';
+import { ENEMIES } from './combat.js?v=26';
+import { textureCanvas,TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=26';
+import { Scenery } from './scenery.js?v=26';
+import { boxesFor } from './shapes.js?v=26';
+import { animalModel,bowModel,arrowModel,toolModel } from './models.js?v=26';
+import { itemModel } from './item-model.js?v=26';
+import { dragonModel,animateDragon } from './dragon-model.js?v=26';
+import { RiftEffects } from './rift-effects.js?v=26';
+import { PostProcess } from './post-process.js?v=26';
+import { PlayerModel } from './player-model.js?v=26';
+import { cameraPosition } from './perspective.js?v=26';
+import { ViewEffects } from './view-effects.js?v=26';
 export class Renderer {
   constructor(container,settings){
     this.settings=settings;this.scene=new THREE.Scene();this.scene.background=new THREE.Color('#b6cddd');this.scene.fog=new THREE.Fog('#b6cddd',62,125);
@@ -23,7 +23,7 @@ export class Renderer {
     this.waterMaterial=new THREE.MeshStandardMaterial({color:'#42a7dd',roughness:.6,metalness:0,transparent:true,opacity:.78,vertexColors:true});
     this.glassMaterial=new THREE.MeshLambertMaterial({color:'#ffffff',transparent:true,opacity:.28,vertexColors:true});
     this.epoch=0;this.revision=0;this.chunkVersions=new Map();this.ready=[];this.inflight=false;this.underground=false;
-    this.worker=new Worker(new URL('./terrain-worker.js?v=24',import.meta.url),{type:'module'});
+    this.worker=new Worker(new URL('./terrain-worker.js?v=26',import.meta.url),{type:'module'});
     this.worker.onmessage=({data})=>{if(data.epoch!==this.epoch)return;this.inflight=false;if(data.revision<(this.chunkVersions.get(`${data.cx},${data.cz}`)||0))return;this.ready.push(data);};
     this.worker.onerror=e=>{console.error('Terrain worker failed',e);document.querySelector('#loading').hidden=false;document.querySelector('#loading').textContent='Terrain could not load. Reload the page to try again.';};
     this.projectileMeshes=new Map();

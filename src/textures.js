@@ -1,4 +1,4 @@
-import { BLOCKS, hash } from './data.js?v=24';
+import { BLOCKS, hash } from './data.js?v=26';
 export const TILE=32,ATLAS_COLS=16;
 export const ATLAS_ROWS=2**Math.ceil(Math.log2(Math.ceil(Object.keys(BLOCKS).length*3/ATLAS_COLS)));
 export const ATLAS_WIDTH=TILE*ATLAS_COLS,ATLAS_HEIGHT=TILE*ATLAS_ROWS;
@@ -36,9 +36,15 @@ export function textureCanvas(){
       }
       ctx.restore();continue;
     }
-    const bright={grass:'#738866',leaf:'#567259',pine:'#4e665f',autumnleaf:'#a59162',dirt:'#92785b',sand:'#c7b889',stone:'#8a969e'};
+    const bright={grass:BLOCKS.grass.color,leaf:BLOCKS.leaf.color,pine:BLOCKS.pine.color,autumnleaf:'#a59162',dirt:'#92785b',sand:'#c7b889',stone:'#8a969e'};
     fill(ores[type]?'#89929a':type==='grass'&&side!==0?bright.dirt:bright[type]||b.color);
     for(let i=0;i<28;i++){const x=Math.floor(hash(i,index+71)*32),y=Math.floor(hash(index+23,i)*32);fill(hash(i,index)>.5?'#ffffff0c':'#15222110',x,y,1+Math.floor(hash(i,5)*4),1+Math.floor(hash(i,9)*3));}
+    if(['lava','magma'].includes(type)){
+      fill(type==='lava'?'#ce581b':'#493c32');
+      for(let i=0;i<14;i++){const x=hash(i,index)*32,y=hash(index,i)*32;stroke(type==='lava'?'#f8aa36':'#cf7228',[[x-8,y],[x,y+3],[x+4,y-3],[x+11,y]],type==='lava'?3:2);}
+    }
+    if(['netherrack','soul_sand'].includes(type))for(let i=0;i<18;i++){const x=hash(i,index)*30,y=hash(index,i)*30;fill('#271c1940',x,y,4,3);fill('#e9b48b20',x,y-1,4,1);}
+    if(['nether_bricks','quartz_bricks'].includes(type))for(let y=0;y<32;y+=8){fill('#302b2548',0,y,32,1);for(let x=y%16?8:0;x<32;x+=16)fill('#302b2548',x,y,1,8);}
     if(['end_stone','end_bricks'].includes(type)){
       for(let i=0;i<20;i++){const x=Math.floor(hash(i,index)*28),y=Math.floor(hash(index,i)*28);fill('#82785b30',x,y,3,2);fill('#fff8dc40',x,y-1,3,1);}
       if(type==='end_bricks')for(let y=0;y<32;y+=8){fill('#73665060',0,y,32,1);fill('#73665060',(y*2)%24,y,1,8);}

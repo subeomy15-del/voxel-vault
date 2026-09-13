@@ -1,8 +1,8 @@
-import { netherHeight,netherBlock } from './nether.js?v=24';
-import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=24';
-import { canonicalItem } from './resource-map.js?v=24';
-import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=24';
-import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=24';
+import { netherHeight,netherBlock } from './nether.js?v=26';
+import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=26';
+import { canonicalItem } from './resource-map.js?v=26';
+import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=26';
+import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=26';
 export const CHUNK=16, WORLD_LIMIT=511, WORLD_BOTTOM=-64, WORLD_TOP=95, SEA_LEVEL=4;
 export const cellKey=(x,y,z)=>`${x},${y},${z}`;
 export class World {
@@ -84,7 +84,7 @@ export class World {
     // Walk down a covered, five-block-wide slope into the cave, rather than a flooded shaft.
     if(x>=20&&x<=24&&z<=10&&z>=-32){const floor=this.height(22,10)-Math.floor((10-z)*.65);if(y>floor&&y<floor+6)return null;}
     if(y>h)return h<SEA_LEVEL&&y<=SEA_LEVEL?'water':null;
-    if(this.inCave(x,y,z,c))return null;
+    if(this.inCave(x,y,z,c))return y<-52?'lava':null;
     if(y===h)return h<=SEA_LEVEL+1?'sand':h>48?'snow':BIOMES[c.biome].top;
     if(y>h-4)return c.biome==='desert'?'sand':y===h-3&&c.river<22?'clay':'dirt';
     const rock=y<-49?'basalt':y<-38?'slate':c.rock==='limestone'&&y<-5?'marble':c.rock;

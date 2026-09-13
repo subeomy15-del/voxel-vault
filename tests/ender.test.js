@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { World } from '../src/world.js?v=24';
-import { Game } from '../src/game.js?v=24';
-import { freshState,loadState,saveState } from '../src/save.js?v=24';
-import { ITEMS,RECIPES,craft } from '../src/data.js?v=24';
-import { cameraPosition } from '../src/perspective.js?v=24';
-import { meshChunk } from '../src/mesh.js?v=24';
+import { World } from '../src/world.js?v=26';
+import { Game } from '../src/game.js?v=26';
+import { freshState,loadState,saveState } from '../src/save.js?v=26';
+import { ITEMS,RECIPES,craft } from '../src/data.js?v=26';
+import { cameraPosition } from '../src/perspective.js?v=26';
+import { meshChunk } from '../src/mesh.js?v=26';
 const storage=()=>{const m=new Map();return{getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v)};};
 const game=()=>new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},storage());
 test('Ender islands have a safe arrival, real voids, resources and visible undersides',()=>{
@@ -39,7 +39,7 @@ test('realm travel carries the same inventory, health and equipment and persists
  const loaded=new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},g.storage);assert.equal(loaded.state.dimension,'ender');assert.equal(loaded.world.get(4,36,4),'moonstone_block');loaded.travel('overworld');assert.deepEqual(loaded.pos,home);assert.equal(loaded.world.get(3,44,3),'gold_block');assert.equal(loaded.state.inv.moonstone,8);assert.equal(loaded.state.inv.diamond,13);assert.equal(loaded.state.armor,'armor');const kit=loaded.state.inv.moonstone_orb;loaded.travel('ender');assert.equal(loaded.state.inv.moonstone_orb,kit);assert.equal(loaded.world.get(4,36,4),'moonstone_block');
 });
 test('Rift Run requires reaching each anchor, rewards once, and saves completion',async()=>{
- const {RIFT_ANCHORS}=await import('../src/realms.js?v=24');const g=game();g.start('adventure');g.state.fortressCleared=true;g.save();g.start('ender');g.add('hang_glider');g.state.glider='hang_glider';g.add('moonstone_orb',12);assert.equal(g.collectAnchor('dawn'),false);g.state.elapsed+=20;
+ const {RIFT_ANCHORS}=await import('../src/realms.js?v=26');const g=game();g.start('adventure');g.state.fortressCleared=true;g.save();g.start('ender');g.add('hang_glider');g.state.glider='hang_glider';g.add('moonstone_orb',12);assert.equal(g.collectAnchor('dawn'),false);g.state.elapsed+=20;
  for(const a of RIFT_ANCHORS){g.pos={x:a.x+.5,y:g.world.height(a.x,a.z)+1,z:a.z+.5};assert.equal(g.collectAnchor(a.id),true);assert.equal(g.collectAnchor(a.id),false);g.state.elapsed+=25;}
  assert.equal(g.state.rift.collected.length,3);assert.equal(g.state.inv.moonstone_sword||0,0);assert.equal(g.state.glider,'hang_glider');assert.ok(g.state.rift.best>0);g.travel('overworld');assert.equal(g.state.inv.moonstone_sword||0,0);assert.equal(loadState(g.storage).rift.rewarded,true);g.state.fortressCleared=true;g.travel('ender');assert.equal(g.restartRift(),true);
  for(const a of RIFT_ANCHORS){g.pos={x:a.x+.5,y:g.world.height(a.x,a.z)+1,z:a.z+.5};g.collectAnchor(a.id);g.state.elapsed+=10;}assert.equal(g.state.inv.moonstone_sword||0,0);assert.equal(g.state.rift.runs,2);

@@ -1,5 +1,11 @@
 # Voxel Vault — Dragon Isles
 
+## The Long Way Home — release 14
+
+An eight-chapter adventure now guides your first timber, workshop and iron pickaxe through the Nether fortress, Ender Dragon and journey home. Completed chapters stay completed after you spend materials or reload. The HUD shows your next objective; the Journal records the full route. Creative has its own building guidance. The Rift Run remains an optional End activity, with the dragon as the main objective.
+
+This release includes natural green foliage, neutral portal lighting, no bloom, revised branding, lava hazards, six new building materials, and refreshed previews and item artwork. Existing worlds and inventory remain compatible.
+
 A single-player browser voxel adventure with connected Overworld, Nether and Ender dimensions, a fightable Ender Dragon, building, crafting, farming and gliders. Cool forest greens, muted blue skies, textured blocks and simple item silhouettes give the game a calmer look. Saves stay in your browser.
 
 Play: https://subeomy15-del.github.io/voxel-vault/
@@ -24,7 +30,7 @@ The separate **Rift Run** remains available: use cyan launch pads and a glider t
 - **Diamond:** deep gem for durable equipment and building blocks.
 - **Moonstone:** Ender material for advanced equipment, orbs and shared storage.
 
-The release has 218 usable catalogue items and 131 recipes. Older copper stacks convert to iron; Aether crystal, ruby, sapphire and emerald stacks convert to diamond; violet crystal converts to moonstone. Equivalent older equipment, storage contents and placed mineral blocks retain their value through conversion. Old resource identifiers remain readable by the save loader.
+The release has 232 usable catalogue items and 137 recipes. Older copper stacks convert to iron; Aether crystal, ruby, sapphire and emerald stacks convert to diamond; violet crystal converts to moonstone. Equivalent older equipment, storage contents and placed mineral blocks retain their value through conversion. Old resource identifiers remain readable by the save loader.
 
 ## Explore and build
 
@@ -51,7 +57,7 @@ Nine crops grow during active play. Plant on tilled soil; nearby water speeds gr
 - **F / Q:** eat food / drink a healing tonic. **T:** rotate stairs. **B:** place a bridge block.
 - **Creative flight:** double tap Space, then Space to rise or X to descend.
 
-Touch controls provide movement, drag look and action buttons. First-person tools and third-person characters have animated models. High quality adds shadows, antialiasing and restrained glow; Performance reduces terrain range and skips post-processing.
+Touch controls provide movement, drag look and action buttons. First-person tools and third-person characters have animated models. High quality adds shadows and antialiasing without bloom. Performance reduces terrain range. Lava pools fill the Nether and the deepest Overworld caves; contact damages the player. Magma blocks also deal damage underfoot. Lava is static and placeable in Creative. Netherrack, soul sand, magma, Nether bricks, quartz blocks and quartz bricks expand the building catalogue.
 
 ## Run locally
 
@@ -71,7 +77,7 @@ npm run test:browser
 node tests/dragon-browser.js
 ```
 
-The 68 unit tests cover connected saves, migration of old resources, the five-ore progression, furnace fuel, dragon phases and projectiles, destroyed healing crystals, persistent boss health, one-time rewards, terrain, building, movement, combat, farming and gliding.
+The 82 unit tests cover connected saves, migration of old resources, the five-ore progression, furnace fuel, dragon phases and projectiles, destroyed healing crystals, persistent boss health, one-time rewards, terrain, building, movement, combat, farming and gliding.
 
 Browser scripts use an isolated Chrome profile on debugging port 9224 and the local server on 3001. They reset only the isolated profile's test worlds and exercise real controls, rendering, item images, save reloads and compact layouts. Screenshots go to /private/tmp/voxel-vault-*.png.
 

@@ -1,4 +1,4 @@
-import { hash } from './data.js?v=24';
+import { hash } from './data.js?v=26';
 const blend=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
 export function terrainHeight(world,x,z){
   const noise=(a,b,s)=>world.noise(a,b,s),climate=noise(x+170,z-85,160);
@@ -24,7 +24,7 @@ export function treeAt(world,x,z,biome){
 }
 export function growTree(world,put,x,y,z,species){
   const n=hash(x,z,world.seed+81),height=species==='pine'?7+Math.floor(n*4):species==='birch'?6+Math.floor(n*3):4+Math.floor(n*3);
-  const wood=species==='pine'?'pinewood':species==='birch'?'birch':'wood',leaf=species==='pine'?'pine':species==='oak'&&n>.88?'autumnleaf':'leaf';
+  const wood=species==='pine'?'pinewood':species==='birch'?'birch':'wood',leaf=species==='pine'?'pine':'leaf';
   for(let h=1;h<=height;h++)put(x,y+h,z,wood);
   if(species==='pine'){
     for(let h=3;h<=height+1;h++){

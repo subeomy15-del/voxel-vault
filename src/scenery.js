@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import { hash } from './data.js?v=24';
+import { hash } from './data.js?v=26';
 export class Scenery {
   constructor(renderer){
     this.owner=renderer;this.time={value:0};this.wind={value:1};
@@ -72,14 +72,14 @@ export class Scenery {
     const t=game.state.time,phase=t/600*Math.PI*2,elevation=Math.sin(phase),day=THREE.MathUtils.smoothstep(elevation,-.22,.35),dusk=(1-Math.abs(elevation))**5;
     this.time.value=t;this.wind.value=this.owner.settings.bobbing?1:0;
     const uniforms=this.skyUniforms;uniforms.sunDirection.value.set(-Math.cos(phase)*.8,elevation,.25).normalize();uniforms.night.value=1-day;uniforms.rift.value=game.state.dimension==='ender'?1:0;
-    uniforms.zenith.value.set('#16283e').lerp(new THREE.Color('#7395ad'),day);
-    uniforms.horizon.value.set('#354654').lerp(new THREE.Color('#bdcbd1'),day).lerp(new THREE.Color('#b6a2a0'),dusk*.45);
+    uniforms.zenith.value.set('#16283e').lerp(new THREE.Color('#6aa6cf'),day);
+    uniforms.horizon.value.set('#354654').lerp(new THREE.Color('#c4d8df'),day).lerp(new THREE.Color('#c8b598'),dusk*.35);
     this.sky.visible=!inCave;this.sky.position.copy(this.owner.camera.position);
     this.clouds.visible=!inCave;this.clouds.position.set(game.pos.x+Math.sin(t*.002)*10,0,game.pos.z);this.clouds.material.color.set('#8b9ba5').lerp(new THREE.Color('#f6f0dd'),day);this.clouds.material.opacity=.7*day+.22;
     const r=this.owner;r.scene.background.copy(inCave?new THREE.Color('#162128'):uniforms.horizon.value);r.scene.fog.color.copy(r.scene.background);
     const range=r.settings.quality==='high'?1:.76;r.scene.fog.near=inCave?20:48*range;r.scene.fog.far=inCave?45:106*range;
     r.sun.intensity=inCave?.06:.14+day*1.45;r.sun.color.set('#b7cee7').lerp(new THREE.Color('#edf1f3'),day).lerp(new THREE.Color('#dfbfab'),dusk*.3);
-    r.ambient.intensity=game.effect('nightvision')?2.3:inCave?.38:.6+day*.95;r.ambient.color.set('#c4d2df');r.ambient.groundColor.set('#6b7f7a');
+    r.ambient.intensity=game.effect('nightvision')?2.3:inCave?.38:.6+day*.95;r.ambient.color.set('#e1e8e5');r.ambient.groundColor.set('#74785b');
     if(game.effect('nightvision')){r.scene.fog.near=45;r.scene.fog.far=95;r.lantern.intensity=Math.max(r.lantern.intensity,5);}
     if(game.state.dimension==='ender'){
       uniforms.zenith.value.set('#100d29');uniforms.horizon.value.set('#51416c');uniforms.night.value=.65;

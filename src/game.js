@@ -1,16 +1,17 @@
-import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=24';
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=24';
-import { canonicalItem,normalizeResources } from './resource-map.js?v=24';
-import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=24';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=24';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=24';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,hash,dailySeed } from './data.js?v=24';
-import { freshState,loadState,saveState,importLegacy } from './save.js?v=24';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=24';
-import { movePlayer,requestJump } from './movement.js?v=24';
-import { overlapsBlock } from './shapes.js?v=24';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=24';
-import { ANIMALS,animalKind } from './wildlife.js?v=24';
+import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=26';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=26';
+import { canonicalItem,normalizeResources } from './resource-map.js?v=26';
+import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=26';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=26';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=26';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,hash,dailySeed } from './data.js?v=26';
+import { freshState,loadState,saveState,importLegacy } from './save.js?v=26';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=26';
+import { movePlayer,requestJump } from './movement.js?v=26';
+import { overlapsBlock } from './shapes.js?v=26';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=26';
+import { ANIMALS,animalKind } from './wildlife.js?v=26';
+import { CHAPTERS,journeyStage } from './journey.js?v=26';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}
@@ -353,11 +354,27 @@ export class Game {
     }
   }
   direction(){return{x:-Math.sin(this.yaw)*Math.cos(this.pitch),y:Math.sin(this.pitch),z:-Math.cos(this.yaw)*Math.cos(this.pitch)};}
+  updateJourney(){
+    const stage=journeyStage(this);
+    if(stage<=(this.state.journeyStage||0))return;
+    this.state.journeyStage=stage;
+    this.toast(stage===8?'THE LONG WAY HOME':'NEW CHAPTER',CHAPTERS[stage].title,'reward');
+    this.save();
+  }
+  updateHeat(){
+    let lava=false,magma=false;
+    for(const dx of [-.28,.28])for(const dz of [-.28,.28]){
+      const x=Math.floor(this.pos.x+dx),z=Math.floor(this.pos.z+dz);
+      for(const dy of [.05,.85,1.6])lava ||= this.world.get(x,Math.floor(this.pos.y+dy),z)==='lava';
+      magma ||= this.world.get(x,Math.floor(this.pos.y-.05),z)==='magma';
+    }
+    if(lava)this.hurt(4);else if(magma&&this.grounded)this.hurt(1);
+  }
   update(dt){
     this.renderer.stream(this.pos);if(this.screen)return;
     this.state.time+=dt;this.state.elapsed+=dt;tickSurvival(this,dt);this.updateDrops(dt);for(const k of['grappleCooldown','attackCooldown','hurtCooldown','dashCooldown','dashTime','firecrackerCooldown','blastCooldown'])this[k]=Math.max(0,this[k]-dt);
-    this.cropTimer+=dt;if(this.cropTimer>1){this.cropTimer=0;this.growCrops();}
-    this.move(dt);this.updateFortress();if(this.tickRift(dt))return;this.updateMobs(dt);if(this.screen)return;
+    this.cropTimer+=dt;if(this.cropTimer>1){this.cropTimer=0;this.growCrops();this.updateJourney();}
+    this.move(dt);this.updateHeat();if(this.screen)return;this.updateFortress();if(this.tickRift(dt))return;this.updateMobs(dt);if(this.screen)return;
     this.target=this.world.raycast({x:this.pos.x,y:this.pos.y+(this.crouching?1.15:1.58),z:this.pos.z},this.direction(),6);
     if(this.placeHeld){this.placeTimer-=dt;if(this.placeTimer<=0){this.place();this.placeTimer=.16;}}
     if(this.drawState){if(this.drawState.item!==this.held)this.drawState=null;else this.drawState.time+=dt;}

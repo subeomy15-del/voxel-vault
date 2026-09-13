@@ -1,7 +1,7 @@
-import { VERSION, ITEMS, STARTER_BAR, starterInventory, dailySeed, BLOCKS,CROPS,EFFECTS } from './data.js?v=24';
-import { ANIMALS } from './wildlife.js?v=24';
-import { normalizeResources } from './resource-map.js?v=24';
-import { REALM_FIELDS,captureRealm } from './realms.js?v=24';
+import { VERSION, ITEMS, STARTER_BAR, starterInventory, dailySeed, BLOCKS,CROPS,EFFECTS } from './data.js?v=26';
+import { ANIMALS } from './wildlife.js?v=26';
+import { normalizeResources } from './resource-map.js?v=26';
+import { REALM_FIELDS,captureRealm } from './realms.js?v=26';
 const prefix='voxel-vault-v2-';
 export const defaultSettings={volume:.45,sensitivity:1,quality:'high',bobbing:true,perspective:0};
 export function freshState(seed=7821,mode='adventure') {
@@ -50,6 +50,7 @@ export function loadState(storage,mode='adventure') {
     if(raw.dragon&&typeof raw.dragon==='object')s.dragon={active:raw.dragon.active===true,hp:Math.max(1,Math.min(420,Number(raw.dragon.hp)||420)),defeated:raw.dragon.defeated===true,wins:Math.max(0,Math.min(99999,Number(raw.dragon.wins)||0)),kit:raw.dragon.kit===true,arena:raw.dragon.arena===true};
     for(const[k,n]of Object.entries(raw.moonChest||{}))if(ITEMS[k]&&Number.isFinite(n)&&n>0)s.moonChest[k]=Math.min(999999,Math.floor(n));
     s.fortressCleared=raw.fortressCleared===true||raw.dragon?.defeated===true;
+    s.journeyStage=Math.max(0,Math.min(8,Number.isFinite(raw.journeyStage)?Math.floor(raw.journeyStage):0));
     s.victory=raw.victory===true;s.waypoint=typeof raw.waypoint==='string'?raw.waypoint:'camp';
     for(const k of Object.keys(s.stats))if(Number.isFinite(raw.stats?.[k]))s.stats[k]=Math.max(0,raw.stats[k]);normalizeResources(s);return s;
   }catch{return null;}

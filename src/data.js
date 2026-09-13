@@ -1,4 +1,4 @@
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=24';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=26';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },
@@ -83,6 +83,13 @@ for(const[id,name,color]of [
  ['dark_bricks','Dark Bricks','#4b5363'],['ivory_bricks','Ivory Bricks','#d5cfbb'],['copper_tiles','Copper Roof Tiles','#9c6854'],
  ['teal_tiles','Teal Roof Tiles','#487b7c'],['amber_glass','Amber Glass','#d7ad66'],['violet_glass','Violet Glass','#9f8cc0']
 ])BLOCKS[id]={name,color,solid:true,hardness:1.8};
+for(const[id,name,color,hardness]of [
+ ['netherrack','Netherrack','#854b39',1],['soul_sand','Soul Sand','#75604b',.7],
+ ['magma','Magma Block','#a14e28',1.5],['nether_bricks','Nether Bricks','#513b35',1.8],
+ ['quartz_block','Quartz Block','#ddd5c2',1.6],['quartz_bricks','Quartz Bricks','#cfc5af',1.6]
+])BLOCKS[id]={name,color,hardness,solid:true};
+BLOCKS.lava={name:'Lava',color:'#dc681f',hardness:Infinity,solid:false,liquid:true,description:'Molten rock. Damages on contact; available for placement in Creative.'};
+BLOCKS.magma.description='Hot volcanic rock. Damages anyone standing on it.';
 export const ITEMS = {
   ...Object.fromEntries(Object.entries(BLOCKS).map(([k,v]) => [k,{ ...v, place: true }])),
   wood_sword: { name: 'Trail sword', color: '#c2a47a', kind: 'sword', damage: 3, tier: 1, description: 'A trusty start. Left click to attack.' },
@@ -380,13 +387,19 @@ Object.assign(ITEMS.ruby_blade,{name:'Moonstone Lifeblade',color:'#b2a6cf',descr
 Object.assign(ITEMS.sapphire_blade,{name:'Moonstone Frostblade',color:'#91b5c8'});
 ITEMS.copper_tiles.name=BLOCKS.copper_tiles.name='Weathered Roof Tiles';
 ITEMS.spring_salad.description='Higher jumps for 90 seconds. Made with carrots, corn and diamond.';
-for(const name of ['grass','leaf','pine','hedge']){const color={grass:'#738866',leaf:'#567259',pine:'#4e665f',hedge:'#60785f'}[name];BLOCKS[name].color=color;ITEMS[name].color=color;}
+for(const name of ['grass','leaf','pine','hedge']){const color={grass:'#759b4f',leaf:'#50813e',pine:'#396745',hedge:'#557b40'}[name];BLOCKS[name].color=color;ITEMS[name].color=color;}
 const retained=RECIPES.filter(r=>!RESOURCE_ALIASES[r.item]);
 RECIPES.splice(0,RECIPES.length,...retained);
 for(const r of RECIPES){const cost={};for(const[k,n]of Object.entries(r.cost)){const key=canonicalItem(k);cost[key]=(cost[key]||0)+n;}r.cost=cost;}
 RECIPES.push({item:'diamond_armor',cost:{diamond:8,iron_ingot:4},category:'Gear'},{item:'diamond_block',cost:{diamond:4},category:'Building'});
 SMELTING.splice(0,SMELTING.length,...SMELTING.filter(r=>r.input!=='copper'));
 ORE_GLIDERS.splice(0,ORE_GLIDERS.length,...ORE_GLIDERS.filter(([id])=>['iron','gold','diamond'].includes(id)));
+RECIPES.push(
+ {item:'nether_bricks',count:4,cost:{netherrack:4},category:'Building'},
+ {item:'quartz_block',count:4,cost:{netherrack:8,sand:4},category:'Building'},
+ {item:'quartz_bricks',count:4,cost:{quartz_block:4},category:'Building'},
+ {item:'magma',count:2,cost:{netherrack:4,basalt:2},category:'Building'}
+);
 const HAND_RECIPES=new Set(['bench','plank','birch_plank','pine_plank','torch','arrows','cloth','cotton_cloth','sugar','watermelon_slice','melon_slice','seeds']);
 for(const recipe of RECIPES)recipe.station=HAND_RECIPES.has(recipe.item)?'hand':'bench';
 export const LANDMARKS = [

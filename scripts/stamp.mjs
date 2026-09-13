@@ -6,5 +6,6 @@ for(const directory of ['src','tests'])for(const name of await readdir(new URL(d
   const next=source.replace(/(['"])((?:\.\.?\/|\/src\/)[^'"\s?]+\.js)(?:\?v=[a-z0-9.-]+)?\1/g,(all,quote,path)=>path.includes('/vendor/')||directory==='tests'&&!path.includes('/src/')?all:quote+path+'?v='+release+quote);
   if(next!==source)await writeFile(url,next);
 }
-const index=new URL('index.html',root),html=await readFile(index,'utf8');await writeFile(index,html.replace(/(\.\/(?:src\/main\.js|style\.css|favicon\.svg))(?:\?v=[a-z0-9.-]+)?/g,'$1?v='+release));
+const index=new URL('index.html',root),html=await readFile(index,'utf8');await writeFile(index,html.replace(/(\.\/(?:src\/main\.js|src\/natural\.css|style\.css|favicon\.svg))(?:\?v=[a-z0-9.-]+)?/g,'$1?v='+release));
+const css=new URL('src/natural.css',root),style=await readFile(css,'utf8');await writeFile(css,style.replace(/(assets\/[a-z-]+\.png)(?:\?v=[a-z0-9.-]+)?/g,'$1?v='+release));
 console.log('Stamped browser modules, worker imports and entry assets: '+release);
