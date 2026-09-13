@@ -1,7 +1,9 @@
-import { ANIMALS,updateAnimal } from './wildlife.js?v=12';
-import { visibleBetween,findMobPath } from './navigation.js?v=12';
+import { ANIMALS,updateAnimal } from './wildlife.js?v=13';
+import { visibleBetween,findMobPath } from './navigation.js?v=13';
+import { updateDragon } from './dragon.js?v=13';
 
 export const ENEMIES = {
+  dragon: {name:'Ender Dragon',hp:260,speed:7,damage:5,color:'#383442',glow:'#c6a5ff',radius:3.6,height:2.7,xp:300},
   sentinel: { name:'Grove sentinel', hp:18, speed:1.8, damage:3, color:'#66817c', glow:'#c1e9b2', xp:18 },
   stalker: { name:'Ember prowler', hp:14, speed:3.2, damage:3, color:'#a06443', glow:'#ffd38a', xp:20 },
   wisp: { name:'Frost wisp', hp:14, speed:1.7, damage:3, color:'#82afc2', glow:'#cef5ff', xp:22 },
@@ -42,7 +44,11 @@ export function updateProjectiles(game,dt) {
     const distance=Math.hypot(p.vx,p.vy,p.vz)*dt,steps=Math.max(1,Math.ceil(distance/.18));
     for(let i=0;i<steps&&p.life>0;i++) {
       p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;p.z+=p.vz*dt/steps;
-      if(game.world.intersects(p.x,p.y,p.z,.02,.01)){p.life=0;break;}
+      if(game.world.intersects(p.x,p.y,p.z,.02,.01)){
+        const x=Math.floor(p.x),y=Math.floor(p.y),z=Math.floor(p.z);
+        if(!p.hostile&&game.world.get(x,y,z)==='dragon_crystal'){game.world.set(x,y,z,null);game.renderer.burst(x+.5,y+.5,z+.5,'#b9a2e2',24);game.audio.play('break');game.toast('Healing crystal destroyed','The dragon recovers less health.');}
+        p.life=0;break;
+      }
       if(p.hostile&&Math.hypot(p.x-game.pos.x,p.z-game.pos.z)<.5&&p.y>game.pos.y&&p.y<game.pos.y+1.8){game.hurt(p.damage);p.life=0;}
       if(!p.hostile)for(const m of game.mobs)if(Math.hypot(m.x-p.x,m.z-p.z)<(m.kind==='guardian'?1.3:(ENEMIES[m.kind]?.radius||.35)+.2)&&p.y>m.y&&p.y<m.y+(m.kind==='guardian'?4:(ENEMIES[m.kind]?.height||1.7))){if(p.slow)m.slow=p.slow;game.hit(m,p.damage);p.life=0;break;}
     }
@@ -51,6 +57,7 @@ export function updateProjectiles(game,dt) {
 }
 export function updateEnemies(game,dt) {
   for(const m of [...game.mobs]) {
+    if(m.kind==='dragon'){m.flash=Math.max(0,m.flash-dt);updateDragon(game,m,dt,launchBolt);continue;}
     m.flash=Math.max(0,m.flash-dt);m.cooldown-=dt;m.stun=Math.max(0,(m.stun||0)-dt);
     const d=Math.hypot(game.pos.x-m.x,game.pos.z-m.z), info=ENEMIES[m.kind]||ENEMIES.sentinel;
     if(d>75)continue;

@@ -1,7 +1,7 @@
 export const OUTPOSTS=[
  {id:'lodge',name:'Wayfarer Lodge',dx:18,dz:15,kind:'lodge',color:'#e4bd78',loot:{relic_shard:3,apple:8,wood:24,iron_ingot:5}},
- {id:'tower',name:'Old Watchtower',dx:-25,dz:-18,kind:'tower',color:'#81c8d7',loot:{relic_shard:4,arrows:32,sapphire:3,moonstone_orb:5}},
- {id:'ruins',name:'Crystal Sanctuary',dx:30,dz:-28,kind:'ruins',color:'#b69be7',loot:{relic_shard:5,ruby:4,emerald:4,golden_apple:2}}
+ {id:'tower',name:'Old Watchtower',dx:-25,dz:-18,kind:'tower',color:'#81c8d7',loot:{relic_shard:4,arrows:32,diamond:3,moonstone_orb:5}},
+ {id:'ruins',name:'Crystal Sanctuary',dx:30,dz:-28,kind:'ruins',color:'#b69be7',loot:{relic_shard:5,diamond:4,gold_ingot:4,golden_apple:2}}
 ];
 export const FORGE_OFFERS=[['grappling_hook',3],['ruby_blade',5],['sapphire_blade',5],['warhammer',5],['vanguard_armor',7],['storm_glider',7],['starfall_bow',6]];
 export function installOutposts(g){
@@ -35,7 +35,7 @@ export function installOutposts(g){
      for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++){put(dx,7,dz,'plank');if((Math.abs(dx)===3||Math.abs(dz)===3)&&(dx+dz)%2===0)put(dx,8,dz,'stonebrick');}
      for(let dy=0;dy<8;dy++)put(-1,dy,0,'ladder');put(-1,7,0,'ladder');put(0,8,0,'lantern');
     }else{
-     for(const dx of [-3,3])for(const dz of [-3,3])for(let dy=0;dy<(dx===dz?5:3);dy++)put(dx,dy,dz,dy===4?'sapphire_block':'marble');
+     for(const dx of [-3,3])for(const dz of [-3,3])for(let dy=0;dy<(dx===dz?5:3);dy++)put(dx,dy,dz,dy===4?'diamond_block':'marble');
      for(let dx=-3;dx<=3;dx++)put(dx,5,-3,'marble');put(0,0,-2,'relic_forge');put(0,1,-2,'violet_crystal');
      for(const dx of [-2,2])put(dx,0,2,'lantern');
     }

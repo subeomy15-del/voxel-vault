@@ -1,4 +1,4 @@
-import { BLOCKS, hash } from './data.js?v=12';
+import { BLOCKS, hash } from './data.js?v=13';
 export const TILE=32,ATLAS_COLS=16;
 export const ATLAS_ROWS=2**Math.ceil(Math.log2(Math.ceil(Object.keys(BLOCKS).length*3/ATLAS_COLS)));
 export const ATLAS_WIDTH=TILE*ATLAS_COLS,ATLAS_HEIGHT=TILE*ATLAS_ROWS;
@@ -36,7 +36,7 @@ export function textureCanvas(){
       }
       ctx.restore();continue;
     }
-    const bright={grass:'#79bb46',leaf:'#5fa53d',pine:'#438545',autumnleaf:'#d89c43',dirt:'#98714c',sand:'#e7d39a',stone:'#929aa2'};
+    const bright={grass:'#64836e',leaf:'#4b7064',pine:'#3e625a',autumnleaf:'#a59162',dirt:'#887767',sand:'#c6c5ad',stone:'#8a969e'};
     fill(ores[type]?'#89929a':type==='grass'&&side!==0?bright.dirt:bright[type]||b.color);
     for(let i=0;i<28;i++){const x=Math.floor(hash(i,index+71)*32),y=Math.floor(hash(index+23,i)*32);fill(hash(i,index)>.5?'#ffffff0c':'#15222110',x,y,1+Math.floor(hash(i,5)*4),1+Math.floor(hash(i,9)*3));}
     if(['end_stone','end_bricks'].includes(type)){
@@ -48,6 +48,8 @@ export function textureCanvas(){
       for(let i=0;i<6;i++){const x=hash(i,index)*27,y=hash(index,i)*27;stroke('#ebd6ff99',[[x,y],[x+4,y+4],[x+1,y+7]],1);}
       if(type==='ender_gate'){fill('#30203e',4,4,24,24);ctx.strokeStyle='#d5b0ff';ctx.lineWidth=2;ctx.strokeRect(7,7,18,18);ctx.strokeRect(12,12,8,8);}
     }
+    if(type==='dragon_altar'){fill('#454153');ctx.strokeStyle='#a795c1';ctx.lineWidth=2;ctx.strokeRect(4,4,24,24);stroke('#c6b6df',[[8,11],[13,16],[16,12],[19,16],[24,11],[22,24],[10,24],[8,11]],2);}
+    if(type==='dragon_crystal'){fill('#6c5a84');stroke('#d2c2e8',[[16,2],[28,16],[16,30],[4,16],[16,2]],3);stroke('#af96d1',[[16,3],[16,29]],2);}
     if(type==='launch_pad'){fill('#23434b');ctx.strokeStyle='#8bf5ff';ctx.lineWidth=2;ctx.strokeRect(2,2,28,28);stroke('#b5ffff',[[7,23],[16,13],[25,23]],3);stroke('#64d7e3',[[7,15],[16,5],[25,15]],3);}
     if(type==='treasure_chest'||type==='relic_forge'){fill(type==='treasure_chest'?'#997c52':'#576477');fill('#293748',0,12,32,3);fill('#dec48b',0,0,3,32);fill('#dec48b',29,0,3,32);fill('#f3dba6',13,11,6,10);fill('#634e43',15,15,2,3);if(type==='relic_forge'){fill('#243e49',5,18,22,10);stroke('#8bdddf',[[9,25],[16,20],[23,25]],2);}}
     if(type==='moonstone_chest'){fill('#433450',0,13,32,3);fill('#dbc5ff',13,11,6,9);fill('#624486',15,14,2,3);stroke('#d7c8ef88',[[1,1],[30,1],[30,30]],2);}
@@ -55,7 +57,7 @@ export function textureCanvas(){
     if(type==='melon'||type==='melon_crop'){for(let i=0;i<11;i++){const x=hash(i,41)*32,y=hash(i,74)*32;stroke('#ebd8a77a',[[x-7,y],[x,y+4],[x+6,y-1],[x+12,y+4]]);}if(side===0)fill('#7b8753',14,11,4,7);}
     if(type==='grass'){
       if(side===0){for(let i=0;i<45;i++){const x=hash(i,index)*30,y=hash(i,index+2)*31;fill(i%3?'#b2c38b33':'#3d632c30',x,y,2,1);}}
-      else if(side===1){fill('#79bb46',0,0,32,6);for(let x=0;x<32;x+=2)fill('#79bb46',x,6,2,2+hash(x,index)*4);stroke('#a2ba7b66',[[0,1],[32,1]]);}
+      else if(side===1){fill(bright.grass,0,0,32,6);for(let x=0;x<32;x+=2)fill(bright.grass,x,6,2,2+hash(x,index)*4);stroke('#adc2b366',[[0,1],[32,1]]);}
     }
     const log=['wood','birch','pinewood'].includes(type),plank=type.includes('plank')||type==='bench'||type==='bookshelf'||type==='chest';
     if(log){

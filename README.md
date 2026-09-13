@@ -1,163 +1,76 @@
-# Voxel Vault — Relic Trails
+# Voxel Vault — Dragon Isles
 
-A playable browser voxel adventure with connected Overworld and Ender dimensions, building, farming, crafting, gliding and a three-anchor expedition. Original block-world visuals take direction from the requested bloxd.io reference. Single player, with local saves.
+A single-player browser voxel adventure with connected Overworld and Ender dimensions, a fightable Ender Dragon, building, crafting, farming and gliders. Cool forest greens, muted blue skies, textured blocks and simple item silhouettes give the game a calmer look. Saves stay in your browser.
 
-## Relic Trails update
+Play: https://subeomy15-del.github.io/voxel-vault/
 
-237 usable items and 145 crafting recipes, with rendered 3D item artwork throughout the backpack and hotbar. Find three treasure outposts near home: Wayfarer Lodge, Old Watchtower and Crystal Sanctuary. Follow the map markers, open their chests with E and spend relic shards at a Relic Forge. The lodge chest gives enough shards to buy your first grappling hook. Equip it, aim at solid terrain within 24 blocks and press E to pull yourself toward it.
+## Fight the Ender Dragon
 
-Forge ruby and sapphire blades, a heavy warhammer, Vanguard armor, Storm Glider and Starfall Bow. Ruby blades restore health on a hit; sapphire blades slow enemies. New deep gem veins and building materials expand crafting. Rift anchors award relic shards too, connecting both dimensions to the same equipment progression.
+1. Choose **Enter the Rift** in the lobby or walk through the glowing portal near home.
+2. Find the **Dragon Altar** at X 0, Z −7 on the arrival island. Press **E** nearby to awaken the dragon. Your first challenge supplies a longbow and 64 arrows.
+3. Shoot the four healing crystals on the obsidian pillars. Each surviving crystal slowly restores the dragon's health.
+4. Use a bow while it circles. Keep moving during breath attacks, dodge its swoop, and attack with a sword when it lands. Step outside the marked circle before a tail slam.
+5. The first victory awards a **Dragon Egg**, 16 moonstone and 10 relic shards. Return through the portal with your trophy and gear.
 
-## Show it in class
+The dragon has 260 health and becomes more aggressive below 40% health. Its health and destroyed crystals survive saving and travel. Death lets you retry from the altar. Rematches do not duplicate the first-victory rewards or starter bow kit. Build cover, bring food and craft armor before a difficult fight.
 
-1. Run `npm start` and open http://localhost:3001.
-2. Choose **Adventure** and walk through the glowing portal near home, or use **Enter the Rift** in the lobby to resume the same adventure in its Ender dimension.
-3. Walk onto the cyan launch pad on the north side of the arrival island. Hold W and look slightly down. Your starter glider opens near the top of the jump.
-4. Follow the colored beacons. Press E near each of the three anchors. Every anchor awards moonstone and food; the third unlocks a Moonstone Sword, Armor and Glider.
-5. Walk through the home portal, or choose **Return home with your gear** from Pause. Your inventory, equipment, health and rewards travel with you. Buildings and chests stay in their respective dimensions.
+The separate **Rift Run** remains available: use cyan launch pads and a glider to reach three island anchors, press E to activate each, and earn moonstone equipment. Close the glider with G to land. The challenge records your best time.
 
-Press **V / F5** to cycle first person, third person behind, and third person front. The camera button works on touch devices too. **G** closes the glider to land; launch pads open it automatically near the apex. **E/right click** activates anchors, enters gates, uses orbs or places blocks. **Tab** opens inventory. A completed Rift Run can be replayed from its HUD button; best time is saved and the equipment reward is awarded once.
+## Five-resource progression
 
-## Visual update
+- **Coal:** furnace fuel only. It cannot be placed or used to craft equipment. Campfires burn timber.
+- **Iron:** ore for smelting into tool and building materials.
+- **Gold:** deeper ore for fast tools, bows and armor.
+- **Diamond:** deep gem for durable equipment and building blocks.
+- **Moonstone:** Ender material for advanced equipment, orbs and shared storage.
 
-Animated portals, glowing crystals and navigation beams, a ringed planet, an animated Ender sky, drifting particles, improved shadows, textured materials and a subtle glow pass in High quality. Performance mode skips post-processing and reduces terrain range. The lobby uses captures from the actual game renderer. Third-person views include an animated character, held tools and glider, with camera collision near walls.
+The release has 218 usable catalogue items and 131 recipes. Older copper stacks convert to iron; Aether crystal, ruby, sapphire and emerald stacks convert to diamond; violet crystal converts to moonstone. Equivalent older equipment, storage contents and placed mineral blocks retain their value through conversion. Old resource identifiers remain readable by the save loader.
 
-The adventure now has one shared player inventory and separate geographic snapshots for the two dimensions. Existing Overworld saves are supported. Creative and Daily remain separate game modes. The old standalone Ender save slot is left untouched; the new lobby enters the connected adventure.
+## Explore and build
 
-## Play
+Find Wayfarer Lodge, Old Watchtower and Crystal Sanctuary near home. Open treasure chests with E and trade relic shards at a Relic Forge. The lodge chest supplies enough shards for a grappling hook: equip it, aim at solid terrain within 24 blocks, and press E.
 
-Live site: https://subeomy15-del.github.io/voxel-vault/
+Build with wood, masonry, slabs, stairs, glass, fabrics and metals. Matching slabs stack, stairs rotate, ladders climb and beds set your respawn point. Chests store stacks; moonstone chests share storage across dimensions. The placement preview shows blocked spaces before spending a block.
 
-For local development, use Node.js 20 or newer:
+Nine crops grow during active play. Plant on tilled soil; nearby water speeds growth. Hunt six animal species and cook their meat in a furnace. Food restores hunger and energy; crafted meals can grant timed movement, mining or vision effects.
+
+## Controls
+
+- **WASD / mouse:** move and look. **Space:** jump, swim or climb.
+- **Shift:** sprint. **X:** crouch. **R:** dodge. **Z:** zoom.
+- **Left click:** attack or hold to mine. Hold with a bow, then release to shoot.
+- **E / right click:** interact, grapple, eat, plant, harvest or place.
+- **V / F5:** first person, third person behind, third person front.
+- **G:** open or close an equipped glider while airborne.
+- **1–9 / wheel:** select hotbar. **Middle click:** select a targeted owned block.
+- **Tab / C / M / J:** backpack, crafting, map, field notes. **Esc:** pause.
+- **F / Q:** eat food / drink a healing tonic. **T:** rotate stairs. **B:** place a bridge block.
+- **Creative flight:** double tap Space, then Space to rise or X to descend.
+
+Touch controls provide movement, drag look and action buttons. First-person tools and third-person characters have animated models. High quality adds shadows, antialiasing and restrained glow; Performance reduces terrain range and skips post-processing.
+
+## Run locally
+
+Use Node.js 20 or newer. No dependency installation or build step is required.
 
 ```sh
 npm start
 ```
 
-Open http://localhost:3001. No installation or build step is needed. Three.js is bundled locally. Serve over HTTP so browser modules and the terrain worker can load.
+Open http://localhost:3001. Serve over HTTP so modules and the terrain worker load correctly. Three.js r160 is bundled locally under its MIT license in vendor/LICENSE.
 
-## Controls
-
-- **WASD** move, **mouse** look, **Space** jump, swim or climb. Hold Space for repeated jumps.
-- **Shift** sprint, **X** crouch, **Z** zoom, **R** short dodge.
-- **Left click** attack or hold to mine. Hold with a longbow or recurve bow, then release to shoot. Crossbows reload between shots.
-- **E/right click** interact, eat a held food, plant, harvest or place. Hold to place continuously. Crouch to place against a station.
-- **G** open or close an equipped glider while airborne. Look down to dive; up for a slower descent.
-- **1–9/wheel** select hotbar. **Middle click** selects an owned targeted block, or adds it in Creative.
-- **Tab** backpack, **C** crafting, **M** map, **J** field notes, **Esc** pause.
-- **F** eat the held food or an available ordinary meal; **Q** drink a legacy healing tonic.
-- **T** rotate stairs; **B** place a bridge block.
-- Creative flight: double tap Space; Space to rise, X to descend.
-
-Touch controls provide a movement stick, drag look, jump, mine/attack, use, food, dodge and a glider button when equipped. Bow drawing supports looking around with a second finger.
-
-## Horizon improvements
-
-Holding attack with a pickaxe, axe, building block or food now keeps hitting an animal in range. Animal targeting uses the visible body bounds, ignores flowers and respects solid walls. The crosshair shows the animal’s health and whether it is close enough to hit. Left click attacks; use E/right click or F to eat.
-
-The backpack now has an **All items** catalogue. Its **Gliders** and **Cotton** buttons show those items even when you do not own them. Inspect an item to equip an owned stack or jump directly to its crafting recipe. Pressing G without an equipped wing opens the glider catalogue. Cotton seeds can also be separated from harvested cotton in crafting.
-
-New worlds blend hills and alpine terrain smoothly and use spaced, varied oak, birch and pine trees. New spawns face an open view. Existing worlds retain their previous terrain layout. Animals use bounded local pathfinding to navigate around obstacles, avoid water and stay near their herds; nearby herd members flee together when attacked. Animals save their positions and health, including when you leave their area. Distant animals stop simulating, and each world has a 128-animal cap.
-
-Enemies use line of sight and follow their last known sighting briefly after losing you. Item icons have shaded materials and more distinct meat, seed and plant designs. Held tools have shaped, beveled heads and visible grips. The brand mark, catalogue and glider camera motion have also been refined.
-
-Browser modules and worker imports carry the same release version so refreshing loads a consistent update. For future releases, run `node scripts/stamp.mjs RELEASE` before publishing.
-
-## Food, hunting and farming
-
-Deer drop raw venison and leather; pigs pork; cows beef and leather; sheep mutton and wool; chickens poultry and feathers; rabbits rabbit meat and hides. Animals wander, graze, flee when hurt and follow suitable held foods. Species vary by biome. Walk over their dropped items to collect them. Drops persist in saves and expire after ten minutes of active play.
-
-Craft a furnace from eight stone, place it and interact with it. Cooking a batch requires one ingredient and one coal or timber. All six raw meats cook in furnaces; cooked meat provides substantially more food and stored energy. Campfires cook bread, mushrooms, potatoes and corn. Furnaces also turn copper, iron and gold ore into ingots, sand into glass and clay into bricks.
-
-Food refills a 20-point hunger meter and stores up to 20 points of energy. Movement, sprinting, jumping, mining and healing use energy before hunger. With at least 16 food, health recovers gradually: one point every 2.5 seconds with reserves, every five seconds without. Low hunger prevents sprinting. Ordinary meals do not heal instantly; the older healing tonic retains its direct healing behavior.
-
-Use a hoe on clear grass or dirt to prepare garden soil. Iron and gold hoes till a clear 3 × 3 patch. Plant seeds, carrots or potatoes with E; harvest ripe plants with E or mining. Crops grow during active play, survive saves, and return their seed when harvested early. Water within four blocks when planting shortens growth time by 25%.
-
-| Crop | Normal growth | Harvest |
-| --- | --- | --- |
-| Wheat | 90 s | Wheat and seeds |
-| Carrot | 75 s | Carrots |
-| Cotton | 100 s | Cotton and seeds |
-| Watermelon | 140 s | Watermelon and seeds |
-| Honey melon | 130 s | Melon and seeds |
-| Potato | 90 s | Potatoes |
-| Tomato | 90 s | Tomatoes and seeds |
-| Corn | 110 s | Corn and kernels |
-| Berries | 100 s | Berries and seeds |
-
-Wild plants grow in sparse local patches with open ground between them. Cotton makes cloth, which substitutes for ordinary cloth in recipes. Sugar cane refines into sugar. Melons cut into slices, which can also produce seeds. Gather ferns for fiber and wheat seeds. Flowers, lavender, mushrooms and cane add biome variety without covering every clearing.
-
-## Special meals
-
-Eat these crafted foods to gain an effect, including at full health. Timers pause with the game and persist in saves. The HUD shows remaining duration.
-
-| Food | Effect |
-| --- | --- |
-| Swift melon smoothie | 50% faster movement for 90 s |
-| Springroot salad | Higher jumps for 90 s |
-| Mistberry stew | Invisibility for 75 s; attacks reveal you for 4 s; nearby enemies can still notice you |
-| Prospector pie | Ore sight through rock within 14 blocks for 60 s |
-| Miner’s lunch | 60% faster mining for 120 s |
-| Moonberry compote | Brighter caves and nights for 120 s |
-| Featherlight bread | Slow falling and no fall damage for 90 s |
-
-Garden salad, berry pie, trail mix and venison stew provide larger ordinary meals and energy reserves. Ingredients and exact food values appear in the crafting book and backpack.
-
-## Gliders, gold and ranged equipment
-
-Gliders equip separately from the hotbar. Craft a canvas glider with cloth, timber and leather; upgrade it with an ore or metal ingots. They turn height into forward travel. Landing, water or G closes the wing.
-
-| Glider | Level-look cruise | Descent |
-| --- | --- | --- |
-| Canvas | 11 blocks/s | 1.5 blocks/s |
-| Reinforced | 14 | 1.05 |
-| Coal | 11.5 | 1.4 |
-| Copper | 12.5 | 1.25 |
-| Iron | 14 | 1.1 |
-| Gold | 16 | 1.35 |
-| Diamond | 15 | 0.8 |
-| Diamond | 16 | 0.65 |
-
-Gold also crafts a sword, pickaxe, axe, shovel, hoe, armor, recurve bow and crossbow. Gold tools dig quickly; gold armor reduces incoming damage by 30%.
-
-The ash longbow favors power and range; the recurve draws more quickly. Heavy and repeating crossbows trade damage for reload speed. Equip an ammunition stack in the backpack: iron arrows add damage; frost arrows slow targets for four seconds. Bows and crossbows fall back to ordinary arrows if the selected special ammunition runs out. Projectiles have gravity, collide with terrain and can hit animals.
-
-## World, building and saving
-
-New worlds choose safe random starting locations; Daily worlds use the UTC date as a repeatable seed. Continue preserves your position and bed spawn. Home follows the starting clearing until you use a bed. Adventure, Daily and Creative have separate saves; Overworld and Ender are connected dimensions inside each mode.
-
-The terrain reaches from Y −64 to 95. Ore veins occur underground, with rarer ores in deeper layers. Rivers contain actual water cells; caves beneath dry land stay dry. These are original voxel algorithms with familiar sandbox mechanics, not Minecraft source code.
-
-Build with oak, birch and pine, masonry, polished stone, glass, metals and fabric. Six material families have slabs and directional stairs with matching collision and raycast shapes. Walk onto half steps smoothly. Matching slabs combine into full blocks. A placement ghost previews shape, orientation and blocked spaces.
-
-General recipes accept mixed timber; named wood recipes preserve species. Chests transfer up to 64 items per click and return their contents when mined. Beds set home and rest until morning. Ladders, torches and lanterns help with underground exploration.
-
-Inventory, placed blocks, crop growth, containers, home, position, food reserves, effects, ammunition, gliders and item drops save every 15 seconds, on pause and when leaving. Animal positions and health persist across reloads. Death preserves inventory and builds. Existing version 2 saves and compatible original inventories remain readable. Existing terrain generation stays attached to its save; the new terrain and tree generator applies to new worlds.
-
-Pause → Start a new adventure world asks before replacing an Adventure save. Browser storage belongs to the site origin; clearing site data removes saves.
-
-## Rendering and verification
-
-The game uses a procedural block atlas, rendered 3D item icons, articulated voxel animals, textured glider sails, food models, arrows, swaying instanced grass, clouds, day/night lighting, sun shadows and animated water. Ore sight uses a bounded incremental scan and one instanced draw. Terrain meshes run in a Web Worker; epochs and revisions keep older meshes from overwriting new edits. High and Performance settings control resolution, view range and shadows.
+## Verification
 
 ```sh
 npm test
-```
-
-The 62 automated tests include outpost generation, one-time treasure, forge payment and proximity, grappling collision, weapon effects, complete item artwork, connected realms and the full Rift route. They also cover terrain, shapes, movement, crafting, saves, stations, all animals and meat drops, eating and regeneration, timed effects, bow charging/ammunition, every crop, hydration, glider tiers, gold armor, vegetation density, repeated tool attacks, animal navigation and persistence, terrain compatibility, smooth elevation transitions and consistent tree generation.
-
-Browser scripts use an isolated Chrome profile on debugging port 9224 and the local server on 3001:
-
-```sh
 npm run test:browser
-node tests/wildfields-browser.js
-node tests/wildlands-browser.js
-node tests/horizon-browser.js
-node tests/touch-check.js
+node tests/dragon-browser.js
 ```
 
-These scripts reset the isolated profile’s test worlds. They exercise real keyboard, mouse and touch inputs, reload persistence, cooking, farming, hunting, gliding, visual effects and compact layouts. Screenshots go to `/private/tmp/voxel-vault-*.png`.
+The 68 unit tests cover connected saves, migration of old resources, the five-ore progression, furnace fuel, dragon phases and projectiles, destroyed healing crystals, persistent boss health, one-time rewards, terrain, building, movement, combat, farming and gliding.
 
-Three.js r160 is bundled under its MIT license in `vendor/LICENSE`.
+Browser scripts use an isolated Chrome profile on debugging port 9224 and the local server on 3001. They reset only the isolated profile's test worlds and exercise real controls, rendering, item images, save reloads and compact layouts. Screenshots go to /private/tmp/voxel-vault-*.png.
 
-The browser suite also verifies treasure interaction, forging, grappling, all catalogue images and mobile inventory. Regenerate item artwork with `npm run render:items` using the isolated test browser described above.
+Regenerate 3D item artwork with `npm run render:items`. Before publishing, run `node scripts/stamp.mjs RELEASE` to keep browser modules, the terrain worker and assets on the same release.
+
+Inventory, terrain edits, containers, crops, food, gear, animals and realm progress save locally. Clearing site storage removes those saves. Starting a new Adventure asks before replacing that save.

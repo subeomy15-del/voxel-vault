@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js?v=10';
-import { World } from '../src/world.js?v=10';
-import { ITEMS,BLOCKS,CROPS,RECIPES,ORE_GLIDERS,canCraft,craft } from '../src/data.js?v=10';
-import { ANIMALS,animalKind } from '../src/wildlife.js?v=10';
-import { tickSurvival,canEat } from '../src/survival.js?v=10';
-import { updateProjectiles } from '../src/combat.js?v=10';
-import { loadState } from '../src/save.js?v=10';
+import { Game } from '../src/game.js?v=13';
+import { World } from '../src/world.js?v=13';
+import { ITEMS,BLOCKS,CROPS,RECIPES,ORE_GLIDERS,canCraft,craft } from '../src/data.js?v=13';
+import { ANIMALS,animalKind } from '../src/wildlife.js?v=13';
+import { tickSurvival,canEat } from '../src/survival.js?v=13';
+import { updateProjectiles } from '../src/combat.js?v=13';
+import { loadState } from '../src/save.js?v=13';
 const make=()=>{const data=new Map(),g=new Game({setWorld(){},stream(){},burst(){}},{play(){}},{getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)});g.screen=null;g.pos={x:.5,y:7,z:9.5};g.yaw=0;g.pitch=0;g.mobs=[];return g;};
 const ticks=(fn,seconds)=>{for(let t=0;t<seconds-1e-8;t+=.05)fn(.05);};
 
@@ -67,11 +67,11 @@ test('nine crops grow with hydration, harvest their own produce and survive save
   }
 });
 test('each ore crafts a distinct glider; flight trades forward travel for height and ends on landing',()=>{
-  assert.equal(ORE_GLIDERS.length,6);const flights={};
+  assert.equal(ORE_GLIDERS.length,3);const flights={};
   for(const[id]of ORE_GLIDERS){const name=id+'_glider',recipe=RECIPES.find(r=>r.item===name),inv={...recipe.cost};assert.ok(canCraft(inv,recipe));assert.ok(craft(inv,name));assert.equal(inv[name],1);
     const g=make();g.add(name);g.equip(name);assert.equal(g.held,'wood_sword');g.grounded=true;assert.equal(g.toggleGlide(),false);g.pos.y=55;g.grounded=false;assert.ok(g.toggleGlide());ticks(dt=>g.move(dt),2);assert.ok(g.pos.z<0);assert.ok(g.pos.y<55&&g.pos.y>50);flights[id]={z:g.pos.z,y:g.pos.y};g.grounded=true;g.move(.05);assert.equal(g.gliding,false);
   }
-  assert.ok(flights.gold.z<flights.copper.z);assert.ok(flights.crystal.y>flights.gold.y);assert.ok(flights.diamond.y>flights.iron.y);
+  assert.ok(flights.gold.z<flights.iron.z);assert.ok(flights.diamond.y>flights.gold.y);assert.ok(flights.diamond.y>flights.iron.y);
 });
 test('new recipe ingredients exist, gold equipment functions and vegetation stays in sparse patches',()=>{
   for(const r of RECIPES){assert.ok(ITEMS[r.item],r.item);for(const k of Object.keys(r.cost))assert.ok(ITEMS[k],k);}

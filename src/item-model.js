@@ -1,6 +1,6 @@
 import * as THREE from '../vendor/three.module.js';
-import { ITEMS,BLOCKS,hash } from './data.js?v=12';
-import { toolModel,bowModel,gliderModel } from './models.js?v=12';
+import { ITEMS,BLOCKS,hash } from './data.js?v=13';
+import { toolModel,bowModel,gliderModel } from './models.js?v=13';
 // The same models supply catalogue renders and held equipment.
 export function itemModel(r,name){
  const item=ITEMS[name]||{color:'#a6b4bc'},g=new THREE.Group(),color=item.color;
@@ -9,6 +9,12 @@ export function itemModel(r,name){
  const box=(c,w,h,d,x=0,y=0,z=0)=>add(new THREE.BoxGeometry(w,h,d),c,x,y,z);
  const sphere=(c,size,x=0,y=0,z=0)=>add(new THREE.SphereGeometry(size,14,10),c,x,y,z);
  const crystal=(c,size,x=0,y=0,z=0)=>add(new THREE.OctahedronGeometry(size),c,x,y,z,.25);
+ if(name==='diamond'||name==='crystal'){const gem=add(new THREE.CylinderGeometry(.26,.46,.25,6),color,0,.2);add(new THREE.ConeGeometry(.46,.55,6),color,0,-.2).rotation.z=Math.PI;gem.material.metalness=.08;return g;}
+ if(name==='coal'){const lump=add(new THREE.DodecahedronGeometry(.42,0),'#363e46');lump.scale.set(1.15,.8,.9);return g;}
+ if(name==='moonstone'){const gem=crystal('#b4afd3',.43);gem.scale.set(.8,1.25,.8);return g;}
+ if(name==='dragon_egg'){const egg=add(new THREE.SphereGeometry(.4,8,6),'#484052');egg.scale.y=1.2;box('#aa94c9',.1,.1,.025,.1,.16,.34);return g;}
+ if(name==='torch'){box('#826d55',.13,.7,.13,0,-.14);box('#d9b77b',.23,.24,.23,0,.33);box('#f0dfb1',.12,.16,.12,0,.48);return g;}
+ if(name==='wheat'){for(const x of [-.18,0,.18]){box('#a28e5c',.035,.85,.035,x,-.08);for(let i=0;i<4;i++)for(const side of [-1,1]){const grain=box('#c9b782',.1,.16,.08,x+side*.055,.05+i*.12);grain.rotation.z=side*.5;}}box('#8b795c',.55,.08,.1,0,-.18);return g;}
  if(['sword','pickaxe','axe','shovel','hoe'].includes(item.kind))return toolModel(r,item,name,false);
  if(item.kind==='bow')return bowModel(r,name,item);
  if(item.kind==='glider')return gliderModel(r,item);
@@ -22,8 +28,8 @@ export function itemModel(r,name){
   box('#40546a',.44,.15,.33,0,.43);box('#c6a05c',.66,.09,.31,0,-.23);crystal('#e9d691',.1,0,.12,.18);
   for(const x of [-.19,.19])box('#ebf4f0',.025,.42,.015,x,.04,.155);return g;
  }
- if(item.kind==='orb'){const orb=add(new THREE.IcosahedronGeometry(.37,1),color,0,0,0,.45);orb.material.emissive.set(color);orb.material.emissiveIntensity=.15;const ring=add(new THREE.TorusGeometry(.43,.021,6,40),'#d9edff',0,0,0,.4);ring.rotation.set(.9,.4,.3);return g;}
- if(name==='relic_shard'){const gem=crystal('#f0c66c',.4);gem.scale.set(.65,1.35,.65);add(new THREE.TorusGeometry(.26,.03,6,24),'#b1814a').rotation.x=Math.PI/2;return g;}
+ if(item.kind==='orb'){const orb=add(new THREE.IcosahedronGeometry(.37,1),color,0,0,0,.1);orb.material.emissive.set(color);orb.material.emissiveIntensity=.08;return g;}
+ if(name==='relic_shard'){const gem=crystal('#d8bb83',.4);gem.scale.set(.65,1.35,.65);return g;}
  if(name.endsWith('_ingot')){const mesh=box(color,.77,.25,.4);mesh.rotation.y=.15;box('#eff4eb',.5,.025,.24,0,.14,0);return g;}
  if(item.kind==='ammo'){
   for(let i=0;i<3;i++){const shaft=box('#a38254',.026,.9,.026,(i-1)*.14,0,0);shaft.rotation.z=-.4;const tip=crystal(color,.12,(i-1)*.14+.17,.42);tip.scale.set(.6,1.5,.5);box('#e5dfc9',.1,.16,.02,(i-1)*.14-.15,-.35);}return g;

@@ -4,6 +4,7 @@ export class PostProcess {
   constructor(r){
     this.r=r;this.scene=new THREE.Scene();this.camera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
     this.hdr=r.renderer.extensions.has('EXT_color_buffer_float');const type=this.hdr?THREE.HalfFloatType:THREE.UnsignedByteType;this.sceneTarget=new THREE.WebGLRenderTarget(1,1,{depthBuffer:true,type});
+    this.sceneTarget.samples=r.renderer.capabilities.isWebGL2?2:0;
     this.glowTarget=new THREE.WebGLRenderTarget(1,1,{depthBuffer:false,type});
     const vertexShader='varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}';
     this.glow=new THREE.ShaderMaterial({uniforms:{source:{value:this.sceneTarget.texture},texel:{value:new THREE.Vector2()},threshold:{value:this.hdr?1.15:.7}},vertexShader,depthTest:false,depthWrite:false,fragmentShader:`varying vec2 vUv;uniform sampler2D source;uniform vec2 texel;uniform float threshold;
@@ -20,7 +21,7 @@ export class PostProcess {
     const r=this.r.renderer;if(this.r.settings.quality!=='high'){r.setRenderTarget(null);r.render(scene,camera);return;}
     const size=r.getDrawingBufferSize(new THREE.Vector2()),key=size.x+','+size.y;
     if(this.size!==key){this.size=key;this.sceneTarget.setSize(size.x,size.y);this.glowTarget.setSize(Math.ceil(size.x/2),Math.ceil(size.y/2));this.glow.uniforms.texel.value.set(1/size.x,1/size.y);this.combine.uniforms.texel.value.set(2/size.x,2/size.y);}
-    this.combine.uniforms.strength.value=ender?.35:.13;
+    this.combine.uniforms.strength.value=ender?.22:.1;
     r.setRenderTarget(this.sceneTarget);r.render(scene,camera);
     this.quad.material=this.glow;r.setRenderTarget(this.glowTarget);r.render(this.scene,this.camera);
     this.quad.material=this.combine;r.setRenderTarget(null);r.render(this.scene,this.camera);

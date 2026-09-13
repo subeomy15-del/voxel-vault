@@ -1,17 +1,18 @@
 import * as THREE from '../vendor/three.module.js';
-import { BLOCKS, ITEMS, hash } from './data.js?v=12';
-import { CHUNK, WORLD_LIMIT } from './world.js?v=12';
-import { ENEMIES } from './combat.js?v=12';
-import { textureCanvas,TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=12';
-import { Scenery } from './scenery.js?v=12';
-import { boxesFor } from './shapes.js?v=12';
-import { animalModel,bowModel,arrowModel,toolModel } from './models.js?v=12';
-import { itemModel } from './item-model.js?v=12';
-import { RiftEffects } from './rift-effects.js?v=12';
-import { PostProcess } from './post-process.js?v=12';
-import { PlayerModel } from './player-model.js?v=12';
-import { cameraPosition } from './perspective.js?v=12';
-import { ViewEffects } from './view-effects.js?v=12';
+import { BLOCKS, ITEMS, hash } from './data.js?v=13';
+import { CHUNK, WORLD_LIMIT } from './world.js?v=13';
+import { ENEMIES } from './combat.js?v=13';
+import { textureCanvas,TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=13';
+import { Scenery } from './scenery.js?v=13';
+import { boxesFor } from './shapes.js?v=13';
+import { animalModel,bowModel,arrowModel,toolModel } from './models.js?v=13';
+import { itemModel } from './item-model.js?v=13';
+import { dragonModel,animateDragon } from './dragon-model.js?v=13';
+import { RiftEffects } from './rift-effects.js?v=13';
+import { PostProcess } from './post-process.js?v=13';
+import { PlayerModel } from './player-model.js?v=13';
+import { cameraPosition } from './perspective.js?v=13';
+import { ViewEffects } from './view-effects.js?v=13';
 export class Renderer {
   constructor(container,settings){
     this.settings=settings;this.scene=new THREE.Scene();this.scene.background=new THREE.Color('#b6cddd');this.scene.fog=new THREE.Fog('#b6cddd',62,125);
@@ -22,7 +23,7 @@ export class Renderer {
     this.waterMaterial=new THREE.MeshStandardMaterial({color:'#42a7dd',roughness:.6,metalness:0,transparent:true,opacity:.78,vertexColors:true});
     this.glassMaterial=new THREE.MeshLambertMaterial({color:'#ffffff',transparent:true,opacity:.28,vertexColors:true});
     this.epoch=0;this.revision=0;this.chunkVersions=new Map();this.ready=[];this.inflight=false;this.underground=false;
-    this.worker=new Worker(new URL('./terrain-worker.js?v=12',import.meta.url),{type:'module'});
+    this.worker=new Worker(new URL('./terrain-worker.js?v=13',import.meta.url),{type:'module'});
     this.worker.onmessage=({data})=>{if(data.epoch!==this.epoch)return;this.inflight=false;if(data.revision<(this.chunkVersions.get(`${data.cx},${data.cz}`)||0))return;this.ready.push(data);};
     this.worker.onerror=e=>{console.error('Terrain worker failed',e);document.querySelector('#loading').hidden=false;document.querySelector('#loading').textContent='Terrain could not load. Reload the page to try again.';};
     this.projectileMeshes=new Map();
@@ -89,6 +90,7 @@ export class Renderer {
     const k=`${data.cx},${data.cz}`,old=this.chunks.get(k);if(old){old.removeFromParent();old.traverse(o=>o.geometry?.dispose());}this.scene.add(group);this.chunks.set(k,group);
   }
   makeMob(mob){
+    if(mob.kind==='dragon'){const g=dragonModel(this);this.scene.add(g);this.mobMeshes.set(mob.id,g);return g;}
     if(ENEMIES[mob.kind]?.passive){const g=animalModel(this,mob);this.scene.add(g);this.mobMeshes.set(mob.id,g);return g;}
     const g=new THREE.Group(),boss=mob.kind==='guardian',animal=mob.kind==='grazer';const scale=boss?2.3:1;g.scale.setScalar(scale);
     const info=ENEMIES[mob.kind]||ENEMIES.sentinel,base=info.color,light=info.glow;
@@ -141,6 +143,7 @@ export class Renderer {
       if(Math.hypot(mob.x-game.pos.x,mob.z-game.pos.z)>82)continue;alive.add(mob.id);const g=this.mobMeshes.get(mob.id)||this.makeMob(mob),animal=g.userData.animal;
       const hop=mob.kind==='rabbit'&&mob.walkSpeed>0?Math.abs(Math.sin(mob.walk*10))*.1:0;
       g.position.set(mob.x,mob.y+hop+(mob.kind==='wisp'?.35+Math.sin(t*3)*.18:0),mob.z);g.rotation.y=mob.angle;
+      if(mob.kind==='dragon'){animateDragon(g,mob,t);continue;}
       if(animal){g.userData.legs.forEach((leg,i)=>leg.rotation.x=mob.walkSpeed>0?Math.sin(mob.walk*8+(i%2)*Math.PI)*.45:0);g.userData.head.rotation.x=mob.grazing?.22+Math.sin(t*1.5+mob.id)*.09:0;}
       else{g.children[2].rotation.x=Math.sin(mob.walk*7)*.5;g.children[3].rotation.x=-Math.sin(mob.walk*7)*.5;}
       g.rotation.z=mob.flash>0?Math.sin(mob.flash*70)*.06:0;(animal?g.userData.body:g.children[0])?.material.emissive.set(mob.flash>0?'#89463b':'#000000');

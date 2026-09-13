@@ -1,8 +1,8 @@
 import * as THREE from '../vendor/three.module.js';
-import { ITEMS } from './data.js?v=12';
-import { icon } from './icons.js?v=12';
-import { gliderModel } from './models.js?v=12';
-const ORES={ruby:'#e2688b',sapphire:'#81bdeb',emerald:'#74d8a4',moonstone:'#baa1f2',coal:'#a0a6a0',copper:'#dc9971',iron:'#dfd8c6',gold:'#f5d67c',diamond:'#9be7e5',crystal:'#b1f3cc'};
+import { ITEMS } from './data.js?v=13';
+import { icon } from './icons.js?v=13';
+import { gliderModel } from './models.js?v=13';
+const ORES={moonstone:'#baa1f2',coal:'#a0a6a0',iron:'#dfd8c6',gold:'#f5d67c',diamond:'#9bc8d0'};
 const cells=[];for(let x=-14;x<=14;x++)for(let y=-14;y<=14;y++)for(let z=-14;z<=14;z++)if(x*x+y*y+z*z<=196)cells.push([x,y,z]);cells.sort((a,b)=>a[0]**2+a[1]**2+a[2]**2-b[0]**2-b[1]**2-b[2]**2);
 export class ViewEffects {
   constructor(r){
@@ -17,7 +17,7 @@ export class ViewEffects {
     this.ores=new THREE.InstancedMesh(new THREE.BoxGeometry(.83,.83,.83),oreMaterial,256);this.ores.count=0;this.ores.frustumCulled=false;this.ores.renderOrder=12;r.scene.add(this.ores);this.matrix=new THREE.Matrix4();this.color=new THREE.Color();
   }
   texture(name){
-    if(!this.textures.has(name)){const tex=new THREE.TextureLoader().load(new URL('../assets/items/'+name+'.png',import.meta.url).href);tex.colorSpace=THREE.SRGBColorSpace;this.textures.set(name,tex);}return this.textures.get(name);
+    if(!this.textures.has(name)){const tex=new THREE.TextureLoader().load(new URL('../assets/items/'+name+'.png'+new URL(import.meta.url).search,import.meta.url).href);tex.colorSpace=THREE.SRGBColorSpace;this.textures.set(name,tex);}return this.textures.get(name);
   }
   food(name){return new THREE.Mesh(new THREE.PlaneGeometry(.51,.51),new THREE.MeshLambertMaterial({map:this.texture(name),transparent:true,alphaTest:.12,side:THREE.DoubleSide}));}
   reset(){for(const mesh of this.drops.values())this.r.disposeGroup(mesh);this.drops.clear();this.ores.count=0;this.scan=null;this.scanKey='';this.scanTime=0;}

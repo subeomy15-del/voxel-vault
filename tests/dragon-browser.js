@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {connect,sleep} from './cdp.js';
+const c=await connect(),ev=c.evaluate;
+const ready=async()=>{for(let i=0;i<300;i++){if(await ev('v.chunks.size>=9&&!v.inflight&&!v.queue.length&&!v.ready.length'))return;await sleep(100);}throw Error('Terrain timeout');};
+try{
+ await c.send('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});await c.send('Page.navigate',{url:'http://localhost:3001/'});await sleep(900);
+ await ev(`(async()=>{const m=await import('/src/main.js?v=13');window.g=m.game;window.v=m.renderer;window.ui=m.ui;g.state=(await import('/src/save.js?v=13')).freshState(7821);g.loadWorld();g.pos={x:-70.5,y:g.world.ground(-70.5,24.5),z:24.5};g.screen=null;g.yaw=-.7;g.pitch=.08;ui.render();})()`);await ready();await c.screenshot('cool-overworld');
+ await ev("g.travel('ender');g.pos={x:.5,y:19,z:-4.5};g.yaw=0;g.pitch=-.4;g.vx=g.vz=g.velocity=0;ui.render()");await ready();assert.match(await ev('document.querySelector("#interaction").textContent'),/Dragon/);
+ await c.send('Input.dispatchKeyEvent',{type:'keyDown',code:'KeyE',key:'e'});await c.send('Input.dispatchKeyEvent',{type:'keyUp',code:'KeyE',key:'e'});await sleep(250);assert.equal(await ev('g.boss?.kind'),'dragon');assert.equal(await ev('g.state.inv.longbow'),1);
+ await ev(`g.pos={x:13,y:19,z:-4};g.yaw=Math.atan2(g.pos.x-g.boss.x,g.pos.z-g.boss.z);g.pitch=Math.atan2(g.boss.y-g.pos.y,Math.hypot(g.pos.x-g.boss.x,g.pos.z-g.boss.z));g.equip('longbow')`);await sleep(200);assert.ok(await ev('v.mobMeshes.get(g.boss.id)?.userData.dragon'));assert.equal(await ev('v.riftEffects.dragonCrystals.filter(c=>c.beam.visible).length'),4);assert.equal(await ev('getComputedStyle(document.querySelector("#boss")).display'),'block');await c.screenshot('dragon-flight');
+ await ev(`g.boss.stage='perch';g.boss.stageTime=0;g.boss.cooldown=6;g.boss.x=0;g.boss.y=19;g.boss.z=5;g.pos={x:4,y:19,z:10.5};g.yaw=Math.atan2(4,5.5);g.pitch=0;g.vx=g.vz=g.velocity=0;g.gliding=g.pendingGlide=false;g.padCooldown=3;window.before=g.boss.hp`);await sleep(150);
+ await c.send('Input.dispatchMouseEvent',{type:'mousePressed',x:720,y:450,button:'left',clickCount:1});await sleep(1000);await c.send('Input.dispatchMouseEvent',{type:'mouseReleased',x:720,y:450,button:'left',clickCount:1});await sleep(400);
+ assert.ok(await ev('g.boss.hp<before'));assert.ok(await ev('g.state.inv.arrows<64'));await c.screenshot('dragon-landed');
+ await ev('g.save()');await c.send('Page.reload');await sleep(1000);await ev(`(async()=>{const m=await import('/src/main.js?v=13');window.g=m.game;window.v=m.renderer;window.ui=m.ui;g.screen=null;ui.render()})()`);assert.equal(await ev('g.boss?.kind'),'dragon');
+ await ev('g.hit(g.boss,1000)');assert.equal(await ev('g.state.inv.dragon_egg'),1);assert.equal(await ev('g.boss'),null);await sleep(200);await c.screenshot('dragon-victory');
+ await ev("g.travel('overworld');g.pause('inventory');ui.catalogue=true;ui.filter='All';ui.search='diamond';ui.render()");await sleep(400);assert.equal(await ev('g.state.inv.dragon_egg'),1);await c.screenshot('diamond-icons');assert.ok(await ev(`![...document.querySelectorAll('.item-card strong')].some(e=>/Aether|Ruby|Sapphire|Emerald|Copper/.test(e.textContent))`));
+ assert.deepEqual(c.errors,[]);assert.deepEqual(c.failed,[]);await ev("g.screen='menu';ui.render()");console.log('PASS: cool Overworld, altar input, animated dragon and healing beams, mouse-fired bow damage/ammunition, saved boss, victory trophy, travel home and diamond catalogue.');
+}finally{c.socket.close();}

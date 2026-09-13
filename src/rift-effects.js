@@ -1,7 +1,8 @@
 import * as THREE from '../vendor/three.module.js';
-import { OUTPOSTS } from './expeditions.js?v=12';
-import { RIFT_ANCHORS } from './realms.js?v=12';
-import { hash } from './data.js?v=12';
+import { OUTPOSTS } from './expeditions.js?v=13';
+import { RIFT_ANCHORS } from './realms.js?v=13';
+import { hash } from './data.js?v=13';
+import { DRAGON_TOWERS } from './dragon.js?v=13';
 export class RiftEffects {
   constructor(r){
     this.r=r;this.root=new THREE.Group();r.scene.add(this.root);this.epoch=-1;this.time={value:0};this.markers=[];
@@ -13,7 +14,7 @@ export class RiftEffects {
   }
   rebuild(g){
     for(const child of [...this.root.children]){child.traverse(o=>{o.geometry?.dispose();if(o.material&&o.material!==this.portalMaterial)o.material.dispose();});child.removeFromParent();}
-    this.markerRoot.replaceChildren();this.markers=[];this.anchors=[];this.epoch=this.r.epoch;
+    this.markerRoot.replaceChildren();this.markers=[];this.anchors=[];this.dragonCrystals=[];this.epoch=this.r.epoch;
     const marker=(label,pos,color)=>{const el=document.createElement('div');el.className='world-marker';el.style.setProperty('--marker-color',color);this.markerRoot.append(el);this.markers.push({label,pos,el});return el;};
     const gate=g.state.gate;
     if(gate&&g.world.get(gate.x,gate.y,gate.z)==='ender_gate'){
@@ -23,6 +24,11 @@ export class RiftEffects {
     }
     if(g.state.dimension==='overworld')for(const p of g.state.outposts||[]){const def=OUTPOSTS.find(d=>d.id===p.id);if(def&&!g.state.opened.includes('outpost-'+p.id))marker(def.name.toUpperCase(),{x:p.x,y:p.y+10,z:p.z},def.color);}
     if(g.state.dimension==='ender'){
+      marker('DRAGON ALTAR',{x:.5,y:22,z:-6.5},'#b6a4ce');
+      for(const[x,z]of DRAGON_TOWERS){
+        const crystal=new THREE.Mesh(new THREE.OctahedronGeometry(.6),new THREE.MeshStandardMaterial({color:'#baa5d4',emissive:'#9470b8',emissiveIntensity:1.2,roughness:.5}));crystal.position.set(x+.5,25.5,z+.5);this.root.add(crystal);
+        const beam=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()]),new THREE.LineBasicMaterial({color:'#b395d4',transparent:true,opacity:.55}));beam.frustumCulled=false;this.root.add(beam);this.dragonCrystals.push({x,z,crystal,beam});
+      }
       for(const a of RIFT_ANCHORS){
         const group=new THREE.Group(),y=g.world.height(a.x,a.z)+1;group.position.set(a.x+.5,y,a.z+.5);
         const pedestal=this.r.part('#494062',1.6,.45,1.6,0,.22,0);group.add(pedestal);
@@ -43,6 +49,7 @@ export class RiftEffects {
     this.time.value+=dt;if(this.epoch!==this.r.epoch)this.rebuild(g);
     this.rope.visible=!!g.grapple&&!g.screen;if(g.grapple){const points=this.rope.geometry.attributes.position;points.setXYZ(0,g.pos.x+.25,g.pos.y+1,g.pos.z);points.setXYZ(1,g.grapple.x,g.grapple.y-.4,g.grapple.z);points.needsUpdate=true;}
     const t=this.time.value;this.markerRoot.hidden=!!g.screen;this.particles.position.set(g.pos.x,g.pos.y-3,g.pos.z);this.particles.rotation.y=t*.012;
+    for(const c of this.dragonCrystals){c.crystal.visible=g.world.get(c.x,25,c.z)==='dragon_crystal';c.crystal.rotation.y=t*.6;c.beam.visible=c.crystal.visible&&g.boss?.kind==='dragon';if(c.beam.visible){const p=c.beam.geometry.attributes.position;p.setXYZ(0,c.x+.5,25.5,c.z+.5);p.setXYZ(1,g.boss.x,g.boss.y+1.5,g.boss.z);p.needsUpdate=true;}}
     if(this.planet){this.planet.position.copy(this.r.camera.position).add(new THREE.Vector3(-63,64,-126));this.planet.userData.globe.rotation.y=t*.006;}
     for(const a of this.anchors){const collected=g.state.rift.collected.includes(a.id);a.crystal.rotation.y=t*.8;a.crystal.position.y=2+Math.sin(t*2)*.15;a.crystal.material.emissiveIntensity=collected?.2:1.6;a.ring.rotation.z=t*.3;a.beam.visible=!collected;a.light.intensity=collected?.3:4;a.marker.hidden=collected;}
     for(const m of this.markers){const p=this.r.screenPoint(m.pos.x,m.pos.y,m.pos.z),distance=Math.round(Math.hypot(m.pos.x-g.pos.x,m.pos.z-g.pos.z));if(!p||p.x<0||p.x>1||p.y<0||p.y>1){m.el.style.display='none';continue;}m.el.style.display='';m.el.style.left=p.x*100+'%';m.el.style.top=p.y*100+'%';m.el.textContent=m.label+' · '+distance+'m';}

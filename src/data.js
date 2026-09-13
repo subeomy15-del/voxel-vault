@@ -1,3 +1,4 @@
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=13';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },
@@ -71,6 +72,10 @@ for(const[id,name,color,hardness]of [
 ])BLOCKS[id]={name,color,hardness,solid:true};
 BLOCKS.ender_gate.solid=false;
 BLOCKS.launch_pad={name:'Launch Pad',color:'#4bcfd7',hardness:1.5,solid:true};
+BLOCKS.dragon_altar={name:'Dragon Altar',color:'#686078',hardness:3,solid:true};
+BLOCKS.dragon_crystal={name:'Healing Crystal',color:'#b59bd8',hardness:.8,solid:true,hidden:true,drop:'moonstone',renderOnly:true};
+BLOCKS.dragon_egg={name:'Dragon Egg',color:'#494053',hardness:2,solid:true};
+BLOCKS.diamond_block={name:'Diamond Block',color:'#8abcc6',hardness:3,solid:true};
 for(const[id,name,color]of [
  ['ruby','Ruby Ore','#c34d65'],['sapphire','Sapphire Ore','#4f93d2'],['emerald','Emerald Ore','#48a67d'],
  ['ruby_block','Ruby Block','#b64162'],['sapphire_block','Sapphire Block','#437daf'],['emerald_block','Emerald Block','#398568'],
@@ -358,6 +363,24 @@ RECIPES.push(
 );
 for(const ore of ['ruby','sapphire','emerald'])RECIPES.push({item:ore+'_block',cost:{[ore]:4},category:'Building'});
 for(const material of ['dark_bricks','ivory_bricks','copper_tiles','teal_tiles','amber_glass','violet_glass'])RECIPES.push({item:material,count:8,cost:{stone:4,sand:2},category:'Building'});
+// Five-resource progression, with compatibility aliases for older worlds.
+ITEMS.diamond_armor={...ITEMS.crystal_armor,name:'Diamond Armor',color:'#8abcc6'};
+ITEMS.diamond_axe={...ITEMS.emerald_axe,name:'Diamond Axe',color:'#8abcc6',description:'Rapid timber harvesting with a diamond cutting edge.'};
+ITEMS.diamond_shovel={...ITEMS.sapphire_shovel,name:'Diamond Shovel',color:'#8abcc6'};
+for(const name of Object.keys(RESOURCE_ALIASES))if(ITEMS[name])ITEMS[name].hidden=true;
+Object.assign(ITEMS.coal,{name:'Coal',color:'#42474e',kind:'material',place:false,description:'Fuel for furnaces. Each batch uses one coal.'});
+Object.assign(ITEMS.diamond,{name:'Diamond',color:'#8abcc6'});
+Object.assign(ITEMS.ruby_blade,{name:'Moonstone Lifeblade',color:'#b2a6cf',description:'Melee hits restore one health. Forged with relic shards.'});
+Object.assign(ITEMS.sapphire_blade,{name:'Moonstone Frostblade',color:'#91b5c8'});
+ITEMS.copper_tiles.name=BLOCKS.copper_tiles.name='Weathered Roof Tiles';
+ITEMS.spring_salad.description='Higher jumps for 90 seconds. Made with carrots, corn and diamond.';
+for(const name of ['grass','leaf','pine','hedge']){const color={grass:'#64836e',leaf:'#4b7064',pine:'#3e625a',hedge:'#547568'}[name];BLOCKS[name].color=color;ITEMS[name].color=color;}
+const retained=RECIPES.filter(r=>!RESOURCE_ALIASES[r.item]);
+RECIPES.splice(0,RECIPES.length,...retained);
+for(const r of RECIPES){const cost={};for(const[k,n]of Object.entries(r.cost)){const key=k==='coal'?'wood':canonicalItem(k);cost[key]=(cost[key]||0)+n;}r.cost=cost;}
+RECIPES.push({item:'diamond_armor',cost:{diamond:8,iron_ingot:4},category:'Gear'},{item:'diamond_block',cost:{diamond:4},category:'Building'});
+SMELTING.splice(0,SMELTING.length,...SMELTING.filter(r=>r.input!=='copper'));
+ORE_GLIDERS.splice(0,ORE_GLIDERS.length,...ORE_GLIDERS.filter(([id])=>['iron','gold','diamond'].includes(id)));
 export const LANDMARKS = [
   {id:'camp',name:'Base camp',subtitle:'A place to begin',x:0,z:14,color:'#c5b58a',type:'camp'},
   {id:'cave',name:'Hillside caves',subtitle:'A passage into the stone',x:22,z:8,color:'#aeb9b1',type:'cave'},

@@ -1,6 +1,7 @@
-import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=12';
-import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=12';
-import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=12';
+import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=13';
+import { canonicalItem } from './resource-map.js?v=13';
+import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=13';
+import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=13';
 export const CHUNK=16, WORLD_LIMIT=511, WORLD_BOTTOM=-64, WORLD_TOP=95, SEA_LEVEL=4;
 export const cellKey=(x,y,z)=>`${x},${y},${z}`;
 export class World {
@@ -86,10 +87,10 @@ export class World {
     if(y>h-8)return rock;
     // Veins occur only beneath a substantial layer of soil/rock.
     const vein=hash(Math.floor(x/3)+Math.floor(y/3)*127,Math.floor(z/3),this.seed+93),fleck=hash(x+y*117,z-y*43,this.seed);
-    if(fleck<.72){if(vein>.24&&vein<.255&&y<-30)return 'ruby';if(vein>.255&&vein<.27&&y<-30)return 'sapphire';if(vein>.27&&vein<.285&&y<-30)return 'emerald';if(vein<.027&&y<-35)return 'diamond';if(vein<.045&&y<-22)return 'gold';if(vein<.075&&y<-12)return 'crystal';if(vein<.12)return 'iron';if(vein<.175&&y>-30)return 'copper';if(vein<.235)return 'coal';}
+    if(fleck<.72){if(vein<.04&&y<-30)return 'diamond';if(vein<.075&&y<-18)return 'gold';if(vein<.175)return 'iron';if(vein<.235)return 'coal';}
     return rock;
   }
-  get(x,y,z){const k=cellKey(x,y,z);return this.edits.has(k)?this.edits.get(k):this.base(x,y,z);}
+  get(x,y,z){const k=cellKey(x,y,z),type=this.edits.has(k)?this.edits.get(k):this.base(x,y,z);return canonicalItem(type);}
   solid(x,y,z){return !!BLOCKS[this.get(x,y,z)]?.solid;}
   hydrated(x,y,z){for(let a=-4;a<=4;a++)for(let b=-4;b<=4;b++)if(this.waterAt(x+a,y,z+b)||this.waterAt(x+a,y-1,z+b))return true;return false;}
   waterAt(x,y,z){return this.get(Math.floor(x),Math.floor(y),Math.floor(z))==='water';}

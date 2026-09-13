@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import { hash } from './data.js?v=12';
+import { hash } from './data.js?v=13';
 export class Scenery {
   constructor(renderer){
     this.owner=renderer;this.time={value:0};this.wind={value:1};
@@ -64,7 +64,7 @@ export class Scenery {
     instances.forEach((p,i)=>{
       this.rotation.setFromAxisAngle(up,hash(p.x|0,p.z|0)*Math.PI*2);
       this.scratch.compose(new THREE.Vector3(p.x,p.y,p.z),this.rotation,new THREE.Vector3(1,.55+(p.n-.5)*.9,1));mesh.setMatrixAt(i,this.scratch);
-      this.tint.set(p.n>.86?'#9ca66b':p.n>.73?'#7a995a':'#688948');mesh.setColorAt(i,this.tint);
+      this.tint.set(p.n>.86?'#8b9b86':p.n>.73?'#698775':'#597963');mesh.setColorAt(i,this.tint);
     });
     mesh.receiveShadow=true;mesh.computeBoundingSphere();group.add(mesh);
   }
@@ -72,14 +72,14 @@ export class Scenery {
     const t=game.state.time,phase=t/600*Math.PI*2,elevation=Math.sin(phase),day=THREE.MathUtils.smoothstep(elevation,-.22,.35),dusk=(1-Math.abs(elevation))**5;
     this.time.value=t;this.wind.value=this.owner.settings.bobbing?1:0;
     const uniforms=this.skyUniforms;uniforms.sunDirection.value.set(-Math.cos(phase)*.8,elevation,.25).normalize();uniforms.night.value=1-day;uniforms.rift.value=game.state.dimension==='ender'?1:0;
-    uniforms.zenith.value.set('#16283e').lerp(new THREE.Color('#76b7e8'),day);
-    uniforms.horizon.value.set('#354654').lerp(new THREE.Color('#c2d9e8'),day).lerp(new THREE.Color('#dfab85'),dusk*.6);
+    uniforms.zenith.value.set('#16283e').lerp(new THREE.Color('#7395ad'),day);
+    uniforms.horizon.value.set('#354654').lerp(new THREE.Color('#bdcbd1'),day).lerp(new THREE.Color('#b6a2a0'),dusk*.45);
     this.sky.visible=!inCave;this.sky.position.copy(this.owner.camera.position);
     this.clouds.visible=!inCave;this.clouds.position.set(game.pos.x+Math.sin(t*.002)*10,0,game.pos.z);this.clouds.material.color.set('#8b9ba5').lerp(new THREE.Color('#f6f0dd'),day);this.clouds.material.opacity=.7*day+.22;
     const r=this.owner;r.scene.background.copy(inCave?new THREE.Color('#162128'):uniforms.horizon.value);r.scene.fog.color.copy(r.scene.background);
     const range=r.settings.quality==='high'?1:.76;r.scene.fog.near=inCave?20:48*range;r.scene.fog.far=inCave?45:106*range;
-    r.sun.intensity=inCave?.06:.14+day*1.65;r.sun.color.set('#b7cee7').lerp(new THREE.Color('#fff1d7'),day).lerp(new THREE.Color('#f7bd85'),dusk*.45);
-    r.ambient.intensity=game.effect('nightvision')?2.3:inCave?.38:.6+day*1.2;r.ambient.color.set('#bdd4e0');r.ambient.groundColor.set('#7c8d6c');
+    r.sun.intensity=inCave?.06:.14+day*1.45;r.sun.color.set('#b7cee7').lerp(new THREE.Color('#edf1f3'),day).lerp(new THREE.Color('#dfbfab'),dusk*.3);
+    r.ambient.intensity=game.effect('nightvision')?2.3:inCave?.38:.6+day*.95;r.ambient.color.set('#c4d2df');r.ambient.groundColor.set('#6b7f7a');
     if(game.effect('nightvision')){r.scene.fog.near=45;r.scene.fog.far=95;r.lantern.intensity=Math.max(r.lantern.intensity,5);}
     if(game.state.dimension==='ender'){
       uniforms.zenith.value.set('#100d29');uniforms.horizon.value.set('#51416c');uniforms.night.value=.65;

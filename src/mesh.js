@@ -1,6 +1,6 @@
-import { BLOCKS } from './data.js?v=12';
-import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=12';
-import { TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=12';
+import { BLOCKS } from './data.js?v=13';
+import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=13';
+import { TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=13';
 export const BLOCK_TYPES=Object.keys(BLOCKS);
 const ids=Object.fromEntries(BLOCK_TYPES.map((t,i)=>[t,i+1]));
 const faces=[
@@ -22,6 +22,7 @@ export function meshChunk(world,cx,cz,underground=false){
   const transparent=id=>!id||BLOCKS[BLOCK_TYPES[id-1]]?.boxes||BLOCKS[BLOCK_TYPES[id-1]]?.plant||isGlass(BLOCK_TYPES[id-1])||['water','glass','ladder','torch','lantern','campfire'].includes(BLOCK_TYPES[id-1]);
   for(let x=1;x<17;x++)for(let z=1;z<17;z++)for(let y=1;y<depth-1;y++){
     const id=vox[at(x,y,z)];if(!id)continue;const type=BLOCK_TYPES[id-1],out=type==='water'?water:isGlass(type)?glass:solid;
+    if(BLOCKS[type].renderOnly)continue;
     const wx=cx*16+x-1,wy=low+y-1,wz=cz*16+z-1,small=type==='torch'||type==='lantern',ladder=type==='ladder';
     if(BLOCKS[type].plant||type==='campfire'){
       const tile=(id-1)*3,u=tile%ATLAS_COLS*TILE/ATLAS_WIDTH,v=1-(Math.floor(tile/ATLAS_COLS)+1)*TILE/ATLAS_HEIGHT;
