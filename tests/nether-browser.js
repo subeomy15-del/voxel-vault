@@ -4,7 +4,7 @@ const c=await connect(),ev=c.evaluate;
 try{
  await c.send('Emulation.setDeviceMetricsOverride',{width:1280,height:900,deviceScaleFactor:1,mobile:false});
  await c.send('Page.navigate',{url:'http://localhost:3001/'});await sleep(1500);
- await ev(`(async()=>{const m=await import('/src/main.js?v=22');window.g=m.game;window.ui=m.ui;ui.settings.perspective=0;g.start('adventure',true);g.pause('inventory');ui.render();})()`);
+ await ev(`(async()=>{const m=await import('/src/main.js?v=23');window.g=m.game;window.ui=m.ui;ui.settings.perspective=0;g.start('adventure',true);g.pause('inventory');ui.render();})()`);
  assert.equal(await ev('document.querySelectorAll(".pack-hotbar .pack-slot").length'),9);
  await c.click('[data-action="pack-slot-4"]');assert.equal(await ev('g.state.selected'),4);
  await ev("g.add('diamond',3);ui.render()");await c.click('.pack-storage [data-equip="diamond"]');assert.equal(await ev('g.state.bar[4]'),'diamond');

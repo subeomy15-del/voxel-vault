@@ -1,9 +1,9 @@
-import { NETHER_END } from './nether.js?v=22';
+import { NETHER_END } from './nether.js?v=23';
 import * as THREE from '../vendor/three.module.js';
-import { OUTPOSTS } from './expeditions.js?v=22';
-import { RIFT_ANCHORS } from './realms.js?v=22';
-import { hash } from './data.js?v=22';
-import { DRAGON_TOWERS } from './dragon.js?v=22';
+import { OUTPOSTS } from './expeditions.js?v=23';
+import { RIFT_ANCHORS } from './realms.js?v=23';
+import { hash } from './data.js?v=23';
+import { DRAGON_TOWERS } from './dragon.js?v=23';
 export class RiftEffects {
   constructor(r){
     this.r=r;this.root=new THREE.Group();r.scene.add(this.root);this.epoch=-1;this.time={value:0};this.markers=[];
@@ -11,7 +11,7 @@ export class RiftEffects {
     this.markerRoot=document.createElement('div');this.markerRoot.id='rift-markers';document.querySelector('#hud').append(this.markerRoot);
     this.portalMaterial=new THREE.ShaderMaterial({uniforms:{time:this.time},transparent:true,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending,
       vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-      fragmentShader:`varying vec2 vUv;uniform float time;void main(){vec2 p=(vUv-.5)*2.;float r=length(p),a=atan(p.y,p.x);float swirl=sin(a*5.-r*17.+time*2.6)*.5+.5;float ring=pow(max(0.,1.-abs(r-.85)*7.),2.);float filaments=pow(swirl,7.)*.6;vec3 col=mix(vec3(.22,.07,.75),vec3(.25,.95,1.),swirl*.65+ring*.3);float alpha=(.35+filaments+ring)*smoothstep(1.,.8,r);gl_FragColor=vec4(col*(1.+ring*2.),alpha);}`});
+      fragmentShader:`varying vec2 vUv;uniform float time;void main(){vec2 p=(vUv-.5)*2.;float r=length(p),a=atan(p.y,p.x);float swirl=sin(a*7.-r*22.+time*3.6)*.5+.5;float ring=pow(max(0.,1.-abs(r-.84)*9.),2.);float filaments=pow(swirl,8.)*.8;vec3 col=mix(vec3(.32,.04,.95),vec3(.18,.98,1.),swirl*.7+ring*.35);float alpha=(.42+filaments+ring)*smoothstep(1.,.78,r);gl_FragColor=vec4(col*(1.+ring*3.),alpha);}`});
   }
   rebuild(g){
     for(const child of [...this.root.children]){child.traverse(o=>{o.geometry?.dispose();if(o.material&&o.material!==this.portalMaterial)o.material.dispose();});child.removeFromParent();}

@@ -1,4 +1,4 @@
-import { ITEMS,EFFECTS } from './data.js?v=22';
+import { ITEMS,EFFECTS } from './data.js?v=23';
 export function activeEffect(game,name){return (game.state.effects?.[name]||0)>0;}
 export function canEat(game,name){
   const item=ITEMS[name],s=game.state;if(!item||item.kind!=='food'||!(s.inv[name]>0))return false;
