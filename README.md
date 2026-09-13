@@ -10,7 +10,7 @@ Play: https://subeomy15-del.github.io/voxel-vault/
 2. Find the **Dragon Altar** at X 0, Z −7 on the arrival island. Press **E** nearby to awaken the dragon. Your first challenge supplies a longbow and 64 arrows.
 3. Shoot the four healing crystals on the obsidian pillars. Each surviving crystal slowly restores the dragon's health.
 4. Use a bow while it circles. Keep moving during breath attacks, dodge its swoop, and attack with a sword when it lands. Step outside the marked circle before a tail slam.
-5. The first victory awards a **Dragon Egg**, 16 moonstone and 10 relic shards. Return through the portal with your trophy and gear.
+5. The first victory awards a **Dragon Egg**, 16 moonstone, 10 diamonds and a Forge Seal. Return through the portal with your trophy and gear.
 
 The dragon has 260 health and becomes more aggressive below 40% health. Its health and destroyed crystals survive saving and travel. Death lets you retry from the altar. Rematches do not duplicate the first-victory rewards or starter bow kit. Build cover, bring food and craft armor before a difficult fight.
 
@@ -28,9 +28,9 @@ The release has 218 usable catalogue items and 131 recipes. Older copper stacks 
 
 ## Explore and build
 
-Find Wayfarer Lodge, Old Watchtower and Crystal Sanctuary near home. Open treasure chests with E and trade relic shards at a Relic Forge. The lodge chest supplies enough shards for a grappling hook: equip it, aim at solid terrain within 24 blocks, and press E.
+Find Wayfarer Lodge, Old Watchtower and Crystal Sanctuary near home. Open treasure chests with E and trade diamonds at a Relic Forge. The lodge chest supplies enough diamonds for a grappling hook: equip it, aim at solid terrain within 24 blocks, and press E.
 
-The Relic Forge also offers sacred gear: Dawnblade, Aegis Armor, Seraph Glider and Sacred Orb. Save relic shards from the outposts and Rift anchors for these final-tier rewards. Ender islands now spawn swift Enderlings and ranged Void Archers; cold Overworld nights can call in Frost Howlers.
+The Relic Forge also offers sacred gear: Dawnblade, Aegis Armor, Seraph Glider and Sacred Orb. Save diamonds from deep mines, outposts and Rift anchors for these final-tier rewards. Ender islands now spawn swift Enderlings and ranged Void Archers; cold Overworld nights can call in Frost Howlers.
 
 Build with wood, masonry, slabs, stairs, glass, fabrics and metals. Matching slabs stack, stairs rotate, ladders climb and beds set your respawn point. Chests store stacks; moonstone chests share storage across dimensions. The placement preview shows blocked spaces before spending a block.
 

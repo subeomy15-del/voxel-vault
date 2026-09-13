@@ -1,4 +1,4 @@
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=18';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=19';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },

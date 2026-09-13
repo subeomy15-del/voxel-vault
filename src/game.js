@@ -1,15 +1,15 @@
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=18';
-import { canonicalItem,normalizeResources } from './resource-map.js?v=18';
-import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=18';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=18';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=18';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,craft,hash,dailySeed } from './data.js?v=18';
-import { freshState,loadState,saveState,importLegacy } from './save.js?v=18';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=18';
-import { movePlayer,requestJump } from './movement.js?v=18';
-import { overlapsBlock } from './shapes.js?v=18';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=18';
-import { ANIMALS,animalKind } from './wildlife.js?v=18';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=19';
+import { canonicalItem,normalizeResources } from './resource-map.js?v=19';
+import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=19';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=19';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=19';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,craft,hash,dailySeed } from './data.js?v=19';
+import { freshState,loadState,saveState,importLegacy } from './save.js?v=19';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=19';
+import { movePlayer,requestJump } from './movement.js?v=19';
+import { overlapsBlock } from './shapes.js?v=19';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=19';
+import { ANIMALS,animalKind } from './wildlife.js?v=19';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}
@@ -63,7 +63,7 @@ export class Game {
   collectAnchor(id){
     if(this.state.dimension!=='ender')return false;const anchor=RIFT_ANCHORS.find(a=>a.id===id),rift=this.state.rift;
     if(!anchor||rift.collected.includes(id)||Math.hypot(this.pos.x-anchor.x-.5,this.pos.z-anchor.z-.5)>3||Math.abs(this.pos.y-(this.world.height(anchor.x,anchor.z)+1))>4)return false;
-    rift.collected.push(id);this.add('relic_shard',2);this.add('moonstone',3);this.add('ender_berry',4);this.state.hp=Math.min(20,this.state.hp+5);this.state.food=Math.min(20,this.state.food+5);this.audio.play('reward');
+    rift.collected.push(id);this.add('diamond',2);this.add('moonstone',3);this.add('ender_berry',4);this.state.hp=Math.min(20,this.state.hp+5);this.state.food=Math.min(20,this.state.food+5);this.audio.play('reward');
     this.renderer.burst(anchor.x+.5,this.pos.y+2,anchor.z+.5,anchor.color,35);
     if(rift.collected.length===3){
       rift.finished=this.state.elapsed;const time=Math.max(1,rift.finished-rift.started);rift.best=rift.best?Math.min(rift.best,time):time;rift.runs++;this.add('forge_seal');
@@ -228,8 +228,8 @@ export class Game {
   }
   forge(name){
     const offer=FORGE_OFFERS.find(([item])=>item===name),station=this.station;
-    if(!offer||!station||this.world.get(station.x,station.y,station.z)!=='relic_forge'||Math.hypot(this.pos.x-station.x,this.pos.y-station.y,this.pos.z-station.z)>6||(this.state.inv.relic_shard||0)<offer[1]||(offer[2]&&(!this.state.inv.forge_seal||this.state.inv.forge_seal<offer[2])))return false;
-    this.state.inv.relic_shard-=offer[1];if(offer[2])this.state.inv.forge_seal-=offer[2];this.add(name);this.audio.play('craft');this.toast(ITEMS[name].name+' forged','Equip your new gear in the backpack.','reward');this.save();return true;
+    if(!offer||!station||this.world.get(station.x,station.y,station.z)!=='relic_forge'||Math.hypot(this.pos.x-station.x,this.pos.y-station.y,this.pos.z-station.z)>6||(this.state.inv.diamond||0)<offer[1])return false;
+    this.state.inv.diamond-=offer[1];this.add(name);this.audio.play('craft');this.toast(ITEMS[name].name+' forged','Diamonds accepted. Equip your new gear in the backpack.','reward');this.save();return true;
   }
   useOrb(){
     if(ITEMS[this.held]?.kind!=='orb'||!(this.state.inv[this.held]>0)||this.attackCooldown>0)return false;

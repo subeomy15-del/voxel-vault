@@ -1,5 +1,5 @@
-import { ITEMS } from './data.js?v=18';
-import { WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=18';
+import { ITEMS } from './data.js?v=19';
+import { WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=19';
 const approach=(current,target,amount)=>current<target?Math.min(target,current+amount):Math.max(target,current-amount);
 export function requestJump(game){game.jumpBuffer=.14;tryJump(game);}
 function tryJump(g){

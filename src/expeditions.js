@@ -1,9 +1,9 @@
 export const OUTPOSTS=[
- {id:'lodge',name:'Wayfarer Lodge',dx:18,dz:15,kind:'lodge',color:'#e4bd78',loot:{relic_shard:3,apple:8,wood:24,iron_ingot:5}},
- {id:'tower',name:'Old Watchtower',dx:-25,dz:-18,kind:'tower',color:'#81c8d7',loot:{relic_shard:4,arrows:32,diamond:3,moonstone_orb:5}},
- {id:'ruins',name:'Crystal Sanctuary',dx:30,dz:-28,kind:'ruins',color:'#b69be7',loot:{relic_shard:5,diamond:4,gold_ingot:4,golden_apple:2}}
+ {id:'lodge',name:'Wayfarer Lodge',dx:18,dz:15,kind:'lodge',color:'#e4bd78',loot:{diamond:2,apple:8,wood:24,iron_ingot:5}},
+ {id:'tower',name:'Old Watchtower',dx:-25,dz:-18,kind:'tower',color:'#81c8d7',loot:{diamond:4,arrows:32,moonstone_orb:5}},
+ {id:'ruins',name:'Crystal Sanctuary',dx:30,dz:-28,kind:'ruins',color:'#b69be7',loot:{diamond:5,gold_ingot:4,golden_apple:2}}
 ];
-export const FORGE_OFFERS=[['grappling_hook',3],['ruby_blade',5],['sapphire_blade',5],['warhammer',5],['vanguard_armor',7],['storm_glider',7],['starfall_bow',6],['dawnblade',10,1],['aegis_armor',12,1],['seraph_glider',12,1],['sacred_orb',9,1]];
+export const FORGE_OFFERS=[['grappling_hook',3],['ruby_blade',5],['sapphire_blade',5],['warhammer',7],['vanguard_armor',9],['storm_glider',9],['starfall_bow',8],['dawnblade',14],['aegis_armor',16],['seraph_glider',16],['sacred_orb',12]];
 export function installOutposts(g){
  if(g.state.dimension!=='overworld')return;
  g.state.outposts??=[];const home=g.state.origin||g.pos,w=g.world;
