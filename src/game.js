@@ -1,16 +1,16 @@
-import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=22';
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=22';
-import { canonicalItem,normalizeResources } from './resource-map.js?v=22';
-import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=22';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=22';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=22';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,hash,dailySeed } from './data.js?v=22';
-import { freshState,loadState,saveState,importLegacy } from './save.js?v=22';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=22';
-import { movePlayer,requestJump } from './movement.js?v=22';
-import { overlapsBlock } from './shapes.js?v=22';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=22';
-import { ANIMALS,animalKind } from './wildlife.js?v=22';
+import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=24';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=24';
+import { canonicalItem,normalizeResources } from './resource-map.js?v=24';
+import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=24';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=24';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=24';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,hash,dailySeed } from './data.js?v=24';
+import { freshState,loadState,saveState,importLegacy } from './save.js?v=24';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=24';
+import { movePlayer,requestJump } from './movement.js?v=24';
+import { overlapsBlock } from './shapes.js?v=24';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=24';
+import { ANIMALS,animalKind } from './wildlife.js?v=24';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}
