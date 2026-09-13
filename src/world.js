@@ -1,7 +1,7 @@
-import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=15';
-import { canonicalItem } from './resource-map.js?v=15';
-import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=15';
-import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=15';
+import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=16';
+import { canonicalItem } from './resource-map.js?v=16';
+import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=16';
+import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=16';
 export const CHUNK=16, WORLD_LIMIT=511, WORLD_BOTTOM=-64, WORLD_TOP=95, SEA_LEVEL=4;
 export const cellKey=(x,y,z)=>`${x},${y},${z}`;
 export class World {

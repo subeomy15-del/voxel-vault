@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=15';
-import {World} from '../src/world.js?v=15';
-import {ITEMS,RECIPES,craft} from '../src/data.js?v=15';
-import {freshState,saveState,loadState} from '../src/save.js?v=15';
-import {summonDragon,DRAGON_TOWERS} from '../src/dragon.js?v=15';
-import {launchBolt,updateProjectiles} from '../src/combat.js?v=15';
+import {Game} from '../src/game.js?v=16';
+import {World} from '../src/world.js?v=16';
+import {ITEMS,RECIPES,craft} from '../src/data.js?v=16';
+import {freshState,saveState,loadState} from '../src/save.js?v=16';
+import {summonDragon,DRAGON_TOWERS} from '../src/dragon.js?v=16';
+import {launchBolt,updateProjectiles} from '../src/combat.js?v=16';
 const make=()=>{const data=new Map();return new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},{getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)});};
 const arena=()=>{const g=make();g.start('ender');g.pos={x:.5,y:19,z:-4.5};return g;};
 test('dragon requires its altar, grants a bow once and cycles flight, breath, swoop and melee landing',()=>{

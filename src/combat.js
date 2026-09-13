@@ -1,6 +1,6 @@
-import { ANIMALS,updateAnimal } from './wildlife.js?v=15';
-import { visibleBetween,findMobPath } from './navigation.js?v=15';
-import { updateDragon } from './dragon.js?v=15';
+import { ANIMALS,updateAnimal } from './wildlife.js?v=16';
+import { visibleBetween,findMobPath } from './navigation.js?v=16';
+import { updateDragon } from './dragon.js?v=16';
 
 export const ENEMIES = {
   dragon: {name:'Ender Dragon',hp:260,speed:7,damage:5,color:'#383442',glow:'#c6a5ff',radius:3.6,height:2.7,xp:300},

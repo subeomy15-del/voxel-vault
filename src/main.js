@@ -1,9 +1,9 @@
-import { ITEMS,BLOCKS } from './data.js?v=15';
-import { Renderer } from './render.js?v=15';
-import { Game } from './game.js?v=15';
-import { Audio } from './audio.js?v=15';
-import { UI } from './ui.js?v=15';
-import { loadSettings } from './save.js?v=15';
+import { ITEMS,BLOCKS } from './data.js?v=16';
+import { Renderer } from './render.js?v=16';
+import { Game } from './game.js?v=16';
+import { Audio } from './audio.js?v=16';
+import { UI } from './ui.js?v=16';
+import { loadSettings } from './save.js?v=16';
 let storage;try{storage=localStorage;}catch{storage={getItem:()=>null,setItem:()=>{throw Error('Storage unavailable');}};}
 export const settings=loadSettings(storage);
 if(matchMedia('(prefers-reduced-motion: reduce)').matches)settings.bobbing=false;

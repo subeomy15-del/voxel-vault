@@ -1,6 +1,6 @@
 import * as THREE from '../vendor/three.module.js';
-import { ITEMS,BLOCKS,hash } from './data.js?v=15';
-import { toolModel,bowModel,gliderModel } from './models.js?v=15';
+import { ITEMS,BLOCKS,hash } from './data.js?v=16';
+import { toolModel,bowModel,gliderModel } from './models.js?v=16';
 // The same models supply catalogue renders and held equipment.
 export function itemModel(r,name){
  const item=ITEMS[name]||{color:'#a6b4bc'},g=new THREE.Group(),color=item.color;
@@ -13,6 +13,7 @@ export function itemModel(r,name){
  if(name==='coal'){const lump=add(new THREE.DodecahedronGeometry(.42,0),'#363e46');lump.scale.set(1.15,.8,.9);return g;}
  if(name==='firecracker'){box('#b64e4b',.22,.62,.22,0,-.04);box('#d5bc76',.27,.07,.27,0,.28);box('#d6b57b',.06,.32,.06,0,.62);const fuse=box('#d2c49d',.035,.24,.035,0,.48);fuse.rotation.z=.25;return g;}
  if(name==='moonstone'){const gem=crystal('#b4afd3',.43);gem.scale.set(.8,1.25,.8);return g;}
+ if(name==='sacred_orb'){const orb=add(new THREE.IcosahedronGeometry(.39,1),color,0,0,0,.25);orb.material.emissive.set('#e4be70');orb.material.emissiveIntensity=.2;const halo=add(new THREE.TorusGeometry(.5,.025,6,24),'#fff0bb');halo.rotation.set(.7,.3,.2);return g;}
  if(name==='dragon_egg'){const egg=add(new THREE.SphereGeometry(.4,8,6),'#484052');egg.scale.y=1.2;box('#aa94c9',.1,.1,.025,.1,.16,.34);return g;}
  if(name==='torch'){box('#826d55',.13,.7,.13,0,-.14);box('#d9b77b',.23,.24,.23,0,.33);box('#f0dfb1',.12,.16,.12,0,.48);return g;}
  if(name==='wheat'){for(const x of [-.18,0,.18]){box('#a28e5c',.035,.85,.035,x,-.08);for(let i=0;i<4;i++)for(const side of [-1,1]){const grain=box('#c9b782',.1,.16,.08,x+side*.055,.05+i*.12);grain.rotation.z=side*.5;}}box('#8b795c',.55,.08,.1,0,-.18);return g;}

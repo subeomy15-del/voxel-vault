@@ -1,13 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js?v=15';
-import { freshState,loadState } from '../src/save.js?v=15';
-import { ITEMS,RECIPES } from '../src/data.js?v=15';
+import { Game } from '../src/game.js?v=16';
+import { freshState,loadState } from '../src/save.js?v=16';
+import { ITEMS,RECIPES } from '../src/data.js?v=16';
 import { existsSync } from 'node:fs';
+import { FORGE_OFFERS } from '../src/expeditions.js?v=16';
 const make=()=>{const data=new Map();return new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},{getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)});};
 test('all three outposts generate across terrain seeds and preserve player edits on reload',()=>{
  const g=make();for(const seed of [2,3,8,11,14,22,28]){g.state=freshState(seed);g.loadWorld();assert.equal(g.state.outposts.length,3);for(const p of g.state.outposts)assert.equal(g.world.get(p.x+1,p.y,p.z+1),'treasure_chest');}
  const p=g.state.outposts[0];g.world.set(p.x,p.y+6,p.z,'gold_block');g.save();g.state=loadState(g.storage);g.loadWorld();assert.equal(g.world.get(p.x,p.y+6,p.z),'gold_block');assert.equal(g.state.outposts.length,3);
+});
+test('relic forge exposes a full sacred gear tier with artwork',()=>{
+ assert.ok(FORGE_OFFERS.length>=11);
+ for(const [name,cost] of FORGE_OFFERS){assert.ok(ITEMS[name],name);assert.ok(cost>=3);assert.ok(existsSync(new URL('../assets/items/'+name+'.png',import.meta.url)),name);}
 });
 test('outpost treasure can be collected once and relic forging requires a real nearby station and exact payment',()=>{
  const g=make();g.start();const p=g.state.outposts.find(p=>p.id==='lodge');g.pos={x:p.x+.5,y:p.y,z:p.z+2.5};g.target={x:p.x+1,y:p.y,z:p.z+1,type:'treasure_chest'};g.interact();assert.equal(g.state.inv.relic_shard,3);assert.equal(g.world.get(p.x+1,p.y,p.z+1),'chest');g.interact();assert.equal(g.state.inv.relic_shard,3);

@@ -1,15 +1,15 @@
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=15';
-import { canonicalItem,normalizeResources } from './resource-map.js?v=15';
-import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=15';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=15';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=15';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,craft,hash,dailySeed } from './data.js?v=15';
-import { freshState,loadState,saveState,importLegacy } from './save.js?v=15';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=15';
-import { movePlayer,requestJump } from './movement.js?v=15';
-import { overlapsBlock } from './shapes.js?v=15';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=15';
-import { ANIMALS,animalKind } from './wildlife.js?v=15';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=16';
+import { canonicalItem,normalizeResources } from './resource-map.js?v=16';
+import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=16';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=16';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=16';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,craft,hash,dailySeed } from './data.js?v=16';
+import { freshState,loadState,saveState,importLegacy } from './save.js?v=16';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=16';
+import { movePlayer,requestJump } from './movement.js?v=16';
+import { overlapsBlock } from './shapes.js?v=16';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=16';
+import { ANIMALS,animalKind } from './wildlife.js?v=16';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}

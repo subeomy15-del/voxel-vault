@@ -1,4 +1,4 @@
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=15';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=16';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },
@@ -237,6 +237,7 @@ Object.assign(ITEMS,{
   crystal_carrot:{name:'Crystal Carrot',color:'#a9dbc8',kind:'food',nutrition:6,saturation:8,effect:'nightvision',duration:120,description:'Food and two minutes of night vision.'}
 });
 ITEMS.firecracker={name:'Firecracker',color:'#c96958',kind:'firecracker',description:'Press E for a celebration burst. While gliding, it boosts you forward and upward.'};
+Object.assign(ITEMS,{dawnblade:{name:'Dawnblade',color:'#f0c878',kind:'sword',damage:22,leech:2,tier:6,description:'Sacred sunsteel blade. Hits restore two health.'},aegis_armor:{name:'Aegis Armor',color:'#d8c996',kind:'armor',reduction:.78,description:'Sacred armor that reduces incoming damage by 78%.'},seraph_glider:{name:'Seraph Glider',color:'#e2c58e',kind:'glider',ore:'gold',glideSpeed:21,sink:.5,description:'Sacred wings with exceptional speed and gentle descent.'},sacred_orb:{name:'Sacred Orb',color:'#f0d18c',kind:'orb',description:'A sacred focus orb. Use it to blink safely across the islands.'}});
 export const RECIPES = [
   { item:'firecracker', count:4, cost:{coal:1,sand:2}, category:'Supplies' },
   { item: 'stone_sword', cost: { stone: 6, wood: 2 }, category: 'Gear' },

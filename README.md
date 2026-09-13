@@ -30,6 +30,8 @@ The release has 218 usable catalogue items and 131 recipes. Older copper stacks 
 
 Find Wayfarer Lodge, Old Watchtower and Crystal Sanctuary near home. Open treasure chests with E and trade relic shards at a Relic Forge. The lodge chest supplies enough shards for a grappling hook: equip it, aim at solid terrain within 24 blocks, and press E.
 
+The Relic Forge also offers sacred gear: Dawnblade, Aegis Armor, Seraph Glider and Sacred Orb. Save relic shards from the outposts and Rift anchors for these final-tier rewards.
+
 Build with wood, masonry, slabs, stairs, glass, fabrics and metals. Matching slabs stack, stairs rotate, ladders climb and beds set your respawn point. Chests store stacks; moonstone chests share storage across dimensions. The placement preview shows blocked spaces before spending a block.
 
 Nine crops grow during active play. Plant on tilled soil; nearby water speeds growth. Hunt six animal species and cook their meat in a furnace. Food restores hunger and energy; crafted meals can grant timed movement, mining or vision effects.
