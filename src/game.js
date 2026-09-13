@@ -1,16 +1,16 @@
-import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=21';
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=21';
-import { canonicalItem,normalizeResources } from './resource-map.js?v=21';
-import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=21';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=21';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=21';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,hash,dailySeed } from './data.js?v=21';
-import { freshState,loadState,saveState,importLegacy } from './save.js?v=21';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=21';
-import { movePlayer,requestJump } from './movement.js?v=21';
-import { overlapsBlock } from './shapes.js?v=21';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=21';
-import { ANIMALS,animalKind } from './wildlife.js?v=21';
+import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=22';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=22';
+import { canonicalItem,normalizeResources } from './resource-map.js?v=22';
+import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=22';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=22';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=22';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,hash,dailySeed } from './data.js?v=22';
+import { freshState,loadState,saveState,importLegacy } from './save.js?v=22';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=22';
+import { movePlayer,requestJump } from './movement.js?v=22';
+import { overlapsBlock } from './shapes.js?v=22';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=22';
+import { ANIMALS,animalKind } from './wildlife.js?v=22';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}
@@ -51,11 +51,12 @@ export class Game {
   }
   travel(destination){
     if(!['overworld','nether','ender'].includes(destination)||destination===this.state.dimension)return false;
+    if(destination==='ender'&&!this.creative&&!this.state.fortressCleared){this.toast('Ender portal sealed','Defeat the fortress guardian to open the way.');return false;}
     const source=this.state.dimension;
     this.save();this.state.realms[this.state.dimension]=captureRealm(this.state);
     Object.assign(this.state,structuredClone(this.state.realms[destination]||emptyRealm()));this.state.dimension=destination;
     if(destination==='ender'&&!this.state.rift.kit){
-      this.state.rift.kit=true;this.add('hang_glider');this.add('moonstone_orb',12);this.add('end_stone',96);this.add('ender_berry',12);this.state.glider||='hang_glider';
+      this.state.rift.kit=true;this.add('end_stone',32);this.add('ender_berry',4);
       this.state.bar[3]='end_stone';this.state.bar[4]='moonstone_orb';this.state.bar[7]='ender_berry';this.state.rift.started=this.state.elapsed;
     }
     this.loadWorld();this.screen=null;this.portalCooldown=3;
@@ -71,8 +72,8 @@ export class Game {
     this.renderer.burst(anchor.x+.5,this.pos.y+2,anchor.z+.5,anchor.color,35);
     if(rift.collected.length===3){
       rift.finished=this.state.elapsed;const time=Math.max(1,rift.finished-rift.started);rift.best=rift.best?Math.min(rift.best,time):time;rift.runs++;this.add('forge_seal');
-      if(!rift.rewarded){rift.rewarded=true;this.add('moonstone_sword');this.add('moonstone_glider');this.add('moonstone_armor');this.state.glider='moonstone_glider';this.state.bar[0]='moonstone_sword';}
-      this.toast('RIFT RUN COMPLETE',`${Math.floor(time/60)}:${String(Math.floor(time%60)).padStart(2,'0')} · Moonstone equipment unlocked. Take it home!`,'reward');this.emit('riftComplete');
+      if(!rift.rewarded){rift.rewarded=true;this.add('moonstone',6);}
+      this.toast('RIFT RUN COMPLETE',`${Math.floor(time/60)}:${String(Math.floor(time%60)).padStart(2,'0')} · +6 Moonstone materials. Forge your own equipment!`,'reward');this.emit('riftComplete');
     }else this.toast(anchor.name+' activated',`${rift.collected.length} / 3 anchors · +3 Moonstone · Health restored`,'reward');
     this.save();return true;
   }
@@ -336,13 +337,14 @@ export class Game {
     if(m.hp<=0){
       this.mobs=this.mobs.filter(v=>v!==m);this.state.stats.kills++;
       if(m.kind==='dragon'){defeatDragon(this,m);return;}
+      if(m.fortress){this.state.fortressCleared=true;this.boss=null;this.slam=null;this.toast('Ender portal unsealed','The fortress is conquered. Prepare a bow, armor and a glider before entering.','reward');this.save();}
       const drops=ANIMALS[m.kind]?.drops||{coal:[1,1]};let offset=0;
       for(const[item,[low,high]]of Object.entries(drops)){const count=low+Math.min(high-low,Math.floor(hash(m.id+offset,Math.floor(this.state.elapsed),this.state.seed)*(high-low+1)));this.dropItem(item,count,m.x+offset*.25,m.y,m.z);offset++;}
     }
   }
   hurt(amount){if(this.creative||this.hurtCooldown>0||this.dashTime>0)return;const reduction=1-(ITEMS[this.state.armor]?.reduction||0);this.state.hp=Math.max(0,this.state.hp-amount*reduction);this.hurtCooldown=.7;this.audio.play('hurt');this.emit('hurt');if(this.state.hp<=0){this.state.stats.deaths++;this.pause('death');this.emit('screen');}}
   returnHome(){this.pos={...(this.state.spawn||this.state.origin||{x:.5,y:7,z:20.5})};if(this.world.intersects(this.pos.x,this.pos.y,this.pos.z))this.pos.y=this.world.ground(this.pos.x,this.pos.z);this.velocity=0;this.vx=this.vz=0;this.gliding=false;}
-  respawn(){this.state.hp=20;this.state.food=20;this.state.saturation=5;this.state.effects={};this.returnHome();this.projectiles=[];this.mobs=this.mobs.filter(m=>ENEMIES[m.kind]?.passive);this.boss=null;this.slam=null;if(this.state.dragon){this.state.dragon.active=false;this.state.dragon.hp=260;}this.hurtCooldown=3;this.resume();this.save();}
+  respawn(){this.state.hp=20;this.state.food=20;this.state.saturation=5;this.state.effects={};this.returnHome();this.projectiles=[];this.mobs=this.mobs.filter(m=>ENEMIES[m.kind]?.passive);this.boss=null;this.slam=null;if(this.state.dragon){this.state.dragon.active=false;this.state.dragon.hp=420;}this.hurtCooldown=3;this.resume();this.save();}
   spawnMob(x,z,kind='sentinel',y=null){if(kind==='grazer')kind='deer';const info=ENEMIES[kind]||ENEMIES.sentinel;const m={id:++this.serial,x,z,y:y??this.world.ground(x,z),kind,hp:info.hp,maxHp:info.hp,cooldown:1,flash:0,windup:0,stun:0,angle:0,walk:0,wander:hash(x|0,z|0,this.state.seed)*6};this.mobs.push(m);return m;}
   spawnAmbient(){if(this.state.dimension!=='overworld')return;
     for(const[dx,dz]of[[-12,4],[10,11],[-24,-12],[17,-15],[-9,-18],[22,8]]){
@@ -355,7 +357,7 @@ export class Game {
     this.renderer.stream(this.pos);if(this.screen)return;
     this.state.time+=dt;this.state.elapsed+=dt;tickSurvival(this,dt);this.updateDrops(dt);for(const k of['grappleCooldown','attackCooldown','hurtCooldown','dashCooldown','dashTime','firecrackerCooldown','blastCooldown'])this[k]=Math.max(0,this[k]-dt);
     this.cropTimer+=dt;if(this.cropTimer>1){this.cropTimer=0;this.growCrops();}
-    this.move(dt);if(this.tickRift(dt))return;this.updateMobs(dt);if(this.screen)return;
+    this.move(dt);this.updateFortress();if(this.tickRift(dt))return;this.updateMobs(dt);if(this.screen)return;
     this.target=this.world.raycast({x:this.pos.x,y:this.pos.y+(this.crouching?1.15:1.58),z:this.pos.z},this.direction(),6);
     if(this.placeHeld){this.placeTimer-=dt;if(this.placeTimer<=0){this.place();this.placeTimer=.16;}}
     if(this.drawState){if(this.drawState.item!==this.held)this.drawState=null;else this.drawState.time+=dt;}
@@ -373,8 +375,8 @@ export class Game {
     const t=this.target;if(!t||!Number.isFinite(BLOCKS[t.type]?.hardness)){this.mineProgress=0;return;}const key=cellKey(t.x,t.y,t.z);if(key!==this.mineKey){this.mineKey=key;this.mineProgress=0;}
     const item=ITEMS[this.held],kind=item?.kind,wood=['wood','birch','pinewood','plank','birch_plank','pine_plank','leaf','pine','autumnleaf','bookshelf','hedge'].includes(BLOCKS[t.type].texture||t.type),soil=['grass','dirt','sand','clay','snow','gravel','farmland'].includes(t.type);
     const correct=kind==='axe'&&wood||kind==='shovel'&&soil||kind==='pickaxe'&&!wood&&!soil;
-    const soft=soil||wood||BLOCKS[t.type].plant,hardness=BLOCKS[t.type].hardness*(soft?1.8:3.5);
-    const before=this.mineProgress;this.mineProgress+=dt*(this.creative?40:(correct?(item.speed||1):soft?.8:.3)*(this.effect('haste')?1.6:1))/hardness;
+    const soft=soil||wood||BLOCKS[t.type].plant,hardness=BLOCKS[t.type].hardness;
+    const before=this.mineProgress;this.mineProgress+=dt*(this.creative?40:(correct?(item.speed||1):1)*(this.effect('haste')?1.6:1))/hardness;
     if(Math.floor(before*12)!==Math.floor(this.mineProgress*12)&&this.mineProgress<1){this.renderer.burst(t.x+.5,t.y+.65,t.z+.5,BLOCKS[t.type].color,3);this.audio.play('mine',t.type);}
     if(this.mineProgress>=1){
       if(CROP_BLOCKS.includes(t.type)){this.harvest(t);this.mineProgress=0;return;}
@@ -384,6 +386,11 @@ export class Game {
       this.emit('pickup',{item:BLOCKS[t.type].drop||t.type,count:1});
       this.renderer.burst(t.x+.5,t.y+.5,t.z+.5,BLOCKS[t.type].color,8);this.renderer.swing=1;this.audio.play('mine',t.type);this.mineProgress=0;this.mineKey='';this.emit('hud');
     }
+  }
+  updateFortress(){
+    if(this.state.dimension!=='nether'||this.creative||this.state.fortressCleared||Math.hypot(this.pos.x-72,this.pos.z+48)>18||this.mobs.some(m=>m.fortress))return;
+    const m=this.spawnMob(72,-44,'guardian',25);m.fortress=true;m.hp=m.maxHp=180;this.boss=m;
+    this.toast('Fortress guardian awakened','Defeat it to unseal the Ender portal. Dodge its shockwaves and shard volleys.');
   }
   move(dt){movePlayer(this,dt);}
   updateMobs(dt){updateEnemies(this,dt);}

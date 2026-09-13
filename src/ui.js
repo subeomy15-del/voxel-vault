@@ -1,11 +1,11 @@
-import { inventoryLayout } from './inventory-layout.js?v=21';
-import { realmDestination } from './nether.js?v=21';
-import { FORGE_OFFERS,OUTPOSTS } from './expeditions.js?v=21';
-import { ITEMS, BLOCKS, RECIPES, BIOMES, SMELTING, CROPS, EFFECTS, canCraft, ingredientCount, dailySeed } from './data.js?v=21';
-import { brandMark } from './brand.js?v=21';
-import { ENEMIES } from './combat.js?v=21';
-import { loadState, saveSettings } from './save.js?v=21';
-import { icon } from './icons.js?v=21';
+import { inventoryLayout } from './inventory-layout.js?v=22';
+import { realmDestination } from './nether.js?v=22';
+import { FORGE_OFFERS,OUTPOSTS } from './expeditions.js?v=22';
+import { ITEMS, BLOCKS, RECIPES, BIOMES, SMELTING, CROPS, EFFECTS, canCraft, ingredientCount, dailySeed } from './data.js?v=22';
+import { brandMark } from './brand.js?v=22';
+import { ENEMIES } from './combat.js?v=22';
+import { loadState, saveSettings } from './save.js?v=22';
+import { icon } from './icons.js?v=22';
 export { icon };
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const heldBow=g=>ITEMS[g.held]?.kind==='bow'&&g.attackCooldown>0;
@@ -93,12 +93,12 @@ export class UI {
     const g=this.game,s=g.state,b=BIOMES[g.world.biome(g.pos.x,g.pos.z)];const l=document.querySelector('#location');l.querySelector('.eyebrow').textContent=s.dimension==='nether'?'NETHER WORLD':s.dimension==='ender'?'ENDER WORLD':g.creative?'CREATIVE WORLD':s.mode==='daily'?'DAILY WORLD':'SURVIVAL WORLD';l.querySelector('strong').textContent=b.name;l.querySelector('small').textContent=`Day ${Math.floor(s.time/600)+1} · ${g.creative?'Creative mode':['Morning','Afternoon','Evening','Moonrise'][Math.floor(s.time%600/150)]}`;
     const quest=document.querySelector('#quest');quest.innerHTML=`<span class="eyebrow">YOUR WORLD</span><strong>${Math.floor(g.pos.x)}, ${Math.floor(g.pos.y)}, ${Math.floor(g.pos.z)}</strong><small>${s.stats.built} built · ${s.stats.mined} mined · ${s.stats.harvested} harvested</small>`;
     const rift=s.rift,challenge=document.querySelector('#rift-objective');
-    if(challenge){challenge.hidden=!!g.screen;const end=s.dimension==='ender',count=rift.collected.length,time=Math.max(0,(rift.finished||s.elapsed)-rift.started);challenge.innerHTML=end?`<span class="rift-kicker">${count===3?'EXPEDITION COMPLETE':'THE RIFT RUN'}</span><strong>${count===3?'Moonstone gear unlocked!':'Activate the three anchors'}</strong><div class="anchor-dots">${['dawn','ember','dusk'].map((id,i)=>`<span class="${rift.collected.includes(id)?'done':''}">${rift.collected.includes(id)?'✓':i+1}</span>`).join('')}<b>${timeString(time)}</b></div><small>${count===3?'Return through the portal. Your gear comes with you.':'Cyan pads launch you. Steer with the mouse. Press G to close your glider and land.'}</small>${count===3?'<button data-action="rift-again">Run again →</button>':''}`:`<span class="rift-kicker">${rift.rewarded?'RIFT RUN CONQUERED':'A WORLD BEYOND YOUR WORLD'}</span><strong>${rift.rewarded?'Build with your new rewards':'Explore the outposts'}</strong><small>${rift.rewarded?'Your moonstone gear works here too.':`${s.opened.filter(id=>id.startsWith('outpost-')).length}/3 treasures found. Follow map markers. Mine diamonds for forge gear, then explore the Rift.`}</small>`;}
+    if(challenge){challenge.hidden=!!g.screen;const end=s.dimension==='ender',count=rift.collected.length,time=Math.max(0,(rift.finished||s.elapsed)-rift.started);challenge.innerHTML=end?`<span class="rift-kicker">${count===3?'EXPEDITION COMPLETE':'THE RIFT RUN'}</span><strong>${count===3?'Rift materials earned!':'Activate the three anchors'}</strong><div class="anchor-dots">${['dawn','ember','dusk'].map((id,i)=>`<span class="${rift.collected.includes(id)?'done':''}">${rift.collected.includes(id)?'✓':i+1}</span>`).join('')}<b>${timeString(time)}</b></div><small>${count===3?'Return through the portal. Your gear comes with you.':'Cyan pads launch you. Steer with the mouse. Press G to close your glider and land.'}</small>${count===3?'<button data-action="rift-again">Run again →</button>':''}`:`<span class="rift-kicker">${rift.rewarded?'RIFT RUN CONQUERED':'A WORLD BEYOND YOUR WORLD'}</span><strong>${rift.rewarded?'Build with your new rewards':'Explore the outposts'}</strong><small>${rift.rewarded?'Your moonstone gear works here too.':`${s.opened.filter(id=>id.startsWith('outpost-')).length}/3 treasures found. Follow map markers. Mine diamonds for forge gear, then explore the Rift.`}</small>`;}
     document.querySelector('#hearts').innerHTML=`<span class="hp-fill" style="width:${Math.max(0,Math.min(100,s.hp*5))}%"></span><b>${Math.max(0,Math.ceil(s.hp*5))} / 100</b>`;document.querySelector('#hearts').setAttribute('aria-label',`Health ${Math.max(0,Math.ceil(s.hp*5))} out of 100`);document.querySelector('#armor').textContent=s.armor?'◈ '+Math.round((ITEMS[s.armor]?.reduction||0)*100)+'%':'';document.querySelector('.stamina i').style.width=g.stamina+'%';
-    if(challenge&&s.dimension==='nether')challenge.innerHTML='<span class="rift-kicker">OVERWORLD → NETHER → ENDER</span><strong>Find the Ashen Fortress</strong><small>Follow the fortress marker. Cross the doorway and enter its glowing portal to reach the Ender. The arrival portal leads home.</small>';
+    if(challenge&&s.dimension==='nether')challenge.innerHTML='<span class="rift-kicker">OVERWORLD → NETHER → ENDER</span><strong>Find the Ashen Fortress</strong><small>Follow the fortress marker. Defeat the fortress guardian to unseal its Ender portal. The arrival portal leads home.</small>';
     if(challenge&&s.dimension==='ender'){
       if(g.boss?.kind==='dragon')challenge.innerHTML=`<span class="rift-kicker">ENDER DRAGON</span><strong>${{circle:'Aim for the dragon',breath:'Keep moving!',swoop:'Dodge the swoop',perch:'Landed — use your sword'}[g.boss.stage]}</strong><small>${g.boss.crystals??4}/4 healing crystals remain. Shoot the crystals on the four pillars. Step back when a slam is marked.</small>`;
-      else challenge.innerHTML+=`<small class="dragon-invitation">${s.dragon.defeated?'Dragon defeated. Your trophy travels home with you.':'Dragon challenge: find the altar at 0, −7 on this island. Press E to awaken it. A bow and arrows are supplied.'}</small>`;
+      else challenge.innerHTML+=`<small class="dragon-invitation">${s.dragon.defeated?'Dragon defeated. Your trophy travels home with you.':'Dragon challenge: find the altar at 0, −7 on this island. Press E to awaken it. Bring your own bow, arrows, armor and glider.'}</small>`;
     }
     document.querySelector('#food-label').textContent=`Food ${Math.ceil(s.food)}/20`;
     document.querySelector('#food-fill').style.width=s.food*5+'%';document.querySelector('#reserve-fill').style.width=s.saturation*5+'%';

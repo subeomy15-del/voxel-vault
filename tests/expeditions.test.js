@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js?v=21';
-import { freshState,loadState } from '../src/save.js?v=21';
-import { ITEMS,RECIPES } from '../src/data.js?v=21';
+import { Game } from '../src/game.js?v=22';
+import { freshState,loadState } from '../src/save.js?v=22';
+import { ITEMS,RECIPES } from '../src/data.js?v=22';
 import { existsSync } from 'node:fs';
-import { FORGE_OFFERS } from '../src/expeditions.js?v=21';
+import { FORGE_OFFERS } from '../src/expeditions.js?v=22';
 const make=()=>{const data=new Map();return new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},{getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)});};
 test('all three outposts generate across terrain seeds and preserve player edits on reload',()=>{
  const g=make();for(const seed of [2,3,8,11,14,22,28]){g.state=freshState(seed);g.loadWorld();assert.equal(g.state.outposts.length,3);for(const p of g.state.outposts)assert.equal(g.world.get(p.x+1,p.y,p.z+1),'treasure_chest');}
@@ -20,11 +20,11 @@ test('outpost treasure can be collected once and relic forging requires a real n
  g.pos={x:p.x-.5,y:p.y,z:p.z-1.5};g.add('diamond',20);assert.equal(g.forge('dawnblade'),true);
 });
 test('grappling uses collision-aware movement, has a cooldown and rejects empty sky',()=>{
- const g=make();g.start('ender');g.add('grappling_hook');g.equip('grappling_hook');g.pos={x:10.5,y:19,z:8.5};g.yaw=0;g.pitch=0;g.world.set(10,20,1,'obsidian');assert.equal(g.useGrapple(),true);assert.equal(g.useGrapple(),false);const z=g.pos.z;
+ const g=make();g.start('adventure');g.state.fortressCleared=true;g.save();g.start('ender');g.add('hang_glider');g.state.glider='hang_glider';g.add('moonstone_orb',12);g.add('grappling_hook');g.equip('grappling_hook');g.pos={x:10.5,y:19,z:8.5};g.yaw=0;g.pitch=0;g.world.set(10,20,1,'obsidian');assert.equal(g.useGrapple(),true);assert.equal(g.useGrapple(),false);const z=g.pos.z;
  for(let i=0;i<100;i++){g.move(.016);assert.equal(g.world.intersects(g.pos.x,g.pos.y,g.pos.z),false);}assert.ok(g.pos.z<z-2);g.grappleCooldown=0;g.pitch=1.4;assert.equal(g.useGrapple(),false);
 });
 test('ruby and sapphire weapons have distinct effects and the warhammer respects its recovery',()=>{
- const g=make();g.start('ender');g.pos={x:10.5,y:19,z:8.5};g.yaw=0;g.pitch=0;g.state.hp=10;const m=g.spawnMob(10.5,6.5,'brute',19);m.hp=100;
+ const g=make();g.start('adventure');g.state.fortressCleared=true;g.save();g.start('ender');g.add('hang_glider');g.state.glider='hang_glider';g.add('moonstone_orb',12);g.pos={x:10.5,y:19,z:8.5};g.yaw=0;g.pitch=0;g.state.hp=10;const m=g.spawnMob(10.5,6.5,'brute',19);m.hp=100;
  g.add('ruby_blade');g.equip('ruby_blade');g.attack();assert.equal(g.state.hp,11);g.attackCooldown=0;g.add('sapphire_blade');g.equip('sapphire_blade');g.attack();assert.equal(m.slow,2);g.attackCooldown=0;g.add('warhammer');g.equip('warhammer');g.attack();assert.equal(g.attackCooldown,.85);const hp=m.hp;g.attack();assert.equal(m.hp,hp);
 });
 test('every catalogue item has rendered artwork and all recipe ingredients are real',()=>{

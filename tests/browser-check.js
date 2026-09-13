@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { connect,sleep } from './cdp.js';
 const c=await connect(),{evaluate:ev,click,screenshot}=c;
-const importGame=()=>ev(`(async()=>{const m=await import('/src/main.js?v=21');window.g=m.game;window.v=m.renderer;window.ui=m.ui;})()`);
+const importGame=()=>ev(`(async()=>{const m=await import('/src/main.js?v=22');window.g=m.game;window.v=m.renderer;window.ui=m.ui;})()`);
 const waitTerrain=async()=>{await sleep(120);for(let i=0;i<120;i++){if(await ev('v.chunks.size>=9&&!v.inflight&&v.queue.length===0&&v.ready.length===0'))return;await sleep(100);}throw Error('Terrain worker did not finish');};
 const key=async(code,down=true)=>c.send('Input.dispatchKeyEvent',{type:down?'keyDown':'keyUp',code,key:code==='Space'?' ':code.slice(-1).toLowerCase()});
 try{

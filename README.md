@@ -6,13 +6,13 @@ Play: https://subeomy15-del.github.io/voxel-vault/
 
 ## Fight the Ender Dragon
 
-1. Walk through the portal near home to enter the **Nether**. Find the **Ashen Fortress** at X 72, Z −48 and use its portal to reach the Ender. Ender portals return you to the fortress; the Nether arrival portal leads home.
-2. Find the **Dragon Altar** at X 0, Z −7 on the arrival island. Press **E** nearby to awaken the dragon. Your first challenge supplies a longbow and 64 arrows.
+1. Walk through the portal near home to enter the **Nether**. Find the **Ashen Fortress** at X 72, Z −48 and defeat its guardian to unseal the Ender portal. Ender portals return you to the fortress; the Nether arrival portal leads home.
+2. Find the **Dragon Altar** at X 0, Z −7 on the arrival island. Press **E** nearby to awaken the dragon. Bring your own bow and arrows; no combat kit is supplied.
 3. Shoot the four healing crystals on the obsidian pillars. Each surviving crystal slowly restores the dragon's health.
 4. Use a bow while it circles. Keep moving during breath attacks, dodge its swoop, and attack with a sword when it lands. Step outside the marked circle before a tail slam.
 5. The first victory awards a **Dragon Egg**, 16 moonstone, 10 diamonds and a Forge Seal. Return through the portal with your trophy and gear.
 
-The dragon has 260 health and becomes more aggressive below 40% health. Its health and destroyed crystals survive saving and travel. Death lets you retry from the altar. Rematches do not duplicate the first-victory rewards or starter bow kit. Build cover, bring food and craft armor before a difficult fight.
+The dragon has 420 health and becomes more aggressive below 40% health. Its health and destroyed crystals survive saving and travel. Death lets you retry from the altar. Rematches do not duplicate the first-victory rewards or starter bow kit. Build cover, bring food and craft armor before a difficult fight.
 
 The separate **Rift Run** remains available: use cyan launch pads and a glider to reach three island anchors, press E to activate each, and earn moonstone equipment. Close the glider with G to land. The challenge records your best time.
 
@@ -82,3 +82,5 @@ Inventory, terrain edits, containers, crops, food, gear, animals and realm progr
 The backpack uses square item slots, an equipment area with a character preview, and a separate nine-slot hotbar. Select a hotbar destination, then select an item. Crafting opens the recipe book. All-item browsing and search remain available.
 
 Advanced recipes require a placed workbench within 3.5 blocks. Craft the workbench by hand from 6 timber. Planks, torches, basic arrows, cloth and simple ingredient preparation remain hand recipes. Mining stone by hand is slow; use pickaxes for rock, axes for timber and shovels for soil. Cracks, chips and the mining progress meter show your progress.
+
+Progression update: the Nether fortress guardian must be defeated before entering the Ender. The Rift Run awards materials, not a full equipment set. Dragon rematches restore all four crystals. Mining speed is restored to its original pace; crafting-table requirements remain.

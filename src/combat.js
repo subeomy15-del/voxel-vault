@@ -1,9 +1,9 @@
-import { ANIMALS,updateAnimal } from './wildlife.js?v=21';
-import { visibleBetween,findMobPath } from './navigation.js?v=21';
-import { updateDragon } from './dragon.js?v=21';
+import { ANIMALS,updateAnimal } from './wildlife.js?v=22';
+import { visibleBetween,findMobPath } from './navigation.js?v=22';
+import { updateDragon } from './dragon.js?v=22';
 
 export const ENEMIES = {
-  dragon: {name:'Ender Dragon',hp:260,speed:7,damage:5,color:'#383442',glow:'#c6a5ff',radius:3.6,height:2.7,xp:300},
+  dragon: {name:'Ender Dragon',hp:420,speed:7,damage:5,color:'#383442',glow:'#c6a5ff',radius:3.6,height:2.7,xp:300},
   sentinel: { name:'Grove sentinel', hp:18, speed:1.8, damage:3, color:'#66817c', glow:'#c1e9b2', xp:18 },
   stalker: { name:'Ember prowler', hp:14, speed:3.2, damage:3, color:'#a06443', glow:'#ffd38a', xp:20 },
   wisp: { name:'Frost wisp', hp:14, speed:1.7, damage:3, color:'#82afc2', glow:'#cef5ff', xp:22 },

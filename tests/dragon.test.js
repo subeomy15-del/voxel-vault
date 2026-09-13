@@ -1,19 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=21';
-import {World} from '../src/world.js?v=21';
-import {ITEMS,RECIPES,craft} from '../src/data.js?v=21';
-import {freshState,saveState,loadState} from '../src/save.js?v=21';
-import {summonDragon,DRAGON_TOWERS} from '../src/dragon.js?v=21';
-import {launchBolt,updateProjectiles} from '../src/combat.js?v=21';
+import {Game} from '../src/game.js?v=22';
+import {World} from '../src/world.js?v=22';
+import {ITEMS,RECIPES,craft} from '../src/data.js?v=22';
+import {freshState,saveState,loadState} from '../src/save.js?v=22';
+import {summonDragon,DRAGON_TOWERS} from '../src/dragon.js?v=22';
+import {launchBolt,updateProjectiles} from '../src/combat.js?v=22';
 const make=()=>{const data=new Map();return new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},{getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)});};
-const arena=()=>{const g=make();g.start('ender');g.pos={x:.5,y:19,z:-4.5};return g;};
-test('dragon requires its altar, grants a bow once and cycles flight, breath, swoop and melee landing',()=>{
- const g=arena();g.pos.x=25;assert.equal(summonDragon(g),false);g.pos.x=.5;assert.equal(summonDragon(g),true);assert.equal(summonDragon(g),false);assert.equal(g.state.inv.longbow,1);assert.equal(g.state.inv.arrows,64);
+const arena=()=>{const g=make();g.start('adventure');g.state.fortressCleared=true;g.save();g.start('ender');g.add('hang_glider');g.state.glider='hang_glider';g.add('moonstone_orb',12);g.pos={x:.5,y:19,z:-4.5};return g;};
+test('dragon requires its altar, requires player-supplied gear and cycles flight, breath, swoop and melee landing',()=>{
+ const g=arena();g.pos.x=25;assert.equal(summonDragon(g),false);g.pos.x=.5;assert.equal(summonDragon(g),true);assert.equal(summonDragon(g),false);assert.equal(g.state.inv.longbow||0,0);assert.equal(g.state.inv.arrows||0,0);
  const m=g.boss,stages=new Set(),health=g.state.hp;let shots=0;
  for(let i=0;i<1400;i++){g.hurtCooldown=Math.max(0,g.hurtCooldown-.02);g.updateMobs(.02);stages.add(m.stage);shots=Math.max(shots,g.projectiles.length);}
  assert.deepEqual([...stages].sort(),['breath','circle','perch','swoop']);assert.ok(shots>0);assert.ok(m.hp>0);assert.ok(g.state.hp<=health);
- g.respawn();assert.equal(g.boss,null);g.pos={x:.5,y:19,z:-4.5};assert.equal(summonDragon(g),true);assert.equal(g.state.inv.longbow,1);assert.equal(g.state.inv.arrows,64);
+ g.respawn();assert.equal(g.boss,null);g.pos={x:.5,y:19,z:-4.5};assert.equal(summonDragon(g),true);assert.equal(g.state.inv.longbow||0,0);assert.equal(g.state.inv.arrows||0,0);
 });
 test('arrows break healing crystals and hit the dragon; destroyed crystals stop healing',()=>{
  const g=arena();summonDragon(g);const m=g.boss;m.hp=100;
@@ -25,9 +25,9 @@ test('arrows break healing crystals and hit the dragon; destroyed crystals stop 
 });
 test('dragon health and broken crystals survive travel, rewards are once-only and the trophy returns home',()=>{
  const g=arena();summonDragon(g);g.hit(g.boss,60);g.world.set(-8,25,-8,null);g.save();
- const loaded=new Game(g.renderer,g.audio,g.storage);assert.equal(loaded.boss.hp,200);assert.equal(loaded.world.get(-8,25,-8),null);
- loaded.travel('overworld');loaded.travel('ender');assert.equal(loaded.boss.hp,200);loaded.hit(loaded.boss,300);assert.equal(loaded.boss,null);assert.equal(loaded.state.inv.dragon_egg,1);const moon=loaded.state.inv.moonstone;
- loaded.pos={x:.5,y:19,z:-4.5};summonDragon(loaded);loaded.hit(loaded.boss,300);assert.equal(loaded.state.inv.dragon_egg,1);assert.equal(loaded.state.inv.moonstone,moon);assert.equal(loaded.state.dragon.wins,2);
+ const loaded=new Game(g.renderer,g.audio,g.storage);assert.equal(loaded.boss.hp,360);assert.equal(loaded.world.get(-8,25,-8),null);
+ loaded.travel('overworld');loaded.travel('ender');assert.equal(loaded.boss.hp,360);loaded.hit(loaded.boss,500);assert.equal(loaded.boss,null);assert.equal(loaded.state.inv.dragon_egg,1);const moon=loaded.state.inv.moonstone;
+ loaded.pos={x:.5,y:19,z:-4.5};summonDragon(loaded);loaded.hit(loaded.boss,500);assert.equal(loaded.state.inv.dragon_egg,1);assert.equal(loaded.state.inv.moonstone,moon);assert.equal(loaded.state.dragon.wins,2);
  loaded.travel('overworld');assert.equal(loaded.state.inv.dragon_egg,1);assert.equal(loadState(loaded.storage).dragon.defeated,true);
 });
 test('older resources merge without losing stacks, equipment, containers or placed blocks',()=>{
