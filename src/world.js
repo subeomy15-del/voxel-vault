@@ -1,8 +1,8 @@
-import { netherHeight,netherBlock } from './nether.js?v=23';
-import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=23';
-import { canonicalItem } from './resource-map.js?v=23';
-import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=23';
-import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=23';
+import { netherHeight,netherBlock } from './nether.js?v=22';
+import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=22';
+import { canonicalItem } from './resource-map.js?v=22';
+import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=22';
+import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=22';
 export const CHUNK=16, WORLD_LIMIT=511, WORLD_BOTTOM=-64, WORLD_TOP=95, SEA_LEVEL=4;
 export const cellKey=(x,y,z)=>`${x},${y},${z}`;
 export class World {

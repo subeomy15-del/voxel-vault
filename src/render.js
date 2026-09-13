@@ -1,18 +1,18 @@
 import * as THREE from '../vendor/three.module.js';
-import { BLOCKS, ITEMS, hash } from './data.js?v=23';
-import { CHUNK, WORLD_LIMIT } from './world.js?v=23';
-import { ENEMIES } from './combat.js?v=23';
-import { textureCanvas,TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=23';
-import { Scenery } from './scenery.js?v=23';
-import { boxesFor } from './shapes.js?v=23';
-import { animalModel,bowModel,arrowModel,toolModel } from './models.js?v=23';
-import { itemModel } from './item-model.js?v=23';
-import { dragonModel,animateDragon } from './dragon-model.js?v=23';
-import { RiftEffects } from './rift-effects.js?v=23';
-import { PostProcess } from './post-process.js?v=23';
-import { PlayerModel } from './player-model.js?v=23';
-import { cameraPosition } from './perspective.js?v=23';
-import { ViewEffects } from './view-effects.js?v=23';
+import { BLOCKS, ITEMS, hash } from './data.js?v=22';
+import { CHUNK, WORLD_LIMIT } from './world.js?v=22';
+import { ENEMIES } from './combat.js?v=22';
+import { textureCanvas,TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=22';
+import { Scenery } from './scenery.js?v=22';
+import { boxesFor } from './shapes.js?v=22';
+import { animalModel,bowModel,arrowModel,toolModel } from './models.js?v=22';
+import { itemModel } from './item-model.js?v=22';
+import { dragonModel,animateDragon } from './dragon-model.js?v=22';
+import { RiftEffects } from './rift-effects.js?v=22';
+import { PostProcess } from './post-process.js?v=22';
+import { PlayerModel } from './player-model.js?v=22';
+import { cameraPosition } from './perspective.js?v=22';
+import { ViewEffects } from './view-effects.js?v=22';
 export class Renderer {
   constructor(container,settings){
     this.settings=settings;this.scene=new THREE.Scene();this.scene.background=new THREE.Color('#b6cddd');this.scene.fog=new THREE.Fog('#b6cddd',62,125);
@@ -20,10 +20,10 @@ export class Renderer {
     this.renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});this.renderer.setSize(innerWidth,innerHeight);this.renderer.setPixelRatio(Math.min(devicePixelRatio,settings.quality==='high'?1.5:1));this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.05;container.append(this.renderer.domElement);
     this.ambient=new THREE.HemisphereLight('#e1ecff','#525b48',1.3);this.scene.add(this.ambient);this.sun=new THREE.DirectionalLight('#fff6e4',1.8);this.sun.position.set(-40,75,35);this.scene.add(this.sun);this.sun.castShadow=true;this.sun.shadow.mapSize.set(2048,2048);Object.assign(this.sun.shadow.camera,{left:-40,right:40,top:40,bottom:-40,near:1,far:170});this.sun.shadow.bias=-.0007;this.sun.shadow.normalBias=.04;this.renderer.shadowMap.enabled=settings.quality==='high';this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.scene.add(this.sun.target);
     this.material=new THREE.MeshStandardMaterial({map:this.atlas(),vertexColors:true,alphaTest:.45,roughness:.94,metalness:.02});this.chunks=new Map();this.queue=[];this.center='';this.decor=new THREE.Group();this.scene.add(this.decor);this.effects=[];this.beacons=[];this.mobMeshes=new Map();this.chestMeshes=new Map();
-    this.waterMaterial=new THREE.MeshStandardMaterial({color:'#2f91c3',roughness:.28,metalness:.14,transparent:true,opacity:.82,vertexColors:true});
+    this.waterMaterial=new THREE.MeshStandardMaterial({color:'#42a7dd',roughness:.6,metalness:0,transparent:true,opacity:.78,vertexColors:true});
     this.glassMaterial=new THREE.MeshLambertMaterial({color:'#ffffff',transparent:true,opacity:.28,vertexColors:true});
     this.epoch=0;this.revision=0;this.chunkVersions=new Map();this.ready=[];this.inflight=false;this.underground=false;
-    this.worker=new Worker(new URL('./terrain-worker.js?v=23',import.meta.url),{type:'module'});
+    this.worker=new Worker(new URL('./terrain-worker.js?v=22',import.meta.url),{type:'module'});
     this.worker.onmessage=({data})=>{if(data.epoch!==this.epoch)return;this.inflight=false;if(data.revision<(this.chunkVersions.get(`${data.cx},${data.cz}`)||0))return;this.ready.push(data);};
     this.worker.onerror=e=>{console.error('Terrain worker failed',e);document.querySelector('#loading').hidden=false;document.querySelector('#loading').textContent='Terrain could not load. Reload the page to try again.';};
     this.projectileMeshes=new Map();
@@ -31,7 +31,7 @@ export class Renderer {
     this.outline=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.012,1.012,1.012)),new THREE.LineBasicMaterial({color:'#f7edc5',transparent:true,opacity:.7}));this.outline.visible=false;this.scene.add(this.outline);
     this.cracks=new THREE.Mesh(new THREE.BoxGeometry(1.006,1.006,1.006),new THREE.MeshBasicMaterial({transparent:true,depthWrite:false,opacity:.75}));this.cracks.visible=false;this.scene.add(this.cracks);this.crackStage=-1;this.ghost=null;this.ghostType='';
     this.hand=new THREE.Group();this.camera.add(this.hand);this.scene.add(this.camera);this.hand.position.set(.43,-.4,-.82);this.hand.scale.setScalar(.58);this.swing=0;this.heldName='';
-    this.lantern=new THREE.PointLight('#ffdda1',0,14,1.3);this.camera.add(this.lantern);this.torchLights=Array.from({length:4},()=>{const light=new THREE.PointLight('#ffce87',0,12,1.4);this.scene.add(light);return light;});this.torchTimer=0;
+    this.lantern=new THREE.PointLight('#ffdda1',0,12,1.3);this.camera.add(this.lantern);this.torchLights=Array.from({length:4},()=>{const light=new THREE.PointLight('#ffdda1',0,10,1.4);this.scene.add(light);return light;});this.torchTimer=0;
     this.telegraph=new THREE.Mesh(new THREE.RingGeometry(.92,1,64),new THREE.MeshBasicMaterial({color:'#ff856b',transparent:true,opacity:.8,side:THREE.DoubleSide,depthWrite:false}));this.telegraph.rotation.x=-Math.PI/2;this.telegraph.visible=false;this.scene.add(this.telegraph);
     addEventListener('resize',()=>{this.camera.aspect=innerWidth/innerHeight;this.camera.updateProjectionMatrix();this.renderer.setSize(innerWidth,innerHeight);});
   }

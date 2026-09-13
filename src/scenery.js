@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import { hash } from './data.js?v=23';
+import { hash } from './data.js?v=22';
 export class Scenery {
   constructor(renderer){
     this.owner=renderer;this.time={value:0};this.wind={value:1};
@@ -9,18 +9,18 @@ export class Scenery {
       fragmentShader:`varying vec3 vSky;uniform vec3 sunDirection,zenith,horizon;uniform float night,rift,time;
       float rand(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
       void main(){vec3 d=normalize(vSky);float h=max(d.y,0.0);vec3 col=mix(horizon,zenith,pow(h,.58));
-      float sun=max(dot(d,sunDirection),0.0);col+=vec3(1.0,.74,.37)*pow(sun,18.)*.35*(1.-night);
+      float sun=max(dot(d,sunDirection),0.0);col+=vec3(1.0,.74,.37)*pow(sun,26.)*.22*(1.-night);
       col+=vec3(1.,.88,.59)*smoothstep(.9992,.9996,sun)*(1.-night)*1.1;
-      float moon=max(dot(d,-sunDirection),0.0);col+=vec3(.62,.75,.86)*smoothstep(.9978,.9996,moon)*night;
+      float moon=max(dot(d,-sunDirection),0.0);col+=vec3(.62,.75,.86)*smoothstep(.9993,.9996,moon)*night;
       vec3 cell=floor(d*370.);float star=step(.9988,rand(cell))*pow(max(0.,1.-length(fract(d*370.)-.5)*1.6),3.);
-      col+=vec3(.77,.88,1.)*star*night*smoothstep(.05,.4,h)*1.45;
+      col+=vec3(.77,.88,1.)*star*night*smoothstep(.05,.4,h);
       float ribbon=sin(d.x*5.+sin(d.z*4.+time*.015)*1.3+d.y*9.);float nebula=pow(max(0.,1.-abs(ribbon)),3.)*pow(max(0.,d.y),.4);
       col+=rift*(vec3(.09,.035,.16)*nebula+vec3(.02,.065,.08)*pow(max(0.,1.-abs(ribbon-.4)),4.)*h);gl_FragColor=vec4(col,1.0);
       #include <tonemapping_fragment>
       #include <colorspace_fragment>
       }`});
     this.sky=new THREE.Mesh(new THREE.SphereGeometry(190,24,14),skyMaterial);this.sky.frustumCulled=false;this.sky.renderOrder=-10;renderer.scene.add(this.sky);
-    const material=new THREE.MeshStandardMaterial({color:'#f7f0de',transparent:true,opacity:.82,depthWrite:false,roughness:.92,metalness:0});
+    const material=new THREE.MeshLambertMaterial({color:'#f7f0de',transparent:true,opacity:.82,depthWrite:false});
     this.clouds=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),material,120);this.clouds.frustumCulled=false;
     const m=new THREE.Matrix4(),q=new THREE.Quaternion();let count=0;
     for(let i=0;i<24;i++){
@@ -45,7 +45,7 @@ export class Scenery {
       shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_begin>',`#include <normal_fragment_begin>
       if(abs(vNormal.y)>.7){vec2 wave=vec2(sin(vWaterPos.x*1.8+vWaterPos.z*.8+uWaterTime*.9),cos(vWaterPos.z*2.-vWaterPos.x*.6-uWaterTime*.7));normal=normalize(normal+vec3(wave.x,0.,wave.y)*.1);}`);
       shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>',`float crest=pow(max(0.,sin(vWaterPos.x*2.+vWaterPos.z*1.7+uWaterTime)*cos(vWaterPos.z*1.4-uWaterTime*.65)),12.);
-      outgoingLight+=vec3(.36,.62,.7)*crest*.22;
+      outgoingLight+=vec3(.32,.46,.42)*crest*.12;
       #include <opaque_fragment>`);
     };
   }
@@ -78,7 +78,7 @@ export class Scenery {
     this.clouds.visible=!inCave;this.clouds.position.set(game.pos.x+Math.sin(t*.002)*10,0,game.pos.z);this.clouds.material.color.set('#8b9ba5').lerp(new THREE.Color('#f6f0dd'),day);this.clouds.material.opacity=.7*day+.22;
     const r=this.owner;r.scene.background.copy(inCave?new THREE.Color('#162128'):uniforms.horizon.value);r.scene.fog.color.copy(r.scene.background);
     const range=r.settings.quality==='high'?1:.76;r.scene.fog.near=inCave?20:48*range;r.scene.fog.far=inCave?45:106*range;
-    r.sun.intensity=inCave?.06:.16+day*1.7;r.sun.color.set('#b7cee7').lerp(new THREE.Color('#fff4de'),day).lerp(new THREE.Color('#e6ae8b'),dusk*.45);
+    r.sun.intensity=inCave?.06:.14+day*1.45;r.sun.color.set('#b7cee7').lerp(new THREE.Color('#edf1f3'),day).lerp(new THREE.Color('#dfbfab'),dusk*.3);
     r.ambient.intensity=game.effect('nightvision')?2.3:inCave?.38:.6+day*.95;r.ambient.color.set('#c4d2df');r.ambient.groundColor.set('#6b7f7a');
     if(game.effect('nightvision')){r.scene.fog.near=45;r.scene.fog.far=95;r.lantern.intensity=Math.max(r.lantern.intensity,5);}
     if(game.state.dimension==='ender'){

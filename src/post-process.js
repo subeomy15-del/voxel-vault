@@ -11,8 +11,7 @@ export class PostProcess {
     void main(){vec3 sum=vec3(0.);for(int i=-4;i<=4;i++){vec3 c=texture2D(source,vUv+vec2(float(i)*texel.x*2.,0.)).rgb;float brightness=max(c.r,max(c.g,c.b));sum+=c*smoothstep(threshold,threshold+.55,brightness)*exp(-float(i*i)/8.); }gl_FragColor=vec4(sum/4.9,1.);}`});
     this.combine=new THREE.ShaderMaterial({uniforms:{source:{value:this.sceneTarget.texture},glow:{value:this.glowTarget.texture},texel:{value:new THREE.Vector2()},strength:{value:.24}},vertexShader,depthTest:false,depthWrite:false,fragmentShader:`varying vec2 vUv;uniform sampler2D source,glow;uniform vec2 texel;uniform float strength;
     void main(){vec3 base=texture2D(source,vUv).rgb,bloom=vec3(0.);for(int i=-4;i<=4;i++)bloom+=texture2D(glow,vUv+vec2(0.,float(i)*texel.y*2.)).rgb*exp(-float(i*i)/8.);
-    vec3 color=base+bloom/4.9*strength;float edge=smoothstep(.22,.82,length(vUv-.5));color*=1.-edge*.12;
-    color=(color-.5)*1.08+.5;color=mix(vec3(dot(color,vec3(.299,.587,.114))),color,1.12);float grain=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)-.5;color+=grain*.009;gl_FragColor=vec4(color,1.);
+    vec3 color=base+bloom/4.9*strength;float edge=smoothstep(.25,.85,length(vUv-.5));color*=1.-edge*.09;gl_FragColor=vec4(color,1.);
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
     }`});
@@ -22,7 +21,7 @@ export class PostProcess {
     const r=this.r.renderer;if(this.r.settings.quality!=='high'){r.setRenderTarget(null);r.render(scene,camera);return;}
     const size=r.getDrawingBufferSize(new THREE.Vector2()),key=size.x+','+size.y;
     if(this.size!==key){this.size=key;this.sceneTarget.setSize(size.x,size.y);this.glowTarget.setSize(Math.ceil(size.x/2),Math.ceil(size.y/2));this.glow.uniforms.texel.value.set(1/size.x,1/size.y);this.combine.uniforms.texel.value.set(2/size.x,2/size.y);}
-    this.combine.uniforms.strength.value=ender?.34:.16;
+    this.combine.uniforms.strength.value=ender?.22:.1;
     r.setRenderTarget(this.sceneTarget);r.render(scene,camera);
     this.quad.material=this.glow;r.setRenderTarget(this.glowTarget);r.render(this.scene,this.camera);
     this.quad.material=this.combine;r.setRenderTarget(null);r.render(this.scene,this.camera);
