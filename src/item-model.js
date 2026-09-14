@@ -1,6 +1,6 @@
 import * as THREE from '../vendor/three.module.js';
-import { ITEMS,BLOCKS,hash } from './data.js?v=27';
-import { toolModel,bowModel,gliderModel } from './models.js?v=27';
+import { ITEMS,BLOCKS,hash } from './data.js?v=28';
+import { toolModel,bowModel,gliderModel } from './models.js?v=28';
 // The same models supply catalogue renders and held equipment.
 export function itemModel(r,name){
  const item=ITEMS[name]||{color:'#a6b4bc'},g=new THREE.Group(),color=item.color;
@@ -26,12 +26,17 @@ export function itemModel(r,name){
   add(new THREE.TorusGeometry(.15,.03,6,20),'#b8a484',0,-.42).rotation.x=Math.PI/2;return g;
  }
  if(item.kind==='armor'){
+  if(item.slot==='helm'){box(color,.66,.25,.53,0,.19);for(const x of [-.28,.28])box(color,.12,.36,.5,x,-.03);box(color,.54,.35,.1,0,-.03,-.22);return g;}
+  if(item.slot==='gauntlets'){for(const x of [-.24,.24]){box(color,.27,.38,.3,x,0);box('#49554d',.29,.12,.32,x,.23);}return g;}
+  if(item.slot==='leggings'){box(color,.65,.16,.29,0,.3);for(const x of [-.18,.18])box(color,.27,.67,.28,x,-.08);return g;}
+  if(item.slot==='boots'){for(const x of [-.24,.24]){box(color,.3,.4,.3,x,.1);box(color,.31,.17,.5,x,-.15,.1);}return g;}
   box(color,.63,.66,.29,0,.04);box(color,.26,.26,.35,-.43,.23);box(color,.26,.26,.35,.43,.23);
   box('#40546a',.44,.15,.33,0,.43);box('#c6a05c',.66,.09,.31,0,-.23);crystal('#e9d691',.1,0,.12,.18);
   for(const x of [-.19,.19])box('#ebf4f0',.025,.42,.015,x,.04,.155);return g;
  }
  if(item.kind==='orb'){const orb=add(new THREE.IcosahedronGeometry(.37,1),color,0,0,0,.1);orb.material.emissive.set(color);orb.material.emissiveIntensity=.08;return g;}
  if(name==='relic_shard'){const gem=crystal('#d8bb83',.4);gem.scale.set(.65,1.35,.65);return g;}
+ if(name==='knight_heart'){for(const x of [-.13,.13]){const half=crystal('#9d5847',.28,x,.07);half.scale.set(1,1.3,.7);}add(new THREE.ConeGeometry(.3,.4,4),'#774538',0,-.25).rotation.z=Math.PI;box('#b7a17b',.07,.42,.04,0,0,.2);return g;}
  if(name.endsWith('_ingot')){const mesh=box(color,.77,.25,.4);mesh.rotation.y=.15;box('#eff4eb',.5,.025,.24,0,.14,0);return g;}
  if(item.kind==='ammo'){
   for(let i=0;i<3;i++){const shaft=box('#a38254',.026,.9,.026,(i-1)*.14,0,0);shaft.rotation.z=-.4;const tip=crystal(color,.12,(i-1)*.14+.17,.42);tip.scale.set(.6,1.5,.5);box('#e5dfc9',.1,.16,.02,(i-1)*.14-.15,-.35);}return g;

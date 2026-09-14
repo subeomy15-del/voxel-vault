@@ -1,20 +1,21 @@
-import { netherHeight,netherBlock } from './nether.js?v=27';
-import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=27';
-import { canonicalItem } from './resource-map.js?v=27';
-import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=27';
-import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=27';
+import { netherHeight,netherBlock } from './nether.js?v=28';
+import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=28';
+import { canonicalItem } from './resource-map.js?v=28';
+import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=28';
+import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=28';
 export const CHUNK=16, WORLD_LIMIT=511, WORLD_BOTTOM=-64, WORLD_TOP=95, SEA_LEVEL=4;
 export const cellKey=(x,y,z)=>`${x},${y},${z}`;
 export class World {
   constructor(seed=7821,edits=[],terrain=6,dimension='overworld') {
     this.seed=seed;this.terrain=terrain;this.dimension=dimension;this.edits=new Map(edits);this.structures=new Map();this.columns=new Map();this.prepared=new Set();this.dirty=new Set();this.chests=[];this.changes=[];
     this.landmarks=LANDMARKS.map(l=>({...l,y:this.height(l.x,l.z)+1}));
+    if(dimension==='overworld')for(const [id,name,x,z,color]of [['badlands','Badlands · Draugr Knights',240,180,'#b77745'],['savanna','Savanna',220,-60,'#a2a063'],['marsh','Marsh',-240,200,'#75815a']])this.landmarks.push({id,name,x,z,y:this.height(x,z)+1,color,type:'landscape',subtitle:id==='badlands'?'Hunt knights for Knight Hearts':'Explore a new biome'});
     if(dimension==='ender')this.landmarks=[{id:'camp',name:'Arrival island',subtitle:'Ender Gate: use E to return to Survival',x:0,y:19,z:0,type:'landscape',color:'#b9a3ff'},{id:'spire',name:'Obsidian spires',subtitle:'Moonstone and violet crystal',x:48,y:24,z:0,type:'landscape',color:'#ac83e8'}];
     if(dimension==='nether')this.landmarks=[{id:'nether-camp',name:'Nether Gate',subtitle:'Find the gateway to the Ender world',x:0,y:20,z:0,type:'landscape',color:'#e77d5d'},{id:'nether-fortress',name:'Ashen Fortress',subtitle:'A dangerous route lies beyond',x:72,y:25,z:-48,type:'landscape',color:'#d59a70'}];
     this.makeCamp();
   }
   noise(x,z,scale){const a=Math.floor(x/scale),b=Math.floor(z/scale);let u=x/scale-a,v=z/scale-b;u=u*u*(3-2*u);v=v*v*(3-2*v);return (hash(a,b,this.seed)*(1-u)+hash(a+1,b,this.seed)*u)*(1-v)+(hash(a,b+1,this.seed)*(1-u)+hash(a+1,b+1,this.seed)*u)*v;}
-  biome(x,z){if(this.dimension==='ender')return 'ender';if(this.dimension==='nether')return 'nether';const n=this.noise(x+170,z-85,160);if(z<-155&&n>.32)return 'snow';if(x>115&&n>.46)return 'desert';if(n<.24||x<-55&&z>-135)return 'forest';if(n>.76&&Math.hypot(x,z)>95)return 'mountain';return 'meadow';}
+  biome(x,z){if(this.dimension==='ender')return 'ender';if(this.dimension==='nether')return 'nether';const n=this.noise(x+170,z-85,160);if(x>145+n*25&&z>115)return 'badlands';if(x<-170&&z>145+n*25)return 'marsh';if(x>150&&z>-135&&z<15)return 'savanna';if(z<-155&&n>.32)return 'snow';if(x>115&&n>.46)return 'desert';if(n<.24||x<-55&&z>-135)return 'forest';if(n>.76&&Math.hypot(x,z)>95)return 'mountain';return 'meadow';}
   column(x,z){
     const key=`${x},${z}`;if(this.columns.has(key))return this.columns.get(key);
     if(this.dimension==='nether'){const h=netherHeight(this,x,z),c={h,biome:'nether',bottom:-18};this.columns.set(key,c);return c;}
@@ -40,7 +41,7 @@ export class World {
     // A seed gives one repeatable, dry clearing. Existing saves keep their position.
     for(let i=0;i<240;i++){
       const x=Math.floor((hash(i*7919,173,this.seed)-.5)*560),z=Math.floor((hash(i*104729,941,this.seed+47)-.5)*560),y=this.height(x,z)+1;
-      if(Math.hypot(x,z)<65||y<SEA_LEVEL+3||y>65)continue;
+      if(Math.hypot(x,z)<65||y<SEA_LEVEL+3||y>65||this.biome(x,z)==='badlands')continue;
       let safe=true;
       for(let dx=-1;dx<=1&&safe;dx++)for(let dz=-1;dz<=1;dz++){
         if(Math.abs(this.height(x+dx,z+dz)+1-y)>1||!this.solid(x+dx,y-1,z+dz)||this.waterAt(x+dx,y,z+dz)||this.intersects(x+dx+.5,y,z+dz+.5))safe=false;
@@ -85,7 +86,9 @@ export class World {
     if(x>=20&&x<=24&&z<=10&&z>=-32){const floor=this.height(22,10)-Math.floor((10-z)*.65);if(y>floor&&y<floor+6)return null;}
     if(y>h)return h<SEA_LEVEL&&y<=SEA_LEVEL?'water':null;
     if(this.inCave(x,y,z,c))return y<-52?'lava':null;
-    if(y===h)return h<=SEA_LEVEL+1?'sand':h>48?'snow':BIOMES[c.biome].top;
+    if(c.biome==='badlands'&&y<=h&&y>h-15)return y===h?'red_sand':['red_terracotta','ochre_terracotta','red_terracotta','chalk'][Math.floor((y+96)/3)%4];
+    if(c.biome==='marsh'&&y===h&&this.noise(x+91,z,12)>.58)return 'water';
+    if(y===h)return h<=SEA_LEVEL+1?'sand':h>48&&!['savanna','marsh'].includes(c.biome)?'snow':BIOMES[c.biome].top;
     if(y>h-4)return c.biome==='desert'?'sand':y===h-3&&c.river<22?'clay':'dirt';
     const rock=y<-49?'basalt':y<-38?'slate':c.rock==='limestone'&&y<-5?'marble':c.rock;
     if(y>h-8)return rock;
@@ -114,7 +117,8 @@ export class World {
       const c=this.column(x,z),safe=Math.hypot(x,z-14)<9||x>16&&x<29&&z>-38&&z<16;
       if(safe||c.h<SEA_LEVEL||c.h>58)continue;
       if(c.h<=SEA_LEVEL+2&&c.river<14){if(hash(x,z,this.seed+32)>.982)put(x,c.h+1,z,'cane');continue;}
-      if(c.biome==='desert'){if(hash(x,z,this.seed+32)>.999)for(let y=1;y<=2+Math.floor(hash(z,x,this.seed)*2);y++)put(x,c.h+y,z,'cactus');continue;}
+      if(c.biome==='desert'||c.biome==='badlands'){if(hash(x,z,this.seed+32)>.997)for(let y=1;y<=2+Math.floor(hash(z,x,this.seed)*2);y++)put(x,c.h+y,z,'cactus');continue;}
+      if(c.biome==='marsh'&&this.noise(x+91,z,12)>.58){if(hash(x,z,this.seed+32)>.97)put(x,c.h+1,z,'cane');continue;}
       const tree=treeAt(this,x,z,c.biome);
       if(tree){growTree(this,put,x,c.h,z,tree);continue;}
       const plant=plantAt(this,x,z,c.biome);if(plant)put(x,c.h+1,z,plant);

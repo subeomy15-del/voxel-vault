@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js?v=27';
-import { World } from '../src/world.js?v=27';
-import { ITEMS,BLOCKS,CROPS,RECIPES,ORE_GLIDERS,canCraft,craft } from '../src/data.js?v=27';
-import { ANIMALS,animalKind } from '../src/wildlife.js?v=27';
-import { tickSurvival,canEat } from '../src/survival.js?v=27';
-import { updateProjectiles } from '../src/combat.js?v=27';
-import { loadState } from '../src/save.js?v=27';
+import { Game } from '../src/game.js?v=28';
+import { World } from '../src/world.js?v=28';
+import { ITEMS,BLOCKS,CROPS,RECIPES,ORE_GLIDERS,canCraft,craft } from '../src/data.js?v=28';
+import { ANIMALS,animalKind } from '../src/wildlife.js?v=28';
+import { tickSurvival,canEat } from '../src/survival.js?v=28';
+import { updateProjectiles } from '../src/combat.js?v=28';
+import { loadState } from '../src/save.js?v=28';
 const make=()=>{const data=new Map(),g=new Game({setWorld(){},stream(){},burst(){}},{play(){}},{getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)});g.screen=null;g.pos={x:.5,y:7,z:9.5};g.yaw=0;g.pitch=0;g.mobs=[];return g;};
 const ticks=(fn,seconds)=>{for(let t=0;t<seconds-1e-8;t+=.05)fn(.05);};
 
@@ -37,8 +37,8 @@ test('food has a chewing action, stores reserves and gradually regenerates healt
 test('all effect foods work at full health, expire, pause and persist with equipment and drops',()=>{
   const g=make();g.state.hp=20;g.state.food=20;g.state.saturation=20;
   for(const[name,item]of Object.entries(ITEMS).filter(([,i])=>i.effect)){delete g.state.effects[item.effect];g.add(name);assert.ok(g.eat(name));tickSurvival(g,.9);assert.equal(g.state.effects[item.effect],item.duration);assert.equal(g.state.inv[name],0);}
-  g.add('gold_glider');g.equip('gold_glider');g.add('gold_armor');g.equip('gold_armor');g.add('frost_arrows',4);g.equip('frost_arrows');g.dropItem('raw_venison',2,2,7,9);g.save();
-  const saved=loadState(g.storage);assert.deepEqual(saved.effects,g.state.effects);assert.equal(saved.glider,'gold_glider');assert.equal(saved.armor,'gold_armor');assert.equal(saved.ammo,'frost_arrows');assert.equal(saved.drops[0].item,'raw_venison');
+  g.add('gold_glider');g.equip('gold_glider');for(const slot of ['helm','chestplate','gauntlets','leggings','boots']){g.add('gold_'+slot);g.equip('gold_'+slot);};g.add('frost_arrows',4);g.equip('frost_arrows');g.dropItem('raw_venison',2,2,7,9);g.save();
+  const saved=loadState(g.storage);assert.deepEqual(saved.effects,g.state.effects);assert.equal(saved.glider,'gold_glider');assert.equal(saved.armorParts.chestplate,'gold_chestplate');assert.equal(saved.ammo,'frost_arrows');assert.equal(saved.drops[0].item,'raw_venison');
   g.pause();const before={...g.state.effects};g.update(1);assert.deepEqual(g.state.effects,before);g.resume();ticks(dt=>tickSurvival(g,dt),121);assert.deepEqual(g.state.effects,{});
 });
 test('hunger consumes reserves before food and disables sprinting when depleted',()=>{
@@ -75,7 +75,7 @@ test('each ore crafts a distinct glider; flight trades forward travel for height
 });
 test('new recipe ingredients exist, gold equipment functions and vegetation stays in sparse patches',()=>{
   for(const r of RECIPES){assert.ok(ITEMS[r.item],r.item);for(const k of Object.keys(r.cost))assert.ok(ITEMS[k],k);}
-  const g=make();g.add('gold_armor');g.equip('gold_armor');g.hurt(10);assert.equal(g.state.hp,13);
+  const g=make();for(const slot of ['helm','chestplate','gauntlets','leggings','boots']){g.add('gold_'+slot);g.equip('gold_'+slot);};g.hurt(10);assert.equal(g.state.hp,13);
   let plants=0,columns=0;const types=new Set(),animals=new Set();
   for(const seed of [1,481,901]){const w=new World(seed);for(let x=64;x<192;x++)for(let z=64;z<192;z++){const type=w.get(x,w.height(x,z)+1,z);columns++;if(BLOCKS[type]?.plant||type?.endsWith('_crop')){plants++;types.add(type);}if(x%13===0&&z%13===0)animals.add(animalKind(w,x,z));}}
   assert.ok(plants>20);assert.ok(plants/columns<.04,plants/columns);assert.ok(types.size>=8,types.size);assert.ok(animals.size>=5,animals.size);

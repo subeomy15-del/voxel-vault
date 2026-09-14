@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#17362e">
-  <meta name="description" content="Explore cool forest valleys, build with 232 items, and battle the Ender Dragon. Five ores, connected worlds, gliders, crafting and three camera views.">
-  <title>Voxel Vault — Dragon Isles</title>
-  <link rel="icon" href="./favicon.svg?v=27" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=27">
-  <link rel="stylesheet" href="./src/natural.css?v=27">
+  <meta name="description" content="Explore the Badlands, hunt Draugr Knights, craft the Knight Sword and enchant gear with aura. Five armor slots, traps, Craft All, and a three-world dragon adventure.">
+  <title>Voxel Vault — Badlands Update</title>
+  <link rel="icon" href="./favicon.svg?v=28" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css?v=28">
+  <link rel="stylesheet" href="./src/natural.css?v=28">
 </head>
 <body>
   <div id="world"></div>
@@ -16,6 +16,7 @@
   <div id="hud" hidden>
     <div class="hud-top"><button class="brand small" data-action="pause"><svg class="brand-mark" width="28" height="28" viewBox="0 0 48 48" aria-hidden="true"><path d="M5 16 24 5l19 11v19L24 46 5 35Z" fill="#5e8463"/><path d="m5 16 19 11 19-11L24 5Z" fill="#e4d197"/><path d="M24 27v19L5 35V16Z" fill="#274d3b"/><path d="m11 24 8 5v7l-8-5Zm18 5 8-5v7l-8 5Z" fill="#a6c796"/></svg> VOXEL VAULT</button><div class="compass" id="compass"></div><button class="icon-button camera-button" data-action="camera" aria-label="Switch camera view" title="Camera view (V / F5)">▣</button><button class="icon-button" data-action="pause" aria-label="Pause game">Ⅱ</button></div>
     <div id="location"><span class="eyebrow">SURVIVAL WORLD</span><strong>Verdant Wilds</strong><small>Day 1 · Morning</small></div>
+    <button id="aura-points" data-action="enchant" aria-label="Open aura enchanting">Aura 0 · Enchant</button>
     <div id="quick-guide"><span><kbd>WASD</kbd> Move <kbd>Mouse</kbd> Look</span><span><kbd>Space</kbd> Jump <kbd>Shift</kbd> Sprint</span><span><kbd>E</kbd> Use, plant, harvest / place</span></div>
     <div id="rift-objective" hidden></div><button id="quest" data-action="journal"></button>
     <div id="boss" hidden><div><span>THE VAULT GUARDIAN</span><small id="boss-phase"></small></div><div class="meter"><i id="boss-fill"></i></div></div>
@@ -34,6 +35,6 @@
   <div id="loading"><span class="loader-cube">⬡</span><strong>Loading your world</strong><small>Getting your blocks ready.</small></div>
   <div id="touch-controls" hidden><div id="stick"><i></i></div><div class="touch-actions"><button data-touch="jump" aria-label="Jump">↑</button><button data-touch="attack" aria-label="Mine or attack">⚒</button><button data-touch="interact" aria-label="Interact or place">E</button><button data-action="inventory" aria-label="Backpack">▦</button><button data-touch="dash" aria-label="Dodge dash">»</button><button data-touch="heal" aria-label="Eat food">♧</button><button data-touch="glide" aria-label="Toggle glider" hidden>△</button></div></div>
   <noscript>This adventure needs JavaScript enabled.</noscript>
-  <script type="module" src="./src/main.js?v=27"></script>
+  <script type="module" src="./src/main.js?v=28"></script>
 </body>
 </html>

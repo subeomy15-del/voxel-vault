@@ -1,7 +1,7 @@
 export const CHAPTERS=[
  {title:'Gather your first timber',realm:'Overworld',hint:'Select your axe with 3. Hold left click on a tree trunk. Collect 6 timber.',action:'inventory'},
  {title:'Build a workshop',realm:'Overworld',hint:'Press C to craft a workbench from 6 timber. Equip it from your backpack and place it with right click or E.',action:'craft'},
- {title:'Forge iron equipment',realm:'Overworld',hint:'Craft a furnace near your workbench. Mine iron and coal, smelt ingots, then craft an iron pickaxe.',action:'craft'},
+ {title:'Forge iron equipment',realm:'Overworld',hint:'Craft a furnace near your workbench. Mine iron and coal, smelt ingots, then craft an iron pickaxe. Ore veins are scarce; explore at different depths.',action:'craft'},
  {title:'Cross into the Nether',realm:'Overworld',hint:'Pack cooked food, armor, a bow and arrows. Follow the portal marker near home and walk through the frame.',action:'journal'},
  {title:'Conquer the Ashen Fortress',realm:'Nether',hint:'Follow the fortress marker to 72, −48. Avoid lava and magma. Defeat its guardian to unseal the End portal.',action:'map'},
  {title:'Enter the End',realm:'Nether',hint:'Take a bow, arrows, armor and a glider. Use the portal inside the cleared fortress. The arrival portal leads home.',action:'inventory'},

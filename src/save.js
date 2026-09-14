@@ -1,13 +1,13 @@
-import { VERSION, ITEMS, STARTER_BAR, starterInventory, dailySeed, BLOCKS,CROPS,EFFECTS } from './data.js?v=27';
-import { ANIMALS } from './wildlife.js?v=27';
-import { normalizeResources } from './resource-map.js?v=27';
-import { REALM_FIELDS,captureRealm } from './realms.js?v=27';
+import { VERSION, ITEMS, STARTER_BAR, starterInventory, dailySeed, BLOCKS,CROPS,EFFECTS } from './data.js?v=28';
+import { ANIMALS } from './wildlife.js?v=28';
+import { normalizeResources } from './resource-map.js?v=28';
+import { REALM_FIELDS,captureRealm } from './realms.js?v=28';
 const prefix='voxel-vault-v2-';
 export const defaultSettings={volume:.45,sensitivity:1,quality:'high',bobbing:true,perspective:0};
 export function freshState(seed=7821,mode='adventure') {
   const inv=starterInventory();if(mode==='creative')for(const k of Object.keys(ITEMS))inv[k]=999;
   if(mode==='ender')Object.assign(inv,{end_stone:128,moonstone_orb:9,moonstone_pickaxe:1,moonstone_sword:1,moonstone_glider:1,ender_berry:16,obsidian:32,moonstone_chest:1,ender_gate:1});
-  return {version:VERSION,seed,mode,dimension:mode==='ender'?'ender':'overworld',realms:{},gate:null,outposts:[],rift:{collected:[],started:0,finished:0,best:0,rewarded:false,kit:false,runs:0},moonChest:{},inv,bar:mode==='ender'?['moonstone_sword','moonstone_pickaxe','moonstone_orb','end_stone','obsidian','ender_berry','torch','moonstone_chest','ender_gate']:[...STARTER_BAR],selected:0,hp:20,armor:null,pos:null,yaw:0,pitch:0,time:70,elapsed:0,seals:[],opened:[],discovered:['camp'],edits:[],victory:false,stats:{mined:0,built:0,kills:0,crafted:0,deaths:0,smelted:0,harvested:0},waypoint:'home',spawn:null,origin:null,containers:{},crops:{},terrain:6,food:20,saturation:5,exhaustion:0,effects:{},glider:mode==='ender'?'moonstone_glider':null,ammo:'arrows',drops:[],animals:[]};
+  return {version:VERSION,seed,mode,dimension:mode==='ender'?'ender':'overworld',realms:{},gate:null,outposts:[],rift:{collected:[],started:0,finished:0,best:0,rewarded:false,kit:false,runs:0},moonChest:{},inv,bar:mode==='ender'?['moonstone_sword','moonstone_pickaxe','moonstone_orb','end_stone','obsidian','ender_berry','torch','moonstone_chest','ender_gate']:[...STARTER_BAR],selected:0,hp:20,armor:null,armorParts:{},aura:0,enchants:{},pos:null,yaw:0,pitch:0,time:70,elapsed:0,seals:[],opened:[],discovered:['camp'],edits:[],victory:false,stats:{mined:0,built:0,kills:0,crafted:0,deaths:0,smelted:0,harvested:0},waypoint:'home',spawn:null,origin:null,containers:{},crops:{},terrain:6,food:20,saturation:5,exhaustion:0,effects:{},glider:mode==='ender'?'moonstone_glider':null,ammo:'arrows',drops:[],animals:[]};
 }
 export function slotKey(mode){return prefix+mode+(mode==='daily'?'-'+dailySeed():'');}
 export function loadState(storage,mode='adventure') {
@@ -49,6 +49,9 @@ export function loadState(storage,mode='adventure') {
     }
     if(raw.dragon&&typeof raw.dragon==='object')s.dragon={active:raw.dragon.active===true,hp:Math.max(1,Math.min(420,Number(raw.dragon.hp)||420)),defeated:raw.dragon.defeated===true,wins:Math.max(0,Math.min(99999,Number(raw.dragon.wins)||0)),kit:raw.dragon.kit===true,arena:raw.dragon.arena===true};
     for(const[k,n]of Object.entries(raw.moonChest||{}))if(ITEMS[k]&&Number.isFinite(n)&&n>0)s.moonChest[k]=Math.min(999999,Math.floor(n));
+    s.aura=Number.isFinite(raw.aura)?Math.max(0,Math.min(999999999,Math.floor(raw.aura))):0;
+    for(const [slot,name]of Object.entries(raw.armorParts||{}))if(ITEMS[name]?.slot===slot&&s.inv[name]>0)s.armorParts[slot]=name;
+    for(const [name,level]of Object.entries(raw.enchants||{}))if(ITEMS[name]&&!ITEMS[name].hidden&&Number.isFinite(level))s.enchants[name]=Math.max(0,Math.min(5,Math.floor(level)));
     s.fortressCleared=raw.fortressCleared===true||raw.dragon?.defeated===true;
     s.journeyStage=Math.max(0,Math.min(8,Number.isFinite(raw.journeyStage)?Math.floor(raw.journeyStage):0));
     s.victory=raw.victory===true;s.waypoint=typeof raw.waypoint==='string'?raw.waypoint:'camp';

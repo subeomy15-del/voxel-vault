@@ -1,24 +1,26 @@
-import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=27';
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=27';
-import { canonicalItem,normalizeResources } from './resource-map.js?v=27';
-import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=27';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=27';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=27';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,hash,dailySeed } from './data.js?v=27';
-import { freshState,loadState,saveState,importLegacy } from './save.js?v=27';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=27';
-import { movePlayer,requestJump } from './movement.js?v=27';
-import { overlapsBlock } from './shapes.js?v=27';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=27';
-import { ANIMALS,animalKind } from './wildlife.js?v=27';
-import { CHAPTERS,journeyStage } from './journey.js?v=27';
+import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=28';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=28';
+import { canonicalItem,normalizeResources } from './resource-map.js?v=28';
+import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=28';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=28';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=28';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,maxCraft,hash,dailySeed } from './data.js?v=28';
+import { freshState,loadState,saveState,importLegacy } from './save.js?v=28';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=28';
+import { movePlayer,requestJump } from './movement.js?v=28';
+import { overlapsBlock } from './shapes.js?v=28';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=28';
+import { ANIMALS,animalKind } from './wildlife.js?v=28';
+import { CHAPTERS,journeyStage } from './journey.js?v=28';
+import { enchantGear,weaponPower,miningPower,armorProtection,awardAura } from './enchanting.js?v=28';
+import { tickTraps,trapAt } from './traps.js?v=28';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}
   resetRuntime(){
     this.pos={x:.5,y:7,z:20.5};this.yaw=0;this.pitch=0;this.velocity=0;this.vx=0;this.vz=0;this.grounded=false;this.coyote=0;this.jumpBuffer=0;this.cameraOffset=0;
     this.walk=0;this.moving=false;this.stamina=100;this.flying=false;this.sprinting=false;this.crouching=false;this.target=null;this.mobTarget=null;this.attackHeld=false;this.placeHeld=false;this.mineProgress=0;this.mineKey='';
-    this.attackCooldown=0;this.hurtCooldown=0;this.dashCooldown=0;this.dashTime=0;this.firecrackerCooldown=0;this.blastCooldown=0;this.saveTimer=0;this.stepTimer=0;this.spawnTimer=0;this.cropTimer=0;this.projectiles=[];this.mobs=[];this.keys.clear();this.boss=null;this.slam=null;this.containerKey=null;this.station=null;this.combo=0;this.buildRotation=0;this.placeTimer=0;this.eating=null;this.drawState=null;this.revealTime=0;this.gliding=false;this.regenTimer=0;this.hungerTimer=0;this.portalCooldown=3;this.pendingGlide=false;this.padCooldown=0;this.grapple=null;this.grappleCooldown=0;
+    this.attackCooldown=0;this.hurtCooldown=0;this.dashCooldown=0;this.dashTime=0;this.firecrackerCooldown=0;this.blastCooldown=0;this.saveTimer=0;this.stepTimer=0;this.spawnTimer=0;this.cropTimer=0;this.projectiles=[];this.mobs=[];this.keys.clear();this.boss=null;this.slam=null;this.containerKey=null;this.station=null;this.combo=0;this.buildRotation=0;this.placeTimer=0;this.eating=null;this.drawState=null;this.revealTime=0;this.gliding=false;this.regenTimer=0;this.hungerTimer=0;this.portalCooldown=3;this.pendingGlide=false;this.padCooldown=0;this.grapple=null;this.grappleCooldown=0;this.trapTimer=0;
   }
   loadWorld(){
     normalizeResources(this.state);
@@ -106,18 +108,20 @@ export class Game {
   pause(screen='pause'){if(this.screen==='menu')return;this.audio.quiet?.();this.screen=screen;this.drawState=null;this.eating=null;this.attackHeld=false;this.placeHeld=false;this.mineProgress=0;this.keys.clear();this.touch={x:0,z:0};this.save();globalThis.document?.exitPointerLock?.();}
   resume(){this.screen=null;this.keys.clear();this.attackHeld=false;this.placeHeld=false;}
   select(i){this.drawState=null;this.eating=null;this.state.selected=(i+9)%9;this.mineProgress=0;this.audio.play('click');this.emit('hud');}
-  equip(name){name=BLOCKS[name]?.drop||name;if(!ITEMS[name]||!this.state.inv[name])return;this.drawState=null;this.eating=null;if(ITEMS[name].kind==='glider'){this.state.glider=name;this.toast('Glider equipped','Press G while airborne. Look down to dive, up to slow your descent.');this.save();return;}if(ITEMS[name].kind==='ammo'){this.state.ammo=name;this.toast(ITEMS[name].name+' selected','Used by your bows and crossbows.');this.save();return;}if(ITEMS[name].kind==='armor'){this.state.armor=name;this.toast('Armor equipped',ITEMS[name].description);}else{const i=this.state.bar.indexOf(name);if(i>=0)this.state.selected=i;else this.state.bar[this.state.selected]=name;}this.save();}
+  equip(name){name=BLOCKS[name]?.drop||name;if(!ITEMS[name]||!this.state.inv[name]||ITEMS[name].hidden)return;this.drawState=null;this.eating=null;if(ITEMS[name].kind==='glider'){this.state.glider=name;this.toast('Glider equipped','Press G while airborne. Look down to dive, up to slow your descent.');this.save();return;}if(ITEMS[name].kind==='ammo'){this.state.ammo=name;this.toast(ITEMS[name].name+' selected','Used by your bows and crossbows.');this.save();return;}if(ITEMS[name].kind==='armor'){this.state.armorParts??={};if(ITEMS[name].slot)this.state.armorParts[ITEMS[name].slot]=name;else this.state.armor=name;this.toast('Armor equipped',ITEMS[name].description);}else{const i=this.state.bar.indexOf(name);if(i>=0)this.state.selected=i;else this.state.bar[this.state.selected]=name;}this.save();}
   nearbyWorkbench(){
     const p=this.pos;
     for(let x=Math.floor(p.x)-3;x<=Math.floor(p.x)+3;x++)for(let y=Math.floor(p.y)-2;y<=Math.floor(p.y)+2;y++)for(let z=Math.floor(p.z)-3;z<=Math.floor(p.z)+3;z++)if(Math.hypot(x+.5-p.x,y-p.y,z+.5-p.z)<=3.5&&this.world.get(x,y,z)==='bench')return true;
     return false;
   }
-  craft(name){
+  enchant(name){return enchantGear(this,name);}
+  craft(name,all=false){
     const recipe=RECIPES.find(r=>r.item===name);
     if(recipe?.station==='bench'&&!this.nearbyWorkbench()){this.toast('Crafting table required','Craft a workbench from 6 timber, place it, and stand within 3 blocks.');return false;}
-    if(!craft(this.state.inv,name)){this.toast('More materials needed','The crafting book shows exactly what is missing.');return false;}
-    this.state.stats.crafted++;this.audio.play('craft');this.toast(ITEMS[name].name+' crafted','Stored in your backpack.');
-    const kind=ITEMS[name].kind;if(['sword','pickaxe','armor','axe','shovel','hoe','bow'].includes(kind)){const i=this.state.bar.findIndex(k=>ITEMS[k].kind===kind);if(i>=0)this.state.bar[i]=name;else if(kind==='armor')this.state.armor=name;}
+    const batches=all?maxCraft(this.state.inv,recipe):1;
+    if(!craft(this.state.inv,name,batches)){this.toast('More materials needed','The crafting book shows exactly what is missing.');return false;}
+    this.state.stats.crafted+=batches;this.audio.play('craft');this.toast(ITEMS[name].name+' crafted',((recipe.count||1)*batches)+' added to your backpack.');
+    const kind=ITEMS[name].kind;if(kind==='armor')this.equip(name);else if(['sword','pickaxe','axe','shovel','hoe','bow'].includes(kind)){const i=this.state.bar.findIndex(k=>ITEMS[k].kind===kind);if(i>=0)this.state.bar[i]=name;else if(kind==='armor')this.equip(name);}
     this.save();return true;
   }
   smelt(output){
@@ -170,7 +174,7 @@ export class Game {
   }
   dash(){if(this.dashCooldown>0||this.stamina<25)return;this.dashTime=.2;this.dashCooldown=1.2;this.stamina-=25;}
   jump(){requestJump(this);}
-  save(){this.state.pos={...this.pos};this.state.yaw=this.yaw;this.state.pitch=this.pitch;this.state.edits=[...this.world.edits];this.state.animals=this.mobs.filter(m=>ANIMALS[m.kind]&&m.hp>0).slice(0,128).map(({kind,x,y,z,hp,angle})=>({kind,x,y,z,hp,angle}));const ok=saveState(this.storage,this.state);this.emit('saved',{ok});return ok;}
+  save(){for(const [slot,name]of Object.entries(this.state.armorParts||{}))if(!(this.state.inv[name]>0))delete this.state.armorParts[slot];this.state.pos={...this.pos};this.state.yaw=this.yaw;this.state.pitch=this.pitch;this.state.edits=[...this.world.edits];this.state.animals=this.mobs.filter(m=>ANIMALS[m.kind]&&m.hp>0).slice(0,128).map(({kind,x,y,z,hp,angle})=>({kind,x,y,z,hp,angle}));const ok=saveState(this.storage,this.state);this.emit('saved',{ok});return ok;}
   nearest(){
     if(this.state.dimension==='nether'&&Math.hypot(this.pos.x-72.5,this.pos.y-25,this.pos.z+47.5)<3&&this.world.get(72,25,-48)==='ender_gate')return {...NETHER_END,type:'ender_gate',name:'Enter the Ender',placed:true};
     const t=this.target;
@@ -193,10 +197,10 @@ export class Game {
     if(ITEMS[this.held]?.kind==='explosive')return this.useBlastCharge();
     if(n?.type==='anchor')return this.collectAnchor(n.id);
     if(n&&MATURE_CROPS.includes(n.type)){this.harvest(n);return;}
-    if(n?.type==='supply'){this.state.opened.push(n.id);for(const[k,v]of Object.entries(n.loot))this.add(k,v);if(n.block)this.world.set(n.x,n.y,n.z,'chest');this.audio.play('craft');this.toast(n.block?n.name+' discovered':'Supplies collected',n.block?'Relic shards and rare materials collected. Visit the Relic Forge.':'Timber, food and fuel for your first shelter.',n.block?'reward':'normal');this.save();return;}
+    if(n?.type==='supply'){this.state.opened.push(n.id);for(const[k,v]of Object.entries(n.loot))this.add(k,v);if(n.block)this.world.set(n.x,n.y,n.z,'chest');this.audio.play('craft');this.toast(n.block?n.name+' discovered':'Supplies collected',n.block?'Supplies collected. Explore the Badlands for Knight Hearts.':'Timber, food and fuel for your first shelter.',n.block?'reward':'normal');this.save();return;}
     if(n?.type==='camp'){this.state.hp=20;this.save();this.toast('Rested at camp','Health restored.');return;}
     if(n?.type==='furnace'||n?.type==='campfire'){this.station=n;this.pause('furnace');this.emit('screen');return;}
-    if(n?.type==='relic_forge'){this.station=n;this.pause('forge');this.emit('screen');return;}
+    if(n?.type==='relic_forge'){this.pause('craft');this.emit('screen');return;}
     if(n?.type==='bench'){this.pause('craft');this.emit('screen');return;}
     if(n?.type==='ender_gate'){this.travel(realmDestination(this,n));return;}
     if(n?.type==='chest'||n?.type==='moonstone_chest'){this.containerKey=n.type==='moonstone_chest'?'moon':cellKey(n.x,n.y,n.z);if(this.containerKey!=='moon')this.state.containers[this.containerKey]??={};this.pause('storage');this.emit('screen');return;}
@@ -217,11 +221,14 @@ export class Game {
     if(this.gliding){
       // Rocket-like boost: preserve the glider's steering direction while
       // adding a small lift so a well-timed cracker clears the next ridge.
-      const boost=10;this.vx+=d.x*boost;this.vz+=d.z*boost;this.velocity=Math.min(14,Math.max(this.velocity,2.8)+1.8);
+      const boost=14;this.vx+=d.x*boost;this.vz+=d.z*boost;this.velocity=Math.min(16,Math.max(this.velocity,3.5)+2.5);
       const x=this.pos.x-d.x*1.2,y=this.pos.y+1.15-d.y*.3,z=this.pos.z-d.z*1.2;this.renderer.burst(x,y,z,'#f2a05c',22);this.renderer.burst(x,y+.35,z,'#ead38f',12);this.audio.play('firecracker');this.toast('Glider boost!','Firecracker burn complete · steer toward your next island.','reward');
     }else{
-      const x=this.pos.x+d.x*5,y=this.pos.y+1.1+d.y*5,z=this.pos.z+d.z*5;this.renderer.burst(x,y,z,'#efaa66',34);this.renderer.burst(x,y+.7,z,'#f5d18a',18);this.audio.play('firecracker');this.toast('Firecracker!','A bright little burst. Craft more with coal and sunstone sand.','reward');
+      const x=this.pos.x+d.x*5,y=this.pos.y+1.1+d.y*5,z=this.pos.z+d.z*5;this.renderer.burst(x,y,z,'#efaa66',34);this.renderer.burst(x,y+.7,z,'#f5d18a',18);this.audio.play('firecracker');this.toast('Firecracker!','Aerial burst! Nearby enemies are startled. Craft more with coal and sand.','reward');
     }
+    const fx=this.pos.x+d.x*5,fz=this.pos.z+d.z*5;
+    this.renderer.firework?.(fx,this.pos.y+5,fz);
+    for(const m of this.mobs)if(m.kind!=='dragon'&&m.kind!=='guardian'&&Math.hypot(m.x-fx,m.z-fz)<8&&Math.abs(m.y-this.pos.y)<5)m.stun=Math.max(m.stun||0,2.2);
     this.save();return true;
   }
   useBlastCharge(){
@@ -306,6 +313,7 @@ export class Game {
     if(Math.abs(x)>WORLD_LIMIT||Math.abs(z)>WORLD_LIMIT||y<=WORLD_BOTTOM||y>WORLD_TOP-1)reason='Outside build height';
     else if(occupied&&occupied!=='water'&&!merge)reason='Space occupied';
     else if(type==='cane'&&(!['sand','grass','dirt','clay'].includes(this.world.get(x,y-1,z))||!this.world.hydrated(x,y-1,z)))reason='Plant cane on soil near water';
+    else if((item.trapDamage||item.snare)&&!this.world.solid(x,y-1,z))reason='Traps need solid ground';
     else if(overlapsBlock(type,x,y,z,this.pos.x,this.pos.y,this.pos.z,this.crouching?1.3:1.75,.3))reason='Move back to place';
     return{x,y,z,type,held,valid:!reason,reason};
   }
@@ -323,13 +331,13 @@ export class Game {
       const ammo=(this.state.inv[this.state.ammo]>0||this.creative)?this.state.ammo:this.state.inv.arrows>0?'arrows':null;
       if(!ammo){this.toast('No arrows','Craft arrows and select a stack in your backpack.');this.attackCooldown=.6;return;}
       if(!this.creative)this.state.inv[ammo]--;this.revealTime=4;
-      const power=Math.max(1,Math.round(item.damage*(.25+.75*charge*charge)))+(ITEMS[ammo].bonus||0);
+      const power=Math.max(1,Math.round(item.damage*weaponPower(this.state,this.held)*(.25+.75*charge*charge)))+(ITEMS[ammo].bonus||0);
       launchBolt(this,{x:this.pos.x,y:this.pos.y+1.5,z:this.pos.z},dir,power,false,{speed:(item.boltSpeed||27)*(.45+.55*charge),gravity:4,slow:ITEMS[ammo].slow||0,color:ITEMS[ammo].color});
       this.attackCooldown=item.cooldown||.45;this.audio.play('shoot');return;
     }
     const nearest=targetMob(this,4)?.mob;
     this.revealTime=4;
-    if(nearest){this.hit(nearest,item?.damage||2);if(item?.leech)this.state.hp=Math.min(20,this.state.hp+item.leech);if(item?.slow)nearest.slow=Math.max(nearest.slow||0,item.slow);this.attackCooldown=item?.cooldown||.36;}else if(item?.kind==='sword')this.attackCooldown=item.cooldown||.36;
+    if(nearest){this.hit(nearest,(item?.damage||2)*weaponPower(this.state,this.held));if(item?.leech)this.state.hp=Math.min(20,this.state.hp+item.leech);if(item?.slow)nearest.slow=Math.max(nearest.slow||0,item.slow);this.attackCooldown=item?.cooldown||.36;}else if(item?.kind==='sword')this.attackCooldown=item.cooldown||.36;
   }
   hit(m,power){
     if(!this.mobs.includes(m))return;m.hp-=power;m.flash=.18;m.stun=.18;m.panic=6;m.brain=0;this.revealTime=4;
@@ -337,14 +345,14 @@ export class Game {
     if(ANIMALS[m.kind])for(const other of this.mobs)if(other!==m&&other.kind===m.kind&&Math.hypot(other.x-m.x,other.z-m.z)<7){other.panic=Math.max(other.panic||0,3);other.brain=0;}
     this.audio.play('hit');this.renderer.burst(m.x,m.y+(ENEMIES[m.kind]?.height||1.5)*.5,m.z,'#bdb89e',5);this.emit('damageNumber',{mob:m,power});
     if(m.hp<=0){
-      this.mobs=this.mobs.filter(v=>v!==m);this.state.stats.kills++;
+      this.mobs=this.mobs.filter(v=>v!==m);this.state.stats.kills++;awardAura(this,m.kind==='dragon'?200:m.kind==='draugr_knight'?35:ANIMALS[m.kind]?2:12);
       if(m.kind==='dragon'){defeatDragon(this,m);return;}
       if(m.fortress){this.state.fortressCleared=true;this.boss=null;this.slam=null;this.toast('Ender portal unsealed','The fortress is conquered. Prepare a bow, armor and a glider before entering.','reward');this.save();}
-      const drops=ANIMALS[m.kind]?.drops||{coal:[1,1]};let offset=0;
+      const drops=ENEMIES[m.kind]?.drops||ANIMALS[m.kind]?.drops||{coal:[1,1]};let offset=0;
       for(const[item,[low,high]]of Object.entries(drops)){const count=low+Math.min(high-low,Math.floor(hash(m.id+offset,Math.floor(this.state.elapsed),this.state.seed)*(high-low+1)));this.dropItem(item,count,m.x+offset*.25,m.y,m.z);offset++;}
     }
   }
-  hurt(amount,combat=false){if(this.creative||this.hurtCooldown>0||this.dashTime>0)return;const reduction=1-(ITEMS[this.state.armor]?.reduction||0);this.state.hp=Math.max(0,this.state.hp-amount*reduction*(combat&&this.hardAdventure?1.65:1));this.hurtCooldown=.7;this.audio.play('hurt');this.emit('hurt');if(this.state.hp<=0){this.state.stats.deaths++;this.pause('death');this.emit('screen');}}
+  hurt(amount,combat=false){if(this.creative||this.hurtCooldown>0||this.dashTime>0)return;const reduction=1-armorProtection(this.state);this.state.hp=Math.max(0,this.state.hp-amount*reduction*(combat&&this.hardAdventure?1.65:1));this.hurtCooldown=.7;this.audio.play('hurt');this.emit('hurt');if(this.state.hp<=0){this.state.stats.deaths++;this.pause('death');this.emit('screen');}}
   returnHome(){this.pos={...(this.state.spawn||this.state.origin||{x:.5,y:7,z:20.5})};if(this.world.intersects(this.pos.x,this.pos.y,this.pos.z))this.pos.y=this.world.ground(this.pos.x,this.pos.z);this.velocity=0;this.vx=this.vz=0;this.gliding=false;}
   respawn(){this.state.hp=20;this.state.food=20;this.state.saturation=5;this.state.effects={};this.returnHome();this.projectiles=[];this.mobs=this.mobs.filter(m=>ENEMIES[m.kind]?.passive);this.boss=null;this.slam=null;if(this.state.dragon){this.state.dragon.active=false;this.state.dragon.hp=420;}this.hurtCooldown=3;this.resume();this.save();}
   spawnMob(x,z,kind='sentinel',y=null){if(kind==='grazer')kind='deer';const info=ENEMIES[kind]||ENEMIES.sentinel;const m={id:++this.serial,x,z,y:y??this.world.ground(x,z),kind,hp:Math.ceil(info.hp*(this.hardAdventure&&!info.passive&&kind!=='dragon'?1.4:1)),maxHp:Math.ceil(info.hp*(this.hardAdventure&&!info.passive&&kind!=='dragon'?1.4:1)),cooldown:1,flash:0,windup:0,stun:0,angle:0,walk:0,wander:hash(x|0,z|0,this.state.seed)*6};this.mobs.push(m);return m;}
@@ -375,7 +383,7 @@ export class Game {
     this.renderer.stream(this.pos);if(this.screen)return;
     this.state.time+=dt;this.state.elapsed+=dt;tickSurvival(this,dt);this.updateDrops(dt);for(const k of['grappleCooldown','attackCooldown','hurtCooldown','dashCooldown','dashTime','firecrackerCooldown','blastCooldown'])this[k]=Math.max(0,this[k]-dt);
     this.cropTimer+=dt;if(this.cropTimer>1){this.cropTimer=0;this.growCrops();this.updateJourney();}
-    this.move(dt);this.updateHeat();if(this.screen)return;this.updateFortress();if(this.tickRift(dt))return;this.updateMobs(dt);if(this.screen)return;
+    this.move(dt);tickTraps(this,dt);this.updateHeat();if(this.screen)return;this.updateFortress();if(this.tickRift(dt))return;this.updateMobs(dt);if(this.screen)return;
     this.target=this.world.raycast({x:this.pos.x,y:this.pos.y+(this.crouching?1.15:1.58),z:this.pos.z},this.direction(),6);
     if(this.placeHeld){this.placeTimer-=dt;if(this.placeTimer<=0){this.place();this.placeTimer=.16;}}
     if(this.drawState){if(this.drawState.item!==this.held)this.drawState=null;else this.drawState.time+=dt;}
@@ -384,8 +392,8 @@ export class Game {
     for(const l of this.world.landmarks)if(Math.hypot(l.x-this.pos.x,l.z-this.pos.z)<14&&!this.state.discovered.includes(l.id)){this.state.discovered.push(l.id);this.toast(l.name,l.subtitle);}
     this.spawnTimer+=dt;if(this.spawnTimer>(this.hardAdventure?8:14)){
       this.spawnTimer=0;this.mobs=this.mobs.filter(m=>ANIMALS[m.kind]||Math.hypot(m.x-this.pos.x,m.z-this.pos.z)<85);
-      const ender=this.state.dimension==='ender',hostile=!this.creative&&(ender||this.state.dimension==='nether'||this.pos.y<-7||this.state.time%600>(this.hardAdventure?300:420)),cap=hostile?(this.hardAdventure?(ender?11:9):(ender?7:5)):10,group=this.mobs.filter(m=>!!ENEMIES[m.kind]?.passive!==hostile&&Math.hypot(m.x-this.pos.x,m.z-this.pos.z)<70);
-      if(group.length<cap&&(hostile||this.mobs.filter(m=>ANIMALS[m.kind]).length<128)){const a=hash(Math.floor(this.state.time),this.serial,this.state.seed)*Math.PI*2,x=this.pos.x+Math.sin(a)*22,z=this.pos.z+Math.cos(a)*22,y=this.world.ground(x,z,hostile?this.pos.y+3:this.world.height(x,z)+1);if(Math.abs(y-this.pos.y)<10&&y>-60&&!this.world.waterAt(x,y,z)&&!this.world.intersects(x,y,z,1.7,.4)){const biome=this.world.biome?.(x,z);const kind=this.state.dimension==='nether'?(this.serial%3===0?'brute':'stalker'):ender?(this.serial%3===0?'void_archer':'enderling'):(this.pos.y<-25?'brute':biome==='snow'?'frost_howler':'stalker');this.spawnMob(x,z,hostile?kind:animalKind(this.world,x,z,this.serial),y);}}
+      const ender=this.state.dimension==='ender',hostile=!this.creative&&(ender||this.state.dimension==='nether'||this.pos.y<-7||this.state.time%600>(this.hardAdventure?300:420)||this.world.biome(this.pos.x,this.pos.z)==='badlands'),cap=hostile?(this.hardAdventure?(ender?11:9):(ender?7:5)):10,group=this.mobs.filter(m=>!!ENEMIES[m.kind]?.passive!==hostile&&Math.hypot(m.x-this.pos.x,m.z-this.pos.z)<70);
+      if(group.length<cap&&(hostile||this.mobs.filter(m=>ANIMALS[m.kind]).length<128)){const a=hash(Math.floor(this.state.time),this.serial,this.state.seed)*Math.PI*2,x=this.pos.x+Math.sin(a)*22,z=this.pos.z+Math.cos(a)*22,y=this.world.ground(x,z,hostile?this.pos.y+3:this.world.height(x,z)+1);if(Math.abs(y-this.pos.y)<10&&y>-60&&!this.world.waterAt(x,y,z)&&!this.world.intersects(x,y,z,1.7,.4)){const biome=this.world.biome?.(x,z);const kind=this.state.dimension==='nether'?(this.serial%3===0?'brute':'stalker'):ender?(this.serial%3===0?'void_archer':'enderling'):(biome==='badlands'?(this.serial%3?'draugr_knight':'skeleton'):this.pos.y<-25?'brute':biome==='snow'?'frost_howler':biome==='desert'?'husk':biome==='marsh'&&this.serial%2?'spider':this.serial%2?'zombie':'skeleton');this.spawnMob(x,z,hostile?kind:animalKind(this.world,x,z,this.serial),y);}}
     }
     this.saveTimer+=dt;if(this.saveTimer>15){this.saveTimer=0;this.save();}
   }
@@ -394,12 +402,12 @@ export class Game {
     const item=ITEMS[this.held],kind=item?.kind,wood=['wood','birch','pinewood','plank','birch_plank','pine_plank','leaf','pine','autumnleaf','bookshelf','hedge'].includes(BLOCKS[t.type].texture||t.type),soil=['grass','dirt','sand','clay','snow','gravel','farmland'].includes(t.type);
     const correct=kind==='axe'&&wood||kind==='shovel'&&soil||kind==='pickaxe'&&!wood&&!soil;
     const soft=soil||wood||BLOCKS[t.type].plant,hardness=BLOCKS[t.type].hardness;
-    const before=this.mineProgress;this.mineProgress+=dt*(this.creative?40:(correct?(item.speed||1):1)*(this.effect('haste')?1.6:1))/hardness;
+    const natural=!this.world.edits.has(key);const before=this.mineProgress;this.mineProgress+=dt*(this.creative?40:(correct?(item.speed||1):1)*(this.effect('haste')?1.6:1)*miningPower(this.state,this.held))/hardness;
     if(Math.floor(before*12)!==Math.floor(this.mineProgress*12)&&this.mineProgress<1){this.renderer.burst(t.x+.5,t.y+.65,t.z+.5,BLOCKS[t.type].color,3);this.audio.play('mine',t.type);}
     if(this.mineProgress>=1){
       if(CROP_BLOCKS.includes(t.type)){this.harvest(t);this.mineProgress=0;return;}
       if(t.type==='chest'){const store=this.state.containers[key]||{};for(const[k,n]of Object.entries(store))this.add(k,n);delete this.state.containers[key];}
-      this.world.set(t.x,t.y,t.z,null);this.state.stats.mined++;this.state.exhaustion+=.025;
+      this.world.set(t.x,t.y,t.z,null);this.state.stats.mined++;if(natural)awardAura(this,['diamond','moonstone'].includes(t.type)?8:['coal','iron','gold'].includes(t.type)?4:1);this.state.exhaustion+=.025;
       if(this.held==='moonstone_pickaxe'){this.add(BLOCKS[t.type].drop||t.type);}else if(['leaf','pine','autumnleaf'].includes(t.type)){this.add('leaf');this.add('fiber');if(hash(t.x+t.y,t.z,this.state.seed)<.22)this.add('apple');}else {this.add(BLOCKS[t.type].drop||t.type);if(t.type==='fern'){this.add('fiber',2);this.add('seeds');}}
       this.emit('pickup',{item:BLOCKS[t.type].drop||t.type,count:1});
       this.renderer.burst(t.x+.5,t.y+.5,t.z+.5,BLOCKS[t.type].color,8);this.renderer.swing=1;this.audio.play('mine',t.type);this.mineProgress=0;this.mineKey='';this.emit('hud');
@@ -413,6 +421,7 @@ export class Game {
   move(dt){movePlayer(this,dt);}
   updateMobs(dt){updateEnemies(this,dt);}
   moveMob(m,dx,dz){
+    if(trapAt(this,m)?.snare){dx*=.2;dz*=.2;}
     const info=ENEMIES[m.kind]||{},height=info.height||1.7,radius=info.radius||.25;
     for(const[a,b]of[[dx,dz],[dx,0],[0,dz]]){
       const x=m.x+a,z=m.z+b,y=this.world.ground(x,z,m.y+1.1);

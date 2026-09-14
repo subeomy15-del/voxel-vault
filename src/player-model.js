@@ -1,7 +1,7 @@
 import * as THREE from '../vendor/three.module.js';
-import { itemModel } from './item-model.js?v=27';
-import { ITEMS } from './data.js?v=27';
-import { toolModel,bowModel } from './models.js?v=27';
+import { itemModel } from './item-model.js?v=28';
+import { ITEMS } from './data.js?v=28';
+import { toolModel,bowModel } from './models.js?v=28';
 export class PlayerModel {
   constructor(r){
     this.r=r;this.group=new THREE.Group();this.limbs=[];this.held='';
@@ -24,6 +24,11 @@ export class PlayerModel {
       part(arm,'#397dba',.22,.24,.29,0,-.1,0);part(arm,'#d9ae8c',.21,.36,.25,0,-.39,0);this.limbs.push(arm);
       if(side===1){this.grip=new THREE.Group();this.grip.position.set(0,-.56,-.09);this.grip.scale.setScalar(.5);arm.add(this.grip);this.arm=arm;}
     }
+    this.armorVisuals={helm:[],chestplate:[],gauntlets:[],leggings:[],boots:[]};
+    const armor=(slot,parent,w,h,d,x,y,z)=>this.armorVisuals[slot].push(part(parent,'#a7b3aa',w,h,d,x,y,z));
+    armor('helm',this.head,.49,.14,.46,0,.24,0);for(const x of [-.225,.225])armor('helm',this.head,.06,.3,.45,x,.035,0);
+    armor('chestplate',this.group,.6,.55,.35,0,1.04,0);
+    this.limbs.forEach((limb,i)=>{if(i%2===0){armor('leggings',limb,.26,.53,.3,0,-.26,0);armor('boots',limb,.275,.2,.38,0,-.59,-.025);}else armor('gauntlets',limb,.235,.2,.28,0,-.49,0);});
     r.scene.add(this.group);
   }
   update(g,visible){
@@ -34,6 +39,7 @@ export class PlayerModel {
     this.limbs.forEach((limb,i)=>limb.rotation.x=swing*(i<2?1:-1)*(i%2?-1:1));
     this.arm.rotation.x-=this.r.swing*.9;
     this.shirt.material.color.set(ITEMS[g.state.armor]?.color||'#397dba');
+    for(const [slot,meshes]of Object.entries(this.armorVisuals)){const item=ITEMS[g.state.armorParts?.[slot]];for(const mesh of meshes){mesh.visible=!!item;mesh.material.color.set(item?.color||'#a7b3aa');}}
     if(this.held!==g.held){
       for(const child of [...this.grip.children])this.r.disposeGroup(child);this.grip.clear();this.held=g.held;
       const item=ITEMS[g.held];

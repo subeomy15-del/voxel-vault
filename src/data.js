@@ -1,4 +1,5 @@
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=27';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=28';
+import { installContent } from './badlands-content.js?v=28';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },
@@ -427,16 +428,23 @@ export function ingredientKeys(key,recipe){
   return [key];
 }
 export function ingredientCount(inv,key,recipe){return ingredientKeys(key,recipe).reduce((sum,k)=>sum+(inv[k]||0),0);}
-function craftingPlan(inv,recipe){
+function craftingPlan(inv,recipe,batches=1){
   if(!recipe)return null;const left={...inv},cost={};
   for(const[key,count]of Object.entries(recipe.cost)){
-    let remaining=count;
+    let remaining=count*batches;
     for(const k of ingredientKeys(key,recipe)){const take=Math.min(remaining,left[k]||0);if(take){left[k]-=take;cost[k]=(cost[k]||0)+take;remaining-=take;}}
     if(remaining)return null;
   }
   return cost;
 }
 export function canCraft(inv,recipe){return craftingPlan(inv,recipe)!==null;}
-export function craft(inv,item){const recipe=RECIPES.find(r=>r.item===item),cost=craftingPlan(inv,recipe);if(!cost)return false;for(const[k,n]of Object.entries(cost))inv[k]-=n;inv[item]=(inv[item]||0)+(recipe.count||1);return true;}
+export function maxCraft(inv,recipe){
+ if(!recipe)return 0;
+ let low=0,high=Math.min(...Object.entries(recipe.cost).map(([k,n])=>Math.floor(ingredientCount(inv,k,recipe)/n)));
+ while(low<high){const mid=Math.ceil((low+high)/2);if(craftingPlan(inv,recipe,mid))low=mid;else high=mid-1;}
+ return low;
+}
+export function craft(inv,item,batches=1){const recipe=RECIPES.find(r=>r.item===item);if(!Number.isSafeInteger(batches)||batches<1)return false;const cost=craftingPlan(inv,recipe,batches);if(!cost)return false;for(const[k,n]of Object.entries(cost))inv[k]-=n;inv[item]=(inv[item]||0)+(recipe.count||1)*batches;return true;}
 export function starterInventory() { return { wood_sword:1, wood_pickaxe:1, wood_axe:1, grass:32, wood:0, stone:0, torch:12, apple:5, potion:2,seeds:6,carrot:2,cotton_seeds:3,watermelon_seeds:2 }; }
 export const STARTER_BAR = ['wood_sword','wood_pickaxe','wood_axe','grass','wood','stone','torch','apple','potion'];
+installContent(BLOCKS,ITEMS,RECIPES,BIOMES);

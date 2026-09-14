@@ -1,18 +1,19 @@
 import * as THREE from '../vendor/three.module.js';
-import { BLOCKS, ITEMS, hash } from './data.js?v=27';
-import { CHUNK, WORLD_LIMIT } from './world.js?v=27';
-import { ENEMIES } from './combat.js?v=27';
-import { textureCanvas,TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=27';
-import { Scenery } from './scenery.js?v=27';
-import { boxesFor } from './shapes.js?v=27';
-import { animalModel,bowModel,arrowModel,toolModel } from './models.js?v=27';
-import { itemModel } from './item-model.js?v=27';
-import { dragonModel,animateDragon } from './dragon-model.js?v=27';
-import { RiftEffects } from './rift-effects.js?v=27';
-import { PostProcess } from './post-process.js?v=27';
-import { PlayerModel } from './player-model.js?v=27';
-import { cameraPosition } from './perspective.js?v=27';
-import { ViewEffects } from './view-effects.js?v=27';
+import { BLOCKS, ITEMS, hash } from './data.js?v=28';
+import { CHUNK, WORLD_LIMIT } from './world.js?v=28';
+import { ENEMIES } from './combat.js?v=28';
+import { textureCanvas,TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=28';
+import { Scenery } from './scenery.js?v=28';
+import { boxesFor } from './shapes.js?v=28';
+import { animalModel,bowModel,arrowModel,toolModel } from './models.js?v=28';
+import { itemModel } from './item-model.js?v=28';
+import { dragonModel,animateDragon } from './dragon-model.js?v=28';
+import { RiftEffects } from './rift-effects.js?v=28';
+import { PostProcess } from './post-process.js?v=28';
+import { PlayerModel } from './player-model.js?v=28';
+import { cameraPosition } from './perspective.js?v=28';
+import { ViewEffects } from './view-effects.js?v=28';
+import { undeadModel } from './undead-model.js?v=28';
 export class Renderer {
   constructor(container,settings){
     this.settings=settings;this.scene=new THREE.Scene();this.scene.background=new THREE.Color('#b6cddd');this.scene.fog=new THREE.Fog('#b6cddd',62,125);
@@ -23,7 +24,7 @@ export class Renderer {
     this.waterMaterial=new THREE.MeshStandardMaterial({color:'#42a7dd',roughness:.6,metalness:0,transparent:true,opacity:.78,vertexColors:true});
     this.glassMaterial=new THREE.MeshLambertMaterial({color:'#ffffff',transparent:true,opacity:.28,vertexColors:true});
     this.epoch=0;this.revision=0;this.chunkVersions=new Map();this.ready=[];this.inflight=false;this.underground=false;
-    this.worker=new Worker(new URL('./terrain-worker.js?v=27',import.meta.url),{type:'module'});
+    this.worker=new Worker(new URL('./terrain-worker.js?v=28',import.meta.url),{type:'module'});
     this.worker.onmessage=({data})=>{if(data.epoch!==this.epoch)return;this.inflight=false;if(data.revision<(this.chunkVersions.get(`${data.cx},${data.cz}`)||0))return;this.ready.push(data);};
     this.worker.onerror=e=>{console.error('Terrain worker failed',e);document.querySelector('#loading').hidden=false;document.querySelector('#loading').textContent='Terrain could not load. Reload the page to try again.';};
     this.projectileMeshes=new Map();
@@ -48,7 +49,7 @@ export class Renderer {
     this.viewEffects.reset();for(const mesh of this.projectileMeshes.values())this.disposeGroup(mesh);this.projectileMeshes.clear();
     for(const m of this.chunks.values()){this.scene.remove(m);m.traverse(o=>o.geometry?.dispose());}this.chunks.clear();this.queue=[];this.center='';this.ready=[];this.inflight=false;this.epoch++;this.chunkVersions.clear();this.worker.postMessage({type:'init',epoch:this.epoch,seed:world.seed,terrain:world.terrain,dimension:world.dimension,edits:[...world.edits]});
     this.disposeGroup(this.decor);this.decor.clear();this.scene.add(this.decor);this.beacons=[];this.chestMeshes.clear();for(const mesh of this.mobMeshes.values())this.disposeGroup(mesh);this.mobMeshes.clear();
-    for(const e of this.effects)this.disposeGroup(e.mesh);this.effects=[];this.world=world;
+    for(const e of this.effects)this.disposeGroup(e.mesh);this.effects=[];this.fireworks=[];this.world=world;
     for(const c of world.chests){if(c.block)continue;const g=new THREE.Group();g.position.set(c.x+.5,c.y,c.z+.5);g.add(this.part('#876344',.8,.5,.6,0,.25,0),this.part('#b88f51',.86,.16,.66,0,.57,0),this.part('#f7d483',.16,.25,.04,0,.4,.32));this.decor.add(g);this.chestMeshes.set(c.id,g);}
 
   }
@@ -90,6 +91,7 @@ export class Renderer {
     const k=`${data.cx},${data.cz}`,old=this.chunks.get(k);if(old){old.removeFromParent();old.traverse(o=>o.geometry?.dispose());}this.scene.add(group);this.chunks.set(k,group);
   }
   makeMob(mob){
+    if(['zombie','husk','skeleton','draugr_knight','spider'].includes(mob.kind)){const g=undeadModel(this,mob);this.scene.add(g);this.mobMeshes.set(mob.id,g);return g;}
     if(mob.kind==='dragon'){const g=dragonModel(this);this.scene.add(g);this.mobMeshes.set(mob.id,g);return g;}
     if(ENEMIES[mob.kind]?.passive){const g=animalModel(this,mob);this.scene.add(g);this.mobMeshes.set(mob.id,g);return g;}
     const g=new THREE.Group(),boss=mob.kind==='guardian',animal=mob.kind==='grazer';const scale=boss?2.3:1;g.scale.setScalar(scale);
@@ -122,6 +124,9 @@ export class Renderer {
   }
   screenPoint(x,y,z){const p=new THREE.Vector3(x,y,z).project(this.camera);return p.z<1?{x:(p.x+1)/2,y:(1-p.y)/2}:null;}
   burst(x,y,z,color='#c3dfae',count=12){for(let i=0;i<count;i++){const mesh=this.part(color,.08+Math.random()*.09,.1,.1,x,y,z);this.scene.add(mesh);this.effects.push({mesh,life:.5+Math.random()*.4,v:new THREE.Vector3((Math.random()-.5)*5,Math.random()*4,(Math.random()-.5)*5)});}while(this.effects.length>160){const e=this.effects.shift();this.disposeGroup(e.mesh);}}
+  firework(x,y,z){
+    this.fireworks??=[];for(let i=0;i<3;i++)this.fireworks.push({x,y:y+i*.6,z,time:.12+i*.22,color:['#e9bd72','#c88152','#eee0b5'][i]});
+  }
   update(game,dt){
     const t=game.state.time,inCave=game.pos.y<3&&this.world.height(game.pos.x,game.pos.z)>game.pos.y+4&&game.screen!=='menu';
     const menu=game.screen==='menu',perspective=Number(this.settings.perspective)||0;this.hand.visible=!game.screen&&perspective===0;this.outline.visible=!game.screen&&!!(game.mobTarget||game.target);this.lantern.intensity=!game.screen&&(['torch','lantern'].includes(game.held))?9:game.pos.y<2?2:0;
@@ -153,6 +158,8 @@ export class Renderer {
       g.rotation.z=mob.flash>0?Math.sin(mob.flash*70)*.06:0;(animal?g.userData.body:g.children[0])?.material.emissive.set(mob.flash>0?'#89463b':'#000000');
     }
     for(const [id,g]of this.mobMeshes)if(!alive.has(id)){this.disposeGroup(g);this.mobMeshes.delete(id);}
+    for(const f of this.fireworks||[]){f.time-=dt;if(f.time<=0&&!f.done){f.done=true;for(let i=0;i<48;i++){const a=i*2.399,t=1-2*(i+.5)/48,r=Math.sqrt(1-t*t),mesh=this.part(f.color,.07,.07,.07,f.x,f.y,f.z);mesh.castShadow=false;this.scene.add(mesh);this.effects.push({mesh,life:1.4+Math.random()*.7,v:new THREE.Vector3(Math.cos(a)*r*6,t*6+3,Math.sin(a)*r*6)});}}}
+    this.fireworks=(this.fireworks||[]).filter(f=>!f.done);while(this.effects.length>240)this.disposeGroup(this.effects.shift().mesh);
     for(let i=this.effects.length-1;i>=0;i--){const e=this.effects[i];e.life-=dt;if(e.life<=0){this.disposeGroup(e.mesh);this.effects.splice(i,1);continue;}e.v.y-=dt*9;e.mesh.position.addScaledVector(e.v,dt);e.mesh.rotation.x+=dt*4;e.mesh.scale.setScalar(Math.min(1,e.life*3));}
     this.telegraph.visible=!!game.slam;if(game.slam){this.telegraph.position.set(game.slam.x,game.slam.y+.04,game.slam.z);this.telegraph.scale.setScalar(game.slam.radius);this.telegraph.material.opacity=.4+Math.sin(performance.now()*.02)*.3;}
     const bolts=new Set();for(const p of game.projectiles){bolts.add(p.id);let mesh=this.projectileMeshes.get(p.id);if(!mesh){mesh=p.hostile?new THREE.Mesh(new THREE.BoxGeometry(.1,.1,.35),new THREE.MeshBasicMaterial({color:'#a7cbe4'})):arrowModel(this,p.color);this.scene.add(mesh);this.projectileMeshes.set(p.id,mesh);}mesh.position.set(p.x,p.y,p.z);mesh.lookAt(p.x+p.vx,p.y+p.vy,p.z+p.vz);}for(const[id,mesh]of this.projectileMeshes)if(!bolts.has(id)){this.disposeGroup(mesh);this.projectileMeshes.delete(id);}

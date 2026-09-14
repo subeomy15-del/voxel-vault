@@ -1,5 +1,6 @@
-import { ITEMS } from './data.js?v=27';
-import { WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=27';
+import { trapAt } from './traps.js?v=28';
+import { ITEMS } from './data.js?v=28';
+import { WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=28';
 const approach=(current,target,amount)=>current<target?Math.min(target,current+amount):Math.max(target,current-amount);
 export function requestJump(game){game.jumpBuffer=.14;tryJump(game);}
 function tryJump(g){
@@ -18,7 +19,7 @@ export function movePlayer(g,dt){
   g.sprinting=g.moving&&!g.crouching&&!inWater&&!g.gliding&&!g.eating&&(g.creative||g.state.food>=6)&&g.stamina>3&&(g.keys.has('ShiftLeft')||g.keys.has('ShiftRight'));
   g.stamina=Math.max(0,Math.min(100,g.stamina+dt*(g.sprinting?-9:22)));
   const wing=ITEMS[g.state.glider];
-  const boost=g.effect('speed')?1.5:1;
+  const boost=(g.effect('speed')?1.5:1)*(trapAt(g,g.pos)?.snare&&!g.creative?.25:1);
   const speed=g.gliding?Math.max(7,wing.glideSpeed+Math.max(0,-g.pitch)*7-Math.max(0,g.pitch)*4):(inWater?3.1:g.dashTime>0?15:g.crouching?2.1:g.sprinting?7.4:4.8)*boost*(g.eating?.5:g.drawState?.75:1);
   if(g.dashTime>0&&!g.moving){f=1;g.moving=true;}
   const acceleration=g.gliding?9:g.grounded?42:inWater?18:22;

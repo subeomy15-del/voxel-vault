@@ -1,94 +1,79 @@
-# Voxel Vault — Dragon Isles
-
-## The Long Way Home — release 14
-
-Adventure now has 65% stronger enemy hits, 40% more health for non-dragon hostiles, 15% faster enemy movement and 20% faster attack cooldown recovery. Spawn checks occur every 8 seconds, with nearby hostile limits of 9 (11 in the End); enemies appear throughout the night. Hunger exhaustion is 75% faster and natural healing takes twice as long. Daily and Creative keep their combat balance. Ore generation across all modes uses smaller, rarer veins with barren regions; Nether gold and End moonstone are also scarcer. Existing inventory, mined blocks and builds are retained, while unedited ore locations use the new distribution.
-
-An eight-chapter adventure now guides your first timber, workshop and iron pickaxe through the Nether fortress, Ender Dragon and journey home. Completed chapters stay completed after you spend materials or reload. The HUD shows your next objective; the Journal records the full route. Creative has its own building guidance. The Rift Run remains an optional End activity, with the dragon as the main objective.
-
-This release includes natural green foliage, neutral portal lighting, no bloom, revised branding, lava hazards, six new building materials, and refreshed previews and item artwork. Existing worlds and inventory remain compatible.
-
-A single-player browser voxel adventure with connected Overworld, Nether and Ender dimensions, a fightable Ender Dragon, building, crafting, farming and gliders. Cool forest greens, muted blue skies, textured blocks and simple item silhouettes give the game a calmer look. Saves stay in your browser.
+# Voxel Vault — Badlands Update
 
 Play: https://subeomy15-del.github.io/voxel-vault/
 
-## Fight the Ender Dragon
+A browser voxel adventure with an Overworld → Nether → Ender Dragon journey, building, crafting, farming, gliding and local saves. Natural green foliage, textured blocks and soft shadows; no bloom.
 
-1. Walk through the portal near home to enter the **Nether**. Find the **Ashen Fortress** at X 72, Z −48 and defeat its guardian to unseal the Ender portal. Ender portals return you to the fortress; the Nether arrival portal leads home.
-2. Find the **Dragon Altar** at X 0, Z −7 on the arrival island. Press **E** nearby to awaken the dragon. Bring your own bow and arrows; no combat kit is supplied.
-3. Shoot the four healing crystals on the obsidian pillars. Each surviving crystal slowly restores the dragon's health.
-4. Use a bow while it circles. Keep moving during breath attacks, dodge its swoop, and attack with a sword when it lands. Step outside the marked circle before a tail slam.
-5. The first victory awards a **Dragon Egg**, 16 moonstone, 10 diamonds and a Forge Seal. Return through the portal with your trophy and gear.
+## Badlands, knights and aura
 
-The dragon has 420 health and becomes more aggressive below 40% health. Its health and destroyed crystals survive saving and travel. Death lets you retry from the altar. Rematches do not duplicate the first-victory rewards or starter bow kit. Build cover, bring food and craft armor before a difficult fight.
+Three new Overworld biomes join the forests, meadows, mountains, deserts and snowfields:
 
-The separate **Rift Run** remains available: use cyan launch pads and a glider to reach three island anchors, press E to activate each, and earn moonstone equipment. Close the glider with G to land. The challenge records your best time.
+- Badlands, around X 240, Z 180: red sand, layered terracotta, chalk and cacti. Draugr Knights patrol even in daylight. Track the Badlands landmark from the map.
+- Savanna, around X 220, Z −60: dry grassland with scattered trees.
+- Marsh, around X −240, Z 200: mud, shallow pools, reeds and spiders.
 
-## Five-resource progression
+Zombies and skeleton archers roam at night. Husks haunt the desert. Each draugr knight drops 1–2 Knight Hearts; combine 4 Knight Hearts with 1 Diamond Sword at a workbench to craft the Knight Sword (21 base damage).
 
-- **Coal:** furnace fuel only. It cannot be placed or used to craft equipment. Campfires burn timber.
-- **Iron:** ore for smelting into tool and building materials.
-- **Gold:** deeper ore for fast tools, bows and armor.
-- **Diamond:** deep gem for durable equipment and building blocks.
-- **Moonstone:** Ender material for advanced equipment, orbs and shared storage.
+Natural blocks grant 1 aura when mined; coal, iron and gold grant 4, diamond and moonstone grant 8. Placed blocks do not grant mining aura. Animals grant 2 aura, ordinary hostiles 12, knights 35 and the dragon 200. Creative does not earn aura.
 
-The release has 232 usable catalogue items and 137 recipes. Older copper stacks convert to iron; Aether crystal, ruby, sapphire and emerald stacks convert to diamond; violet crystal converts to moonstone. Equivalent older equipment, storage contents and placed mineral blocks retain their value through conversion. Old resource identifiers remain readable by the save loader.
+Open **Enchant** from your backpack or the aura HUD button. Upgrades apply to a gear type, including every copy you own, and persist through travel and reloads.
 
-## Explore and build
+- Power: +12% weapon damage per level.
+- Efficiency: +12% tool mining speed per level.
+- Protection: +1 percentage point per armor piece per level.
 
-Find Wayfarer Lodge, Old Watchtower and Crystal Sanctuary near home. Open treasure chests with E and trade diamonds at a Relic Forge. The lodge chest supplies enough diamonds for a grappling hook: equip it, aim at solid terrain within 24 blocks, and press E.
+Five levels cost 25, 100, 225, 400 and 625 aura respectively. Maximum combined armor protection is 80%.
 
-The Relic Forge also offers sacred gear: Dawnblade, Aegis Armor, Seraph Glider and Sacred Orb. Save diamonds from deep mines, outposts and Rift anchors for these final-tier rewards. Ender islands now spawn swift Enderlings and ranged Void Archers; cold Overworld nights can call in Frost Howlers.
+## Armor, traps and crafting
 
-Build with wood, masonry, slabs, stairs, glass, fabrics and metals. Matching slabs stack, stairs rotate, ladders climb and beds set your respawn point. Chests store stacks; moonstone chests share storage across dimensions. The placement preview shows blocked spaces before spending a block.
+Armor has five independent slots: helm, chestplate, gauntlets, leggings and boots. Wood, stone, iron, gold, diamond and moonstone pieces are available. Click an equipped armor piece to remove it. Complete unenchanted sets provide 15%, 25%, 40%, 30%, 60% and 65% protection respectively.
 
-Nine crops grow during active play. Plant on tilled soil; nearby water speeds growth. Hunt six animal species and cook their meat in a furnace. Food restores hunger and energy; crafted meals can grant timed movement, mining or vision effects.
+Place wood, stone, iron, gold or diamond spikes on solid ground. They deal 2, 3, 5, 4 or 8 damage per second to creatures crossing them, including the player. Trap Nets slow both mobs and players. Mine traps to recover them.
+
+Every recipe has **Craft** and **Craft All** buttons. Craft All makes as many batches as your current materials allow; it obeys workbench requirements and shows the total output. Mixed timber species work in general wood recipes.
+
+Firecrackers produce three layered aerial bursts, startle nearby ordinary mobs and give a stronger glider boost. They do not destroy terrain. Blast Charges remain a separate mining explosive.
+
+The Relic Forge and its exclusive gear have been retired. Existing saves convert those items to ordinary tools, gear or materials; complete armor sets become five matching pieces. Retired forge blocks become stone bricks. Existing builds, containers and saved upgrades remain readable.
+
+## Adventure progression
+
+Eight saved chapters guide timber gathering, workbench placement, iron tools, the Nether, the fortress guardian, the End, the dragon and the journey home. Open the Journal for your progress and the Badlands field guide.
+
+Follow the portal near home into the Nether. Defeat the guardian at the Ashen Fortress (72, −48) to unseal its End portal. Find the Dragon Altar at (0, −7) on the arrival island and press E. Bring your own weapons, arrows, food, armor and glider.
+
+Destroy the four healing crystals, dodge breath attacks and swoops, and strike when the dragon lands. Its health, destroyed crystals and first-victory rewards persist. Return through the End portal to the Nether; use the Nether arrival portal to go home.
+
+The optional Rift Run uses gliders and launch pads to reach three island anchors. Outposts offer travel supplies and building materials.
+
+Adventure has tougher and faster hostiles, more frequent nighttime spawns, faster hunger loss and slower healing. Ore veins are scarce and separated by barren regions. Coal, iron, gold and diamond occur underground; moonstone is found in the End. Lava fills Nether pools and some deepest caves. Lava and magma hurt on contact.
 
 ## Controls
 
-- **WASD / mouse:** move and look. **Space:** jump, swim or climb.
-- **Shift:** sprint. **X:** crouch. **R:** dodge. **Z:** zoom.
-- **Left click:** attack or hold to mine. Hold with a bow, then release to shoot.
-- **E / right click:** interact, grapple, eat, plant, harvest or place.
-- **Firecrackers:** craft 4 with 1 coal and 2 sunstone sand, equip them, then press E for a bright burst. While gliding, press E to boost forward and upward; each boost has a short recovery.
-- **Blast Charges:** craft one with 3 coal, 2 iron ingots and 2 sand. Equip it and press E to arm a timed mining explosion. Clear the area before it detonates.
-- **V / F5:** first person, third person behind, third person front.
-- **G:** open or close an equipped glider while airborne.
-- **1–9 / wheel:** select hotbar. **Middle click:** select a targeted owned block.
-- **Tab / C / M / J:** backpack, crafting, map, field notes. **Esc:** pause.
-- **F / Q:** eat food / drink a healing tonic. **T:** rotate stairs. **B:** place a bridge block.
-- **Creative flight:** double tap Space, then Space to rise or X to descend.
+- WASD / mouse: move and look. Space: jump, swim or climb.
+- Shift: sprint. X: crouch. R: dodge. Z: zoom.
+- Left click: attack or hold to mine. Hold and release with a bow to shoot.
+- E / right click: interact, eat, plant, harvest or place.
+- Tab: backpack. C: crafting. M: map. J: journal. Esc: pause.
+- V / F5: cycle first-person and third-person cameras.
+- G: toggle an equipped glider while airborne.
+- 1–9 / wheel: select hotbar. T: rotate stairs. B: bridge placement.
+- F / Q: eat food / drink healing tonic.
+- Creative: double-tap Space to fly; Space rises, X descends.
 
-Touch controls provide movement, drag look and action buttons. First-person tools and third-person characters have animated models. High quality adds shadows and antialiasing without bloom. Performance reduces terrain range. Lava pools fill the Nether and the deepest Overworld caves; contact damages the player. Magma blocks also deal damage underfoot. Lava is static and placeable in Creative. Netherrack, soul sand, magma, Nether bricks, quartz blocks and quartz bricks expand the building catalogue.
+Touch controls provide movement, drag look and action buttons. Worlds save in your browser; starting a replacement Adventure asks first.
 
-## Run locally
+## Local development and verification
 
-Use Node.js 20 or newer. No dependency installation or build step is required.
+Requires Node.js 20 or newer. No dependencies or build step are needed.
 
 ```sh
 npm start
-```
-
-Open http://localhost:3001. Serve over HTTP so modules and the terrain worker load correctly. Three.js r160 is bundled locally under its MIT license in vendor/LICENSE.
-
-## Verification
-
-```sh
 npm test
 npm run test:browser
-node tests/dragon-browser.js
+npm run test:dragon
 ```
 
-The 85 unit tests cover connected saves, migration of old resources, the five-ore progression, furnace fuel, dragon phases and projectiles, destroyed healing crystals, persistent boss health, one-time rewards, terrain, building, movement, combat, farming and gliding.
+Open http://localhost:3001. Browser tests use an isolated Chrome profile on debugging port 9224, exercising actual rendering, crafting, gear, aura upgrades, saves, mobile layouts and portal travel. Screenshots go to /private/tmp/voxel-vault-*.png.
 
-Browser scripts use an isolated Chrome profile on debugging port 9224 and the local server on 3001. They reset only the isolated profile's test worlds and exercise real controls, rendering, item images, save reloads and compact layouts. Screenshots go to /private/tmp/voxel-vault-*.png.
-
-Regenerate 3D item artwork with `npm run render:items`. Before publishing, run `node scripts/stamp.mjs RELEASE` to keep browser modules, the terrain worker and assets on the same release.
-
-Inventory, terrain edits, containers, crops, food, gear, animals and realm progress save locally. Clearing site storage removes those saves. Starting a new Adventure asks before replacing that save.
-
-The backpack uses square item slots, an equipment area with a character preview, and a separate nine-slot hotbar. Select a hotbar destination, then select an item. Crafting opens the recipe book. All-item browsing and search remain available.
-
-Advanced recipes require a placed workbench within 3.5 blocks. Craft the workbench by hand from 6 timber. Planks, torches, basic arrows, cloth and simple ingredient preparation remain hand recipes. Mining stone by hand is slow; use pickaxes for rock, axes for timber and shovels for soil. Cracks, chips and the mining progress meter show your progress.
-
-Progression update: the Nether fortress guardian must be defeated before entering the Ender. The Rift Run awards materials, not a full equipment set. Dragon rematches restore all four crystals. Mining speed is restored to its original pace; crafting-table requirements remain.
+Run `npm run render:items` to regenerate shared 3D item artwork. Before publishing, run `node scripts/stamp.mjs RELEASE` to keep browser modules, terrain worker imports, styles and entry assets synchronized. Three.js r160 is bundled locally under its MIT license in vendor/LICENSE.
