@@ -1,5 +1,5 @@
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=28';
-import { installContent } from './badlands-content.js?v=28';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=31';
+import { installContent } from './badlands-content.js?v=31';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },

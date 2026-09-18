@@ -1,8 +1,54 @@
-# Voxel Vault — Badlands Update
+# Voxel Vault — Better Together
 
 Play: https://subeomy15-del.github.io/voxel-vault/
 
-A browser voxel adventure with an Overworld → Nether → Ender Dragon journey, building, crafting, farming, gliding and local saves. Natural green foliage, textured blocks and soft shadows; no bloom.
+A browser voxel adventure with an Overworld → Nether → Ender Dragon journey, building, crafting, farming, gliding and local saves. Joinable lobbies support shared Creative worlds, Bed Wars and Manhunt. Natural green foliage, textured blocks and soft shadows; no bloom.
+
+## Build Together
+
+Choose **Play together** or a multiplayer mode on the home screen. Create a public room or an invite-only room for 2–8 builders, or join using a six-character code. Guests mark themselves ready, then the host starts the world. Friends can join a running Creative world while there is space. Bed Wars and Manhunt require at least two players and lock their roster once the match starts.
+
+- Shared placement and mining across the Overworld, Nether and End; late joiners receive existing builds.
+- Visible teammates with names, smooth movement and held items. Press **P** or the crew beacon button to mark your position.
+- Crew milestones at 25, 100 and 300 placed blocks. Everyone has unlimited Creative materials and flight.
+- Automatic host transfer when the host leaves; connection recovery sends a fresh world snapshot. Reloading the same tab reconnects your session while it is still available. Building waits during a lost connection.
+- Solo inventory, progress and saves stay separate and are restored when you leave. Shared mode focuses on building: solo bosses, storage and Rift challenges remain in solo worlds, and Blast Charges are disabled in shared worlds.
+
+Rooms and builds are held in server memory. They end when the last player leaves, all disconnected players expire (two-minute grace), or the server restarts. A room supports up to 50,000 edited block positions. Public rooms appear in the server browser; private codes are invitations, so only share them with people you want to join.
+
+### Bed Wars
+
+Two teams, Ember and Tide, battle across floating islands. Protect your bed, bridge toward the enemy island, and mine their bed with your pickaxe. You respawn after three seconds while your bed survives; once it is gone, your next death eliminates you. The last team standing wins. A ten-minute round ends in a draw if neither team wins.
+
+Each player starts with a sword, pickaxe, 32 blocks and 12 coins. Stay near your gold generator tile to earn two coins every three seconds. Press **K** (or tap **Base shop**) to buy 16 blocks for 8 coins, an iron sword for 24, or armor for 20. Base foundations and your own bed are protected. Place with right click / E; hold left click with a pickaxe to mine, or a sword to attack an opponent in reach. PvP health, equipment, block budgets, bed destruction and respawns are checked by the server.
+
+### Manhunt
+
+The host is the runner and everyone else is a hunter. The runner gets a 20-second head start. Then a six-minute chase begins: touch three marked beacons in any order and return to the starting beacon to escape. Hunters follow a live directional tracker. Catch the runner or let the clock run out to win as hunters. Hunters respawn after three seconds; the runner has one life. You have a sword, pickaxe and 32 building blocks; mining terrain replenishes the block pouch.
+
+Both modes use separate match loadouts, show a result screen, and let the host start another round. Menus do not pause a multiplayer match. Leaving forfeits your place. Solo crafting, portals, hunger and damage from ordinary game creatures do not apply to these matches.
+
+### Running a multiplayer server
+
+```sh
+npm start
+# Or use port 3002 for a separate preview:
+npm run preview
+```
+
+Open `http://localhost:3001`. The server listens on all network interfaces; friends on the same network can open `http://YOUR_LAN_IP:3001` and use the same lobby code. Share that address instead of `localhost`. Use `PORT` and `HOST` to customize the listener.
+
+For internet play, run this Node server on a public HTTPS host that supports long-lived HTTP responses. Serving the game and API from the same host needs no extra configuration. Static GitHub Pages alone cannot run multiplayer: open **Server settings** in Build Together and enter your hosted server URL. The server permits the existing GitHub Pages origin by default; set `ALLOWED_ORIGINS` to a comma-separated list for other frontends. Invite links include a configured server address for the recipient to review. Proxy SSE routes without buffering and allow long-lived connections. No third-party runtime dependencies or accounts are needed.
+
+## Daily expeditions
+
+Daily World now has three tracked goals: gather 30 blocks, craft five batches and place 20 blocks. Complete all three to earn 45 aura and three bread once per daily seed. Progress and claimed rewards survive reloads and resetting the same daily world. The HUD points to the next useful action. A new seed arrives at 00:00 UTC.
+
+## Endless Horizons
+
+Explore and build beyond the old 511-block border in every dimension. Terrain streams around the player and distant chunks are unloaded; new continents rise beyond the original island’s ocean. Existing island terrain and builds remain intact. Distant positions, beds, animals and dropped items persist on reload. Vertical build limits still apply.
+
+A carved stone title and brass vault crest accompany a softer terrain horizon. Terrain meshing uses cached transparency and direct neighbor lookups, while cache cleanup retains nearby columns and trees to reduce regeneration during exploration.
 
 ## Badlands, knights and aura
 
@@ -48,10 +94,21 @@ The optional Rift Run uses gliders and launch pads to reach three island anchors
 
 Adventure has tougher and faster hostiles, more frequent nighttime spawns, faster hunger loss and slower healing. Ore veins are scarce and separated by barren regions. Coal, iron, gold and diamond occur underground; moonstone is found in the End. Lava fills Nether pools and some deepest caves. Lava and magma hurt on contact.
 
+## Cloudstep Circuit and movement upgrade
+
+Choose **Play Parkour** on the main menu for an original floating garden course: warm-up hops, rising ledges, sprint gaps, a launch pad, four checkpoints and a finish arch. Move to start the timer; checkpoints record splits, falls return you to your last checkpoint with a short fade, and completion records a local personal best. **R** retries the checkpoint; the pause menu can restart the full run. Pausing stops this solo timer. Your other worlds are saved separately and restored when you leave. The course is currently solo; Creative, Bed Wars and Manhunt keep their joinable multiplayer lobbies.
+
+The shared movement controller adds coyote time, jump buffering, release-sensitive jumps, air momentum, firm ground braking, safe ledge mantling and collision-aware steps. Hold Space for full jump height or release early for short hops. Mantling requires forward movement and a recent jump near a low ledge with enough space for the entire player; it cannot pull you through ceilings. Mobile Parkour uses the **»** button to toggle sprint.
+
+Settings include sensitivity, FOV, hold/toggle sprint and crouch, independent camera-motion switches, three graphics presets and individual graphics controls. Chunk distance, baked voxel ambient occlusion, shadow maps, FXAA and pooled particle density change live. Sustained slow rendering gradually reduces resolution and recovers it when headroom returns. Master, music and effects volume control separate Web Audio buses. All textures and synthesized audio are original; no external audio assets are required.
+
+Implementation: `movement.js` owns collision and parkour movement; `parkour-course.js` provides the same deterministic geometry to `World` and the terrain worker; `parkour.js` / `game-timer.js` manage runs; `parkour-ui.js` / `parkour-view.js` render course feedback. Rendering uses `particles.js`, `camera-motion.js`, `render-performance.js`, existing chunk meshes and the procedural atlas. `settings.js` normalizes and migrates persistent preferences. Add further course definitions and corresponding world geometry to extend the course catalogue. Optional future work includes more courses, moving platforms and networked parkour races.
+
 ## Controls
 
 - WASD / mouse: move and look. Space: jump, swim or climb.
-- Shift: sprint. X: crouch. R: dodge. Z: zoom.
+- Shift: sprint. Ctrl / X: crouch (C also crouches in Parkour). R: dodge, or retry a checkpoint in Parkour. Z: zoom.
+- F3: FPS, frame time, draw calls, triangles and chunk/particle counts.
 - Left click: attack or hold to mine. Hold and release with a bow to shoot.
 - E / right click: interact, eat, plant, harvest or place.
 - Tab: backpack. C: crafting. M: map. J: journal. Esc: pause.
@@ -72,8 +129,14 @@ npm start
 npm test
 npm run test:browser
 npm run test:dragon
+npm run test:infinite
+npm run test:multiplayer
+npm run test:competitive
+npm run test:parkour
+npm run test:settings
+npm run test:render
 ```
 
-Open http://localhost:3001. Browser tests use an isolated Chrome profile on debugging port 9224, exercising actual rendering, crafting, gear, aura upgrades, saves, mobile layouts and portal travel. Screenshots go to /private/tmp/voxel-vault-*.png.
+Open http://localhost:3001. The multiplayer and competitive browser tests default to `http://localhost:3002`; set `VOXEL_TEST_URL` to your server address. It uses three isolated browser contexts to check invites, readiness, shared edits, avatars, reconnects, late joins, host migration and mobile layouts. Browser tests use an isolated Chrome profile on debugging port 9224, exercising actual rendering, crafting, gear, aura upgrades, saves, mobile layouts and portal travel. The newer Parkour/settings/render suites default to debugging port 9234; set `VOXEL_CDP_PORT` to use another port for these or the multiplayer suites. Screenshots go to /private/tmp/voxel-vault-*.png.
 
 Run `npm run render:items` to regenerate shared 3D item artwork. Before publishing, run `node scripts/stamp.mjs RELEASE` to keep browser modules, terrain worker imports, styles and entry assets synchronized. Three.js r160 is bundled locally under its MIT license in vendor/LICENSE.

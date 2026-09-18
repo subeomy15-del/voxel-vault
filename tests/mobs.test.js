@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=28';
-import {ENEMIES} from '../src/combat.js?v=28';
+import {Game} from '../src/game.js?v=31';
+import {ENEMIES} from '../src/combat.js?v=31';
 const make=()=>new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},{getItem:()=>null,setItem(){}});
 test('new realm mobs have distinct roles and can spawn',()=>{
  for(const kind of ['enderling','void_archer','frost_howler'])assert.ok(ENEMIES[kind]);

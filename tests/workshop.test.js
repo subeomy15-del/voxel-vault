@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=28';
+import {Game} from '../src/game.js?v=31';
 const make=()=>new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},{getItem(){return null;},setItem(){}});
 test('hand crafts a bench; advanced recipes require a present, nearby bench without spending on rejection',()=>{
  const g=make();g.start();g.pos={x:150.5,y:70,z:150.5};g.add('wood',6);assert.equal(g.craft('bench'),true);g.add('stone',16);

@@ -1,9 +1,9 @@
-import { NETHER_END } from './nether.js?v=28';
+import { NETHER_END } from './nether.js?v=31';
 import * as THREE from '../vendor/three.module.js';
-import { OUTPOSTS } from './expeditions.js?v=28';
-import { RIFT_ANCHORS } from './realms.js?v=28';
-import { hash } from './data.js?v=28';
-import { DRAGON_TOWERS } from './dragon.js?v=28';
+import { OUTPOSTS } from './expeditions.js?v=31';
+import { RIFT_ANCHORS } from './realms.js?v=31';
+import { hash } from './data.js?v=31';
+import { DRAGON_TOWERS } from './dragon.js?v=31';
 export class RiftEffects {
   constructor(r){
     this.r=r;this.root=new THREE.Group();r.scene.add(this.root);this.epoch=-1;this.time={value:0};this.markers=[];
@@ -49,6 +49,7 @@ export class RiftEffects {
   }
   update(g,dt){
     this.time.value+=dt;if(this.epoch!==this.r.epoch)this.rebuild(g);
+    this.root.visible=!g.multiplayer?.competitive&&g.state.mode!=='parkour';if(g.multiplayer?.competitive||g.state.mode==='parkour'){this.rope.visible=false;this.markerRoot.hidden=true;return;}
     this.rope.visible=!!g.grapple&&!g.screen;if(g.grapple){const points=this.rope.geometry.attributes.position;points.setXYZ(0,g.pos.x+.25,g.pos.y+1,g.pos.z);points.setXYZ(1,g.grapple.x,g.grapple.y-.4,g.grapple.z);points.needsUpdate=true;}
     const t=this.time.value;this.markerRoot.hidden=!!g.screen;this.particles.visible=false;this.particles.position.set(g.pos.x,g.pos.y-3,g.pos.z);this.particles.rotation.y=t*.012;
     for(const c of this.dragonCrystals){c.crystal.visible=g.world.get(c.x,25,c.z)==='dragon_crystal';c.crystal.rotation.y=t*.6;c.beam.visible=c.crystal.visible&&g.boss?.kind==='dragon';if(c.beam.visible){const p=c.beam.geometry.attributes.position;p.setXYZ(0,c.x+.5,25.5,c.z+.5);p.setXYZ(1,g.boss.x,g.boss.y+1.5,g.boss.z);p.needsUpdate=true;}}

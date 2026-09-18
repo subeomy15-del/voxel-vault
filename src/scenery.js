@@ -1,8 +1,9 @@
 import * as THREE from '../vendor/three.module.js';
-import { hash } from './data.js?v=28';
+import { hash } from './data.js?v=31';
 export class Scenery {
   constructor(renderer){
     this.owner=renderer;this.time={value:0};this.wind={value:1};
+    this.palette=Object.fromEntries(Object.entries({day:'#6aa6cf',horizon:'#c4d8df',dusk:'#c8b598',cloud:'#f6f0dd',cave:'#162128',sun:'#edf1f3',sunset:'#dfbfab'}).map(([key,color])=>[key,new THREE.Color(color)]));
     this.skyUniforms={sunDirection:{value:new THREE.Vector3(-.5,.8,.3)},zenith:{value:new THREE.Color('#6eabcb')},horizon:{value:new THREE.Color('#d6dbca')},night:{value:0},rift:{value:0},time:this.time};
     const skyMaterial=new THREE.ShaderMaterial({uniforms:this.skyUniforms,side:THREE.BackSide,depthWrite:false,
       vertexShader:'varying vec3 vSky;void main(){vSky=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
@@ -50,8 +51,8 @@ export class Scenery {
     };
   }
   addGroundDetail(group,cx,cz,world){
-    const underground=this.owner.underground;if(underground)return;
-    const instances=[],high=this.owner.settings.quality==='high';
+    const underground=this.owner.underground;if(underground||world.dimension!=='overworld'||this.owner.options.quality==='low')return;
+    const instances=[],high=this.owner.options.quality==='high'||this.owner.options.quality==='custom';
     for(let a=0;a<16;a++)for(let b=0;b<16;b++){
       const x=cx*16+a,z=cz*16+b,n=hash(x,z,world.seed+718);const patch=world.noise(x+94,z-37,22);if(n<(high?(patch>.58?.86:.965):.975))continue;
       const y=world.height(x,z)+1;if(world.get(x,y-1,z)!=='grass'||world.get(x,y,z))continue;
@@ -72,24 +73,31 @@ export class Scenery {
     const t=game.state.time,phase=t/600*Math.PI*2,elevation=Math.sin(phase),day=THREE.MathUtils.smoothstep(elevation,-.22,.35),dusk=(1-Math.abs(elevation))**5;
     this.time.value=t;this.wind.value=this.owner.settings.bobbing?1:0;
     const uniforms=this.skyUniforms;uniforms.sunDirection.value.set(-Math.cos(phase)*.8,elevation,.25).normalize();uniforms.night.value=1-day;uniforms.rift.value=game.state.dimension==='ender'?1:0;
-    uniforms.zenith.value.set('#16283e').lerp(new THREE.Color('#6aa6cf'),day);
-    uniforms.horizon.value.set('#354654').lerp(new THREE.Color('#c4d8df'),day).lerp(new THREE.Color('#c8b598'),dusk*.35);
+    uniforms.zenith.value.set('#16283e').lerp(this.palette.day,day);
+    uniforms.horizon.value.set('#354654').lerp(this.palette.horizon,day).lerp(this.palette.dusk,dusk*.35);
     this.sky.visible=!inCave;this.sky.position.copy(this.owner.camera.position);
-    this.clouds.visible=!inCave;this.clouds.position.set(game.pos.x+Math.sin(t*.002)*10,0,game.pos.z);this.clouds.material.color.set('#8b9ba5').lerp(new THREE.Color('#f6f0dd'),day);this.clouds.material.opacity=.7*day+.22;
-    const r=this.owner;r.scene.background.copy(inCave?new THREE.Color('#162128'):uniforms.horizon.value);r.scene.fog.color.copy(r.scene.background);
-    const range=r.settings.quality==='high'?1:.76;r.scene.fog.near=inCave?20:48*range;r.scene.fog.far=inCave?45:106*range;
-    r.sun.intensity=inCave?.06:.14+day*1.45;r.sun.color.set('#b7cee7').lerp(new THREE.Color('#edf1f3'),day).lerp(new THREE.Color('#dfbfab'),dusk*.3);
+    this.clouds.visible=!inCave;this.clouds.position.set(game.pos.x+Math.sin(t*.002)*10,0,game.pos.z);this.clouds.material.color.set('#8b9ba5').lerp(this.palette.cloud,day);this.clouds.material.opacity=.7*day+.22;
+    const r=this.owner;r.scene.background.copy(inCave?this.palette.cave:uniforms.horizon.value);r.scene.fog.color.copy(r.scene.background);
+    this.clouds.count=r.options.quality==='low'?40:r.options.quality==='medium'?80:120;
+    const distance=r.options.renderDistance*16;r.scene.fog.near=inCave?20:distance*.44;r.scene.fog.far=inCave?45:distance+8;
+    r.sun.intensity=inCave?.06:.14+day*1.45;r.sun.color.set('#b7cee7').lerp(this.palette.sun,day).lerp(this.palette.sunset,dusk*.3);
     r.ambient.intensity=game.effect('nightvision')?2.3:inCave?.38:.6+day*.95;r.ambient.color.set('#e1e8e5');r.ambient.groundColor.set('#74785b');
     if(game.effect('nightvision')){r.scene.fog.near=45;r.scene.fog.far=95;r.lantern.intensity=Math.max(r.lantern.intensity,5);}
     if(game.state.dimension==='ender'){
       uniforms.zenith.value.set('#100d29');uniforms.horizon.value.set('#51416c');uniforms.night.value=.65;
-      this.sky.visible=true;this.clouds.visible=false;r.scene.background.set('#30233f');r.scene.fog.color.set('#51416c');r.scene.fog.near=35;r.scene.fog.far=115;
+      this.sky.visible=true;this.clouds.visible=false;r.scene.background.set('#30233f');r.scene.fog.color.set('#51416c');r.scene.fog.near=distance*.42;r.scene.fog.far=distance+20;
       r.ambient.intensity=1.6;r.ambient.color.set('#c4b6ed');r.ambient.groundColor.set('#756894');r.sun.intensity=1.4;r.sun.color.set('#e5d9ff');
     }
     if(game.state.dimension==='nether'){
       uniforms.zenith.value.set('#211b22');uniforms.horizon.value.set('#875248');uniforms.night.value=.4;
-      this.sky.visible=true;this.clouds.visible=false;r.scene.background.set('#583b3b');r.scene.fog.color.set('#875248');r.scene.fog.near=25;r.scene.fog.far=105;
+      this.sky.visible=true;this.clouds.visible=false;r.scene.background.set('#583b3b');r.scene.fog.color.set('#875248');r.scene.fog.near=distance*.34;r.scene.fog.far=distance+12;
       r.ambient.intensity=1.5;r.ambient.color.set('#e2b29a');r.ambient.groundColor.set('#754849');r.sun.intensity=1.2;r.sun.color.set('#f6b686');
+    }
+    if(game.state.dimension==='parkour'){
+      uniforms.zenith.value.set('#629cdb');uniforms.horizon.value.set('#d5e8f1');uniforms.night.value=0;uniforms.rift.value=0;uniforms.sunDirection.value.set(-.45,.78,.35).normalize();
+      this.sky.visible=true;this.clouds.visible=true;this.clouds.position.y=-78;this.clouds.material.color.set('#f2f7ff');this.clouds.material.opacity=.48;
+      r.scene.background.copy(uniforms.horizon.value);r.scene.fog.color.copy(uniforms.horizon.value);r.scene.fog.near=distance*.65;r.scene.fog.far=distance+22;
+      r.ambient.intensity=1.45;r.ambient.color.set('#e6f2ff');r.ambient.groundColor.set('#899cc2');r.sun.intensity=1.65;r.sun.color.set('#fff0d6');
     }
     const direction=uniforms.sunDirection.value;r.sun.position.set(game.pos.x+direction.x*50,game.pos.y+Math.max(.3,Math.abs(direction.y))*70,game.pos.z+direction.z*60);r.sun.target.position.set(game.pos.x,game.pos.y,game.pos.z);
   }

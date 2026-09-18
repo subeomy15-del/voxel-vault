@@ -4,17 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#17362e">
-  <meta name="description" content="Explore the Badlands, hunt Draugr Knights, craft the Knight Sword and enchant gear with aura. Five armor slots, traps, Craft All, and a three-world dragon adventure.">
-  <title>Voxel Vault — Badlands Update</title>
-  <link rel="icon" href="./favicon.svg?v=28" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=28">
-  <link rel="stylesheet" href="./src/natural.css?v=28">
+  <meta name="description" content="Play Bed Wars, Manhunt and shared Creative in joinable eight-player lobbies. Take on daily expeditions or survive a three-world dragon adventure. Your world starts here.">
+  <title>Voxel Vault — Better Together</title>
+  <link rel="icon" href="./favicon.svg?v=31" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css?v=31">
+  <link rel="stylesheet" href="./src/natural.css?v=31">
+  <link rel="stylesheet" href="./src/multiplayer.css?v=31">
+  <link rel="stylesheet" href="./src/multiplayer-modes.css?v=31">
+  <link rel="stylesheet" href="./src/field-goals.css?v=31">
+  <link rel="stylesheet" href="./src/polish-ui.css?v=31">
+  <link rel="stylesheet" href="./src/parkour.css?v=31">
 </head>
 <body>
   <div id="world"></div>
   <div id="vignette"></div>
   <div id="hud" hidden>
-    <div class="hud-top"><button class="brand small" data-action="pause"><svg class="brand-mark" width="28" height="28" viewBox="0 0 48 48" aria-hidden="true"><path d="M5 16 24 5l19 11v19L24 46 5 35Z" fill="#5e8463"/><path d="m5 16 19 11 19-11L24 5Z" fill="#e4d197"/><path d="M24 27v19L5 35V16Z" fill="#274d3b"/><path d="m11 24 8 5v7l-8-5Zm18 5 8-5v7l-8 5Z" fill="#a6c796"/></svg> VOXEL VAULT</button><div class="compass" id="compass"></div><button class="icon-button camera-button" data-action="camera" aria-label="Switch camera view" title="Camera view (V / F5)">▣</button><button class="icon-button" data-action="pause" aria-label="Pause game">Ⅱ</button></div>
+    <div class="hud-top"><button class="brand small" data-action="pause"><svg class="brand-mark" width="28" height="28" aria-hidden="true" viewBox="0 0 64 64"><path d="M4 17 32 2l28 15v31L32 63 4 48Z" fill="#111e21"/><path d="m8 19 24-13 24 13-24 13Z" fill="#b7cb8b"/><path d="m8 19 24 13v26L8 45Z" fill="#596944"/><path d="m32 32 24-13v26L32 58Z" fill="#2f4036"/><path d="m8 19 24 13 24-13v6L32 38 8 25Z" fill="#d7bf7e"/><path d="m15 31 7 4 5 13 5 3v7l-9-5Z" fill="#ede0ac"/><path d="m32 51 5-3 5-17 7-4-8 26-9 5Z" fill="#af945b"/><path d="m19 19 13-7 13 7-13 7Z" fill="#64784b"/><path d="m25 19 7-4 7 4-7 4Z" fill="#ede0ac"/><path d="M10 20v24l9 5M34 34l20-11" fill="none" stroke="#ffffff" stroke-opacity=".22" stroke-width="2"/></svg> VOXEL VAULT</button><div class="compass" id="compass"></div><button class="icon-button camera-button" data-action="camera" aria-label="Switch camera view" title="Camera view (V / F5)">▣</button><button class="icon-button" data-action="pause" aria-label="Pause game">Ⅱ</button></div>
     <div id="location"><span class="eyebrow">SURVIVAL WORLD</span><strong>Verdant Wilds</strong><small>Day 1 · Morning</small></div>
     <button id="aura-points" data-action="enchant" aria-label="Open aura enchanting">Aura 0 · Enchant</button>
     <div id="quick-guide"><span><kbd>WASD</kbd> Move <kbd>Mouse</kbd> Look</span><span><kbd>Space</kbd> Jump <kbd>Shift</kbd> Sprint</span><span><kbd>E</kbd> Use, plant, harvest / place</span></div>
@@ -35,6 +40,6 @@
   <div id="loading"><span class="loader-cube">⬡</span><strong>Loading your world</strong><small>Getting your blocks ready.</small></div>
   <div id="touch-controls" hidden><div id="stick"><i></i></div><div class="touch-actions"><button data-touch="jump" aria-label="Jump">↑</button><button data-touch="attack" aria-label="Mine or attack">⚒</button><button data-touch="interact" aria-label="Interact or place">E</button><button data-action="inventory" aria-label="Backpack">▦</button><button data-touch="dash" aria-label="Dodge dash">»</button><button data-touch="heal" aria-label="Eat food">♧</button><button data-touch="glide" aria-label="Toggle glider" hidden>△</button></div></div>
   <noscript>This adventure needs JavaScript enabled.</noscript>
-  <script type="module" src="./src/main.js?v=28"></script>
+  <script type="module" src="./src/main.js?v=31"></script>
 </body>
 </html>

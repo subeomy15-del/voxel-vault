@@ -1,6 +1,6 @@
 import * as THREE from '../vendor/three.module.js';
-import { ITEMS,BLOCKS,hash } from './data.js?v=28';
-import { toolModel,bowModel,gliderModel } from './models.js?v=28';
+import { ITEMS,BLOCKS,hash } from './data.js?v=31';
+import { toolModel,bowModel,gliderModel } from './models.js?v=31';
 // The same models supply catalogue renders and held equipment.
 export function itemModel(r,name){
  const item=ITEMS[name]||{color:'#a6b4bc'},g=new THREE.Group(),color=item.color;

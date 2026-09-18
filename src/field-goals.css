@@ -1,0 +1,13 @@
+.daily-goals{list-style:none;padding:0;margin:15px 0 0;display:grid;gap:10px;text-shadow:none}
+.daily-goals li>div{display:flex;justify-content:space-between;gap:12px;align-items:baseline;font-size:11px;color:#e7e4d5}
+.daily-goals b{font-size:10px;font-variant-numeric:tabular-nums;color:#c7c6b5;font-weight:600}
+.daily-goals progress{display:block;width:100%;height:4px;margin-top:6px;appearance:none;border:0;background:#e5e1c921;border-radius:3px;overflow:hidden;accent-color:#d2b16c}
+.daily-goals progress::-webkit-progress-bar{background:#e5e1c921;border-radius:3px}
+.daily-goals progress::-webkit-progress-value{background:#d2b16c;border-radius:3px}
+.daily-goals progress::-moz-progress-bar{background:#d2b16c;border-radius:3px}
+.daily-goals .complete>div,.daily-goals .complete b{color:#b9d69b}
+.daily-goals .complete progress::-webkit-progress-value{background:#9abc7c}
+.daily-goals .complete progress::-moz-progress-bar{background:#9abc7c}
+#rift-objective>.daily-reward{color:#e2ca93;padding-top:10px;border-top:1px solid #dbd0a92b;font-size:10px}
+@media(max-width:700px){.daily-goals{gap:8px;margin-top:10px}.daily-goals li>div{font-size:9px;gap:6px}.daily-goals b{font-size:9px}.daily-goals progress{margin-top:4px;height:3px}#rift-objective>.daily-reward{font-size:9px;padding-top:8px}}
+@media(max-height:600px){.daily-goals{gap:6px;margin-top:8px}.daily-goals progress{margin-top:3px}.daily-goals li>div{font-size:10px}#rift-objective>.daily-reward{margin-top:8px;padding-top:6px}}

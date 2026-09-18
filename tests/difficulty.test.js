@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=28';
-import {World} from '../src/world.js?v=28';
-import {hash} from '../src/data.js?v=28';
-import {tickSurvival} from '../src/survival.js?v=28';
+import {Game} from '../src/game.js?v=31';
+import {World} from '../src/world.js?v=31';
+import {hash} from '../src/data.js?v=31';
+import {tickSurvival} from '../src/survival.js?v=31';
 const make=mode=>{const g=new Game({setWorld(){},stream(){},burst(){}},{play(){},quiet(){}},{getItem(){return null;},setItem(){}});g.state.mode=mode;return g;};
 test('Adventure increases hostile durability and combat damage but preserves wildlife, hazards and Creative immunity',()=>{
  const hard=make('adventure'),daily=make('daily'),creative=make('creative');

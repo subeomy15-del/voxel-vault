@@ -1,6 +1,6 @@
 {
   "name": "voxel-vault",
-  "version": "15.0.0",
+  "version": "16.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,6 +8,16 @@
     "test": "node --test tests/*.test.js",
     "test:browser": "node tests/journey-browser.js && node tests/nether-browser.js && node tests/badlands-browser.js",
     "render:items": "node tests/render-items.js",
-    "test:dragon": "node tests/dragon-browser.js"
+    "test:dragon": "node tests/dragon-browser.js",
+    "test:infinite": "node tests/infinite-browser.js",
+    "test:multiplayer": "node tests/multiplayer-browser.js",
+    "preview": "PORT=3002 node server.js",
+    "test:competitive": "node tests/competitive-browser.js",
+    "test:parkour": "node tests/parkour-browser.js",
+    "test:settings": "node tests/settings-browser.js",
+    "test:render": "node tests/render-browser.js"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

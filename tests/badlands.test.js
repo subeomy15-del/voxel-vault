@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=28';
-import {World} from '../src/world.js?v=28';
-import {ITEMS,BLOCKS,RECIPES,maxCraft,craft} from '../src/data.js?v=28';
-import {ARMOR_SLOTS,RETIRED_FORGE} from '../src/badlands-content.js?v=28';
-import {armorProtection,gearPower} from '../src/enchanting.js?v=28';
-import {tickTraps} from '../src/traps.js?v=28';
-import {freshState,loadState,saveState} from '../src/save.js?v=28';
-import {updateEnemies} from '../src/combat.js?v=28';
+import {Game} from '../src/game.js?v=31';
+import {World} from '../src/world.js?v=31';
+import {ITEMS,BLOCKS,RECIPES,maxCraft,craft} from '../src/data.js?v=31';
+import {ARMOR_SLOTS,RETIRED_FORGE} from '../src/badlands-content.js?v=31';
+import {armorProtection,gearPower} from '../src/enchanting.js?v=31';
+import {tickTraps} from '../src/traps.js?v=31';
+import {freshState,loadState,saveState} from '../src/save.js?v=31';
+import {updateEnemies} from '../src/combat.js?v=31';
 const make=()=>{const data=new Map();return new Game({setWorld(){},burst(){},stream(){},firework(){this.fired=true;}},{play(){},quiet(){}},{getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)});};
 test('three new biomes generate across seeds with layered Badlands, marsh water and map markers',()=>{
  for(const seed of [1,72,7821]){const w=new World(seed,[],6);assert.equal(w.biome(240,180),'badlands');assert.equal(w.biome(220,-60),'savanna');assert.equal(w.biome(-240,200),'marsh');const h=w.height(240,180);assert.equal(w.get(240,h,180),'red_sand');assert.ok(['red_terracotta','ochre_terracotta','chalk'].includes(w.get(240,h-2,180)));assert.ok(w.landmarks.some(l=>l.id==='badlands'));}
