@@ -16,10 +16,11 @@ import { undeadModel } from './undead-model.js?v=31';
 import { ParticlePool } from './particles.js?v=31';
 import { CameraMotion } from './camera-motion.js?v=31';
 import { FrameBudget,renderOptions } from './render-performance.js?v=31';
+import { Diagnostics } from './diagnostics.js?v=31';
 import { MovementEffects } from './movement-effects.js?v=31';
 export class Renderer {
   constructor(container,settings){
-    this.settings=settings;this.options=renderOptions(settings);this.performance=new FrameBudget();this.cameraMotion=new CameraMotion();this.telemetry={fps:60,frameMs:16.7,drawCalls:0,triangles:0,chunks:0,queued:0,particles:0,pixelRatio:1,quality:this.options.quality,workerMs:0};this.scene=new THREE.Scene();this.scene.background=new THREE.Color('#b6cddd');this.scene.fog=new THREE.Fog('#b6cddd',62,125);
+    this.diagnostics=new Diagnostics();this.settings=settings;this.options=renderOptions(settings);this.performance=new FrameBudget();this.cameraMotion=new CameraMotion();this.telemetry={fps:60,frameMs:16.7,drawCalls:0,triangles:0,chunks:0,queued:0,particles:0,pixelRatio:1,quality:this.options.quality,workerMs:0};this.scene=new THREE.Scene();this.scene.background=new THREE.Color('#b6cddd');this.scene.fog=new THREE.Fog('#b6cddd',62,125);
     this.camera=new THREE.PerspectiveCamera(74,innerWidth/innerHeight,.05,220);this.camera.rotation.order='YXZ';
     this.renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});this.renderer.setSize(innerWidth,innerHeight);this.renderer.setPixelRatio(Math.min(devicePixelRatio,this.options.maxPixelRatio));this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.05;this.renderer.info.autoReset=false;container.append(this.renderer.domElement);
     this.ambient=new THREE.HemisphereLight('#e1ecff','#525b48',1.3);this.scene.add(this.ambient);this.sun=new THREE.DirectionalLight('#fff6e4',1.8);this.sun.position.set(-40,75,35);this.scene.add(this.sun);this.sun.castShadow=true;this.sun.shadow.mapSize.set(2048,2048);Object.assign(this.sun.shadow.camera,{left:-40,right:40,top:40,bottom:-40,near:1,far:170});this.sun.shadow.bias=-.0007;this.sun.shadow.normalBias=.04;this.renderer.shadowMap.enabled=settings.quality==='high';this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.scene.add(this.sun.target);
@@ -104,10 +105,11 @@ export class Renderer {
     if(this.world.columns.size>80000){this.world.pruneCache(cx,cz,7);}
   }
   installChunk(data){
+    const installedAt=performance.now();
     const group=new THREE.Group(),materials={solid:this.material,water:this.waterMaterial,glass:this.glassMaterial};
     for(const[name,attributes]of Object.entries(data.geometry)){if(!attributes.index.length)continue;const geometry=new THREE.BufferGeometry();for(const k of['position','normal','uv','color'])geometry.setAttribute(k,new THREE.BufferAttribute(attributes[k],k==='uv'?2:3));geometry.setIndex(new THREE.BufferAttribute(attributes.index,1));geometry.computeBoundingSphere();const mesh=new THREE.Mesh(geometry,materials[name]);mesh.receiveShadow=true;mesh.castShadow=name==='solid';group.add(mesh);}
     this.scenery.addGroundDetail(group,data.cx,data.cz,this.world);
-    const k=`${data.cx},${data.cz}`,old=this.chunks.get(k);if(old){old.removeFromParent();old.traverse(o=>o.geometry?.dispose());}this.scene.add(group);this.chunks.set(k,group);
+    const k=`${data.cx},${data.cz}`,old=this.chunks.get(k);if(old){old.removeFromParent();old.traverse(o=>o.geometry?.dispose());}this.scene.add(group);this.chunks.set(k,group);this.diagnostics.lastChunkInstallMs=performance.now()-installedAt;
   }
   makeMob(mob){
     if(['zombie','husk','skeleton','draugr_knight','spider'].includes(mob.kind)){const g=undeadModel(this,mob);this.scene.add(g);this.mobMeshes.set(mob.id,g);return g;}
@@ -153,7 +155,7 @@ export class Renderer {
     this.torchLights.forEach((light,index)=>{const point=nearest[index]?.point;light.intensity=point?8.5+Math.sin(game.state.time*7+index)*.4:0;if(point)light.position.set(point.x+.5,point.y+1,point.z+.5);});
   }
   update(game,dt){
-    const wallNow=performance.now(),wallDt=this.recordedFrame??(this.lastFrameTime?(wallNow-this.lastFrameTime)/1000:dt);this.recordedFrame=undefined;this.lastFrameTime=wallNow;
+    const wallNow=performance.now(),wallDt=this.recordedFrame??(this.lastFrameTime?(wallNow-this.lastFrameTime)/1000:dt);this.recordedFrame=undefined;this.lastFrameTime=wallNow;this.diagnostics.record(wallDt);
     const signature=JSON.stringify([this.settings.quality,this.settings.renderDistance,this.settings.shadows,this.settings.ambientOcclusion,this.settings.particles,this.settings.antialias,this.settings.fov,this.settings.bobbing,this.settings.cameraEffects,this.settings.debugFPS]);
     if(this.performance.record(wallDt)||signature!==this.settingsSignature)this.applySettings();
     this.movementEffects.update(game,dt,this.options);const cameraMotion=this.cameraMotion.update(game,dt,this.options);
@@ -199,7 +201,7 @@ export class Renderer {
     this.viewEffects.update(game,dt);
     this.riftEffects.update(game,dt);this.renderer.info.reset();this.postProcess.render(this.scene,this.camera,game.state.dimension==='ender');
     Object.assign(this.telemetry,{fps:this.performance.fps,frameMs:this.performance.frameMs,drawCalls:this.renderer.info.render.calls,triangles:this.renderer.info.render.triangles,chunks:this.chunks.size,queued:this.queue.length+(this.inflight?1:0),particles:this.particles.count,pixelRatio:this.renderer.getPixelRatio(),quality:this.options.quality,adaptive:this.performance.scale<1});
-    this.debugTimer-=dt;if(this.options.debugFPS&&this.debugTimer<=0){this.debugTimer=.25;const stats=this.telemetry;this.debugElement.textContent=`${Math.round(stats.fps)} FPS · ${stats.frameMs.toFixed(1)} ms\n${stats.drawCalls} draws · ${(stats.triangles/1000).toFixed(1)}k triangles\n${stats.chunks} chunks · ${stats.queued} queued · worker ${stats.workerMs.toFixed(1)} ms\n${stats.particles} particles · ${stats.pixelRatio.toFixed(2)}× resolution${stats.adaptive?' · adaptive':''}\nF3 · hide performance`;}
+    this.debugTimer-=dt;if(this.options.debugFPS&&this.debugTimer<=0){this.debugTimer=.25;const stats=this.telemetry;this.debugElement.textContent=`${Math.round(stats.fps)} FPS · ${stats.frameMs.toFixed(1)} ms\n${stats.drawCalls} draws · ${(stats.triangles/1000).toFixed(1)}k triangles\n${stats.chunks} chunks · ${stats.queued} queued · worker ${stats.workerMs.toFixed(1)} ms\n${stats.particles} particles · ${stats.pixelRatio.toFixed(2)}× resolution${stats.adaptive?' · adaptive':''}\nF3 · hide performance`;if(this.diagnostics.development){const d=this.diagnostics.snapshot(this,game);this.debugElement.textContent+=`\np95 ${d.p95Ms.toFixed(1)} ms · install ${d.chunkInstallMs.toFixed(2)} ms\n${d.entities} entities · ${d.meshes} meshes · ${d.materials} materials\n${d.geometries} geometries · ${d.textures} textures · heap ${d.heapBytes?(d.heapBytes/1048576).toFixed(1)+' MB':'unavailable'}\nSave ${d.save.status} · ${(d.save.durationMs||0).toFixed(2)} ms · ${((d.save.bytes||0)/1024).toFixed(0)} KB`;}}
   }
 }
 export { THREE };

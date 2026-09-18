@@ -1,0 +1,128 @@
+[
+  {
+    "name": "badlands-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 9183,
+    "log": "PASS: Badlands, Knight Sword Craft All, five armor slots, aura enchanting, knight rendering, fireworks, traps, mobile and saved upgrades\n"
+  },
+  {
+    "name": "browser-check.js",
+    "code": 1,
+    "signal": null,
+    "ms": 6263,
+    "log": "file:///Users/danielyoo/voxel-vault/tests/cdp.js:11\n  const evaluate=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true,userGesture:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result.value;};\n                                                                                                                                                                          ^\n\nError: {\"exceptionId\":1,\"text\":\"Uncaught\",\"lineNumber\":0,\"columnNumber\":48,\"scriptId\":\"263\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"\",\"scriptId\":\"263\",\"url\":\"\",\"lineNumber\":0,\"columnNumber\":48}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"TypeError\",\"description\":\"TypeError: Cannot read properties of null (reading 'click')\\n    at <anonymous>:1:49\",\"objectId\":\"3578418055177498115.4.2\"}}\n    at evaluate (file:///Users/danielyoo/voxel-vault/tests/cdp.js:11:171)\n    at async click (file:///Users/danielyoo/voxel-vault/tests/cdp.js:13:153)\n    at async file:///Users/danielyoo/voxel-vault/tests/browser-check.js:10:2\n\nNode.js v24.19.0\n"
+  },
+  {
+    "name": "competitive-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 24609,
+    "log": "PASS: separate browser sessions; Bed Wars and Manhunt UI creation, invites, ready checks, mode startup, arena/kit, shop purchases, frozen head start, beacon markers, real remote PvP, multiplayer avatars, mobile layouts and Escape/K navigation.\n"
+  },
+  {
+    "name": "dragon-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 10096,
+    "log": "PASS: cool Overworld, altar input, animated dragon and healing beams, mouse-fired bow damage/ammunition, saved boss, victory trophy, travel home and diamond catalogue.\n"
+  },
+  {
+    "name": "ender-browser.js",
+    "code": 1,
+    "signal": null,
+    "ms": 2921,
+    "log": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'overworld'\n- 'ender'\n\n    at file:///Users/danielyoo/voxel-vault/tests/ender-browser.js:23:9 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 'overworld',\n  expected: 'ender',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v24.19.0\n"
+  },
+  {
+    "name": "expeditions-browser.js",
+    "code": 1,
+    "signal": null,
+    "ms": 3724,
+    "log": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'stonebrick'\n- 'relic_forge'\n\n    at file:///Users/danielyoo/voxel-vault/tests/expeditions-browser.js:10:143 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 'stonebrick',\n  expected: 'relic_forge',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v24.19.0\n"
+  },
+  {
+    "name": "horizon-browser.js",
+    "code": 1,
+    "signal": null,
+    "ms": 5808,
+    "log": "file:///Users/danielyoo/voxel-vault/tests/cdp.js:11\n  const evaluate=async expression=>{const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true,userGesture:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result.value;};\n                                                                                                                                                                          ^\n\nError: {\"exceptionId\":2,\"text\":\"Uncaught\",\"lineNumber\":0,\"columnNumber\":48,\"scriptId\":\"577\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"\",\"scriptId\":\"577\",\"url\":\"\",\"lineNumber\":0,\"columnNumber\":48}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"TypeError\",\"description\":\"TypeError: Cannot read properties of null (reading 'click')\\n    at <anonymous>:1:49\",\"objectId\":\"3578418055177498115.9.2\"}}\n    at evaluate (file:///Users/danielyoo/voxel-vault/tests/cdp.js:11:171)\n    at async Object.click (file:///Users/danielyoo/voxel-vault/tests/cdp.js:13:153)\n    at async file:///Users/danielyoo/voxel-vault/tests/horizon-browser.js:9:3\n\nNode.js v24.19.0\n"
+  },
+  {
+    "name": "infinite-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 10218,
+    "log": "PASS: movement across the old border, positive/negative distant chunks, bounded mesh count, saved distant builds and desktop/mobile branding.\n"
+  },
+  {
+    "name": "journey-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 6243,
+    "log": "PASS: first chapters, actual workbench craft, journal, save reload, desktop/mobile HUD and zero browser errors\n"
+  },
+  {
+    "name": "multiplayer-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 5022,
+    "log": "PASS: independent browser sessions, invites, readiness, shared blocks/removal, avatars, pings, reconnect, late join, capacity, host migration, solo preservation and mobile layout.\n"
+  },
+  {
+    "name": "natural-browser.js",
+    "code": 1,
+    "signal": null,
+    "ms": 17824,
+    "log": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert.ok(await ev(\"document.querySelector('.lobby-logo').textContent.includes('OVERWORLD / NETHER / END')\"))\n\n    at file:///Users/danielyoo/voxel-vault/tests/natural-browser.js:22:9 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v24.19.0\n"
+  },
+  {
+    "name": "nether-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 10543,
+    "log": "PASS: inventory slots, equipping, recipes, mobile layout, Nether rendering and portal round trip\n"
+  },
+  {
+    "name": "parkour-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 4721,
+    "log": "PASS: actual keyboard walk/sprint/jump/crouch, checkpoint splits, fall and R respawn, pause timer, finish/PB/restart, mobile HUD, solo restoration, block placement/mining.\n"
+  },
+  {
+    "name": "render-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 5461,
+    "log": "Rendering browser checks passed: {\"fps\":59.778134674709605,\"frameMs\":16.728524659419843,\"drawCalls\":59,\"triangles\":13206,\"chunks\":169,\"queued\":0,\"particles\":0,\"pixelRatio\":1,\"quality\":\"custom\",\"workerMs\":2.8999999910593033,\"adaptive\":false}\n"
+  },
+  {
+    "name": "settings-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 3130,
+    "log": "PASS: Parkour menu entry, real settings controls, live graphics preset, audio gain buses, comfort toggles, controls/credits navigation, mobile layout and reload persistence.\n"
+  },
+  {
+    "name": "touch-check.js",
+    "code": 1,
+    "signal": null,
+    "ms": 2341,
+    "log": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert.ok(await ev('g.pos.z')<before-.3)\n\n    at file:///Users/danielyoo/voxel-vault/tests/touch-check.js:8:285 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v24.19.0\n"
+  },
+  {
+    "name": "wildfields-browser.js",
+    "code": 1,
+    "signal": null,
+    "ms": 5067,
+    "log": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 6\n\n    at file:///Users/danielyoo/voxel-vault/tests/wildfields-browser.js:19:60 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 0,\n  expected: 6,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v24.19.0\n"
+  },
+  {
+    "name": "wildlands-browser.js",
+    "code": 1,
+    "signal": null,
+    "ms": 7019,
+    "log": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 8\n\n    at file:///Users/danielyoo/voxel-vault/tests/wildlands-browser.js:21:10 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 0,\n  expected: 8,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v24.19.0\n"
+  }
+]

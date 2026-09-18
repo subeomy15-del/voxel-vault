@@ -1,0 +1,175 @@
+[
+  {
+    "profile": "desktop-1080",
+    "quality": "low",
+    "medianMs": 16.699999999999818,
+    "p95Ms": 16.800000000000182,
+    "maxMs": 16.800000000000182,
+    "heap": 20587644,
+    "telemetry": {
+      "fps": 60.00749853591646,
+      "frameMs": 16.66458400030568,
+      "drawCalls": 36,
+      "triangles": 24198,
+      "chunks": 49,
+      "queued": 0,
+      "particles": 0,
+      "pixelRatio": 1,
+      "quality": "low",
+      "workerMs": 6.399999991059303,
+      "adaptive": false
+    },
+    "meshes": 114,
+    "materials": 58,
+    "memory": {
+      "geometries": 37,
+      "textures": 1
+    },
+    "longTasks": [
+      {
+        "start": 550.7000000029802,
+        "duration": 115
+      }
+    ]
+  },
+  {
+    "profile": "desktop-1080",
+    "quality": "medium",
+    "medianMs": 16.699999999999818,
+    "p95Ms": 16.700000000000728,
+    "maxMs": 16.80000000000109,
+    "heap": 26858196,
+    "telemetry": {
+      "fps": 59.97140978404138,
+      "frameMs": 16.67461217938725,
+      "drawCalls": 139,
+      "triangles": 95277,
+      "chunks": 81,
+      "queued": 0,
+      "particles": 0,
+      "pixelRatio": 1,
+      "quality": "medium",
+      "workerMs": 8.700000002980232,
+      "adaptive": false
+    },
+    "meshes": 227,
+    "materials": 59,
+    "memory": {
+      "geometries": 109,
+      "textures": 3
+    },
+    "longTasks": []
+  },
+  {
+    "profile": "desktop-1080",
+    "quality": "high",
+    "medianMs": 16.69999999999891,
+    "p95Ms": 16.700000000000728,
+    "maxMs": 16.799999999999272,
+    "heap": 33424932,
+    "telemetry": {
+      "fps": 60.003735791363795,
+      "frameMs": 16.665629011451113,
+      "drawCalls": 168,
+      "triangles": 117615,
+      "chunks": 121,
+      "queued": 0,
+      "particles": 0,
+      "pixelRatio": 1,
+      "quality": "high",
+      "workerMs": 26.400000005960464,
+      "adaptive": false
+    },
+    "meshes": 298,
+    "materials": 59,
+    "memory": {
+      "geometries": 140,
+      "textures": 3
+    },
+    "longTasks": []
+  },
+  {
+    "profile": "touch-throttled",
+    "quality": "low",
+    "medianMs": 16.69999999999891,
+    "p95Ms": 16.700000000000728,
+    "maxMs": 16.80000000000109,
+    "heap": 40664996,
+    "telemetry": {
+      "fps": 59.937966148246176,
+      "frameMs": 16.683916126327563,
+      "drawCalls": 28,
+      "triangles": 21208,
+      "chunks": 81,
+      "queued": 0,
+      "particles": 0,
+      "pixelRatio": 1,
+      "quality": "low",
+      "workerMs": 7.699999988079071,
+      "adaptive": false
+    },
+    "meshes": 197,
+    "materials": 75,
+    "memory": {
+      "geometries": 61,
+      "textures": 1
+    },
+    "longTasks": []
+  },
+  {
+    "profile": "touch-throttled",
+    "quality": "medium",
+    "medianMs": 16.69999999999709,
+    "p95Ms": 16.799999999999272,
+    "maxMs": 16.799999999999272,
+    "heap": 33219536,
+    "telemetry": {
+      "fps": 59.82056604473548,
+      "frameMs": 16.716658937198492,
+      "drawCalls": 116,
+      "triangles": 79991,
+      "chunks": 81,
+      "queued": 0,
+      "particles": 0,
+      "pixelRatio": 1.25,
+      "quality": "medium",
+      "workerMs": 8.099999994039536,
+      "adaptive": false
+    },
+    "meshes": 243,
+    "materials": 75,
+    "memory": {
+      "geometries": 98,
+      "textures": 3
+    },
+    "longTasks": []
+  },
+  {
+    "profile": "touch-throttled",
+    "quality": "high",
+    "medianMs": 16.69999999999709,
+    "p95Ms": 16.700000000000728,
+    "maxMs": 16.80000000000291,
+    "heap": 35172584,
+    "telemetry": {
+      "fps": 59.89845335942195,
+      "frameMs": 16.69492188720598,
+      "drawCalls": 126,
+      "triangles": 86566,
+      "chunks": 121,
+      "queued": 0,
+      "particles": 0,
+      "pixelRatio": 1.5,
+      "quality": "high",
+      "workerMs": 13.399999991059303,
+      "adaptive": false
+    },
+    "meshes": 314,
+    "materials": 75,
+    "memory": {
+      "geometries": 110,
+      "textures": 3
+    },
+    "longTasks": []
+  }
+]

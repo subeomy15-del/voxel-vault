@@ -1,0 +1,128 @@
+[
+  {
+    "name": "badlands-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 8685.302916999999,
+    "log": "PASS: Badlands, Knight Sword Craft All, five armor slots, aura enchanting, knight rendering, fireworks, traps, mobile and saved upgrades\n"
+  },
+  {
+    "name": "browser-check.js",
+    "code": 0,
+    "signal": null,
+    "ms": 18930.859959,
+    "log": "PASS: worker terrain, real sprint/jump/mining/placement, pause, crafting, furnace, storage, bed/respawn, dry caves, expanded-world edits, reload persistence, 68+ creative items, map, journal, compact layout; no runtime errors or missing assets.\n"
+  },
+  {
+    "name": "competitive-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 25046.082666000002,
+    "log": "PASS: separate browser sessions; Bed Wars and Manhunt UI creation, invites, ready checks, mode startup, arena/kit, shop purchases, frozen head start, beacon markers, real remote PvP, multiplayer avatars, mobile layouts and Escape/K navigation.\n"
+  },
+  {
+    "name": "dragon-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 10325.605249999993,
+    "log": "PASS: cool Overworld, altar input, animated dragon and healing beams, mouse-fired bow damage/ammunition, saved boss, victory trophy, travel home and diamond catalogue.\n"
+  },
+  {
+    "name": "ender-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 16745.250583,
+    "log": "PASS: Ender worker terrain, all camera perspectives, avatar/hand visibility, real orb key input, saved builds and camera settings, moonstone catalogue, return travel, mobile lobby and camera control, three anchor rewards, automatic launch/glide, shared reward inventory, and Performance rendering.\n"
+  },
+  {
+    "name": "expeditions-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 4876.696916000001,
+    "log": "PASS: visible lodge, real treasure interaction, one-time treasure rewards, 200+ item catalogue, all PNG icons load, and mobile inventory.\n"
+  },
+  {
+    "name": "horizon-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 17670.355500000005,
+    "log": "PASS: one versioned game instance, all six current unowned gliders discoverable, cotton equip/plant/grow/harvest, real pickaxe hold kills through flowers and drops pork, crafting/equipping/saving a glider, upgraded icons and tools, both terrain views and compact catalogue. {\"median\":16.699999999999818,\"p95\":16.800000000000182,\"drawCalls\":255,\"triangles\":174925}\n"
+  },
+  {
+    "name": "infinite-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 10932.731375000003,
+    "log": "PASS: movement across the old border, positive/negative distant chunks, bounded mesh count, saved distant builds and desktop/mobile branding.\n"
+  },
+  {
+    "name": "journey-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 6641.843958999991,
+    "log": "PASS: first chapters, actual workbench craft, journal, save reload, desktop/mobile HUD and zero browser errors\n"
+  },
+  {
+    "name": "multiplayer-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 6797.809875000006,
+    "log": "PASS: independent browser sessions, invites, readiness, shared blocks/removal, avatars, pings, reconnect, late join, capacity, host migration, solo preservation and mobile layout.\n"
+  },
+  {
+    "name": "natural-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 19262.07162500001,
+    "log": "PASS: natural world previews, lava rendering, branding, desktop/mobile layout and no browser errors\n"
+  },
+  {
+    "name": "nether-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 11295.361541999999,
+    "log": "PASS: inventory slots, equipping, recipes, mobile layout, Nether rendering and portal round trip\n"
+  },
+  {
+    "name": "parkour-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 4924.860167000006,
+    "log": "PASS: actual keyboard walk/sprint/jump/crouch, checkpoint splits, fall and R respawn, pause timer, finish/PB/restart, mobile HUD, solo restoration, block placement/mining.\n"
+  },
+  {
+    "name": "render-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 5019.114125000022,
+    "log": "Rendering browser checks passed: {\"fps\":60.01565575176647,\"frameMs\":16.66231898116962,\"drawCalls\":59,\"triangles\":13206,\"chunks\":169,\"queued\":0,\"particles\":0,\"pixelRatio\":1,\"quality\":\"custom\",\"workerMs\":2.4000000059604645,\"adaptive\":false}\n"
+  },
+  {
+    "name": "settings-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 3120.306332999986,
+    "log": "PASS: Parkour menu entry, real settings controls, live graphics preset, audio gain buses, comfort toggles, controls/credits navigation, mobile layout and reload persistence.\n"
+  },
+  {
+    "name": "touch-check.js",
+    "code": 0,
+    "signal": null,
+    "ms": 5551.213583000004,
+    "log": "PASS: real touch joystick, release cleanup, drag look, touch eating/dodge, simultaneous bow drawing and look release, touch gliding, backpack, and keyboard focus traversal.\n"
+  },
+  {
+    "name": "wildfields-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 12088.340625000012,
+    "log": "PASS: real-input tilling, planting, growth, harvest, campfire cooking, inventory search, water and grass shaders, day/night lighting, stair rotation, placement previews, hold-to-build controls and procedural audio. {\"median\":16.69999999999891,\"p95\":16.799999999999272,\"drawCalls\":147,\"triangles\":124873}\n"
+  },
+  {
+    "name": "wildlands-browser.js",
+    "code": 1,
+    "signal": null,
+    "ms": 5911.187749999983,
+    "log": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\ntrue !== false\n\n    at file:///Users/danielyoo/voxel-vault/tests/wildlands-browser.js:17:62 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: true,\n  expected: false,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v24.19.0\n"
+  }
+]

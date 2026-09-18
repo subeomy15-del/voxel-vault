@@ -1,0 +1,49 @@
+{
+  "date": "2026-09-18T12:54:05.990Z",
+  "node": "v24.19.0",
+  "terrain": {
+    "overworld": {
+      "totalMs": 312.1302910000001,
+      "medianMs": 9.151333000000022,
+      "p95Ms": 26.804667000000002,
+      "bytes": 2972176
+    },
+    "nether": {
+      "totalMs": 95.66062899999997,
+      "medianMs": 2.9727080000000115,
+      "p95Ms": 8.379208000000006,
+      "bytes": 2286200
+    },
+    "ender": {
+      "totalMs": 54.60437499999989,
+      "medianMs": 2.138417000000004,
+      "p95Ms": 2.8274170000000254,
+      "bytes": 2252600
+    }
+  },
+  "saves": [
+    {
+      "edits": 1088,
+      "medianMs": 0.0618750000000432,
+      "bytes": 30186
+    },
+    {
+      "edits": 11088,
+      "medianMs": 0.5742500000000064,
+      "bytes": 289086
+    },
+    {
+      "edits": 101088,
+      "medianMs": 5.729417000000012,
+      "bytes": 2709186
+    }
+  ],
+  "invalidSave": {
+    "badJSON": true,
+    "unknownVersion": true
+  },
+  "delayedBlast": {
+    "armed": true,
+    "explosionsAfterLoadWorld": 1
+  }
+}

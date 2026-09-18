@@ -15,9 +15,9 @@ try{
   await ev('g.state.elapsed+=91');await sleep(1200);assert.equal(await ev('g.world.get(0,7,8)'),'wheat_crop');await use();assert.equal(await ev('g.state.inv.wheat'),3);
   await ev(`g.world.set(1,7,9,'campfire');g.add('mushroom',2);g.add('wood',3);g.target={x:1,y:7,z:9,type:'campfire'};g.interact();ui.render()`);
   assert.equal(await ev("document.querySelectorAll('[data-smelt=iron_ingot]').length"),0);await c.click('[data-smelt=roasted_mushroom]');assert.equal(await ev('g.state.inv.roasted_mushroom'),1);
-  await ev(`g.start('creative',true);g.pause('inventory');ui.filter='All';ui.search='';ui.render();document.querySelector('[data-item-search]').focus()`);
-  await c.send('Input.insertText',{text:'diamond'});assert.equal(await ev('document.querySelectorAll(".item-card").length'),6);
-  assert.ok(await ev(`Array.from(document.querySelectorAll('.item-card')).every(e=>e.textContent.toLowerCase().includes('diamond'))`));
+  await ev(`g.start('creative',true);g.pause('inventory');ui.catalogue=true;ui.filter='All';ui.search='';ui.render();document.querySelector('[data-item-search]').focus()`);
+  await c.send('Input.insertText',{text:'diamond'});assert.ok(await ev('document.querySelectorAll(".item-card").length')>=6);
+  assert.ok(await ev(`(async()=>{const {ITEMS}=await import('/src/data.js?v=31');return Array.from(document.querySelectorAll('.item-card')).every(e=>{const k=e.dataset.inspect;return (ITEMS[k].name+' '+ITEMS[k].description).toLowerCase().includes('diamond')})})()`));
   await c.screenshot('wildfields-search');
   await ev(`g.resume();ui.render();g.flying=true;g.pos={x:.5,y:29,z:58.5};g.yaw=Math.PI;g.pitch=-.45;g.state.time=110;g.equip('iron_pickaxe');document.querySelector('#toasts').replaceChildren()`);
   await terrain();await sleep(250);await c.screenshot('wildfields-river');

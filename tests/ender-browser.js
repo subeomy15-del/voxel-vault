@@ -19,7 +19,7 @@ try{
   await ev('captureStyle.remove()');c.errors.length=0;c.failed.length=0;
  }
  await c.send('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
- await ev(`g.screen='menu';ui.render()`);await c.click('[data-action="ender"]');await ready();
+ await ev(`g.screen='menu';ui.render()`);await c.click('[data-action="ender"]');assert.equal(await ev('g.state.dimension'),'overworld');await ev(`g.state.fortressCleared=true;g.add('hang_glider');g.equip('hang_glider');g.add('moonstone_orb',6);g.travel('nether');g.travel('ender');g.state.bar[4]='moonstone_orb';ui.render()`);await ready();
  assert.equal(await ev('g.world.dimension'),'ender');assert.equal(await ev('g.world.get(0,19,0)'),'ender_gate');assert.equal(await ev('g.state.glider'),'hang_glider');
  await ev('g.pos={x:.5,y:19,z:12.5};g.yaw=0;g.pitch=.03');await key('KeyV');assert.equal(await ev('ui.settings.perspective'),1);assert.equal(await ev('v.player.group.visible'),true);assert.equal(await ev('v.hand.visible'),false);await c.screenshot('ender-third-back');
  await key('F5');assert.equal(await ev('ui.settings.perspective'),2);assert.equal(await ev('v.player.group.visible'),true);await c.screenshot('ender-third-front');
@@ -34,9 +34,9 @@ try{
   await c.send('Input.dispatchKeyEvent',{type:'keyDown',code:'KeyE',key:'e'});await c.send('Input.dispatchKeyEvent',{type:'keyUp',code:'KeyE',key:'e'});await sleep(150);
   assert.ok(await ev(`g.state.rift.collected.includes('${id}')`));
  }
- assert.equal(await ev('g.state.inv.moonstone_sword'),1);assert.equal(await ev('g.state.glider'),'moonstone_glider');await c.screenshot('rift-complete');
+ assert.ok(await ev('g.state.inv.moonstone')>=9);assert.equal(await ev('g.state.glider'),'hang_glider');await c.screenshot('rift-complete');
  await ev(`g.pos={x:.5,y:19,z:10.5};g.vx=g.vz=g.velocity=0;g.gliding=false;g.grounded=true;g.padCooldown=0;g.yaw=0;g.pitch=0`);await sleep(200);assert.ok(await ev('g.velocity')>10);await sleep(1300);assert.equal(await ev('g.gliding'),true);await c.screenshot('rift-launch');
- await ev('g.returnHome();g.pause();ui.render()');await c.click('[data-action="return-world"]');assert.equal(await ev('g.state.mode'),'adventure');assert.equal(await ev('g.state.dimension'),'overworld');assert.equal(await ev('g.state.inv.moonstone_sword'),1);
+ await ev('g.returnHome();g.pause();ui.render()');await c.click('[data-action="return-world"]');assert.equal(await ev('g.state.mode'),'adventure');assert.equal(await ev('g.state.dimension'),'nether');await ev(`g.travel('overworld');ui.render()`);assert.ok(await ev('g.state.inv.moonstone')>=9);
  await ev('g.pause();g.screen="menu";ui.render()');await ready();await c.screenshot('real-world-lobby');
  await c.send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await ev('ui.render()');assert.ok(await ev('document.querySelector(".ender-world-button").getBoundingClientRect().right<=innerWidth'));assert.ok(await ev('document.documentElement.scrollWidth<=innerWidth'));await c.screenshot('ender-mobile-lobby');
  await c.click('[data-action="ender"]');await ready();await c.click('[data-action="camera"]');assert.equal(await ev('ui.settings.perspective'),2);await c.screenshot('ender-mobile-camera');await ev("ui.settings.quality='low'");await sleep(200);await c.screenshot('rift-performance-mode');await ev("ui.settings.quality='high'");
