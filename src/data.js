@@ -1,3 +1,4 @@
+import {installPotions} from './potion-content.js?v=32';
 import {BIOME_DEFINITIONS} from './biome-registry.js?v=32';
 import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=32';
 import { installContent } from './badlands-content.js?v=32';
@@ -450,3 +451,5 @@ export function craft(inv,item,batches=1){const recipe=RECIPES.find(r=>r.item===
 export function starterInventory() { return { wood_sword:1, wood_pickaxe:1, wood_axe:1, grass:32, wood:0, stone:0, torch:12, apple:5, potion:2,seeds:6,carrot:2,cotton_seeds:3,watermelon_seeds:2 }; }
 export const STARTER_BAR = ['wood_sword','wood_pickaxe','wood_axe','grass','wood','stone','torch','apple','potion'];
 installContent(BLOCKS,ITEMS,RECIPES,BIOMES);
+
+installPotions(BLOCKS,ITEMS,RECIPES);

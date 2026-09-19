@@ -84,7 +84,7 @@ export class Scenery {
     this.clouds.count=r.options.quality==='low'?40:r.options.quality==='medium'?80:120;
     const distance=r.options.renderDistance*16;r.scene.fog.near=inCave?20:distance*.7;r.scene.fog.far=inCave?45:distance+16;
     r.sun.intensity=inCave?.06:.14+day*1.45;r.sun.color.set('#b7cee7').lerp(this.palette.sun,day).lerp(this.palette.sunset,dusk*.3);
-    r.ambient.intensity=game.effect('nightvision')?2.3:inCave?.38:.45+day*.68;r.ambient.color.set('#e1e8e5');r.ambient.groundColor.lerp(profile.ground,blend);
+    r.ambient.intensity=game.effect('nightvision')?Math.max(2.3,2.3+(game.potionPower('nightvision')-1)*.45):inCave?.38:.45+day*.68;r.ambient.color.set('#e1e8e5');r.ambient.groundColor.lerp(profile.ground,blend);
     if(game.effect('nightvision')){r.scene.fog.near=45;r.scene.fog.far=95;r.lantern.intensity=Math.max(r.lantern.intensity,5);}
     if(game.state.dimension==='ender'){
       uniforms.zenith.value.set('#100d29');uniforms.horizon.value.set('#51416c');uniforms.night.value=.65;

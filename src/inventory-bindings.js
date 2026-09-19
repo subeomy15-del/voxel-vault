@@ -58,9 +58,10 @@ export class InventoryBindings {
    text(this.root.querySelector('.book-intro span b'),s.selected+1);
   }
   if(g.screen==='craft'){
-   const bench=g.nearbyWorkbench();
+   const stations=new Map();
    for(const recipe of RECIPES){const row=this.recipes.get(recipe.item);if(!row||!fresh&&!Object.keys(recipe.cost).some(k=>ingredientKeys(k,recipe).some(i=>changed.has(i))))continue;
-    const ready=canCraft(s.inv,recipe)&&(recipe.station!=='bench'||bench),amount=maxCraft(s.inv,recipe)*(recipe.count||1);flag(row,'ready',ready);
+    if(!stations.has(recipe.station))stations.set(recipe.station,g.stationAvailable(recipe.station));
+    const ready=canCraft(s.inv,recipe)&&stations.get(recipe.station),amount=maxCraft(s.inv,recipe)*(recipe.count||1);flag(row,'ready',ready);
     for(const cost of row.querySelectorAll('[data-ingredient]')){const k=cost.dataset.ingredient,count=ingredientCount(s.inv,k,recipe);text(cost,`${count}/${recipe.cost[k]} ${ITEMS[k].name}`);flag(cost,'enough',count>=recipe.cost[k]);flag(cost,'missing',count<recipe.cost[k]);}
     for(const button of row.querySelectorAll('button'))button.disabled=!ready;text(row.querySelector('[data-craft-all]'),'Craft All'+(amount?' ('+amount+')':''));
    }

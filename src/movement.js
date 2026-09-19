@@ -1,3 +1,4 @@
+import {potionPower} from './potions.js?v=32';
 import { trapAt } from './traps.js?v=32';
 import { BLOCKS, ITEMS } from './data.js?v=32';
 import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=32';
@@ -37,7 +38,7 @@ export function releaseJump(g) {
 
 function tryJump(g) {
   if (g.mantle || g.creative && g.flying || !(g.jumpBuffer > 0) || !(g.grounded || g.coyote > 0)) return false;
-  g.velocity = g.effect('jump') ? 12.7 : MOVEMENT.jump;
+  g.velocity = Math.max(g.state.effects?.jump>0?12.7:MOVEMENT.jump,MOVEMENT.jump*(1+potionPower(g.state,'jump')));
   if (g.jumpReleased) g.velocity = 3.8;
   g.state.exhaustion += .18; g.grounded = false; g.coyote = 0; g.jumpBuffer = 0; g.jumpActive = true;
   g.jumpImpulse = 1; g.audio.play('jump'); g.emit?.('jump', { velocity: g.velocity });
@@ -168,7 +169,7 @@ export function movePlayer(g, dt) {
   const wantsSprint = g.touchSprint || (settings(g).sprintMode === 'toggle' ? !!g.sprintToggle : held(g, sprintKeys));
   g.sprinting = g.moving && !g.crouching && !inWater && !g.gliding && !g.eating && (g.creative || g.state.food >= 6) && g.stamina > 3 && wantsSprint;
   g.stamina = Math.max(0, Math.min(100, g.stamina + dt * (g.sprinting ? -9 : 22)));
-  const wing = ITEMS[g.state.glider], boost = (g.effect('speed') ? 1.5 : 1) * (trapAt(g, g.pos)?.snare && !g.creative ? .25 : 1);
+  const wing = ITEMS[g.state.glider], boost = Math.max(g.state.effects?.speed>0?1.5:1,1+potionPower(g.state,'speed')) * (trapAt(g, g.pos)?.snare && !g.creative ? .25 : 1);
   const speed = g.gliding ? Math.max(7, wing.glideSpeed + Math.max(0, -g.pitch) * 7 - Math.max(0, g.pitch) * 4) : (inWater ? 3.1 : g.dashTime > 0 ? 15 : g.crouching ? 2.1 : g.sprinting ? MOVEMENT.sprint : MOVEMENT.walk) * boost * (g.eating ? .5 : g.drawState ? .75 : 1);
   if (g.dashTime > 0 && !g.moving) { forward = 1; g.moving = true; }
   const wishX = -Math.sin(g.yaw) * forward + Math.cos(g.yaw) * sideways, wishZ = -Math.cos(g.yaw) * forward - Math.sin(g.yaw) * sideways;
@@ -221,7 +222,7 @@ export function movePlayer(g, dt) {
     }
     tryJump(g);
   }
-  if (!g.multiplayer?.competitive && g.state.mode !== 'parkour' && g.pos.y < WORLD_BOTTOM - 3) { g.returnHome(); g.hurt(3); }
+  if (!g.multiplayer?.competitive && g.state.mode !== 'parkour' && g.pos.y < WORLD_BOTTOM - 3) { g.returnHome(); g.hurt(3,false,'void'); }
   if (g.moving) {
     g.walk += dt * (g.sprinting ? 1.35 : 1); g.stepTimer += dt;
     if (g.stepTimer > .42 && g.grounded) { g.stepTimer = 0; g.audio.play('step', g.world.get(Math.floor(g.pos.x), Math.floor(g.pos.y - .03), Math.floor(g.pos.z)) || 'stone'); }

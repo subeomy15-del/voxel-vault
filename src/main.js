@@ -1,3 +1,4 @@
+import {potionFor} from './potions.js?v=32';
 import {installWorldDebug} from './world-debug.js?v=32';
 import {openDurableStorage} from './durable-storage.js?v=32';
 import {showStartupFailure} from './startup-errors.js?v=32';
@@ -42,10 +43,10 @@ try{
     if(e.code==='KeyH'&&(!game.screen||game.screen==='inventory')){game.useFirecracker();ui.refreshItems();return;}
     if(game.screen)return;if(e.code==='KeyV'||e.code==='F5'){ui.action('camera');return;}movementInput(game,e.code,true);
     if(parkour.active&&e.code==='KeyR'){parkour.resetToCheckpoint();return;}
-    if(/^Digit[1-9]$/.test(e.code)){const index=Number(e.code.at(-1))-1;if(game.state.bar[index]==='firecracker')game.useFirecracker();else game.select(index);}
+    if(/^Digit[1-9]$/.test(e.code)){const index=Number(e.code.at(-1))-1;if(game.state.bar[index]==='firecracker')game.useFirecracker();else if(potionFor(game.state.bar[index]))game.drink(game.state.bar[index]);else game.select(index);}
     if(e.code==='Space'){if(game.creative&&performance.now()-lastSpace<300){game.flying=!game.flying;game.toast(game.flying?'Taking the scenic route':'Back on solid ground',game.flying?'Space to rise · X to descend':'');}lastSpace=performance.now();game.jump();}
     if(parkour.active)return;
-    if(e.code==='KeyP'&&multiplayer.active)multiplayer.ping().catch(error=>game.toast('Could not send ping',error.message));if(e.code==='KeyG')game.toggleGlide();if(e.code==='KeyR')game.dash();if(e.code==='KeyT')game.rotateBuilding();if(e.code==='KeyE')use();if(e.code==='KeyB')game.place(true);if(e.code==='KeyF')game.eatAvailable();if(e.code==='KeyQ')game.eat('potion');
+    if(e.code==='KeyP'&&multiplayer.active)multiplayer.ping().catch(error=>game.toast('Could not send ping',error.message));if(e.code==='KeyG')game.toggleGlide();if(e.code==='KeyR')game.dash();if(e.code==='KeyT')game.rotateBuilding();if(e.code==='KeyE')use();if(e.code==='KeyB')game.place(true);if(e.code==='KeyF')game.eatAvailable();if(e.code==='KeyQ')game.drink(potionFor(game.held)?game.held:'potion');
   });
   addEventListener('keyup',e=>{movementInput(game,e.code,false);if(e.code==='Space')releaseJump(game);if(e.code==='KeyE')game.placeHeld=false;});
   addEventListener('blur',()=>{game.keys.clear();game.attackHeld=false;game.placeHeld=false;if(!game.screen){game.pause();ui.render();}});

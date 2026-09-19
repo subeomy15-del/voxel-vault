@@ -1,8 +1,10 @@
+import {potionModel} from './potion-model.js?v=32';
 import * as THREE from '../vendor/three.module.js';
 import { ITEMS,BLOCKS,hash } from './data.js?v=32';
 import { toolModel,bowModel,gliderModel } from './models.js?v=32';
 // The same models supply catalogue renders and held equipment.
 export function itemModel(r,name){
+ if(ITEMS[name]?.kind==='potion'||['potion','water_flask','empty_flask'].includes(name))return potionModel(name);
  const item=ITEMS[name]||{color:'#a6b4bc'},g=new THREE.Group(),color=item.color;
  const mat=(c,metal=0)=>new THREE.MeshStandardMaterial({color:c,roughness:metal?.3:.68,metalness:metal});
  const add=(geometry,c,x=0,y=0,z=0,metal=0)=>{const mesh=new THREE.Mesh(geometry,mat(c,metal));mesh.position.set(x,y,z);g.add(mesh);return mesh;};

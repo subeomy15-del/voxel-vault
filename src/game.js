@@ -1,3 +1,4 @@
+import {drinkPotion,potionFor,potionPower,potionDamageMultiplier} from './potions.js?v=32';
 import { armBlast,cancelDelayedActions } from './delayed-actions.js?v=32';
 import { saveHealth,preserveBeforeReplacement } from './save-health.js?v=32';
 import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=32';
@@ -105,6 +106,8 @@ export class Game {
   get hardAdventure(){return this.state.mode==='adventure';}
   get maxHp(){return 20;}
   effect(name){return activeEffect(this,name);}
+  drink(name=this.held){return drinkPotion(this,name);}
+  potionPower(name){return potionPower(this.state,name);}
   emit(type,data={}){this.events.push({type,...data});}
   toast(title,text='',kind='normal'){this.emit('toast',{title,text,kind});}
   start(mode='adventure',reset=false){
@@ -119,16 +122,18 @@ export class Game {
   resume(){this.screen=null;this.keys.clear();this.movementInputHeld?.clear();this.attackHeld=false;this.placeHeld=false;}
   select(i){this.drawState=null;this.eating=null;this.state.selected=(i+9)%9;this.mineProgress=0;this.audio.play('click');this.emit('hud');}
   equip(name){name=BLOCKS[name]?.drop||name;if(!ITEMS[name]||!this.state.inv[name]||ITEMS[name].hidden)return;this.drawState=null;this.eating=null;if(ITEMS[name].kind==='glider'){this.state.glider=name;this.toast('Glider equipped','Press G while airborne. Look down to dive, up to slow your descent.');this.save();return;}if(ITEMS[name].kind==='ammo'){this.state.ammo=name;this.toast(ITEMS[name].name+' selected','Used by your bows and crossbows.');this.save();return;}if(ITEMS[name].kind==='armor'){this.state.armorParts??={};if(ITEMS[name].slot)this.state.armorParts[ITEMS[name].slot]=name;else this.state.armor=name;this.toast('Armor equipped',ITEMS[name].description);}else{const i=this.state.bar.indexOf(name);if(i>=0)this.state.selected=i;else this.state.bar[this.state.selected]=name;}this.save();}
-  nearbyWorkbench(){
+  nearbyWorkbench(){return this.nearbyStation('bench');}
+  stationAvailable(station){return !station||station==='hand'||this.nearbyStation(station);}
+  nearbyStation(station){
     const p=this.pos;
-    for(let x=Math.floor(p.x)-3;x<=Math.floor(p.x)+3;x++)for(let y=Math.floor(p.y)-2;y<=Math.floor(p.y)+2;y++)for(let z=Math.floor(p.z)-3;z<=Math.floor(p.z)+3;z++)if(Math.hypot(x+.5-p.x,y-p.y,z+.5-p.z)<=3.5&&this.world.get(x,y,z)==='bench')return true;
+    for(let x=Math.floor(p.x)-3;x<=Math.floor(p.x)+3;x++)for(let y=Math.floor(p.y)-2;y<=Math.floor(p.y)+2;y++)for(let z=Math.floor(p.z)-3;z<=Math.floor(p.z)+3;z++)if(Math.hypot(x+.5-p.x,y-p.y,z+.5-p.z)<=3.5&&this.world.get(x,y,z)===station)return true;
     return false;
   }
   enchant(name){return enchantGear(this,name);}
   craft(name,all=false){
     if(this.multiplayer?.competitive){this.toast('Match equipment','Use the base shop in Bed Wars. Your match supplies are in the hotbar.');return false;}
     const recipe=RECIPES.find(r=>r.item===name);
-    if(recipe?.station==='bench'&&!this.nearbyWorkbench()){this.toast('Crafting table required','Craft a workbench from 6 timber, place it, and stand within 3 blocks.');return false;}
+    if(recipe&&!this.stationAvailable(recipe.station)){this.toast(recipe.station==='water'?'Water required':recipe.station==='brewing_station'?'Brewing station required':'Crafting table required','Stand within three blocks of the required station or water.');return false;}
     const batches=all?maxCraft(this.state.inv,recipe):1;
     if(!craft(this.state.inv,name,batches)){this.toast('More materials needed','The crafting book shows exactly what is missing.');return false;}
     this.state.stats.crafted+=batches;this.audio.play('craft');this.toast(ITEMS[name].name+' crafted',((recipe.count||1)*batches)+' added to your backpack.');
@@ -151,12 +156,13 @@ export class Game {
   add(name,n=1){name=canonicalItem(name);this.state.inv[name]=(this.state.inv[name]||0)+n;}
   heal(item){const ok=consumeFood(this,item);if(ok)this.save();return ok;}
   eat(item=this.held){
+    if(potionFor(item))return this.drink(item);
     if(this.eating)return false;
     if(!canEat(this,item)){if(!this.state.inv[item])this.toast('No food left','Gather, farm, or cook something in your furnace.');return false;}
     this.drawState=null;this.eating={item,time:.85,total:.85};return true;
   }
   eatAvailable(){
-    const held=ITEMS[this.held];if(held?.kind==='food'&&this.state.inv[this.held]>0)return this.eat(this.held);
+    const held=ITEMS[this.held];if(held?.kind==='potion')return this.drink();if(held?.kind==='food'&&this.state.inv[this.held]>0)return this.eat(this.held);
     const food=Object.keys(this.state.inv).filter(k=>ITEMS[k]?.nutrition&&!ITEMS[k].effect&&canEat(this,k)).sort((a,b)=>Number(!!ITEMS[a].raw)-Number(!!ITEMS[b].raw)||ITEMS[b].saturation-ITEMS[a].saturation)[0];
     if(food)return this.eat(food);this.toast('Equip some food','Select a meal in your backpack, then press F to eat.');return false;
   }
@@ -194,7 +200,7 @@ export class Game {
     const t=this.target;
     if(this.state.dimension==='ender'&&!this.state.dragon.active&&this.world.get(0,19,-7)==='dragon_altar'&&Math.hypot(this.pos.x-.5,this.pos.y-19,this.pos.z+6.5)<4)return{...DRAGON_ALTAR,type:'dragon_altar',name:this.state.dragon.defeated?'Challenge the dragon again':'Awaken the Ender Dragon'};
     if(t?.type==='treasure_chest'){const chest=this.world.chests.find(c=>c.x===t.x&&c.y===t.y&&c.z===t.z&&!this.state.opened.includes(c.id));if(chest)return{...chest,type:'supply',name:chest.name};}
-    if(t&&['relic_forge','ender_gate','moonstone_chest','furnace','campfire','bench','chest','bed',...MATURE_CROPS].includes(t.type))return {...t,name:BLOCKS[t.type].name,placed:true};
+    if(t&&['brewing_station','relic_forge','ender_gate','moonstone_chest','furnace','campfire','bench','chest','bed',...MATURE_CROPS].includes(t.type))return {...t,name:BLOCKS[t.type].name,placed:true};
     if(this.state.dimension==='ender')for(const anchor of RIFT_ANCHORS)if(!this.state.rift.collected.includes(anchor.id)&&Math.hypot(this.pos.x-anchor.x-.5,this.pos.z-anchor.z-.5)<3&&Math.abs(this.pos.y-this.world.height(anchor.x,anchor.z)-1)<4)return{...anchor,type:'anchor',y:this.world.height(anchor.x,anchor.z)+1};
     const gate=this.state.gate;if(gate&&this.world.get(gate.x,gate.y,gate.z)==='ender_gate'&&Math.hypot(this.pos.x-gate.x-.5,this.pos.z-gate.z-.5)<3&&Math.abs(this.pos.y-gate.y)<4)return{...gate,type:'ender_gate',name:this.state.dimension==='ender'?'Return home':'Enter the Rift',placed:true};
     let best=null,dist=3;
@@ -202,6 +208,7 @@ export class Game {
     const camp=this.world.landmarks[0];if(!best&&Math.hypot(camp.x-this.pos.x,camp.z-this.pos.z)<2.5)best=camp;return best;
   }
   interact(){
+    if(potionFor(this.held))return this.drink();
     if(this.multiplayer?.modes?.interact())return;
     if(this.keys.has('KeyX')&&ITEMS[this.held]?.place)return this.place();
     if(ITEMS[this.held]?.kind==='hoe'&&['grass','dirt','farmland'].includes(this.target?.type)){this.till();return;}
@@ -217,6 +224,7 @@ export class Game {
     if(n?.type==='camp'){this.state.hp=20;this.save();this.toast('Rested at camp','Health restored.');return;}
     if(n?.type==='furnace'||n?.type==='campfire'){this.station=n;this.pause('furnace');this.emit('screen');return;}
     if(n?.type==='relic_forge'){this.pause('craft');this.emit('screen');return;}
+    if(n?.type==='brewing_station'){this.pause('craft');this.emit('browse',{category:'Brewing'});this.emit('screen');return;}
     if(n?.type==='bench'){this.pause('craft');this.emit('screen');return;}
     if(n?.type==='ender_gate'){this.travel(realmDestination(this,n));return;}
     if(n?.type==='chest'||n?.type==='moonstone_chest'){this.containerKey=n.type==='moonstone_chest'?'moon':cellKey(n.x,n.y,n.z);if(this.containerKey!=='moon')this.state.containers[this.containerKey]??={};this.pause('storage');this.emit('screen');return;}
@@ -356,7 +364,7 @@ export class Game {
     }
     const nearest=targetMob(this,4)?.mob;
     this.revealTime=4;
-    if(nearest){this.hit(nearest,(item?.damage||2)*weaponPower(this.state,this.held));if(item?.leech)this.state.hp=Math.min(20,this.state.hp+item.leech);if(item?.slow)nearest.slow=Math.max(nearest.slow||0,item.slow);this.attackCooldown=item?.cooldown||.36;}else if(item?.kind==='sword')this.attackCooldown=item.cooldown||.36;
+    if(nearest){this.hit(nearest,(item?.damage||2)*weaponPower(this.state,this.held)*(1+this.potionPower('strength')));if(item?.leech)this.state.hp=Math.min(20,this.state.hp+item.leech);if(item?.slow)nearest.slow=Math.max(nearest.slow||0,item.slow);this.attackCooldown=item?.cooldown||.36;}else if(item?.kind==='sword')this.attackCooldown=item.cooldown||.36;
   }
   hit(m,power){
     if(!this.mobs.includes(m))return;m.hp-=power;m.flash=.18;m.stun=.18;m.panic=6;m.brain=0;this.revealTime=4;
@@ -371,9 +379,9 @@ export class Game {
       for(const[item,[low,high]]of Object.entries(drops)){const count=low+Math.min(high-low,Math.floor(hash(m.id+offset,Math.floor(this.state.elapsed),this.state.seed)*(high-low+1)));this.dropItem(item,count,m.x+offset*.25,m.y,m.z);offset++;}
     }
   }
-  hurt(amount,combat=false){if(this.state.mode==='parkour'||this.multiplayer?.competitive||this.creative||this.hurtCooldown>0||this.dashTime>0)return;const reduction=1-armorProtection(this.state);this.state.hp=Math.max(0,this.state.hp-amount*reduction*(combat&&this.hardAdventure?1.65:1));this.hurtCooldown=.7;this.audio.play('hurt');this.emit('hurt');if(this.state.hp<=0){this.state.stats.deaths++;this.pause('death');this.emit('screen');}}
+  hurt(amount,combat=false,source=combat?'combat':'physical'){if(this.state.mode==='parkour'||this.multiplayer?.competitive||this.creative||this.hurtCooldown>0||this.dashTime>0)return;const reduction=(1-armorProtection(this.state))*potionDamageMultiplier(this,source);this.state.hp=Math.max(0,this.state.hp-amount*reduction*(combat&&this.hardAdventure?1.65:1));this.hurtCooldown=.7;this.audio.play('hurt');this.emit('hurt');if(this.state.hp<=0){this.state.stats.deaths++;this.pause('death');this.emit('screen');}}
   returnHome(){this.pos={...(this.state.spawn||this.state.origin||{x:.5,y:7,z:20.5})};if(this.world.intersects(this.pos.x,this.pos.y,this.pos.z))this.pos.y=this.world.ground(this.pos.x,this.pos.z);this.velocity=0;this.vx=this.vz=0;this.gliding=false;}
-  respawn(){this.state.hp=20;this.state.food=20;this.state.saturation=5;this.state.effects={};this.returnHome();this.projectiles=[];this.mobs=this.mobs.filter(m=>ENEMIES[m.kind]?.passive);this.boss=null;this.slam=null;if(this.state.dragon){this.state.dragon.active=false;this.state.dragon.hp=420;}this.hurtCooldown=3;this.resume();this.save();}
+  respawn(){this.state.hp=20;this.state.food=20;this.state.saturation=5;this.state.effects={};this.state.brews={};this.state.breath=20;this.returnHome();this.projectiles=[];this.mobs=this.mobs.filter(m=>ENEMIES[m.kind]?.passive);this.boss=null;this.slam=null;if(this.state.dragon){this.state.dragon.active=false;this.state.dragon.hp=420;}this.hurtCooldown=3;this.resume();this.save();}
   spawnMob(x,z,kind='sentinel',y=null){if(kind==='grazer')kind='deer';const info=ENEMIES[kind]||ENEMIES.sentinel;const m={id:++this.serial,x,z,y:y??this.world.ground(x,z),kind,hp:Math.ceil(info.hp*(this.hardAdventure&&!info.passive&&kind!=='dragon'?1.4:1)),maxHp:Math.ceil(info.hp*(this.hardAdventure&&!info.passive&&kind!=='dragon'?1.4:1)),cooldown:1,flash:0,windup:0,stun:0,angle:0,walk:0,wander:hash(x|0,z|0,this.state.seed)*6};this.mobs.push(m);return m;}
   spawnAmbient(){if(this.state.dimension!=='overworld')return;
     for(const[dx,dz]of[[-12,4],[10,11],[-24,-12],[17,-15],[-9,-18],[22,8]]){
@@ -396,10 +404,10 @@ export class Game {
       for(const dy of [.05,.85,1.6])lava ||= this.world.get(x,Math.floor(this.pos.y+dy),z)==='lava';
       magma ||= this.world.get(x,Math.floor(this.pos.y-.05),z)==='magma';
     }
-    if(lava)this.hurt(4);else if(magma&&this.grounded)this.hurt(1);
+    if(lava)this.hurt(4,false,'fire');else if(magma&&this.grounded)this.hurt(1,false,this.state.dimension==='nether'?'ash':'fire');
   }
   update(dt){
-    this.renderer.stream(this.pos);if(this.screen)return;
+    this.renderer.stream(this.pos);if(this.screen){this.state.potionCooldown=Math.max(0,(this.state.potionCooldown||0)-dt);return;}
     if(this.state.mode==='parkour'){
       this.state.time+=dt;this.state.elapsed+=dt;this.stamina=100;
       if(!this.parkour?.respawnTime)this.move(dt);
@@ -426,7 +434,7 @@ export class Game {
     const item=ITEMS[this.held],kind=item?.kind,wood=['wood','birch','pinewood','plank','birch_plank','pine_plank','leaf','pine','autumnleaf','bookshelf','hedge'].includes(BLOCKS[t.type].texture||t.type),soil=['grass','dirt','sand','clay','snow','gravel','farmland'].includes(t.type);
     const correct=kind==='axe'&&wood||kind==='shovel'&&soil||kind==='pickaxe'&&!wood&&!soil;
     const soft=soil||wood||BLOCKS[t.type].plant,hardness=BLOCKS[t.type].hardness;
-    const natural=!this.world.edits.has(key);const before=this.mineProgress;this.mineProgress+=dt*(this.creative?40:(correct?(item.speed||1):1)*(this.effect('haste')?1.6:1)*miningPower(this.state,this.held))/hardness;
+    const natural=!this.world.edits.has(key);const before=this.mineProgress;this.mineProgress+=dt*(this.creative?40:(correct?(item.speed||1):1)*Math.max(this.effect('haste')?1.6:1,1+this.potionPower('mining'))*miningPower(this.state,this.held))/hardness;
     if(Math.floor(before*12)!==Math.floor(this.mineProgress*12)&&this.mineProgress<1){this.renderer.burst(t.x+.5,t.y+.65,t.z+.5,BLOCKS[t.type].color,3);this.audio.play('mine',t.type);}
     if(this.mineProgress>=1){
       if(this.multiplayer?.competitive){if(this.world.set(t.x,t.y,t.z,null)){this.renderer.burst(t.x+.5,t.y+.5,t.z+.5,BLOCKS[t.type].color,8);this.renderer.swing=1;this.audio.play('mine',t.type);}this.mineProgress=0;this.mineKey='';return;}

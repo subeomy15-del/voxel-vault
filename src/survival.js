@@ -1,5 +1,6 @@
+import {potionPower,tickPotions} from './potions.js?v=32';
 import { ITEMS,EFFECTS } from './data.js?v=32';
-export function activeEffect(game,name){return (game.state.effects?.[name]||0)>0;}
+export function activeEffect(game,name){return (game.state.effects?.[name]||0)>0||potionPower(game.state,name)>0;}
 export function canEat(game,name){
   const item=ITEMS[name],s=game.state;if(!item||item.kind!=='food'||!(s.inv[name]>0))return false;
   if(item.effect&&(s.effects[item.effect]||0)<item.duration*.8)return true;
@@ -16,6 +17,7 @@ export function consumeFood(game,name){
 }
 export function tickSurvival(game,dt){
   const s=game.state;
+  tickPotions(game,dt);
   for(const[name,t]of Object.entries(s.effects)){if(t<=dt)delete s.effects[name];else s.effects[name]=t-dt;}
   game.revealTime=Math.max(0,(game.revealTime||0)-dt);
   if(game.eating){
