@@ -15,7 +15,7 @@ export function freshState(seed=7821,mode='adventure') {
 export function slotKey(mode){return prefix+mode+(mode==='daily'?'-'+dailySeed():'');}
 export function loadState(storage,mode='adventure') {
   try {
-    const raw=readDocument(storage,slotKey(mode),raw=>raw&&raw.version===VERSION);if(!raw)return null;
+    const cached=storage.readState?.(slotKey(mode)),raw=cached===undefined?readDocument(storage,slotKey(mode),raw=>raw&&raw.version===VERSION):cached;if(!raw||raw.version!==VERSION)return null;
     const s=freshState(Number.isFinite(raw.seed)?raw.seed:7821,mode);s.terrain=raw.terrain===6?6:5;
     for(const [k,n]of Object.entries(raw.inv||{}))if(ITEMS[k]&&Number.isFinite(n))s.inv[k]=Math.max(0,Math.min(999999,Math.floor(n)));
     if(Array.isArray(raw.bar)&&raw.bar.length===9)s.bar=raw.bar.map((k,i)=>ITEMS[k]?k:STARTER_BAR[i]);
@@ -61,7 +61,7 @@ export function loadState(storage,mode='adventure') {
     for(const k of Object.keys(s.stats))if(Number.isFinite(raw.stats?.[k]))s.stats[k]=Math.max(0,raw.stats[k]);normalizeResources(s);recoverDelayedActions(raw,s);return s;
   }catch{return null;}
 }
-export function saveState(storage,state){try{return writeDocument(storage,slotKey(state.mode),JSON.stringify(state));}catch(error){setSaveHealth(storage,slotKey(state.mode),{status:storageFailure(error),message:String(error.message)});return false;}}
+export function saveState(storage,state){if(storage.replaceState)return storage.replaceState(state);try{return writeDocument(storage,slotKey(state.mode),JSON.stringify(state));}catch(error){setSaveHealth(storage,slotKey(state.mode),{status:storageFailure(error),message:String(error.message)});return false;}}
 export function loadSettings(storage){try{return normalizeSettings(JSON.parse(storage.getItem(prefix+'settings')||'{}'));}catch{return {...defaultSettings};}}
 export function saveSettings(storage,settings){try{storage.setItem(prefix+'settings',JSON.stringify(normalizeSettings(settings)));return true;}catch{return false;}}
 export function importLegacy(storage,state){

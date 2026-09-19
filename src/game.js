@@ -63,7 +63,7 @@ export class Game {
     if(!['overworld','nether','ender'].includes(destination)||destination===this.state.dimension)return false;
     if(destination==='ender'&&!this.creative&&!this.state.fortressCleared){this.toast('Ender portal sealed','Defeat the fortress guardian to open the way.');return false;}
     const source=this.state.dimension;
-    this.save();this.state.realms[this.state.dimension]=captureRealm(this.state);
+    this.save(true);this.state.realms[this.state.dimension]=captureRealm(this.state);
     Object.assign(this.state,structuredClone(this.state.realms[destination]||emptyRealm()));this.state.dimension=destination;
     if(destination==='ender'&&!this.state.rift.kit){
       this.state.rift.kit=true;this.add('end_stone',32);this.add('ender_berry',4);
@@ -185,7 +185,8 @@ export class Game {
   }
   dash(){if(this.state.mode==='parkour'||this.dashCooldown>0||this.stamina<25)return;this.dashTime=.2;this.dashCooldown=1.2;this.stamina-=25;}
   jump(){requestJump(this);}
-  save(){if(this.state.mode==='parkour')return true;for(const [slot,name]of Object.entries(this.state.armorParts||{}))if(!(this.state.inv[name]>0))delete this.state.armorParts[slot];this.state.pos={...this.pos};this.state.yaw=this.yaw;this.state.pitch=this.pitch;this.state.edits=this.multiplayer?.active?this.multiplayer.captureEdits(this.world):[...this.world.edits];this.state.animals=this.mobs.filter(m=>ANIMALS[m.kind]&&m.hp>0).slice(0,128).map(({kind,x,y,z,hp,angle})=>({kind,x,y,z,hp,angle}));if(this.multiplayer?.active)return true;const ok=saveState(this.storage,this.state);this.saveStatus=saveHealth(this.storage,slotKey(this.state.mode));this.emit('saved',{ok,status:this.saveStatus.status});return ok;}
+  get saveReady(){return this.storage.flush?.()||Promise.resolve(true);}
+  save(snapshot=false){if(this.state.mode==='parkour')return true;for(const [slot,name]of Object.entries(this.state.armorParts||{}))if(!(this.state.inv[name]>0))delete this.state.armorParts[slot];this.state.pos={...this.pos};this.state.yaw=this.yaw;this.state.pitch=this.pitch;if(snapshot||!this.storage.queueWorld||this.multiplayer?.active)this.state.edits=this.multiplayer?.active?this.multiplayer.captureEdits(this.world):[...this.world.edits];this.state.animals=this.mobs.filter(m=>ANIMALS[m.kind]&&m.hp>0).slice(0,128).map(({kind,x,y,z,hp,angle})=>({kind,x,y,z,hp,angle}));if(this.multiplayer?.active)return true;if(this.storage.queueWorld)return this.storage.queueWorld(this.state,this.world,status=>{this.saveStatus=status;this.emit('saved',{ok:status.status==='saved',status:status.status});});const ok=saveState(this.storage,this.state);this.saveStatus=saveHealth(this.storage,slotKey(this.state.mode));this.emit('saved',{ok,status:this.saveStatus.status});return ok;}
   nearest(){
     if(this.state.mode==='parkour')return null;
     if(this.multiplayer?.competitive)return null;

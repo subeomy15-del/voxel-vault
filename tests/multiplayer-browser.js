@@ -43,7 +43,7 @@ const screenshot = async (tab, name) => writeFile(`/private/tmp/voxel-vault-${na
 try {
   const host = await page();
   await screenshot(host, 'together-home');
-  await host.evaluate(`g.start('adventure',true);g.add('diamond',7);g.save();window.savedSolo=JSON.stringify(g.state);g.screen='menu';ui.render();mui.open();`);
+  await host.evaluate(`g.start('adventure',true);g.add('diamond',7);g.save(true);window.savedSolo=JSON.stringify(g.state);g.screen='menu';ui.render();mui.open();`);
   await until(host, `g.screen==='multiplayer'`);
   await host.evaluate(`mp.create({name:'Test builders',playerName:'Host',public:true,maxPlayers:3})`);
   await until(host, `mp.status==='connected'&&mp.room?.players.length===1`);

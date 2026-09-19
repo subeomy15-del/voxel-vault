@@ -1,3 +1,4 @@
+import {EditMap} from './edit-map.js?v=31';
 import { netherHeight,netherBlock } from './nether.js?v=31';
 import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=31';
 import { canonicalItem } from './resource-map.js?v=31';
@@ -8,7 +9,7 @@ export const CHUNK=16, WORLD_LIMIT=Infinity, WORLD_BOTTOM=-64, WORLD_TOP=95, SEA
 export const cellKey=(x,y,z)=>`${x},${y},${z}`;
 export class World {
   constructor(seed=7821,edits=[],terrain=6,dimension='overworld') {
-    this.seed=seed;this.terrain=terrain;this.dimension=dimension;this.edits=new Map(edits);this.structures=new Map();this.columns=new Map();this.prepared=new Set();this.dirty=new Set();this.chests=[];this.changes=[];
+    this.seed=seed;this.terrain=terrain;this.dimension=dimension;this.edits=new EditMap(edits);this.structures=new Map();this.columns=new Map();this.prepared=new Set();this.dirty=new Set();this.chests=[];this.changes=[];
     this.course=dimension==='parkour'?courseGeometry():null;
     this.landmarks=LANDMARKS.map(l=>({...l,y:this.height(l.x,l.z)+1}));
     if(this.course)this.landmarks=CLOUDSTEP.checkpoints.map((cp,i)=>({...cp,id:'course-'+i,type:'landscape',subtitle:'Cloudstep checkpoint',color:'#a9e8ce'}));

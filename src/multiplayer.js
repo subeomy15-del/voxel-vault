@@ -210,7 +210,7 @@ export class Multiplayer extends EventTarget {
   enterWorld() {
     if (this.active) return;
     const g = this.game;
-    g.save();
+    g.save(true);
     this.soloState = structuredClone(g.state);
     this.active = true;
     this.loadSharedWorld();

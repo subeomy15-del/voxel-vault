@@ -1,3 +1,4 @@
+import {openDurableStorage} from './durable-storage.js?v=31';
 import {showStartupFailure} from './startup-errors.js?v=31';
 import { MultiplayerModes } from './multiplayer-modes.js?v=31';
 import { Parkour } from './parkour.js?v=31';
@@ -22,6 +23,7 @@ let renderer,game,ui,multiplayer,multiplayerUI,multiplayerPlayers,fieldGoals,par
 try{
   renderer=new Renderer(document.querySelector('#world'),settings);
   startupStage='save';
+  try{storage=await openDurableStorage(storage);}catch(error){document.querySelector('#save-state').textContent='Recovery storage unavailable · using local saves';}
   game=new Game(renderer,new Audio(settings),storage);startupStage='interface';ui=new UI(game,settings);
   multiplayer=new Multiplayer(game);multiplayerUI=new MultiplayerUI(game,ui,multiplayer);multiplayerPlayers=new MultiplayerPlayers(renderer,multiplayer);fieldGoals=new FieldGoals(game);game.fieldGoals=fieldGoals;new MultiplayerModes(game,ui,multiplayer);multiplayer.restore();
   parkour=new Parkour(game);parkourUI=new ParkourUI(game,ui,parkour);parkourView=new ParkourView(renderer,parkour);
@@ -45,7 +47,7 @@ try{
   });
   addEventListener('keyup',e=>{movementInput(game,e.code,false);if(e.code==='Space')releaseJump(game);if(e.code==='KeyE')game.placeHeld=false;});
   addEventListener('blur',()=>{game.keys.clear();game.attackHeld=false;game.placeHeld=false;if(!game.screen){game.pause();ui.render();}});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){game.save();if(!game.screen){game.pause();ui.render();}}});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){game.save();storage.flush?.();if(!game.screen){game.pause();ui.render();}}});
   document.addEventListener('pointerlockchange',()=>{if(!document.pointerLockElement&&!game.screen&&!expectedUnlock){game.pause();ui.render();}expectedUnlock=false;});
   addEventListener('mousemove',e=>{if(game.screen)return;if(document.pointerLockElement===canvas||dragging){game.yaw-=e.movementX*.0022*settings.sensitivity;game.pitch=Math.max(-1.52,Math.min(1.52,game.pitch-e.movementY*.0022*settings.sensitivity));}});
   canvas.addEventListener('pointerdown',e=>{
@@ -63,7 +65,7 @@ try{
   const moveStick=e=>{const r=stick.getBoundingClientRect(),dx=e.clientX-r.left-r.width/2,dz=e.clientY-r.top-r.height/2,len=Math.max(1,Math.hypot(dx,dz)/36);game.touch.x=dx/len/36;game.touch.z=dz/len/36;stick.firstElementChild.style.transform=`translate(${dx/len}px,${dz/len}px)`;};
   stick.addEventListener('pointerdown',e=>{stickId=e.pointerId;stick.setPointerCapture(e.pointerId);moveStick(e);});stick.addEventListener('pointermove',e=>{if(e.pointerId===stickId)moveStick(e);});for(const name of ['pointerup','pointercancel'])stick.addEventListener(name,()=>{stickId=null;game.touch={x:0,z:0};stick.firstElementChild.style.transform='';});
   for(const button of document.querySelectorAll('[data-touch]')){button.addEventListener('pointerdown',e=>{e.preventDefault();if(game.screen)return;game.audio.start();button.setPointerCapture(e.pointerId);if(button.dataset.touch==='attack'){game.attackHeld=true;game.attack();}if(button.dataset.touch==='jump'){if(game.creative&&performance.now()-lastSpace<300){game.flying=!game.flying;game.toast(game.flying?'Flight enabled':'Flight disabled','Hold jump to rise.');}lastSpace=performance.now();game.jump();game.keys.add('Space');}if(button.dataset.touch==='glide')game.toggleGlide();if(button.dataset.touch==='dash'){if(parkour.active)game.touchSprint=!game.touchSprint;else game.dash();}if(button.dataset.touch==='heal')game.eatAvailable();if(button.dataset.touch==='interact')use();});for(const name of ['pointerup','pointercancel'])button.addEventListener(name,e=>{e.stopPropagation();if(button.dataset.touch==='attack'){if(name==='pointerup')game.releaseAttack();else game.drawState=null;game.attackHeld=false;}if(button.dataset.touch==='interact')game.placeHeld=false;if(button.dataset.touch==='jump'){game.keys.delete('Space');releaseJump(game);}});}
-  addEventListener('pagehide',()=>{game.save();game.audio.quiet();});
+  addEventListener('pagehide',()=>{game.save();storage.flush?.();game.audio.quiet();});
   let last=performance.now(),hudTimer=0,loaded=false,loadedEpoch=0;
   function frame(now){if(loadedEpoch!==renderer.epoch){loadedEpoch=renderer.epoch;loaded=false;document.querySelector('#loading').hidden=false;}const dt=Math.min(.05,(now-last)/1000);game.frameElapsed=Math.min(.25,Math.max(0,(now-last)/1000));last=now;multiplayer.modes?.update(dt);game.update(dt);multiplayer.update(dt);fieldGoals.update(dt);game.audio.update(game,dt);multiplayerPlayers.update(game,dt);parkourView.update(dt);parkourUI.updateFade();renderer.update(game,dt);hudTimer+=dt;if(hudTimer>.09){hudTimer=0;ui.update();multiplayerUI.update();multiplayer.modes?.renderHud();parkourUI.update();}if(!loaded&&renderer.chunks.size>=9){loaded=true;document.querySelector('#loading').hidden=true;}requestAnimationFrame(frame);}
   requestAnimationFrame(frame);

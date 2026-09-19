@@ -27,7 +27,7 @@ export class UI {
   }
   action(action,button){
     const g=this.game;g.audio.start();g.audio.play('click');
-    if(action==='export-world'){this.exportWorldBackup();return;}
+    if(action==='export-world'){this.exportWorldBackup().catch(error=>g.toast('Export failed',error.message));return;}
     if(action==='import-world'){this.overlay.querySelector('[data-world-import]')?.click();return;}
     if(action.startsWith('settings-tab-')){this.settingsTab=action.slice(13);this.render();this.overlay.querySelector(`[data-action="${action}"]`)?.focus();return;}
     if(action==='settings-reset'){Object.assign(this.settings,defaultSettings);this.settingsMessage=saveSettings(g.storage,this.settings)?'Defaults restored.':'Defaults applied for this session.';g.renderer.applySettings?.(this.settings);g.audio.applySettings?.(this.settings);this.render();return;}
@@ -54,9 +54,9 @@ export class UI {
     }
     else if(action==='slot')g.select(Number(button.dataset.slot));
   }
-  exportWorldBackup(){
+  async exportWorldBackup(){
     const g=this.game,key=slotKey(g.state.mode),health=saveHealth(g.storage,key);
-    g.save();const text=health.blocked?g.storage.getItem(key):exportWorld(g.state);
+    g.save(true);const text=health.blocked?await(g.storage.exportStored?.(key)||g.storage.getItem(key)):exportWorld(g.state);
     const url=URL.createObjectURL(new Blob([text||'null'],{type:'application/json'})),link=document.createElement('a');
     link.href=url;link.download=`voxel-vault-${g.state.seed}-${health.blocked?'recovery':'backup'}.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
@@ -64,7 +64,7 @@ export class UI {
     const g=this.game;if(g.multiplayer?.active||g.parkour?.active)throw Error('Leave the lobby or course before importing a solo world.');
     const state=parseWorldBackup(text),key=slotKey(state.mode);
     if(!preserveBeforeReplacement(g.storage,key))throw Error('The existing world could not be backed up. Free some storage and try again.');
-    if(!saveState(g.storage,state))throw Error('The backup could not be saved. Your current session has not changed.');
+    if(!await saveState(g.storage,state))throw Error('The backup could not be saved. Your current session has not changed.');
     g.state=state;g.loadWorld();g.screen='pause';g.save();this.render();g.toast('World imported','The previous world was kept in a recovery slot.');
   }
   resume(){this.game.resume();this.render();if(!this.touch){const canvas=this.game.renderer.renderer.domElement;try{const promise=canvas.requestPointerLock();promise?.catch(()=>this.game.toast('Click the world to look around','If mouse capture is unavailable, drag to look.'));}catch{this.game.toast('Drag to look around','Mouse capture is unavailable in this browser.');}}}
@@ -187,7 +187,7 @@ export class UI {
       if(event.type==='dragonDefeated'){const el=document.querySelector('#combat-message');el.classList.add('rift-victory');el.innerHTML='<small>THE ISLANDS ARE YOURS</small>DRAGON DEFEATED<small>Take your Dragon Egg home through the portal</small>';setTimeout(()=>{el.classList.remove('rift-victory');el.textContent='';},5500);}
       if(event.type==='toast'){if(this.game.screen==='menu')continue;const el=document.createElement('div');el.className='toast '+event.kind;el.innerHTML=`<span>${event.kind==='reward'?'✦':event.kind==='discovery'?'◇':'↗'}</span><div><strong>${escape(event.title)}</strong>${event.text?`<small>${escape(event.text)}</small>`:''}</div>`;const parent=document.querySelector('#toasts');parent.append(el);while(parent.children.length>(this.game.screen?1:3))parent.firstChild.remove();setTimeout(()=>el.remove(),4300);}
       if(event.type==='pickup'){const el=document.createElement('div');el.className='pickup';el.innerHTML=`${icon(event.item,25)}<span>${ITEMS[event.item]?.name||event.item}</span><b>+${event.count}</b>`;const list=document.querySelector('#pickups');list.append(el);while(list.children.length>4)list.firstChild.remove();setTimeout(()=>el.remove(),2200);}
-      if(event.type==='saved'){document.querySelector('#save-state').textContent=event.ok?'✓ World saved locally':event.status==='storage full'?'Storage full · export a backup':'Save failed · export a backup';}
+      if(event.type==='saved'){document.querySelector('#save-state').textContent=event.ok?'✓ World saved locally':event.status==='saving'?'Saving…':event.status==='storage full'?'Storage full · export a backup':'Save failed · export a backup';}
       if(event.type==='hurt'){const el=document.querySelector('#damage');el.classList.remove('hit');void el.offsetWidth;el.classList.add('hit');}
       if(event.type==='browse'){this.catalogue=true;this.inspect=null;this.filter=event.search==='glider'?'Gear':'All';this.search=event.search;this.render();}
       if(event.type==='screen')this.render();

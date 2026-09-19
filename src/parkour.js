@@ -12,7 +12,7 @@ export class Parkour {
   }
   start(id=CLOUDSTEP.id){
     const g=this.game;if(g.multiplayer?.room||!COURSES[id])return false;
-    if(!this.active){g.save();this.soloState=structuredClone(g.state);}
+    if(!this.active){g.save(true);this.soloState=structuredClone(g.state);}
     this.course=COURSES[id];this.best=this.readBest();this.previousBest=this.best;
     const state=freshState(91347,'parkour');state.dimension='parkour';state.pos={...this.course.spawn};state.origin={...state.pos};state.spawn={...state.pos};state.yaw=this.course.spawn.yaw;state.pitch=0;state.time=95;state.inv={};state.glider=null;
     g.state=state;g.events.length=0;g.loadWorld();g.screen=null;g.grounded=true;

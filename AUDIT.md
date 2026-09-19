@@ -63,3 +63,11 @@ Validation: 189/189 unit tests. Full browser run: 17/18 passed; the hunting suit
 Added recovery rotation, corrupt/unsupported-save write protection, explicit replacement backups, versioned JSON export/import, truthful save status, stage-specific startup errors and refundable cancellation of armed charges across pause/reload/world changes. The v2 key and terrain generation versions remain unchanged. Validated the real pre-upgrade fixture, all realm edits and explicit air.
 
 Validation: 196/196 full unit tests before the final lifecycle integration test; 6/6 focused explosion/recovery tests including that new test; real browser gameplay/save-reload check passed with no runtime errors or failed assets. This step does not claim faster saving: synchronous fallback snapshots remain, and the next step replaces browser autosave serialization with worker-backed IndexedDB.
+
+## Phase 2b — worker-backed durable saving
+
+Browser saves now debounce small metadata snapshots and transfer changed blocks in batches of at most 500 to a dedicated worker. IndexedDB atomically commits the world plus two recovery snapshots. The legacy localStorage world is retained. Explicit full snapshots are used for realm/solo-mode transitions and export; ordinary saves do not rebuild the edit array. The original synchronous implementation remains a storage-unavailable fallback and for headless unit fixtures. Failed writes retain dirty changes for retry.
+
+Measured browser baseline: 100k edits 8.1 ms synchronous. New incremental save requests: 0–0.1 ms on this Mac, with full snapshot work off the gameplay thread. See phase2-persistence.json. Real migration/reload verified inventory, containers, crops, explicit air and distinct saved realm snapshots. 198/198 unit tests passed before two additional durable-storage tests (2/2 passed). Full browser run: 18/19 passed; multiplayer's state comparison required the explicit snapshot API and its targeted rerun passed. The final realm snapshot regression also passed. No physical-phone result or 30-minute soak is claimed.
+
+Latest user steering prioritizes the structure/biome overhaul next, after this stable persistence checkpoint. Existing terrain versions will remain supported; new generation will have a separate version.
