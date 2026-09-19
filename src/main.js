@@ -1,3 +1,4 @@
+import {showStartupFailure} from './startup-errors.js?v=31';
 import { MultiplayerModes } from './multiplayer-modes.js?v=31';
 import { Parkour } from './parkour.js?v=31';
 import { ParkourUI } from './parkour-ui.js?v=31';
@@ -16,10 +17,12 @@ import { loadSettings,saveSettings } from './save.js?v=31';
 let storage;try{storage=localStorage;}catch{storage={getItem:()=>null,setItem:()=>{throw Error('Storage unavailable');}};}
 export const settings=loadSettings(storage);
 if(matchMedia('(prefers-reduced-motion: reduce)').matches){settings.bobbing=false;settings.cameraEffects=false;}
+let startupStage='renderer';
 let renderer,game,ui,multiplayer,multiplayerUI,multiplayerPlayers,fieldGoals,parkour,parkourUI,parkourView;
 try{
   renderer=new Renderer(document.querySelector('#world'),settings);
-  game=new Game(renderer,new Audio(settings),storage);ui=new UI(game,settings);
+  startupStage='save';
+  game=new Game(renderer,new Audio(settings),storage);startupStage='interface';ui=new UI(game,settings);
   multiplayer=new Multiplayer(game);multiplayerUI=new MultiplayerUI(game,ui,multiplayer);multiplayerPlayers=new MultiplayerPlayers(renderer,multiplayer);fieldGoals=new FieldGoals(game);game.fieldGoals=fieldGoals;new MultiplayerModes(game,ui,multiplayer);multiplayer.restore();
   parkour=new Parkour(game);parkourUI=new ParkourUI(game,ui,parkour);parkourView=new ParkourView(renderer,parkour);
   const canvas=renderer.renderer.domElement;const use=()=>{if(game.interact()===true){game.placeHeld=true;game.placeTimer=.3;}};let dragging=false,lastTouch=null,lastSpace=0,expectedUnlock=false;
@@ -64,5 +67,5 @@ try{
   let last=performance.now(),hudTimer=0,loaded=false,loadedEpoch=0;
   function frame(now){if(loadedEpoch!==renderer.epoch){loadedEpoch=renderer.epoch;loaded=false;document.querySelector('#loading').hidden=false;}const dt=Math.min(.05,(now-last)/1000);game.frameElapsed=Math.min(.25,Math.max(0,(now-last)/1000));last=now;multiplayer.modes?.update(dt);game.update(dt);multiplayer.update(dt);fieldGoals.update(dt);game.audio.update(game,dt);multiplayerPlayers.update(game,dt);parkourView.update(dt);parkourUI.updateFade();renderer.update(game,dt);hudTimer+=dt;if(hudTimer>.09){hudTimer=0;ui.update();multiplayerUI.update();multiplayer.modes?.renderHud();parkourUI.update();}if(!loaded&&renderer.chunks.size>=9){loaded=true;document.querySelector('#loading').hidden=true;}requestAnimationFrame(frame);}
   requestAnimationFrame(frame);
-}catch(error){console.error(error);const el=document.querySelector('#loading');el.innerHTML='<strong>The wilds couldn’t load.</strong><small>Please use a browser with WebGL enabled, then reload.</small>';}
+}catch(error){console.error(error);const el=document.querySelector('#loading');showStartupFailure(el,error,startupStage);}
 export { game, renderer, ui, multiplayer, multiplayerUI, multiplayerPlayers, fieldGoals, parkour, parkourUI };

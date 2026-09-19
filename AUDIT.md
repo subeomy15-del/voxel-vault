@@ -57,3 +57,9 @@ Phase outcomes, commit hashes, changed files and remaining risks will be appende
 Added bounded frame percentiles, long-task collection and development resource/save diagnostics; restored backpack discovery controls; isolated browser contexts and repaired assertions for current crafting requirements, retired resources, inventory search and touch geometry. Preview capture no longer overwrites shipped images unless explicitly requested. Added portable benchmark and complete browser runners plus a pre-upgrade fixture.
 
 Validation: 189/189 unit tests. Full browser run: 17/18 passed; the hunting suite failed once in a random-seed firing lane, passed in isolation, and its fixture was changed to clear the shot corridor. Final targeted result is recorded alongside the full run. No rendering optimization claimed in this phase. Baseline metrics remain the comparison reference. Safari automation remains disabled; Firefox is unavailable. Next: lifecycle-safe delayed actions and durable, recoverable saving.
+
+## Phase 2a — recovery and lifecycle safety
+
+Added recovery rotation, corrupt/unsupported-save write protection, explicit replacement backups, versioned JSON export/import, truthful save status, stage-specific startup errors and refundable cancellation of armed charges across pause/reload/world changes. The v2 key and terrain generation versions remain unchanged. Validated the real pre-upgrade fixture, all realm edits and explicit air.
+
+Validation: 196/196 full unit tests before the final lifecycle integration test; 6/6 focused explosion/recovery tests including that new test; real browser gameplay/save-reload check passed with no runtime errors or failed assets. This step does not claim faster saving: synchronous fallback snapshots remain, and the next step replaces browser autosave serialization with worker-backed IndexedDB.

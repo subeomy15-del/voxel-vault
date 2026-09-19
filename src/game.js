@@ -1,3 +1,5 @@
+import { armBlast,cancelDelayedActions } from './delayed-actions.js?v=31';
+import { saveHealth,preserveBeforeReplacement } from './save-health.js?v=31';
 import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=31';
 import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=31';
 import { canonicalItem,normalizeResources } from './resource-map.js?v=31';
@@ -5,7 +7,7 @@ import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dra
 import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=31';
 import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=31';
 import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,maxCraft,hash,dailySeed } from './data.js?v=31';
-import { freshState,loadState,saveState,importLegacy } from './save.js?v=31';
+import { freshState,loadState,saveState,slotKey,importLegacy } from './save.js?v=31';
 import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=31';
 import { movePlayer,requestJump } from './movement.js?v=31';
 import { overlapsBlock } from './shapes.js?v=31';
@@ -24,6 +26,7 @@ export class Game {
     this.attackCooldown=0;this.hurtCooldown=0;this.dashCooldown=0;this.dashTime=0;this.firecrackerCooldown=0;this.blastCooldown=0;this.saveTimer=0;this.stepTimer=0;this.spawnTimer=0;this.cropTimer=0;this.projectiles=[];this.mobs=[];this.keys.clear();this.boss=null;this.slam=null;this.containerKey=null;this.station=null;this.combo=0;this.buildRotation=0;this.placeTimer=0;this.eating=null;this.drawState=null;this.revealTime=0;this.gliding=false;this.regenTimer=0;this.hungerTimer=0;this.portalCooldown=3;this.pendingGlide=false;this.padCooldown=0;this.grapple=null;this.grappleCooldown=0;this.trapTimer=0;
   }
   loadWorld(){
+    cancelDelayedActions(this);
     normalizeResources(this.state);
     this.resetRuntime();this.world=new World(this.state.seed,this.state.edits,this.state.terrain,this.state.dimension);
     if(this.state.pos)this.pos={...this.state.pos};
@@ -106,11 +109,13 @@ export class Game {
   toast(title,text='',kind='normal'){this.emit('toast',{title,text,kind});}
   start(mode='adventure',reset=false){
     if(mode==='ender'){this.start('adventure',reset);if(this.state.dimension!=='ender')this.travel('ender');return;}
+    if(reset&&!preserveBeforeReplacement(this.storage,slotKey(mode))){this.toast('Could not preserve your world','Export a backup or free storage before replacing it.');return false;}
+    cancelDelayedActions(this);
     let state=reset?null:loadState(this.storage,mode);
     if(!state){state=freshState(mode==='daily'?dailySeed():Math.floor(Math.random()*2147483646)+1,mode);if(mode==='adventure'&&!reset)importLegacy(this.storage,state);}
     this.state=state;this.loadWorld();this.screen=null;this.save();this.toast(this.state.dimension==='ender'?'Ender Islands':this.creative?'Creative world':'Make this place your own',this.state.dimension==='ender'?'G to glide · Use Moonstone Orbs to blink · Use the arrival gate or pause menu to return.':this.creative?'Every material is available in your backpack.':'A new clearing, a new beginning. Gather timber, plant a garden, and build a place to return to.');
   }
-  pause(screen='pause'){if(this.screen==='menu')return;this.audio.quiet?.();this.screen=screen;this.drawState=null;this.eating=null;this.attackHeld=false;this.placeHeld=false;this.mineProgress=0;this.keys.clear();this.movementInputHeld?.clear();this.sprintToggle=false;this.crouchToggle=false;this.touchSprint=false;this.touch={x:0,z:0};this.save();globalThis.document?.exitPointerLock?.();}
+  pause(screen='pause'){if(this.screen==='menu')return;cancelDelayedActions(this);this.audio.quiet?.();this.screen=screen;this.drawState=null;this.eating=null;this.attackHeld=false;this.placeHeld=false;this.mineProgress=0;this.keys.clear();this.movementInputHeld?.clear();this.sprintToggle=false;this.crouchToggle=false;this.touchSprint=false;this.touch={x:0,z:0};this.save();globalThis.document?.exitPointerLock?.();}
   resume(){this.screen=null;this.keys.clear();this.movementInputHeld?.clear();this.attackHeld=false;this.placeHeld=false;}
   select(i){this.drawState=null;this.eating=null;this.state.selected=(i+9)%9;this.mineProgress=0;this.audio.play('click');this.emit('hud');}
   equip(name){name=BLOCKS[name]?.drop||name;if(!ITEMS[name]||!this.state.inv[name]||ITEMS[name].hidden)return;this.drawState=null;this.eating=null;if(ITEMS[name].kind==='glider'){this.state.glider=name;this.toast('Glider equipped','Press G while airborne. Look down to dive, up to slow your descent.');this.save();return;}if(ITEMS[name].kind==='ammo'){this.state.ammo=name;this.toast(ITEMS[name].name+' selected','Used by your bows and crossbows.');this.save();return;}if(ITEMS[name].kind==='armor'){this.state.armorParts??={};if(ITEMS[name].slot)this.state.armorParts[ITEMS[name].slot]=name;else this.state.armor=name;this.toast('Armor equipped',ITEMS[name].description);}else{const i=this.state.bar.indexOf(name);if(i>=0)this.state.selected=i;else this.state.bar[this.state.selected]=name;}this.save();}
@@ -180,7 +185,7 @@ export class Game {
   }
   dash(){if(this.state.mode==='parkour'||this.dashCooldown>0||this.stamina<25)return;this.dashTime=.2;this.dashCooldown=1.2;this.stamina-=25;}
   jump(){requestJump(this);}
-  save(){if(this.state.mode==='parkour')return true;for(const [slot,name]of Object.entries(this.state.armorParts||{}))if(!(this.state.inv[name]>0))delete this.state.armorParts[slot];this.state.pos={...this.pos};this.state.yaw=this.yaw;this.state.pitch=this.pitch;this.state.edits=this.multiplayer?.active?this.multiplayer.captureEdits(this.world):[...this.world.edits];this.state.animals=this.mobs.filter(m=>ANIMALS[m.kind]&&m.hp>0).slice(0,128).map(({kind,x,y,z,hp,angle})=>({kind,x,y,z,hp,angle}));if(this.multiplayer?.active)return true;const ok=saveState(this.storage,this.state);this.emit('saved',{ok});return ok;}
+  save(){if(this.state.mode==='parkour')return true;for(const [slot,name]of Object.entries(this.state.armorParts||{}))if(!(this.state.inv[name]>0))delete this.state.armorParts[slot];this.state.pos={...this.pos};this.state.yaw=this.yaw;this.state.pitch=this.pitch;this.state.edits=this.multiplayer?.active?this.multiplayer.captureEdits(this.world):[...this.world.edits];this.state.animals=this.mobs.filter(m=>ANIMALS[m.kind]&&m.hp>0).slice(0,128).map(({kind,x,y,z,hp,angle})=>({kind,x,y,z,hp,angle}));if(this.multiplayer?.active)return true;const ok=saveState(this.storage,this.state);this.saveStatus=saveHealth(this.storage,slotKey(this.state.mode));this.emit('saved',{ok,status:this.saveStatus.status});return ok;}
   nearest(){
     if(this.state.mode==='parkour')return null;
     if(this.multiplayer?.competitive)return null;
@@ -247,7 +252,7 @@ export class Game {
     if(this.world.get(x,y,z)||this.world.intersects(x,y,z,1.6,.35)){this.toast('No room','Aim at open ground to place the charge.');return false;}
     if(!this.creative)this.state.inv[this.held]--;this.blastCooldown=1.8;
     this.renderer.burst(x+.5,y+.5,z+.5,'#e4a166',12);this.audio.play('fuse');this.toast('Blast charge armed','Move away — detonation in 1.2 seconds.','reward');
-    setTimeout(()=>this.detonate(x,y,z),1200);this.save();return true;
+    armBlast(this,x,y,z);this.save();return true;
   }
   detonate(x,y,z){
     const radius=2.7;
