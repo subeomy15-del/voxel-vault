@@ -172,7 +172,7 @@ export function movePlayer(g, dt) {
   const speed = g.gliding ? Math.max(7, wing.glideSpeed + Math.max(0, -g.pitch) * 7 - Math.max(0, g.pitch) * 4) : (inWater ? 3.1 : g.dashTime > 0 ? 15 : g.crouching ? 2.1 : g.sprinting ? MOVEMENT.sprint : MOVEMENT.walk) * boost * (g.eating ? .5 : g.drawState ? .75 : 1);
   if (g.dashTime > 0 && !g.moving) { forward = 1; g.moving = true; }
   const wishX = -Math.sin(g.yaw) * forward + Math.cos(g.yaw) * sideways, wishZ = -Math.cos(g.yaw) * forward - Math.sin(g.yaw) * sideways;
-  if (g.gliding) { g.vx = approach(g.vx, wishX * speed, 9 * dt); g.vz = approach(g.vz, wishZ * speed, 9 * dt); }
+  if (g.gliding) { const current=Math.hypot(g.vx,g.vz),flightSpeed=current+(speed-current)*(1-Math.exp(-3*dt));g.vx=wishX*flightSpeed;g.vz=wishZ*flightSpeed; }
   else if (!g.grounded && !inWater && !flying && g.dashTime <= 0) airControl(g, wishX, wishZ, speed, dt);
   else approachHorizontal(g, wishX * speed, wishZ * speed, dt * (g.dashTime > 0 ? 85 : inWater ? 18 : !g.moving ? 72 : g.vx * wishX + g.vz * wishZ < 0 ? 72 : 55));
   if (g.grapple) {
@@ -202,7 +202,7 @@ export function movePlayer(g, dt) {
     const dy = (g.keys.has('Space') ? 1 : 0) - (wantsCrouch ? 1 : 0);
     verticalSweep(g, Math.min(WORLD_TOP - 2, g.pos.y + dy * 8 * dt) - g.pos.y, height); g.velocity = 0;
   } else {
-    if (g.gliding) { const target = -Math.max(.65, wing.sink + Math.max(0, -g.pitch) * 7 - Math.max(0, g.pitch) * .7); g.velocity = approach(g.velocity, target, dt * 6); }
+    if (g.gliding) { const target = -Math.max(.65, wing.sink + Math.max(0, -g.pitch) * 7 - Math.max(0, g.pitch) * .7); g.velocity += (target-g.velocity)*(1-Math.exp(-18*dt)); }
     else { g.velocity -= dt * (inWater ? 7 : g.effect('slowfall') ? 6 : MOVEMENT.gravity); if (g.effect('slowfall')) g.velocity = Math.max(-2.4, g.velocity); }
     if (inWater && g.keys.has('Space')) g.velocity = 4.4;
     if (ladder) g.velocity = g.keys.has('Space') || forward > 0 ? 3.5 : wantsCrouch ? -3 : Math.max(-1, g.velocity);

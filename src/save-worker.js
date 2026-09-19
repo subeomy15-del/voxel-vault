@@ -9,7 +9,7 @@ async function commit(job){
     const tx=db.transaction('snapshots','readwrite'),store=tx.objectStore('snapshots'),previous=store.get(key),older=store.get(key+'.recovery-0');
     previous.onsuccess=()=>{if(previous.result)store.put(previous.result,key+(previous.result.version===2&&Array.isArray(previous.result.edits)?'.recovery-0':'.damaged'));};
     older.onsuccess=()=>{if(older.result)store.put(older.result,key+'.recovery-1');};
-    const replacement=store.get(key);replacement.onsuccess=()=>{if(replacement.result&&replacement.result.seed!==state.seed)store.put(replacement.result,key+'.before-replacement');};
+    const replacement=store.get(key);replacement.onsuccess=()=>{if(replacement.result&&(job.replacement||replacement.result.seed!==state.seed))store.put(replacement.result,key+'.before-replacement');};
     store.put(state,key);tx.oncomplete=resolve;tx.onabort=()=>reject(tx.error||Error('Save interrupted'));tx.onerror=()=>{};
   });
   worlds.set(key,{state,maps});return {workerMs:performance.now()-started,bytes:new Blob([JSON.stringify(state)]).size};
@@ -31,7 +31,7 @@ onmessage=async({data:m})=>{
   }
   if(m.type==='begin'){
     const prior=worlds.get(m.key),maps=prior?.maps||new Map();if(m.reset)maps.clear();
-    jobs.set(m.id,{key:m.key,meta:m.meta,maps});return;
+    jobs.set(m.id,{key:m.key,meta:m.meta,maps,replacement:m.replacement===true});return;
   }
   if(m.type==='export'){const state=await request(db.transaction('snapshots').objectStore('snapshots').get(m.key));postMessage({id:m.id,text:JSON.stringify(state)});return;}
   if(m.type==='patch'){

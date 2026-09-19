@@ -46,5 +46,5 @@ test('Craft All uses exact materials, supports mixed timber and obeys workbench 
 });
 test('all spike tiers deal distinct damage, nets slow movement and firecrackers startle enemies',()=>{
  for(const [tier,damage]of [['wood',2],['stone',3],['iron',5],['gold',4],['diamond',8]]){const g=make();g.pos={x:100.5,y:60,z:100.5};g.grounded=true;g.world.set(100,59,100,'stone');g.world.set(100,60,100,tier+'_spikes');const m=g.spawnMob(100.5,100.5,'zombie',60),hp=m.hp;tickTraps(g,1);assert.equal(m.hp,hp-damage);assert.equal(g.state.hp,20-damage);assert.ok(ITEMS[tier+'_spikes'].place);}
- const g=make();g.pos={x:100.5,y:60,z:100.5};g.world.set(100,59,100,'stone');g.world.set(101,59,100,'stone');g.world.set(100,60,100,'net');const m=g.spawnMob(100.5,100.5,'zombie',60);g.moveMob(m,.5,0);assert.ok(m.x<100.7);g.add('firecracker');g.equip('firecracker');g.direction=()=>({x:0,y:0,z:1});g.useFirecracker();assert.equal(g.renderer.fired,true);assert.ok(m.stun>=2);
+ const g=make();g.screen=null;g.pos={x:100.5,y:60,z:100.5};g.world.set(100,59,100,'stone');g.world.set(101,59,100,'stone');g.world.set(100,60,100,'net');const m=g.spawnMob(100.5,100.5,'zombie',60);g.moveMob(m,.5,0);assert.ok(m.x<100.7);g.add('firecracker');g.equip('firecracker');g.direction=()=>({x:0,y:0,z:1});g.useFirecracker();assert.equal(g.renderer.fired,true);assert.ok(m.stun>=2);
 });

@@ -1,5 +1,8 @@
+import {GRAPHICS_PRESETS} from './settings.js?v=31';
+import {initialQuality,deviceProfile} from './auto-quality.js?v=31';
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
-export function renderOptions(settings = {}) {
+export function renderOptions(settings = {},autoLevel=initialQuality(deviceProfile())) {
+  if(settings.quality==='auto')settings={...settings,...GRAPHICS_PRESETS[autoLevel],quality:autoLevel};
   const quality = ['low', 'medium', 'high', 'custom'].includes(settings.quality) ? settings.quality : 'high';
   const low = quality === 'low', medium = quality === 'medium';
   return {

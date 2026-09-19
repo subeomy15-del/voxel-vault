@@ -1,0 +1,156 @@
+[
+  {
+    "name": "badlands-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 7935.318542,
+    "log": "PASS: Badlands, Knight Sword Craft All, five armor slots, aura enchanting, knight rendering, fireworks, traps, mobile and saved upgrades\n"
+  },
+  {
+    "name": "browser-check.js",
+    "code": 0,
+    "signal": null,
+    "ms": 15421.831083,
+    "log": "PASS: worker terrain, real sprint/jump/mining/placement, pause, crafting, furnace, storage, bed/respawn, dry caves, expanded-world edits, reload persistence, 68+ creative items, map, journal, compact layout; no runtime errors or missing assets.\n"
+  },
+  {
+    "name": "competitive-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 25982.066917000004,
+    "log": "PASS: separate browser sessions; Bed Wars and Manhunt UI creation, invites, ready checks, mode startup, arena/kit, shop purchases, frozen head start, beacon markers, real remote PvP, multiplayer avatars, mobile layouts and Escape/K navigation.\n"
+  },
+  {
+    "name": "dragon-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 9657.154666000002,
+    "log": "PASS: cool Overworld, altar input, animated dragon and healing beams, mouse-fired bow damage/ammunition, saved boss, victory trophy, travel home and diamond catalogue.\n"
+  },
+  {
+    "name": "ender-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 13342.214625,
+    "log": "PASS: Ender worker terrain, all camera perspectives, avatar/hand visibility, real orb key input, saved builds and camera settings, moonstone catalogue, return travel, mobile lobby and camera control, three anchor rewards, automatic launch/glide, shared reward inventory, and Performance rendering.\n"
+  },
+  {
+    "name": "expeditions-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 4573.322333999997,
+    "log": "PASS: visible lodge, real treasure interaction, one-time treasure rewards, 200+ item catalogue, all PNG icons load, and mobile inventory.\n"
+  },
+  {
+    "name": "horizon-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 13766.32312500001,
+    "log": "PASS: one versioned game instance, all six current unowned gliders discoverable, cotton equip/plant/grow/harvest, real pickaxe hold kills through flowers and drops pork, crafting/equipping/saving a glider, upgraded icons and tools, both terrain views and compact catalogue. {\"median\":16.699999999999818,\"p95\":16.700000000000273,\"drawCalls\":61,\"triangles\":73222}\n"
+  },
+  {
+    "name": "infinite-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 9218.080708000009,
+    "log": "PASS: movement across the old border, positive/negative distant chunks, bounded mesh count, saved distant builds and desktop/mobile branding.\n"
+  },
+  {
+    "name": "inventory-stability-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 2235.8869170000107,
+    "log": "PASS: quick-use firecracker/glider and stable inventory, hotbar, equipment, crafting, enchanting, furnace, chest and effect-timer DOM.\n"
+  },
+  {
+    "name": "journey-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 6560.891459000006,
+    "log": "PASS: first chapters, actual workbench craft, journal, save reload, desktop/mobile HUD and zero browser errors\n"
+  },
+  {
+    "name": "multiplayer-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 4823.52175,
+    "log": "PASS: independent browser sessions, invites, readiness, shared blocks/removal, avatars, pings, reconnect, late join, capacity, host migration, solo preservation and mobile layout.\n"
+  },
+  {
+    "name": "natural-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 15086.623208000005,
+    "log": "PASS: natural world previews, lava rendering, branding, desktop/mobile layout and no browser errors\n"
+  },
+  {
+    "name": "nether-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 10983.683166999996,
+    "log": "PASS: inventory slots, equipping, recipes, mobile layout, Nether rendering and portal round trip\n"
+  },
+  {
+    "name": "parkour-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 5980.634125000011,
+    "log": "PASS: actual keyboard walk/sprint/jump/crouch, checkpoint splits, fall and R respawn, pause timer, finish/PB/restart, mobile HUD, solo restoration, block placement/mining.\n"
+  },
+  {
+    "name": "performance-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 16824.135458000004,
+    "log": "PASS: fresh Auto, live quality changes, bounded shadows, desktop and CPU-throttled touch frame budgets. [{\"touch\":false,\"requested\":\"low\",\"p95\":16.700000000000273,\"drawCalls\":39,\"casters\":0},{\"touch\":false,\"requested\":\"medium\",\"p95\":16.800000000000182,\"drawCalls\":102,\"casters\":10},{\"touch\":false,\"requested\":\"high\",\"p95\":16.799999999999272,\"drawCalls\":108,\"casters\":18},{\"touch\":false,\"requested\":\"auto\",\"p95\":16.700000000000728,\"drawCalls\":108,\"casters\":10},{\"touch\":true,\"requested\":\"auto\",\"p95\":16.700000000000273,\"drawCalls\":20,\"casters\":0}]\n"
+  },
+  {
+    "name": "persistence-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 5421.918042000005,
+    "log": "PASS: legacy migration, original backup retained, 100k incremental edits, <8 ms save requests, explicit air, all realm snapshots, reload and rejected corrupt import. {\"samples\":[0.09999999403953552,0.10000000894069672,0.20000000298023224,0.10000000894069672,0.09999999403953552,0.20000000298023224,0.20000000298023224,0.20000000298023224,0.19999998807907104,0],\"status\":{\"status\":\"saved\",\"durationMs\":0.20000000298023224,\"bytes\":2850881,\"blocked\":false,\"workerMs\":110.69999998807907,\"message\":\"\"},\"edits\":101090}\n"
+  },
+  {
+    "name": "render-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 5450.626749999996,
+    "log": "Rendering browser checks passed: {\"fps\":59.992088811288525,\"frameMs\":16.66886450887893,\"drawCalls\":44,\"triangles\":9108,\"chunks\":169,\"queued\":0,\"particles\":0,\"pixelRatio\":1,\"quality\":\"custom\",\"workerMs\":2.0999999940395355,\"adaptive\":false}\n"
+  },
+  {
+    "name": "settings-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 3172.041459,
+    "log": "PASS: Parkour menu entry, real settings controls, live graphics preset, audio gain buses, comfort toggles, controls/credits navigation, mobile layout and reload persistence.\n"
+  },
+  {
+    "name": "touch-check.js",
+    "code": 1,
+    "signal": null,
+    "ms": 3071.4872920000053,
+    "log": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert.ok(await ev('g.pos.z')<before-.3)\n\n    at file:///Users/danielyoo/voxel-vault/tests/touch-check.js:8:437 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v24.19.0\n"
+  },
+  {
+    "name": "wildfields-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 13600.579083000019,
+    "log": "PASS: real-input tilling, planting, growth, harvest, campfire cooking, inventory search, water and grass shaders, day/night lighting, stair rotation, placement previews, hold-to-build controls and procedural audio. {\"median\":16.69999999999891,\"p95\":16.700000000000728,\"drawCalls\":63,\"triangles\":46984}\n"
+  },
+  {
+    "name": "wildlands-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 18425.044916000013,
+    "log": "PASS: real food input, reserve/effect HUD, bow hold/release, hunting drops and collection, furnace cooking, equipped gliders, airborne G flight, ore sight, night vision, invisibility, six rendered animal species, nine crops and gold inventory. {\"median\":16.700000000000728,\"p95\":16.799999999999272,\"drawCalls\":203,\"triangles\":38738}\n"
+  },
+  {
+    "name": "worldgen-browser.js",
+    "code": 0,
+    "signal": null,
+    "ms": 24456.916958999995,
+    "log": "PASS: 11 real biome/ruin scenes streamed without missing assets or shader/runtime errors. [{\"name\":\"temple\",\"p95\":16.700000000000273,\"drawCalls\":58},{\"name\":\"fortress\",\"p95\":16.700000000000728,\"drawCalls\":76},{\"name\":\"observatory\",\"p95\":16.699999999999818,\"drawCalls\":48},{\"name\":\"house\",\"p95\":16.799999999999272,\"drawCalls\":78},{\"name\":\"dungeon\",\"p95\":16.700000000000728,\"drawCalls\":86},{\"name\":\"jungle\",\"p95\":16.700000000000728,\"drawCalls\":64},{\"name\":\"desert\",\"p95\":16.700000000000728,\"drawCalls\":45},{\"name\":\"mountain\",\"p95\":16.799999999999272,\"drawCalls\":64},{\"name\":\"snow\",\"p95\":16.700000000000728,\"drawCalls\":69},{\"name\":\"autumn_forest\",\"p95\":16.700000000000728,\"drawCalls\":74},{\"name\":\"ocean\",\"p95\":16.799999999999272,\"drawCalls\":40}]\n"
+  }
+]

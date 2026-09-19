@@ -14,7 +14,7 @@ export class RiftEffects {
       fragmentShader:`varying vec2 vUv;uniform float time;void main(){vec2 p=(vUv-.5)*2.;float r=length(p),a=atan(p.y,p.x);float swirl=sin(a*5.-r*17.+time*2.6)*.5+.5;float ring=pow(max(0.,1.-abs(r-.85)*7.),2.);float filaments=pow(swirl,7.)*.6;vec3 col=mix(vec3(.19,.22,.24),vec3(.48,.51,.46),swirl*.65+ring*.3);float alpha=(.35+filaments+ring)*smoothstep(1.,.8,r);gl_FragColor=vec4(col,alpha);}`});
   }
   rebuild(g){
-    for(const child of [...this.root.children]){child.traverse(o=>{o.geometry?.dispose();if(o.material&&o.material!==this.portalMaterial)o.material.dispose();});child.removeFromParent();}
+    for(const child of [...this.root.children]){child.traverse(o=>{if(o.geometry)this.r.geometryCache.release(o.geometry);if(o.material&&o.material!==this.portalMaterial)o.material.dispose();});child.removeFromParent();}
     this.markerRoot.replaceChildren();this.markers=[];this.anchors=[];this.dragonCrystals=[];this.epoch=this.r.epoch;
     const marker=(label,pos,color)=>{const el=document.createElement('div');el.className='world-marker';el.style.setProperty('--marker-color',color);this.markerRoot.append(el);this.markers.push({label,pos,el});return el;};
     const gate=g.state.gate;
@@ -51,10 +51,10 @@ export class RiftEffects {
     this.time.value+=dt;if(this.epoch!==this.r.epoch)this.rebuild(g);
     this.root.visible=!g.multiplayer?.competitive&&g.state.mode!=='parkour';if(g.multiplayer?.competitive||g.state.mode==='parkour'){this.rope.visible=false;this.markerRoot.hidden=true;return;}
     this.rope.visible=!!g.grapple&&!g.screen;if(g.grapple){const points=this.rope.geometry.attributes.position;points.setXYZ(0,g.pos.x+.25,g.pos.y+1,g.pos.z);points.setXYZ(1,g.grapple.x,g.grapple.y-.4,g.grapple.z);points.needsUpdate=true;}
-    const t=this.time.value;this.markerRoot.hidden=!!g.screen;this.particles.visible=false;this.particles.position.set(g.pos.x,g.pos.y-3,g.pos.z);this.particles.rotation.y=t*.012;
+    const t=this.time.value;this.markerRoot.hidden=!!g.screen;const high=this.r.options.quality==='high'&&this.r.options.particles!=='off';this.particles.visible=high&&['ender','nether'].includes(g.state.dimension);this.particles.position.set(g.pos.x,g.pos.y-3,g.pos.z);this.particles.rotation.y=t*.012;
     for(const c of this.dragonCrystals){c.crystal.visible=g.world.get(c.x,25,c.z)==='dragon_crystal';c.crystal.rotation.y=t*.6;c.beam.visible=c.crystal.visible&&g.boss?.kind==='dragon';if(c.beam.visible){const p=c.beam.geometry.attributes.position;p.setXYZ(0,c.x+.5,25.5,c.z+.5);p.setXYZ(1,g.boss.x,g.boss.y+1.5,g.boss.z);p.needsUpdate=true;}}
-    if(this.planet){this.planet.visible=false;this.planet.position.copy(this.r.camera.position).add(new THREE.Vector3(-63,64,-126));this.planet.userData.globe.rotation.y=t*.006;}
-    for(const a of this.anchors){const collected=g.state.rift.collected.includes(a.id);a.crystal.rotation.y=t*.8;a.crystal.position.y=2+Math.sin(t*2)*.15;a.crystal.material.emissiveIntensity=collected?.05:.15;a.ring.rotation.z=t*.3;a.beam.visible=false;a.light.intensity=0;a.marker.hidden=collected;}
+    if(this.planet){this.planet.visible=high;this.planet.position.set(this.r.camera.position.x-63,this.r.camera.position.y+64,this.r.camera.position.z-126);this.planet.userData.globe.rotation.y=t*.006;}
+    for(const a of this.anchors){const collected=g.state.rift.collected.includes(a.id);a.crystal.rotation.y=t*.8;a.crystal.position.y=2+Math.sin(t*2)*.15;a.crystal.material.emissiveIntensity=collected?.05:.15;a.ring.rotation.z=t*.3;a.beam.visible=high&&!collected;a.light.intensity=high&&!collected&&Math.hypot(a.group.position.x-g.pos.x,a.group.position.z-g.pos.z)<8?3:0;a.marker.hidden=collected;}
     for(const m of this.markers){const p=this.r.screenPoint(m.pos.x,m.pos.y,m.pos.z),distance=Math.round(Math.hypot(m.pos.x-g.pos.x,m.pos.z-g.pos.z));if(!p||p.x<0||p.x>1||p.y<0||p.y>1){m.el.style.display='none';continue;}m.el.style.display='';m.el.style.left=p.x*100+'%';m.el.style.top=p.y*100+'%';m.el.textContent=m.label+' · '+distance+'m';}
   }
 }

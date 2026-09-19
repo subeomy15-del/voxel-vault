@@ -6,7 +6,7 @@ export const GRAPHICS_PRESETS = Object.freeze({
 });
 export const defaultSettings = Object.freeze({
   sensitivity: 1, fov: 74, sprintMode: 'hold', crouchMode: 'hold', perspective: 0,
-  quality: 'high', ...GRAPHICS_PRESETS.high,
+  quality: 'auto', ...GRAPHICS_PRESETS.medium,
   masterVolume: .45, musicVolume: .16, effectsVolume: 1, volume: .45,
   bobbing: true, cameraEffects: true, debugFPS: false
 });
@@ -17,8 +17,8 @@ const flag = (value, fallback) => typeof value === 'boolean' ? value : fallback;
 
 export function normalizeSettings(raw = {}) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) raw = {};
-  const quality = choice(raw.quality, ['low', 'medium', 'high', 'custom'], defaultSettings.quality);
-  const preset = GRAPHICS_PRESETS[quality] || GRAPHICS_PRESETS.high;
+  const quality = choice(raw.quality, ['auto', 'low', 'medium', 'high', 'custom'], defaultSettings.quality);
+  const preset = GRAPHICS_PRESETS[quality] || (quality==='auto'?GRAPHICS_PRESETS.medium:GRAPHICS_PRESETS.high);
   const masterVolume = numeric(raw.masterVolume ?? raw.volume, defaultSettings.masterVolume, 0, 1);
   return {
     sensitivity: numeric(raw.sensitivity, 1, .3, 2.5),
@@ -38,13 +38,13 @@ export function normalizeSettings(raw = {}) {
 }
 
 export function applyQualityPreset(settings, quality) {
-  if (!Object.hasOwn(GRAPHICS_PRESETS, quality)) return settings;
-  return Object.assign(settings, normalizeSettings({ ...settings, ...GRAPHICS_PRESETS[quality], quality }));
+  if (quality!=='auto'&&!Object.hasOwn(GRAPHICS_PRESETS, quality)) return settings;
+  return Object.assign(settings, normalizeSettings({ ...settings, ...(GRAPHICS_PRESETS[quality]||GRAPHICS_PRESETS.medium), quality }));
 }
 
 export function updateSetting(settings, key, value) {
   if (!Object.hasOwn(defaultSettings, key)) return settings;
-  if (key === 'quality' && Object.hasOwn(GRAPHICS_PRESETS, value)) return applyQualityPreset(settings, value);
+  if (key === 'quality' && (value==='auto'||Object.hasOwn(GRAPHICS_PRESETS, value))) return applyQualityPreset(settings, value);
   const next = { ...settings, [key]: value };
   if (key === 'volume') next.masterVolume = value;
   if (GRAPHICS_KEYS.includes(key)) next.quality = 'custom';

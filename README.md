@@ -1,8 +1,16 @@
-# Voxel Vault — Better Together
+# Voxel Vault — Living Wilds
 
 Play: https://subeomy15-del.github.io/voxel-vault/
 
 A browser voxel adventure with an Overworld → Nether → Ender Dragon journey, building, crafting, farming, gliding and local saves. Joinable lobbies support shared Creative worlds, Bed Wars and Manhunt. Natural green foliage, textured blocks and soft shadows; no bloom.
+
+## Living Wilds update
+
+New worlds have large climate regions, varied forests, rivers, oceans and 13 deterministic ruin families. Existing worlds retain their terrain and builds. Browser saves use a worker-backed durable store with recovery snapshots and JSON export/import.
+
+Press **H** to use a firecracker directly from your backpack; clicking its hotbar slot or the touch boost button also works. **G** opens the equipped glider immediately; looking turns flight without the old steering delay. Inventory, storage, crafting, equipment and enchant counts update in place without replacing menus or unchanged icons. Auto graphics starts phones on Low and typical desktops on Medium.
+
+The public site is a static GitHub Pages deployment. Public multiplayer rooms additionally require an HTTPS Voxel Vault server configured in Server settings; GitHub Pages cannot run that server.
 
 ## Build Together
 

@@ -163,8 +163,8 @@ export class Game {
   toggleGlide(){
     if(this.gliding){this.gliding=false;return true;}
     if(!this.state.glider||!this.state.inv[this.state.glider]){this.pause('inventory');this.emit('browse',{search:'glider'});return false;}
-    if(this.grounded||this.world.waterAt(this.pos.x,this.pos.y+.5,this.pos.z)){this.toast('Find some height','Jump from a hill and press G while airborne.');return false;}
-    this.gliding=true;this.flying=false;this.velocity=Math.min(0,this.velocity);this.audio.play('jump');return true;
+    if(this.grounded&&this.world.intersects(this.pos.x,this.pos.y-.04,this.pos.z,.052)||this.world.waterAt(this.pos.x,this.pos.y+.5,this.pos.z)){this.toast('Find some height','Jump from a hill and press G while airborne.');return false;}
+    this.gliding=true;this.flying=false;this.grounded=false;this.pendingGlide=false;this.mantle=null;const wing=ITEMS[this.state.glider],speed=Math.max(wing.glideSpeed,Math.hypot(this.vx,this.vz));this.vx=-Math.sin(this.yaw)*speed;this.vz=-Math.cos(this.yaw)*speed;this.velocity=Math.max(-wing.sink,Math.min(1.5,this.velocity));this.audio.play('jump');return true;
   }
   releaseAttack(){
     const draw=this.drawState;this.drawState=null;this.attackHeld=false;
@@ -232,8 +232,8 @@ export class Game {
     this.grapple={x:hit.x+.5+hit.normal.x*.8,y:hit.y+1.3,z:hit.z+.5+hit.normal.z*.8,time:1.6};this.grappleCooldown=2;this.gliding=false;this.pendingGlide=false;this.audio.play('launch');return true;
   }
   useFirecracker(){
-    if(ITEMS[this.held]?.kind!=='firecracker'||!this.state.inv.firecracker||this.firecrackerCooldown>0)return false;
-    const d=this.direction();this.state.inv.firecracker--;this.firecrackerCooldown=this.gliding?.8:.25;
+    if(this.multiplayer?.competitive||this.state.mode==='parkour'||this.screen&&this.screen!=='inventory'||!this.state.inv.firecracker||this.firecrackerCooldown>0&&performance.now()<(this.firecrackerReadyAt??Infinity))return false;
+    const d=this.direction();this.state.inv.firecracker--;this.firecrackerCooldown=this.gliding?.8:.25;this.firecrackerReadyAt=performance.now()+this.firecrackerCooldown*1000;
     if(this.gliding){
       // Rocket-like boost: preserve the glider's steering direction while
       // adding a small lift so a well-timed cracker clears the next ridge.

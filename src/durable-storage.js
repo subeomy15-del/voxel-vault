@@ -5,7 +5,7 @@ function metadata(state){
   const {edits,realms,...rest}=state;return structuredClone({...rest,realms:Object.fromEntries(Object.entries(realms||{}).map(([d,{edits,...fields}])=>[d,fields]))});
 }
 export class DurableStorage {
-  constructor(local,worker){this.local=local;this.worker=worker;this.serial=0;this.calls=new Map();this.cache=new Map();this.desired=new Map();this.known=new WeakSet();this.timer=null;this.running=null;
+  constructor(local,worker){this.local=local;this.worker=worker;this.serial=0;this.calls=new Map();this.cache=new Map();this.desired=new Map();this.known=new WeakSet();this.replacements=new Set();this.timer=null;this.running=null;
     worker.onmessage=({data})=>{const call=this.calls.get(data.id);if(call){this.calls.delete(data.id);clearTimeout(call.timer);data.ok===false?call.reject(Object.assign(Error(data.error),{name:data.name})):call.resolve(data);}};
     worker.onerror=event=>{for(const call of this.calls.values()){clearTimeout(call.timer);call.reject(Error(event.message||'Save worker failed'));}this.calls.clear();};
   }
@@ -35,19 +35,20 @@ export class DurableStorage {
       if(part.length||replace)send({type:'patch',dimension,entries:part,replace});
     };
     try{
-      const result=this.response(id);send({type:'begin',key,meta,reset:false});
+      const result=this.response(id);send({type:'begin',key,meta,reset:false,replacement:this.replacements.has(key)});
       if(full){await batch(meta.dimension,world.edits,true);for(const[d,realm]of Object.entries(job.realms||{}))await batch('realm:'+d,realm.edits||[],true);}
       revision=world.edits.revision;
       const dirty=world.edits.pending;
       if(dirty)await batch(meta.dimension,(function*(){for(const[k,e]of dirty)if(e.revision<=revision)yield[k,e.value,e.deleted===true];})());
-      send({type:'commit'});const metrics=await result;world.edits.acknowledge?.(revision);this.known.add(world);
+      send({type:'commit'});const metrics=await result;world.edits.acknowledge?.(revision);this.known.add(world);this.replacements.delete(key);
       const queued=[...this.desired.values()].some(next=>next.key===key);
       setSaveHealth(this,key,{status:queued?'saving':'saved',durationMs:mainMs,workerMs:metrics.workerMs,bytes:metrics.bytes,message:''});onStatus?.(saveHealth(this,key));return true;
     }catch(error){this.known.delete(world);setSaveHealth(this,key,{status:storageFailure(error),message:error.message,durationMs:mainMs});onStatus?.(saveHealth(this,key));return false;}
   }
+  preserveBeforeReplacement(key){this.replacements.add(key);setSaveHealth(this,key,{blocked:false});return true;}
   async replaceState(state){
     await this.flush();const {EditMap}=await import('./edit-map.js?v=31');const world={edits:new EditMap(state.edits)};
-    this.queueWorld(state,world);return this.flush();
+    this.preserveBeforeReplacement(slotKey(state.mode));this.queueWorld(state,world);return this.flush();
   }
   dispose(){clearTimeout(this.timer);this.worker.terminate();for(const call of this.calls.values()){clearTimeout(call.timer);call.reject(Error('Save worker closed'));}this.calls.clear();}
 }

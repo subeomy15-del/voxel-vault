@@ -1,6 +1,7 @@
 import { ANIMALS,updateAnimal } from './wildlife.js?v=31';
 import { visibleBetween,findMobPath } from './navigation.js?v=31';
 import { updateDragon } from './dragon.js?v=31';
+import { EntityIndex } from './entity-index.js?v=31';
 
 export const ENEMIES = {
   zombie:{name:'Zombie',hp:22,speed:1.65,damage:4,color:'#667554',glow:'#8c9373',xp:20,drops:{coal:[1,2]}},
@@ -47,6 +48,7 @@ function shootAtPlayer(game,m,spread=0) {
   game.audio.play('shoot');
 }
 export function updateProjectiles(game,dt) {
+  const index=game.mobs.length>12?(game.entityIndex??=new EntityIndex()).rebuild(game.mobs):null;
   for(const p of game.projectiles) {
     p.life-=dt;p.vy-=(p.gravity||0)*dt;
     const distance=Math.hypot(p.vx,p.vy,p.vz)*dt,steps=Math.max(1,Math.ceil(distance/.18));
@@ -58,13 +60,14 @@ export function updateProjectiles(game,dt) {
         p.life=0;break;
       }
       if(p.hostile&&Math.hypot(p.x-game.pos.x,p.z-game.pos.z)<.5&&p.y>game.pos.y&&p.y<game.pos.y+1.8){game.hurt(p.damage,true);p.life=0;}
-      if(!p.hostile)for(const m of game.mobs)if(Math.hypot(m.x-p.x,m.z-p.z)<(m.kind==='guardian'?1.3:(ENEMIES[m.kind]?.radius||.35)+.2)&&p.y>m.y&&p.y<m.y+(m.kind==='guardian'?4:(ENEMIES[m.kind]?.height||1.7))){if(p.slow)m.slow=p.slow;game.hit(m,p.damage);p.life=0;break;}
+      if(!p.hostile)for(const m of index?index.near(p.x,p.z,4):game.mobs)if(m.hp>0&&Math.hypot(m.x-p.x,m.z-p.z)<(m.kind==='guardian'?1.3:(ENEMIES[m.kind]?.radius||.35)+.2)&&p.y>m.y&&p.y<m.y+(m.kind==='guardian'?4:(ENEMIES[m.kind]?.height||1.7))){if(p.slow)m.slow=p.slow;game.hit(m,p.damage);p.life=0;break;}
     }
   }
   game.projectiles=game.projectiles.filter(p=>p.life>0);
 }
 export function updateEnemies(game,dt) {
-  for(const m of [...game.mobs]) {
+  let sightBudget=3,pathBudget=1;const frameMobs=[...game.mobs],offset=(game.aiCursor||0)%Math.max(1,frameMobs.length);game.aiCursor=offset+1;
+  for(let i=0;i<frameMobs.length;i++) {const m=frameMobs[(i+offset)%frameMobs.length];
     if(m.kind==='dragon'){m.flash=Math.max(0,m.flash-dt);updateDragon(game,m,dt,launchBolt);continue;}
     m.flash=Math.max(0,m.flash-dt);m.cooldown-=dt*(game.hardAdventure&&!ENEMIES[m.kind]?.passive?1.2:1);m.stun=Math.max(0,(m.stun||0)-dt);
     const d=Math.hypot(game.pos.x-m.x,game.pos.z-m.z), info=ENEMIES[m.kind]||ENEMIES.sentinel;
@@ -74,9 +77,9 @@ export function updateEnemies(game,dt) {
     if(game.effect('invisibility')&&game.revealTime<=0&&d>2){m.windup=0;m.lunge=0;continue;}
     if(game.creative||m.stun>0)continue;
     m.sightTimer=(m.sightTimer||0)-dt;
-    if(m.sightTimer<=0){m.sightTimer=.25;m.canSee=visibleBetween(game.world,{x:m.x,y:m.y+1.25,z:m.z},{x:game.pos.x,y:game.pos.y+1.3,z:game.pos.z});if(m.canSee){m.memory=5;m.lastSeen={...game.pos};}}
+    if(m.sightTimer<=0&&sightBudget>0){sightBudget--;m.sightTimer=.22+(m.id%7)*.017;m.canSee=visibleBetween(game.world,{x:m.x,y:m.y+1.25,z:m.z},{x:game.pos.x,y:game.pos.y+1.3,z:game.pos.z});if(m.canSee){m.memory=5;m.lastSeen={...game.pos};}}
     m.memory=Math.max(0,(m.memory||0)-dt);
-    if(!m.canSee){m.windup=0;m.lunge=0;if(m.memory>0&&m.lastSeen){m.pathTimer=(m.pathTimer||0)-dt;if(m.pathTimer<=0){m.pathTimer=1;m.path=findMobPath(game.world,m,m.lastSeen,info);}
+    if(!m.canSee){m.windup=0;m.lunge=0;if(m.memory>0&&m.lastSeen){m.pathTimer=(m.pathTimer||0)-dt;if(m.pathTimer<=0&&pathBudget>0){pathBudget--;m.pathTimer=1;m.path=findMobPath(game.world,m,m.lastSeen,info);}
       const next=m.path?.[0];if(next){const dx=next.x-m.x,dz=next.z-m.z,length=Math.hypot(dx,dz);if(length<.2)m.path.shift();else{const step=Math.min(length,dt*(info.speed*(game.hardAdventure?1.15:1)));game.moveMob(m,dx/length*step,dz/length*step);}}}continue;}
 
     m.angle=Math.atan2(game.pos.x-m.x,game.pos.z-m.z);

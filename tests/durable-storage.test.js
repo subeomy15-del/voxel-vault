@@ -17,3 +17,8 @@ test('failed durable writes retain dirty edits for retry and never report saved'
  storage.queueWorld(state,world);assert.equal(await storage.flush(),false);assert.equal(saveHealth(storage,slotKey(state.mode)).status,'storage full');assert.equal(world.edits.pending.size,1);
  worker.fail=false;storage.queueWorld(state,world);assert.equal(await storage.flush(),true);assert.equal(world.edits.pending.size,0);storage.dispose();
 });
+
+test('same-seed imports explicitly preserve the previous durable world and retries retain that intent',async()=>{
+ const {storage,messages,worker}=setup(),state=freshState();worker.fail=true;assert.equal(await storage.replaceState(state),false);assert.equal(messages.find(m=>m.type==='begin').replacement,true);
+ messages.length=0;worker.fail=false;await storage.replaceState(state);assert.equal(messages.find(m=>m.type==='begin').replacement,true);assert.equal(storage.replacements.size,0);storage.dispose();
+});

@@ -29,6 +29,7 @@ export function writeDocument(storage,key,text){
   }catch(error){setSaveHealth(storage,key,{status:storageFailure(error),durationMs:performance.now()-started,message:String(error.message)});return false;}
 }
 export function preserveBeforeReplacement(storage,key){
+  if(storage.preserveBeforeReplacement)return storage.preserveBeforeReplacement(key);
   try{const raw=storage.getItem(key);if(raw)storage.setItem(key+'.before-replacement',raw);setSaveHealth(storage,key,{blocked:false});return true;}
   catch(error){setSaveHealth(storage,key,{status:storageFailure(error),message:String(error.message)});return false;}
 }
