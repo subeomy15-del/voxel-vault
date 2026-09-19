@@ -1,13 +1,13 @@
-import {StructureGenerator} from './structure-generator.js?v=31';
-import {climateAt,blendedSurface,smooth} from './climate.js?v=31';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=31';
-import {EditMap} from './edit-map.js?v=31';
-import { netherHeight,netherBlock } from './nether.js?v=31';
-import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=31';
-import { canonicalItem } from './resource-map.js?v=31';
-import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=31';
-import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=31';
-import { CLOUDSTEP,courseGeometry } from './parkour-course.js?v=31';
+import {StructureGenerator} from './structure-generator.js?v=32';
+import {climateAt,blendedSurface,smooth} from './climate.js?v=32';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=32';
+import {EditMap} from './edit-map.js?v=32';
+import { netherHeight,netherBlock } from './nether.js?v=32';
+import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=32';
+import { canonicalItem } from './resource-map.js?v=32';
+import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=32';
+import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=32';
+import { CLOUDSTEP,courseGeometry } from './parkour-course.js?v=32';
 export const CHUNK=16, WORLD_LIMIT=Infinity, WORLD_BOTTOM=-64, WORLD_TOP=95, SEA_LEVEL=4;
 export const cellKey=(x,y,z)=>`${x},${y},${z}`;
 export class World {

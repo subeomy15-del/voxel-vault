@@ -1,7 +1,7 @@
-import { ANIMALS,updateAnimal } from './wildlife.js?v=31';
-import { visibleBetween,findMobPath } from './navigation.js?v=31';
-import { updateDragon } from './dragon.js?v=31';
-import { EntityIndex } from './entity-index.js?v=31';
+import { ANIMALS,updateAnimal } from './wildlife.js?v=32';
+import { visibleBetween,findMobPath } from './navigation.js?v=32';
+import { updateDragon } from './dragon.js?v=32';
+import { EntityIndex } from './entity-index.js?v=32';
 
 export const ENEMIES = {
   zombie:{name:'Zombie',hp:22,speed:1.65,damage:4,color:'#667554',glow:'#8c9373',xp:20,drops:{coal:[1,2]}},

@@ -1,5 +1,5 @@
-import { ITEMS } from './data.js?v=31';
-import { icon } from './icons.js?v=31';
+import { ITEMS } from './data.js?v=32';
+import { icon } from './icons.js?v=32';
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 export function packSlot(g,name,count,extra=''){return `<button class="pack-slot ${name===g.held?'selected':''}" ${extra||(name==='firecracker'?'data-use-firecracker':`data-equip="${name}"`)} data-item="${name||''}" title="${esc(ITEMS[name]?.name||'Empty slot')}" aria-label="${esc(ITEMS[name]?.name||'Empty slot')}${count?' · '+count:''}">${name?icon(name,48):''}${count?`<b>${g.creative?'∞':count}</b>`:''}</button>`;}
 export function inventoryLayout(g,items){

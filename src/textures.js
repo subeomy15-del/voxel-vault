@@ -1,4 +1,4 @@
-import { BLOCKS, hash } from './data.js?v=31';
+import { BLOCKS, hash } from './data.js?v=32';
 export const TILE=32,ATLAS_COLS=16;
 export const ATLAS_ROWS=2**Math.ceil(Math.log2(Math.ceil(Object.keys(BLOCKS).length*3/ATLAS_COLS)));
 export const ATLAS_WIDTH=TILE*ATLAS_COLS,ATLAS_HEIGHT=TILE*ATLAS_ROWS;

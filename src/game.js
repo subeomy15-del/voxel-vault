@@ -1,21 +1,21 @@
-import { armBlast,cancelDelayedActions } from './delayed-actions.js?v=31';
-import { saveHealth,preserveBeforeReplacement } from './save-health.js?v=31';
-import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=31';
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=31';
-import { canonicalItem,normalizeResources } from './resource-map.js?v=31';
-import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=31';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=31';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=31';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,maxCraft,hash,dailySeed } from './data.js?v=31';
-import { freshState,loadState,saveState,slotKey,importLegacy } from './save.js?v=31';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=31';
-import { movePlayer,requestJump } from './movement.js?v=31';
-import { overlapsBlock } from './shapes.js?v=31';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=31';
-import { ANIMALS,animalKind } from './wildlife.js?v=31';
-import { CHAPTERS,journeyStage } from './journey.js?v=31';
-import { enchantGear,weaponPower,miningPower,armorProtection,awardAura } from './enchanting.js?v=31';
-import { tickTraps,trapAt } from './traps.js?v=31';
+import { armBlast,cancelDelayedActions } from './delayed-actions.js?v=32';
+import { saveHealth,preserveBeforeReplacement } from './save-health.js?v=32';
+import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=32';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=32';
+import { canonicalItem,normalizeResources } from './resource-map.js?v=32';
+import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=32';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=32';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=32';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,maxCraft,hash,dailySeed } from './data.js?v=32';
+import { freshState,loadState,saveState,slotKey,importLegacy } from './save.js?v=32';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=32';
+import { movePlayer,requestJump } from './movement.js?v=32';
+import { overlapsBlock } from './shapes.js?v=32';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=32';
+import { ANIMALS,animalKind } from './wildlife.js?v=32';
+import { CHAPTERS,journeyStage } from './journey.js?v=32';
+import { enchantGear,weaponPower,miningPower,armorProtection,awardAura } from './enchanting.js?v=32';
+import { tickTraps,trapAt } from './traps.js?v=32';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}

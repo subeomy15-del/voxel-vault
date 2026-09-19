@@ -1,6 +1,6 @@
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=31';
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=31';
-import { installContent } from './badlands-content.js?v=31';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=32';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=32';
+import { installContent } from './badlands-content.js?v=32';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },

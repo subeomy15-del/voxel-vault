@@ -1,8 +1,8 @@
-import {ITEMS,RECIPES,SMELTING,canCraft,maxCraft,ingredientCount,ingredientKeys} from './data.js?v=31';
-import {icon} from './icons.js?v=31';
-import {packSlot} from './inventory-layout.js?v=31';
-import {enchantRow} from './workshop-ui.js?v=31';
-import {enchantKind,enchantLevel,enchantCost} from './enchanting.js?v=31';
+import {ITEMS,RECIPES,SMELTING,canCraft,maxCraft,ingredientCount,ingredientKeys} from './data.js?v=32';
+import {icon} from './icons.js?v=32';
+import {packSlot} from './inventory-layout.js?v=32';
+import {enchantRow} from './workshop-ui.js?v=32';
+import {enchantKind,enchantLevel,enchantCost} from './enchanting.js?v=32';
 const text=(node,value)=>{if(node&&node.textContent!==String(value))node.textContent=String(value);};
 const flag=(node,name,value)=>{if(node.classList.contains(name)!==!!value)node.classList.toggle(name,!!value);};
 const attr=(node,name,value)=>{if(node.getAttribute(name)!==String(value))node.setAttribute(name,String(value));};

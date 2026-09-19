@@ -1,12 +1,12 @@
-import {WORLDGEN_VERSION} from './biome-registry.js?v=31';
-import { recoverDelayedActions } from './delayed-actions.js?v=31';
-import { readDocument,writeDocument,setSaveHealth,storageFailure } from './save-health.js?v=31';
-import { VERSION, ITEMS, STARTER_BAR, starterInventory, dailySeed, BLOCKS,CROPS,EFFECTS } from './data.js?v=31';
-import { ANIMALS } from './wildlife.js?v=31';
-import { normalizeResources } from './resource-map.js?v=31';
-import { REALM_FIELDS,captureRealm } from './realms.js?v=31';
-import { defaultSettings, normalizeSettings } from './settings.js?v=31';
-export { defaultSettings } from './settings.js?v=31';
+import {WORLDGEN_VERSION} from './biome-registry.js?v=32';
+import { recoverDelayedActions } from './delayed-actions.js?v=32';
+import { readDocument,writeDocument,setSaveHealth,storageFailure } from './save-health.js?v=32';
+import { VERSION, ITEMS, STARTER_BAR, starterInventory, dailySeed, BLOCKS,CROPS,EFFECTS } from './data.js?v=32';
+import { ANIMALS } from './wildlife.js?v=32';
+import { normalizeResources } from './resource-map.js?v=32';
+import { REALM_FIELDS,captureRealm } from './realms.js?v=32';
+import { defaultSettings, normalizeSettings } from './settings.js?v=32';
+export { defaultSettings } from './settings.js?v=32';
 const prefix='voxel-vault-v2-';
 export function freshState(seed=7821,mode='adventure') {
   const inv=starterInventory();if(mode==='creative')for(const k of Object.keys(ITEMS))inv[k]=999;

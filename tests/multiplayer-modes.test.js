@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { createServer } from '../server.js';
-import { BEDWARS_BEDS, BEDWARS_SPAWNS, MODE_RULES, mapEdits } from '../src/mode-rules.js?v=31';
+import { BEDWARS_BEDS, BEDWARS_SPAWNS, MODE_RULES, mapEdits } from '../src/mode-rules.js?v=32';
 
 async function fixture(t, mode, count = 2) {
   let clock = 1000;

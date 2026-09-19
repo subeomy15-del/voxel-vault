@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {saveHealth,readDocument,writeDocument,preserveBeforeReplacement} from '../src/save-health.js?v=31';
-import {parseWorldBackup,exportWorld} from '../src/world-backup.js?v=31';
+import {saveHealth,readDocument,writeDocument,preserveBeforeReplacement} from '../src/save-health.js?v=32';
+import {parseWorldBackup,exportWorld} from '../src/world-backup.js?v=32';
 const memory=()=>{const data=new Map();return{data,getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)};};
 const valid=s=>s?.version===2;
 test('rotating recovery snapshots survive malformed and interrupted primary writes',()=>{

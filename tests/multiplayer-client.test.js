@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js?v=31';
-import { Multiplayer } from '../src/multiplayer.js?v=31';
-import { slotKey } from '../src/save.js?v=31';
+import { Game } from '../src/game.js?v=32';
+import { Multiplayer } from '../src/multiplayer.js?v=32';
+import { slotKey } from '../src/save.js?v=32';
 
 const storage = () => ({ data: new Map(), getItem(key) { return this.data.get(key) || null; }, setItem(key, value) { this.data.set(key, value); } });
 const response = (body = { ok: true }, status = 200) => ({ ok: status < 400, status, json: async () => body });
@@ -49,11 +49,13 @@ test('joining and leaving preserve solo worlds, inventory, location and existing
   g.yaw = 1.2; g.pitch = -.3;
   g.save();
   const solo = h.store.getItem(slotKey('adventure'));
+  const soloTerrain = g.state.terrain;
   h.store.setItem(slotKey('creative'), 'existing creative save');
   await h.connect();
   assert.equal(h.client.active, true);
   assert.equal(g.state.seed, h.room.seed);
   assert.equal(g.state.mode, 'creative');
+  assert.equal(g.state.terrain, 6, 'shared terrain must match the authoritative server');
   g.state.inv.diamond = 1234;
   g.world.set(125, 80, 130, 'stonebrick');
   await h.client.editQueue;
@@ -62,6 +64,7 @@ test('joining and leaving preserve solo worlds, inventory, location and existing
   assert.equal(h.store.getItem(slotKey('creative')), 'existing creative save');
   await h.client.leave();
   assert.equal(h.client.active, false);
+  assert.equal(g.state.terrain, soloTerrain, 'leaving restores the solo generation version');
   assert.equal(g.state.inv.diamond, 7);
   assert.deepEqual(g.pos, { x: 120.5, y: 82, z: 130.5 });
   assert.equal(g.yaw, 1.2);

@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js?v=31';
-import { Parkour } from '../src/parkour.js?v=31';
-import { CLOUDSTEP } from '../src/parkour-course.js?v=31';
-import { movementInput, releaseJump } from '../src/movement.js?v=31';
-import { slotKey } from '../src/save.js?v=31';
+import { Game } from '../src/game.js?v=32';
+import { Parkour } from '../src/parkour.js?v=32';
+import { CLOUDSTEP } from '../src/parkour-course.js?v=32';
+import { movementInput, releaseJump } from '../src/movement.js?v=32';
+import { slotKey } from '../src/save.js?v=32';
 
 function harness() {
   const storage = { data: new Map(), writes: [], getItem(key) { return this.data.get(key) || null; }, setItem(key, value) { this.data.set(key, value); this.writes.push(key); } };

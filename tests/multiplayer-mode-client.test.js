@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js?v=31';
-import { Multiplayer } from '../src/multiplayer.js?v=31';
-import { MultiplayerModes } from '../src/multiplayer-modes.js?v=31';
-import { BEDWARS_BLOCKS, BEDWARS_SPAWNS, MODE_RULES, mapEdits } from '../src/mode-rules.js?v=31';
-import { ITEMS } from '../src/data.js?v=31';
+import { Game } from '../src/game.js?v=32';
+import { Multiplayer } from '../src/multiplayer.js?v=32';
+import { MultiplayerModes } from '../src/multiplayer-modes.js?v=32';
+import { BEDWARS_BLOCKS, BEDWARS_SPAWNS, MODE_RULES, mapEdits } from '../src/mode-rules.js?v=32';
+import { ITEMS } from '../src/data.js?v=32';
 
 const settle = () => new Promise(resolve => setImmediate(resolve));
 const storage = () => ({ data: new Map(), getItem(key) { return this.data.get(key) || null; }, setItem(key, value) { this.data.set(key, value); } });

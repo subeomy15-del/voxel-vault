@@ -7,7 +7,7 @@ try{
   await c.send('Emulation.setTouchEmulationEnabled',{enabled:false});
   await c.send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
   await c.send('Page.navigate',{url:'http://localhost:3001/'});await sleep(600);
-  await ev(`(async()=>{const m=await import('./src/main.js?v=31');window.g=m.game;window.v=m.renderer;window.ui=m.ui;g.start('adventure',true);g.pos={x:.5,y:7,z:9.5};g.yaw=0;g.pitch=-.95;g.add('stone_hoe');g.equip('stone_hoe');ui.render();})()`);
+  await ev(`(async()=>{const m=await import('./src/main.js?v=32');window.g=m.game;window.v=m.renderer;window.ui=m.ui;g.start('adventure',true);g.pos={x:.5,y:7,z:9.5};g.yaw=0;g.pitch=-.95;g.add('stone_hoe');g.equip('stone_hoe');ui.render();})()`);
   await terrain();await sleep(200);assert.equal(await ev('g.target?.type'),'grass');await use();
   assert.equal(await ev('g.world.get(0,6,8)'),'farmland');
   await ev("g.equip('seeds')");const before=await ev('g.state.inv.seeds');await use();
@@ -17,7 +17,7 @@ try{
   assert.equal(await ev("document.querySelectorAll('[data-smelt=iron_ingot]').length"),0);await c.click('[data-smelt=roasted_mushroom]');assert.equal(await ev('g.state.inv.roasted_mushroom'),1);
   await ev(`g.start('creative',true);g.pause('inventory');ui.catalogue=true;ui.filter='All';ui.search='';ui.render();document.querySelector('[data-item-search]').focus()`);
   await c.send('Input.insertText',{text:'diamond'});assert.ok(await ev('document.querySelectorAll(".item-card").length')>=6);
-  assert.ok(await ev(`(async()=>{const {ITEMS}=await import('/src/data.js?v=31');return Array.from(document.querySelectorAll('.item-card')).every(e=>{const k=e.dataset.inspect;return (ITEMS[k].name+' '+ITEMS[k].description).toLowerCase().includes('diamond')})})()`));
+  assert.ok(await ev(`(async()=>{const {ITEMS}=await import('/src/data.js?v=32');return Array.from(document.querySelectorAll('.item-card')).every(e=>{const k=e.dataset.inspect;return (ITEMS[k].name+' '+ITEMS[k].description).toLowerCase().includes('diamond')})})()`));
   await c.screenshot('wildfields-search');
   await ev(`g.resume();ui.render();g.flying=true;g.pos={x:.5,y:29,z:58.5};g.yaw=Math.PI;g.pitch=-.45;g.state.time=110;g.equip('iron_pickaxe');document.querySelector('#toasts').replaceChildren()`);
   await terrain();await sleep(250);await c.screenshot('wildfields-river');

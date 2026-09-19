@@ -1,6 +1,6 @@
-import { freshState } from './save.js?v=31';
-import { ITEMS, BLOCKS } from './data.js?v=31';
-import { MODE_RULES } from './mode-rules.js?v=31';
+import { freshState } from './save.js?v=32';
+import { ITEMS, BLOCKS } from './data.js?v=32';
+import { MODE_RULES } from './mode-rules.js?v=32';
 
 const dimensions = ['overworld', 'nether', 'ender'];
 const emptyEdits = () => Object.fromEntries(dimensions.map(d => [d, new Map()]));
@@ -221,6 +221,8 @@ export class Multiplayer extends EventTarget {
     this.pending = 0; this.editQueue = Promise.resolve();
     this.modes?.leave();
     g.state = freshState(this.room.seed, this.competitive ? 'arena' : 'creative');
+    // Shared rooms use the server's stable terrain contract, independent of new solo worlds.
+    g.state.terrain = 6;
     if (this.competitive) {
       g.state.dimension = MODE_RULES[this.room.mode].dimension;
       const self = this.room.match?.players.find(player => player.id === this.playerId);

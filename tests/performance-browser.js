@@ -12,7 +12,7 @@ try{
   await ev(`(async()=>{const m=await import(document.querySelector('script[type=module]').src);window.g=m.game;window.v=m.renderer;window.settings=m.settings;window.ui=m.ui;g.start('creative',true);g.pos={x:.5,y:7,z:20.5};g.yaw=0;g.pitch=0;g.flying=true;g.mobs=[];g.state.time=110;ui.render();})()`);
   assert.equal(await ev('settings.quality'),'auto');assert.equal(await ev('v.options.quality'),touch?'low':'medium');
   for(const quality of touch?['auto']:['low','medium','high','auto']){
-   await ev(`(async()=>{const {applyQualityPreset}=await import('/src/settings.js?v=31');applyQualityPreset(settings,'${quality}');v.applySettings();})()`);
+   await ev(`(async()=>{const {applyQualityPreset}=await import('/src/settings.js?v=32');applyQualityPreset(settings,'${quality}');v.applySettings();})()`);
    for(let i=0;i<220;i++){if(await ev('!v.queue.length&&!v.inflight&&!v.ready.length&&v.chunks.size>=9'))break;await sleep(70);}
    const metrics=await ev(`new Promise(resolve=>{let previous=performance.now(),samples=[];function frame(t){samples.push(t-previous);previous=t;if(samples.length<150)requestAnimationFrame(frame);else{samples.sort((a,b)=>a-b);resolve({p95:samples[142],median:samples[75],...v.telemetry,casters:[...v.chunks.values()].reduce((n,g)=>n+g.children.filter(m=>m.castShadow).length,0),geometries:v.renderer.info.memory.geometries,textures:v.renderer.info.memory.textures});}}requestAnimationFrame(frame);})`);
    assert.ok(metrics.p95<(touch?34:20),`${quality} ${touch?'touch':'desktop'} p95 ${metrics.p95}`);

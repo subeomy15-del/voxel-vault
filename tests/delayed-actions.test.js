@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {armBlast,cancelDelayedActions,recoverDelayedActions} from '../src/delayed-actions.js?v=31';
+import {armBlast,cancelDelayedActions,recoverDelayedActions} from '../src/delayed-actions.js?v=32';
 test('canceling delayed charges refunds their original inventory once and never changes a replacement world',()=>{
   const state={inv:{blast_charge:0}},g={state,world:{},creative:false,screen:null,detonate(){assert.fail('canceled blast fired');}};
   armBlast(g,1,7,2);assert.equal(state.pendingBlasts.length,1);

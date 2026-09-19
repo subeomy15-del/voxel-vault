@@ -1,4 +1,4 @@
-import {integerHash} from './climate.js?v=31';
+import {integerHash} from './climate.js?v=32';
 const key=(x,y,z)=>`${x},${y},${z}`;
 export class StructureTemplate {
  constructor(seed){this.seed=seed;this.cells=new Map();this.protected=new Set();this.footprint=new Set();}

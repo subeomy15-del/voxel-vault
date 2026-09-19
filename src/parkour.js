@@ -1,6 +1,6 @@
-import { CLOUDSTEP,COURSES } from './parkour-course.js?v=31';
-import { GameTimer } from './game-timer.js?v=31';
-import { freshState } from './save.js?v=31';
+import { CLOUDSTEP,COURSES } from './parkour-course.js?v=32';
+import { GameTimer } from './game-timer.js?v=32';
+import { freshState } from './save.js?v=32';
 
 export class Parkour {
   constructor(game){this.game=game;game.parkour=this;this.timer=new GameTimer();this.course=CLOUDSTEP;this.checkpoint=0;this.respawnTime=0;this.pulse=0;}
