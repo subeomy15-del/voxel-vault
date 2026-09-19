@@ -16,8 +16,9 @@ const isGlass=type=>type==='glass'||type?.endsWith('_glass');
 const empty=()=>({position:[],normal:[],uv:[],color:[],index:[]});
 export function meshChunk(world,cx,cz,underground=false,options={}){
   const solid=empty(),water=empty(),glass=empty(),low=underground?WORLD_BOTTOM:-10;
-  let high=0;for(let x=-1;x<=16;x++)for(let z=-1;z<=16;z++)high=Math.max(high,world.height(cx*16+x,cz*16+z)+13);
-  for(const[k,t]of world.edits){if(!t)continue;const[x,y,z]=k.split(',').map(Number);if(Math.floor(x/16)===cx&&Math.floor(z/16)===cz)high=Math.max(high,y+2);}
+  let high=world.dimension==='overworld'?6:0;for(let x=-1;x<=16;x++)for(let z=-1;z<=16;z++)high=Math.max(high,world.height(cx*16+x,cz*16+z)+13);
+  for(const[k,t]of world.edits.chunkEntries?.(cx,cz)||world.edits){if(!t)continue;const[x,y,z]=k.split(',').map(Number);if(Math.floor(x/16)===cx&&Math.floor(z/16)===cz)high=Math.max(high,y+2);}
+  world.prepare(cx,cz);high=Math.max(high,world.chunkTops?.get(`${cx},${cz}`)||0);
   high=Math.min(WORLD_TOP+1,high);const depth=high-low+2,vox=new Uint16Array(18*18*depth),at=(x,y,z)=>(x*18+z)*depth+y;
   for(let x=0;x<18;x++)for(let z=0;z<18;z++)for(let y=0;y<depth;y++)vox[at(x,y,z)]=ids[world.get(cx*16+x-1,low+y-1,cz*16+z-1)]||0;
   const transparency=BLOCK_TYPES.map(type=>!!(BLOCKS[type].boxes||BLOCKS[type].plant||isGlass(type)||['lava','water','ladder','torch','lantern','campfire'].includes(type)));

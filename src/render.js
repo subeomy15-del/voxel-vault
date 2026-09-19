@@ -22,7 +22,7 @@ export class Renderer {
   constructor(container,settings){
     this.diagnostics=new Diagnostics();this.settings=settings;this.options=renderOptions(settings);this.performance=new FrameBudget();this.cameraMotion=new CameraMotion();this.telemetry={fps:60,frameMs:16.7,drawCalls:0,triangles:0,chunks:0,queued:0,particles:0,pixelRatio:1,quality:this.options.quality,workerMs:0};this.scene=new THREE.Scene();this.scene.background=new THREE.Color('#b6cddd');this.scene.fog=new THREE.Fog('#b6cddd',62,125);
     this.camera=new THREE.PerspectiveCamera(74,innerWidth/innerHeight,.05,220);this.camera.rotation.order='YXZ';
-    this.renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});this.renderer.setSize(innerWidth,innerHeight);this.renderer.setPixelRatio(Math.min(devicePixelRatio,this.options.maxPixelRatio));this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.05;this.renderer.info.autoReset=false;container.append(this.renderer.domElement);
+    this.renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});this.renderer.setSize(innerWidth,innerHeight);this.renderer.setPixelRatio(Math.min(devicePixelRatio,this.options.maxPixelRatio));this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1;this.renderer.info.autoReset=false;container.append(this.renderer.domElement);
     this.ambient=new THREE.HemisphereLight('#e1ecff','#525b48',1.3);this.scene.add(this.ambient);this.sun=new THREE.DirectionalLight('#fff6e4',1.8);this.sun.position.set(-40,75,35);this.scene.add(this.sun);this.sun.castShadow=true;this.sun.shadow.mapSize.set(2048,2048);Object.assign(this.sun.shadow.camera,{left:-40,right:40,top:40,bottom:-40,near:1,far:170});this.sun.shadow.bias=-.0007;this.sun.shadow.normalBias=.04;this.renderer.shadowMap.enabled=settings.quality==='high';this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.scene.add(this.sun.target);
     this.material=new THREE.MeshStandardMaterial({map:this.atlas(),vertexColors:true,alphaTest:.45,roughness:.94,metalness:.02});this.chunks=new Map();this.queue=[];this.center='';this.decor=new THREE.Group();this.scene.add(this.decor);this.particles=new ParticlePool(this.scene);this.movementEffects=new MovementEffects(this.camera,this.particles);this.effects=this.particles;this.beacons=[];this.mobMeshes=new Map();this.chestMeshes=new Map();
     this.waterMaterial=new THREE.MeshStandardMaterial({color:'#42a7dd',roughness:.6,metalness:0,transparent:true,opacity:.78,vertexColors:true});
@@ -150,8 +150,7 @@ export class Renderer {
   }
   updateTorches(game,dt){
     this.torchTimer-=dt;if(this.torchTimer>0)return;this.torchTimer=.5;
-    if(this.torchRevision!==this.revision){this.torchRevision=this.revision;this.torchCache=[];for(const[key,type]of this.world.edits)if(type==='torch'||type==='lantern'||type==='campfire'){const[x,y,z]=key.split(',').map(Number);this.torchCache.push({x,y,z});}}
-    const nearest=[];for(const point of this.torchCache){const distance=(point.x-game.pos.x)**2+(point.y-game.pos.y)**2+(point.z-game.pos.z)**2;if(distance>=256)continue;const entry={point,distance};let index=nearest.findIndex(other=>distance<other.distance);if(index<0)index=nearest.length;if(index<4){nearest.splice(index,0,entry);if(nearest.length>4)nearest.pop();}}
+    const nearest=this.world.edits.lights.nearest(game.pos);
     this.torchLights.forEach((light,index)=>{const point=nearest[index]?.point;light.intensity=point?8.5+Math.sin(game.state.time*7+index)*.4:0;if(point)light.position.set(point.x+.5,point.y+1,point.z+.5);});
   }
   update(game,dt){
@@ -172,7 +171,7 @@ export class Renderer {
     const crosshair=document.querySelector('#crosshair');
     if(perspective===1&&!menu){const d=game.direction(),distance=game.target?.distance||6,p=new THREE.Vector3(game.pos.x+d.x*distance,game.pos.y+1.58+d.y*distance,game.pos.z+d.z*distance).project(this.camera);crosshair.style.left=(p.x+1)*50+'%';crosshair.style.top=(1-p.y)*50+'%';}else{crosshair.style.left='50%';crosshair.style.top='50%';}
     crosshair.style.visibility=perspective===2?'hidden':'visible';
-    this.scenery.update(game,inCave);this.updatePlacement(game);this.cracks.visible=!game.screen&&!!game.target&&game.mineProgress>0&&!BLOCKS[game.target.type].plant;if(this.cracks.visible){this.updateCracks(game.mineProgress);this.cracks.position.set(game.target.x+.5,game.target.y+.5,game.target.z+.5);}
+    this.scenery.update(game,inCave,dt);this.updatePlacement(game);this.cracks.visible=!game.screen&&!!game.target&&game.mineProgress>0&&!BLOCKS[game.target.type].plant;if(this.cracks.visible){this.updateCracks(game.mineProgress);this.cracks.position.set(game.target.x+.5,game.target.y+.5,game.target.z+.5);}
     this.outline.scale.set(1,1,1);this.outline.material.color.set(game.mobTarget?'#f2d495':'#f7edc5');this.outline.material.opacity=.48+(this.options.cameraEffects?Math.sin(t*3)*.07:0);
     if(game.mobTarget){const m=game.mobTarget.mob,info=ENEMIES[m.kind],radius=(info.radius||.35)+.15,height=(info.height||1.8)+.12;this.outline.scale.set(radius*2,height,radius*2);this.outline.position.set(m.x,m.y+height/2,m.z);}
     else if(game.target){const height=BLOCKS[game.target.type].shape==='slab'?.5:1;this.outline.scale.y=height;this.outline.position.set(game.target.x+.5,game.target.y+height/2,game.target.z+.5);this.cracks.scale.y=height;this.cracks.position.y=game.target.y+height/2;}

@@ -34,7 +34,7 @@ test('version 5 worlds retain their terrain and new worlds use the smoother gene
   const st=storage(),old=freshState(481);old.terrain=5;old.pos={x:.5,y:7,z:9.5};saveState(st,old);const loaded=loadState(st),g=new Game({setWorld(){},stream(){},burst(){}},{play(){}},st);assert.equal(loaded.terrain,5);assert.equal(g.world.terrain,5);
   const legacy=new World(481,[],5),modern=new World(481,[],6);let different=0;
   for(let x=-250;x<=250;x+=25)for(let z=-250;z<=250;z+=25){assert.equal(g.world.height(x,z),legacy.height(x,z));if(legacy.height(x,z)!==modern.height(x,z))different++;}
-  assert.ok(different>100);assert.equal(freshState().terrain,6);
+  assert.ok(different>100);assert.equal(freshState().terrain,7);
 });
 test('terrain transitions stay smooth away from coastlines and river valleys',()=>{
   const w=new World(481,[],6);let worst=0;

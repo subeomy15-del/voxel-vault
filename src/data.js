@@ -1,3 +1,4 @@
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=31';
 import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=31';
 import { installContent } from './badlands-content.js?v=31';
 export const VERSION = 2;
@@ -417,6 +418,7 @@ export const BIOMES={
   desert:{name:'Drylands',color:'#c9b489',top:'sand'},snow:{name:'Alpine forest',color:'#cfddda',top:'snow'},
   mountain:{name:'Highlands',color:'#8c9890',top:'stone'},
 };
+for(const[id,definition]of Object.entries(BIOME_DEFINITIONS))if(!BIOMES[id])BIOMES[id]=definition;
 export function hash(x,z,seed=1) { let n = Math.imul(x ^ seed, 374761393) + Math.imul(z,668265263); n = Math.imul(n ^ n >>> 13,1274126177); return ((n ^ n >>> 16) >>> 0) / 4294967295; }
 export function dailySeed(date = new Date()) { return Number(date.toISOString().slice(0,10).replaceAll('-','')); }
 export const TIMBER=['wood','birch','pinewood'];

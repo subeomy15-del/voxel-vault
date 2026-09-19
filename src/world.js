@@ -1,3 +1,6 @@
+import {StructureGenerator} from './structure-generator.js?v=31';
+import {climateAt,blendedSurface,smooth} from './climate.js?v=31';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=31';
 import {EditMap} from './edit-map.js?v=31';
 import { netherHeight,netherBlock } from './nether.js?v=31';
 import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=31';
@@ -16,10 +19,11 @@ export class World {
     if(dimension==='overworld')for(const [id,name,x,z,color]of [['badlands','Badlands · Draugr Knights',240,180,'#b77745'],['savanna','Savanna',220,-60,'#a2a063'],['marsh','Marsh',-240,200,'#75815a']])this.landmarks.push({id,name,x,z,y:this.height(x,z)+1,color,type:'landscape',subtitle:id==='badlands'?'Hunt knights for Knight Hearts':'Explore a new biome'});
     if(dimension==='ender')this.landmarks=[{id:'camp',name:'Arrival island',subtitle:'Ender Gate: use E to return to Survival',x:0,y:19,z:0,type:'landscape',color:'#b9a3ff'},{id:'spire',name:'Obsidian spires',subtitle:'Moonstone and violet crystal',x:48,y:24,z:0,type:'landscape',color:'#ac83e8'}];
     if(dimension==='nether')this.landmarks=[{id:'nether-camp',name:'Nether Gate',subtitle:'Find the gateway to the Ender world',x:0,y:20,z:0,type:'landscape',color:'#e77d5d'},{id:'nether-fortress',name:'Ashen Fortress',subtitle:'A dangerous route lies beyond',x:72,y:25,z:-48,type:'landscape',color:'#d59a70'}];
-    this.makeCamp();
+    this.makeCamp();this.chunkTops=new Map();this.ruins=this.terrain>=7&&dimension==='overworld'?new StructureGenerator(this):null;
   }
   noise(x,z,scale){const a=Math.floor(x/scale),b=Math.floor(z/scale);let u=x/scale-a,v=z/scale-b;u=u*u*(3-2*u);v=v*v*(3-2*v);return (hash(a,b,this.seed)*(1-u)+hash(a+1,b,this.seed)*u)*(1-v)+(hash(a,b+1,this.seed)*(1-u)+hash(a+1,b+1,this.seed)*u)*v;}
-  biome(x,z){if(this.dimension==='ender')return 'ender';if(this.dimension==='nether')return 'nether';const n=this.noise(x+170,z-85,160);if(x>145+n*25&&z>115)return 'badlands';if(x<-170&&z>145+n*25)return 'marsh';if(x>150&&z>-135&&z<15)return 'savanna';if(z<-155&&n>.32)return 'snow';if(x>115&&n>.46)return 'desert';if(n<.24||x<-55&&z>-135)return 'forest';if(n>.76&&Math.hypot(x,z)>95)return 'mountain';return 'meadow';}
+  biome(x,z){return this.terrain>=7&&this.dimension==='overworld'?this.column(Math.floor(x),Math.floor(z)).biome:this.legacyBiome(x,z);}
+  legacyBiome(x,z){if(this.dimension==='ender')return 'ender';if(this.dimension==='nether')return 'nether';const n=this.noise(x+170,z-85,160);if(x>145+n*25&&z>115)return 'badlands';if(x<-170&&z>145+n*25)return 'marsh';if(x>150&&z>-135&&z<15)return 'savanna';if(z<-155&&n>.32)return 'snow';if(x>115&&n>.46)return 'desert';if(n<.24||x<-55&&z>-135)return 'forest';if(n>.76&&Math.hypot(x,z)>95)return 'mountain';return 'meadow';}
   column(x,z){
     const key=`${x},${z}`;if(this.columns.has(key))return this.columns.get(key);
     if(this.course){const c={h:this.course.heights.get(key)??-64,biome:'meadow',bottom:5,river:999};this.columns.set(key,c);return c;}
@@ -31,17 +35,19 @@ export class World {
       const h=exists?(central?18:18+Math.floor(hash(gz,gx,this.seed)*4))+(central?0:Math.floor(this.noise(x,z,12)*2))+Math.floor(Math.max(0,d-9)*.09):-64;
       const c={h,biome:'ender',bottom:h-Math.max(3,Math.floor((1-d/edge)*16+this.noise(x,z,9)*3)),dx,dz,central,exists,river:999};this.columns.set(key,c);return c;
     }
-    const biome=this.biome(x,z),large=this.noise(x,z,78),detail=this.noise(x+37,z-51,22);
+    let biome=this.legacyBiome(x,z);const large=this.noise(x,z,78),detail=this.noise(x+37,z-51,22);
     let h=10+large*15+detail*5;
     if(this.terrain>=6)h=terrainHeight(this,x,z);else if(biome==='mountain'||biome==='snow')h+=Math.pow(this.noise(x-140,z+95,44),1.7)*38;
     const river=Math.abs(z-(66+Math.sin(x*.013)*21+Math.sin(x*.039)*5));
     if(river<17){const a=Math.min(1,(17-river)/12);h=h*(1-a)+(SEA_LEVEL-2)*a;}
     // Preserve the original island, then blend into new continents past its ocean.
     const coast=Math.hypot(x*.92,z*.87);
-    if(coast>405){const returnToLand=Math.max(0,Math.min(1,(coast-690)/160));h-=(coast-405)*.65*(1-returnToLand);}
+    if(this.terrain<7&&coast>405){const returnToLand=Math.max(0,Math.min(1,(coast-690)/160));h-=(coast-405)*.65*(1-returnToLand);}
+    const region=this.terrain>=7?smooth(280,540,Math.hypot(x,z)):0,climate=region>0?climateAt(this.seed,x,z):null;
+    if(climate){h=h*(1-region)+climate.h*region;if(region>.5)biome=climate.biome;}
     const d=Math.hypot(x,z-12);if(d<42){const a=Math.max(0,Math.min(1,(42-d)/22));h=h*(1-a)+6*a;}
-    h=Math.max(-7,Math.min(70,Math.floor(h)));
-    const wrap=(n,span)=>((n+span/2)%span+span)%span-span/2,cx=Math.floor(x/52),cz=Math.floor(z/52),px=cx*52+20+hash(cx,cz,this.seed)*12,pz=cz*52+22;const v={h,biome,t1:-16+Math.sin(z*.047)*5,t2:-34+Math.sin(x*.039)*7,river,a2:(wrap(x-Math.sin(z*.033)*17,80)/3.2)**2,b2:(wrap(z-Math.sin(x*.035)*19,88)/4.4)**2,chamber:((x-px)/13)**2+((z-pz)/16)**2,cy:-22-hash(cz,cx,this.seed+7)*23,rock:this.noise(x+9,z-31,28)>.7?'granite':this.noise(x-67,z+84,34)>.64?'limestone':'stone'};this.columns.set(key,v);return v;
+    h=Math.max(this.terrain>=7?-36:-7,Math.min(this.terrain>=7?78:70,Math.floor(h)));
+    const wrap=(n,span)=>((n+span/2)%span+span)%span-span/2,cx=Math.floor(x/52),cz=Math.floor(z/52),px=cx*52+20+hash(cx,cz,this.seed)*12,pz=cz*52+22;const v={h,biome,climate,region,t1:-16+Math.sin(z*.047)*5,t2:-34+Math.sin(x*.039)*7,river,a2:(wrap(x-Math.sin(z*.033)*17,80)/3.2)**2,b2:(wrap(z-Math.sin(x*.035)*19,88)/4.4)**2,chamber:((x-px)/13)**2+((z-pz)/16)**2,cy:-22-hash(cz,cx,this.seed+7)*23,rock:this.noise(x+9,z-31,28)>.7?'granite':this.noise(x-67,z+84,34)>.64?'limestone':'stone'};this.columns.set(key,v);return v;
   }
   pruneCache(cx,cz,radius=8){
     // Retain nearby terrain so travel does not periodically regenerate the entire view.
@@ -49,7 +55,8 @@ export class World {
     for(const key of this.columns.keys()){const [x,z]=key.split(',').map(Number);if(outside(x,z))this.columns.delete(key);}
     for(const key of this.structures.keys()){const [x,,z]=key.split(',').map(Number);if(outside(x,z))this.structures.delete(key);}
     for(const key of this.prepared){const [x,z]=key.split(',').map(Number);if(Math.abs(x-cx)>radius||Math.abs(z-cz)>radius)this.prepared.delete(key);}
-    this.makeCamp();
+    for(const tag of this.chunkTops.keys()){const[x,z]=tag.split(',').map(Number);if(Math.abs(x-cx)>radius||Math.abs(z-cz)>radius)this.chunkTops.delete(tag);}
+    this.ruins?.prune(cx,cz,radius);this.makeCamp();
   }
   height(x,z){return this.column(Math.floor(x),Math.floor(z)).h;}
   findSpawn(){if(this.course)return {...CLOUDSTEP.spawn};if(this.dimension==='ender')return{x:.5,y:19,z:8.5};if(this.dimension==='nether')return{x:.5,y:25,z:8.5};
@@ -104,6 +111,8 @@ export class World {
     if(this.inCave(x,y,z,c))return y<-52?'lava':null;
     if(c.biome==='badlands'&&y<=h&&y>h-15)return y===h?'red_sand':['red_terracotta','ochre_terracotta','red_terracotta','chalk'][Math.floor((y+96)/3)%4];
     if(c.biome==='marsh'&&y===h&&this.noise(x+91,z,12)>.58)return 'water';
+    if(y===h&&c.region>.5)return blendedSurface({...c.climate,h},x,z,this.seed);
+    if(y>h-4&&c.region>.5)return y===h-3&&c.climate.river<22?'clay':BIOME_DEFINITIONS[c.biome].subsurface;
     if(y===h)return h<=SEA_LEVEL+1?'sand':h>48&&!['savanna','marsh'].includes(c.biome)?'snow':BIOMES[c.biome].top;
     if(y>h-4)return c.biome==='desert'?'sand':y===h-3&&c.river<22?'clay':'dirt';
     const rock=y<-49?'basalt':y<-38?'slate':c.rock==='limestone'&&y<-5?'marble':c.rock;
@@ -129,10 +138,14 @@ export class World {
   prepare(cx,cz){if(this.dimension!=='overworld')return;
     if(this.terrain<6)return this.prepareLegacy(cx,cz);
     const tag=`${cx},${cz}`;if(this.prepared.has(tag))return;this.prepared.add(tag);
-    const put=(x,y,z,type)=>{if(Math.floor(x/16)!==cx||Math.floor(z/16)!==cz)return;const key=cellKey(x,y,z),old=this.structures.get(key);if(!old||['leaf','pine','autumnleaf'].includes(old))this.structures.set(key,type);};
-    for(let x=cx*16-4;x<cx*16+20;x++)for(let z=cz*16-4;z<cz*16+20;z++){
+    const sites=this.ruins?.forChunk(cx,cz)||[],reserved=new Set();
+    const stamp=(x,y,z,type)=>{if(Math.floor(x/16)!==cx||Math.floor(z/16)!==cz||y>WORLD_TOP||y<=WORLD_BOTTOM)return;const k=cellKey(x,y,z);this.structures.set(k,type);reserved.add(k);if(type)this.chunkTops.set(tag,Math.max(this.chunkTops.get(tag)||0,y+2));};
+    this.ruins?.stamp(cx,cz,sites,stamp);
+    const put=(x,y,z,type)=>{if(Math.floor(x/16)!==cx||Math.floor(z/16)!==cz)return;const key=cellKey(x,y,z),old=this.structures.get(key);if(reserved.has(key))return;if(!this.structures.has(key)||['leaf','pine','autumnleaf'].includes(old)){this.structures.set(key,type);this.chunkTops.set(tag,Math.max(this.chunkTops.get(tag)||0,y+2));}};
+    const margin=this.terrain>=7?6:4;
+    for(let x=cx*16-margin;x<cx*16+16+margin;x++)for(let z=cz*16-margin;z<cz*16+16+margin;z++){
       const c=this.column(x,z),safe=Math.hypot(x,z-14)<9||x>16&&x<29&&z>-38&&z<16;
-      if(safe||c.h<SEA_LEVEL||c.h>58)continue;
+      if(safe||c.h<SEA_LEVEL||c.h>(this.terrain>=7?70:58)||this.ruins?.reserved(x,z,sites,3))continue;
       if(c.h<=SEA_LEVEL+2&&c.river<14){if(hash(x,z,this.seed+32)>.982)put(x,c.h+1,z,'cane');continue;}
       if(c.biome==='desert'||c.biome==='badlands'){if(hash(x,z,this.seed+32)>.997)for(let y=1;y<=2+Math.floor(hash(z,x,this.seed)*2);y++)put(x,c.h+y,z,'cactus');continue;}
       if(c.biome==='marsh'&&this.noise(x+91,z,12)>.58){if(hash(x,z,this.seed+32)>.97)put(x,c.h+1,z,'cane');continue;}

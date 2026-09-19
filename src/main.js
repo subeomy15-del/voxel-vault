@@ -1,3 +1,4 @@
+import {installWorldDebug} from './world-debug.js?v=31';
 import {openDurableStorage} from './durable-storage.js?v=31';
 import {showStartupFailure} from './startup-errors.js?v=31';
 import { MultiplayerModes } from './multiplayer-modes.js?v=31';
@@ -24,7 +25,7 @@ try{
   renderer=new Renderer(document.querySelector('#world'),settings);
   startupStage='save';
   try{storage=await openDurableStorage(storage);}catch(error){document.querySelector('#save-state').textContent='Recovery storage unavailable · using local saves';}
-  game=new Game(renderer,new Audio(settings),storage);startupStage='interface';ui=new UI(game,settings);
+  game=new Game(renderer,new Audio(settings),storage);startupStage='interface';ui=new UI(game,settings);installWorldDebug(game,renderer);
   multiplayer=new Multiplayer(game);multiplayerUI=new MultiplayerUI(game,ui,multiplayer);multiplayerPlayers=new MultiplayerPlayers(renderer,multiplayer);fieldGoals=new FieldGoals(game);game.fieldGoals=fieldGoals;new MultiplayerModes(game,ui,multiplayer);multiplayer.restore();
   parkour=new Parkour(game);parkourUI=new ParkourUI(game,ui,parkour);parkourView=new ParkourView(renderer,parkour);
   const canvas=renderer.renderer.domElement;const use=()=>{if(game.interact()===true){game.placeHeld=true;game.placeTimer=.3;}};let dragging=false,lastTouch=null,lastSpace=0,expectedUnlock=false;
