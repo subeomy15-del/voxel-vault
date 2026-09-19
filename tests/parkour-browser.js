@@ -67,7 +67,11 @@ try{
   await evaluate(`document.exitPointerLock();ui.touch=matchMedia('(pointer: coarse)').matches;`);await wait(150);await evaluate(`ui.resume();`);
   assert.equal(await evaluate(`document.querySelector('#touch-controls').hidden`),false);
   assert.ok(await evaluate('document.documentElement.scrollWidth<=innerWidth'));
+  // Viewport emulation and pointer-lock release reach the compositor asynchronously.
+  await until(`!document.pointerLockElement&&document.querySelector('#loading').hidden&&g.screen===null`);
+  await evaluate(`new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))`);
   const dashPoint=await evaluate(`(()=>{const b=document.querySelector('[data-touch="dash"]').getBoundingClientRect();return {x:b.x+b.width/2,y:b.y+b.height/2};})()`);
+  assert.equal(await evaluate(`document.elementFromPoint(${dashPoint.x},${dashPoint.y})?.dataset.touch`),'dash','Touch sprint must be reachable after mobile resize');
   await call('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[dashPoint]});
   await call('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   await evaluate(`g.touch.z=-1;`);await wait(200);

@@ -1,25 +1,25 @@
-import {GeometryCache,ModelPool} from './model-cache.js?v=32';
-import {AutoQuality} from './auto-quality.js?v=32';
+import {GeometryCache,ModelPool} from './model-cache.js?v=33';
+import {AutoQuality} from './auto-quality.js?v=33';
 import * as THREE from '../vendor/three.module.js';
-import { BLOCKS, ITEMS, hash } from './data.js?v=32';
-import { ENEMIES } from './combat.js?v=32';
-import { textureCanvas,TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=32';
-import { Scenery } from './scenery.js?v=32';
-import { boxesFor } from './shapes.js?v=32';
-import { animalModel,bowModel,arrowModel,toolModel } from './models.js?v=32';
-import { itemModel } from './item-model.js?v=32';
-import { dragonModel,animateDragon } from './dragon-model.js?v=32';
-import { RiftEffects } from './rift-effects.js?v=32';
-import { PostProcess } from './post-process.js?v=32';
-import { PlayerModel } from './player-model.js?v=32';
-import { cameraPosition } from './perspective.js?v=32';
-import { ViewEffects } from './view-effects.js?v=32';
-import { undeadModel } from './undead-model.js?v=32';
-import { ParticlePool } from './particles.js?v=32';
-import { CameraMotion } from './camera-motion.js?v=32';
-import { FrameBudget,renderOptions } from './render-performance.js?v=32';
-import { Diagnostics } from './diagnostics.js?v=32';
-import { MovementEffects } from './movement-effects.js?v=32';
+import { BLOCKS, ITEMS, hash } from './data.js?v=33';
+import { ENEMIES } from './combat.js?v=33';
+import { textureCanvas,TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=33';
+import { Scenery } from './scenery.js?v=33';
+import { boxesFor } from './shapes.js?v=33';
+import { animalModel,bowModel,arrowModel,toolModel } from './models.js?v=33';
+import { itemModel } from './item-model.js?v=33';
+import { dragonModel,animateDragon } from './dragon-model.js?v=33';
+import { RiftEffects } from './rift-effects.js?v=33';
+import { PostProcess } from './post-process.js?v=33';
+import { PlayerModel } from './player-model.js?v=33';
+import { cameraPosition } from './perspective.js?v=33';
+import { ViewEffects } from './view-effects.js?v=33';
+import { undeadModel } from './undead-model.js?v=33';
+import { ParticlePool } from './particles.js?v=33';
+import { CameraMotion } from './camera-motion.js?v=33';
+import { FrameBudget,renderOptions } from './render-performance.js?v=33';
+import { Diagnostics } from './diagnostics.js?v=33';
+import { MovementEffects } from './movement-effects.js?v=33';
 export class Renderer {
   constructor(container,settings){
     this.geometryCache=new GeometryCache();this.mobPool=new ModelPool(g=>this.disposeGroup(g));this.projectilePool=new ModelPool(g=>this.disposeGroup(g),50);this.autoQuality=new AutoQuality();this.crosshair=document.querySelector('#crosshair');this.projectedPoint=new THREE.Vector3();this.handMaterials=[];this.bowBindings=[];this.shadowTimer=0;this.diagnostics=new Diagnostics();this.settings=settings;this.options=renderOptions(settings,this.autoQuality.level);this.performance=new FrameBudget();this.cameraMotion=new CameraMotion();this.telemetry={fps:60,frameMs:16.7,drawCalls:0,triangles:0,chunks:0,queued:0,particles:0,pixelRatio:1,quality:this.options.quality,workerMs:0};this.scene=new THREE.Scene();this.scene.background=new THREE.Color('#b6cddd');this.scene.fog=new THREE.Fog('#b6cddd',62,125);
@@ -30,7 +30,7 @@ export class Renderer {
     this.waterMaterial=new THREE.MeshStandardMaterial({color:'#42a7dd',roughness:.6,metalness:0,transparent:true,opacity:.78,vertexColors:true});
     this.glassMaterial=new THREE.MeshLambertMaterial({color:'#ffffff',transparent:true,opacity:.28,vertexColors:true});
     this.epoch=0;this.revision=0;this.chunkVersions=new Map();this.ready=[];this.inflight=false;this.underground=false;
-    this.worker=new Worker(new URL('./terrain-worker.js?v=32',import.meta.url),{type:'module'});
+    this.worker=new Worker(new URL('./terrain-worker.js?v=33',import.meta.url),{type:'module'});
     this.worker.onmessage=({data})=>{if(data.epoch!==this.epoch)return;this.inflight=false;this.telemetry.workerMs=data.buildMs||0;if(data.ambientOcclusion!==this.options.ambientOcclusion){if(!this.queue.some(([x,z])=>x===data.cx&&z===data.cz))this.queue.push([data.cx,data.cz]);return;}if(data.revision<(this.chunkVersions.get(`${data.cx},${data.cz}`)||0))return;this.ready.push(data);};
     this.worker.onerror=e=>{console.error('Terrain worker failed',e);document.querySelector('#loading').hidden=false;document.querySelector('#loading').textContent='Terrain could not load. Reload the page to try again.';};
     this.projectileMeshes=new Map();
@@ -122,6 +122,7 @@ export class Renderer {
   buildMob(mob){
     if(['zombie','husk','skeleton','draugr_knight','spider'].includes(mob.kind)){const g=undeadModel(this,mob);this.scene.add(g);this.mobMeshes.set(mob.id,g);return g;}
     if(mob.kind==='dragon'){const g=dragonModel(this);this.scene.add(g);this.mobMeshes.set(mob.id,g);return g;}
+    if(mob.kind==='trader'){const g=new THREE.Group();g.add(this.part('#487c7a',.58,.7,.38,0,.84,0),this.part('#d6b492',.42,.43,.4,0,1.41,0),this.part('#525747',.22,.48,.25,-.16,.28,0),this.part('#525747',.22,.48,.25,.16,.28,0),this.part('#d4b58f',.18,.62,.2,-.38,.82,0),this.part('#d4b58f',.18,.62,.2,.38,.82,0),this.part('#b59962',.67,.12,.58,0,1.65,0),this.part('#bba474',.42,.23,.4,0,1.8,0),this.part('#84674c',.46,.5,.24,0,.87,-.3),this.part('#dec799',.38,.44,.025,0,.78,.205));for(const x of [-.11,.11])g.add(this.part('#34494c',.065,.07,.018,x,1.45,.21));this.scene.add(g);this.mobMeshes.set(mob.id,g);return g;}
     if(ENEMIES[mob.kind]?.passive){const g=animalModel(this,mob);this.scene.add(g);this.mobMeshes.set(mob.id,g);return g;}
     const g=new THREE.Group(),boss=mob.kind==='guardian',animal=mob.kind==='grazer';const scale=boss?2.3:1;g.scale.setScalar(scale);
     const info=ENEMIES[mob.kind]||ENEMIES.sentinel,base=info.color,light=info.glow;
@@ -139,7 +140,7 @@ export class Renderer {
   }
   setHand(name){if(name===this.heldName)return;this.heldName=name;for(const c of [...this.hand.children])this.disposeGroup(c);const item=ITEMS[name];if(!item)return;
     const g=new THREE.Group();g.rotation.set(-.15,0,-.2);
-    if(item.kind==='grapple')g.add(itemModel(this,name));
+    if(['grapple','fishing','potion','chart'].includes(item.kind))g.add(itemModel(this,name));
     else if(['sword','pickaxe','axe','shovel','hoe'].includes(item.kind))g.add(toolModel(this,item,name));
     else if(item.kind==='orb'){const orb=new THREE.Mesh(new THREE.IcosahedronGeometry(.2,1),new THREE.MeshStandardMaterial({color:item.color,emissive:item.color,emissiveIntensity:.6,metalness:.3,roughness:.2}));g.add(orb);}
     else if(item.kind==='bow')g.add(bowModel(this,name,item));
@@ -208,7 +209,7 @@ export class Renderer {
     this.fireworks=(this.fireworks||[]).filter(f=>!f.done);this.particles.update(dt);
     this.telegraph.visible=!!game.slam;if(game.slam){this.telegraph.position.set(game.slam.x,game.slam.y+.04,game.slam.z);this.telegraph.scale.setScalar(game.slam.radius);this.telegraph.material.opacity=.4+Math.sin(performance.now()*.02)*.3;}
     const bolts=new Set();for(const p of game.projectiles){bolts.add(p.id);let mesh=this.projectileMeshes.get(p.id);if(!mesh){const key=p.hostile?'hostile':p.color;mesh=this.projectilePool.take(key)||(p.hostile?new THREE.Mesh(new THREE.BoxGeometry(.1,.1,.35),new THREE.MeshBasicMaterial({color:'#a7cbe4'})):arrowModel(this,p.color));mesh.userData.poolKey=key;this.scene.add(mesh);this.projectileMeshes.set(p.id,mesh);}mesh.position.set(p.x,p.y,p.z);mesh.lookAt(p.x+p.vx,p.y+p.vy,p.z+p.vz);}for(const[id,mesh]of this.projectileMeshes)if(!bolts.has(id)){this.projectilePool.release(mesh.userData.poolKey,mesh);this.projectileMeshes.delete(id);}
-    const draw=game.drawState?Math.min(1,game.drawState.time/ITEMS[game.held].drawTime):0;
+    const draw=game.drawState?Math.min(1,game.drawState.time/game.drawDuration()):0;
     this.hand.position.x=.43-draw*.1;this.hand.position.z=-.82+draw*.16;
     if(game.eating){this.hand.position.set(.16,-.28+Math.sin(game.eating.time*22)*.035,-.53);this.hand.rotation.z=.45;}
     this.hand.visible=!game.screen&&!game.gliding&&perspective===0&&game.state.dimension!=='parkour';

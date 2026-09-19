@@ -1,8 +1,9 @@
-import {ITEMS,RECIPES,SMELTING,canCraft,maxCraft,ingredientCount,ingredientKeys} from './data.js?v=32';
-import {icon} from './icons.js?v=32';
-import {packSlot} from './inventory-layout.js?v=32';
-import {enchantRow} from './workshop-ui.js?v=32';
-import {enchantKind,enchantLevel,enchantCost} from './enchanting.js?v=32';
+import {infusionTooltip} from './infusion-ui.js?v=33';
+import {ITEMS,RECIPES,SMELTING,canCraft,maxCraft,ingredientCount,ingredientKeys} from './data.js?v=33';
+import {icon} from './icons.js?v=33';
+import {packSlot} from './inventory-layout.js?v=33';
+import {enchantRow} from './workshop-ui.js?v=33';
+import {enchantKind,enchantLevel,enchantCost} from './enchanting.js?v=33';
 const text=(node,value)=>{if(node&&node.textContent!==String(value))node.textContent=String(value);};
 const flag=(node,name,value)=>{if(node.classList.contains(name)!==!!value)node.classList.toggle(name,!!value);};
 const attr=(node,name,value)=>{if(node.getAttribute(name)!==String(value))node.setAttribute(name,String(value));};
@@ -19,6 +20,7 @@ export class InventoryBindings {
    const name=s.bar[i];let slot=this.hotbarSlots[i];
    if(!slot){slot=element(`<button class="slot" data-action="slot" data-slot="${i}"><small>${i+1}</small><span class="slot-art"></span><b></b></button>`);this.hotbar.append(slot);this.hotbarSlots[i]=slot;}
    if(this.hotbarNames[i]!==name){slot.querySelector('.slot-art').innerHTML=icon(name);slot.title=ITEMS[name].name+(name==='firecracker'?' · click or H to use':'');this.hotbarNames[i]=name;}
+   const tooltip=infusionTooltip(s,name);slot.title=ITEMS[name].name+(tooltip?'\n'+tooltip:'');flag(slot,'infused',!!tooltip);slot.dataset.tier=s.infusions?.[name]?.tier||'';
    flag(slot,'selected',s.selected===i);text(slot.querySelector('b'),g.creative?'∞':s.inv[name]||0);
   }
   text(document.querySelector('#item-name'),ITEMS[g.held].name);
@@ -33,7 +35,7 @@ export class InventoryBindings {
   this.stores=[...root.querySelectorAll('.storage-grid')].map(grid=>({grid,slots:new Map([...grid.querySelectorAll('[data-transfer]')].map(n=>[n.dataset.transfer,n]))}));return true;
  }
  update(){
-  this.updateHotbar();const g=this.ui.game,s=g.state;
+  this.updateHotbar();this.ui.infusionView?.update();const g=this.ui.game,s=g.state;
   if(!['inventory','craft','enchant','storage','furnace'].includes(g.screen)||!this.ui.overlay.firstElementChild)return;
   const fresh=this.bind(),changed=diff(this.inv,s.inv),gear=JSON.stringify([s.selected,s.bar,s.armor,s.armorParts,s.glider,s.ammo]),gearChanged=gear!==this.gear;
   const store=g.containerKey==='moon'?s.moonChest:s.containers[g.containerKey]||{},stored=diff(this.store,store),enchantChanged=diff(this.enchants,s.enchants||{}),auraChanged=this.aura!==s.aura;

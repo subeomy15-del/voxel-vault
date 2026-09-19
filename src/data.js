@@ -1,7 +1,9 @@
-import {installPotions} from './potion-content.js?v=32';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=32';
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=32';
-import { installContent } from './badlands-content.js?v=32';
+import {installExploration} from './exploration-content.js?v=33';
+import {installAltars} from './infusion-registry.js?v=33';
+import {installPotions} from './potion-content.js?v=33';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=33';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=33';
+import { installContent } from './badlands-content.js?v=33';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },
@@ -453,3 +455,7 @@ export const STARTER_BAR = ['wood_sword','wood_pickaxe','wood_axe','grass','wood
 installContent(BLOCKS,ITEMS,RECIPES,BIOMES);
 
 installPotions(BLOCKS,ITEMS,RECIPES);
+
+installAltars(BLOCKS,ITEMS,RECIPES);
+
+installExploration(BLOCKS,ITEMS,RECIPES,SMELTING);

@@ -1,5 +1,6 @@
-import {potionPower,tickPotions} from './potions.js?v=32';
-import { ITEMS,EFFECTS } from './data.js?v=32';
+import {armorInfusion} from './infusions.js?v=33';
+import {potionPower,tickPotions} from './potions.js?v=33';
+import { ITEMS,EFFECTS } from './data.js?v=33';
 export function activeEffect(game,name){return (game.state.effects?.[name]||0)>0||potionPower(game.state,name)>0;}
 export function canEat(game,name){
   const item=ITEMS[name],s=game.state;if(!item||item.kind!=='food'||!(s.inv[name]>0))return false;
@@ -29,7 +30,7 @@ export function tickSurvival(game,dt){
   s.exhaustion+=dt*(game.sprinting?.24:game.moving?.04:.006)*(s.mode==='adventure'?1.75:1);
   while(s.exhaustion>=4){s.exhaustion-=4;if(s.saturation>0)s.saturation=Math.max(0,s.saturation-1);else s.food=Math.max(0,s.food-1);}
   if(s.hp<20&&s.food>=16){
-    game.regenTimer=(game.regenTimer||0)+dt;const interval=(s.saturation>0?2.5:5)*(s.mode==='adventure'?2:1);
+    game.regenTimer=(game.regenTimer||0)+dt;const interval=(s.saturation>0?2.5:5)*(s.mode==='adventure'?2:1)/(1+Math.min(.6,armorInfusion(s,'recovery')));
     if(game.regenTimer>=interval){game.regenTimer=0;s.hp=Math.min(20,s.hp+1);s.exhaustion+=1.2;}
   }else game.regenTimer=0;
   if(s.food===0){game.hungerTimer=(game.hungerTimer||0)+dt;if(game.hungerTimer>=7){game.hungerTimer=0;s.hp=Math.max(1,s.hp-1);}}else game.hungerTimer=0;

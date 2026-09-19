@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from '../vendor/three.module.js';
-import { CameraMotion } from '../src/camera-motion.js?v=32';
-import { FrameBudget, renderOptions } from '../src/render-performance.js?v=32';
-import { ParticlePool } from '../src/particles.js?v=32';
-import { MovementEffects } from '../src/movement-effects.js?v=32';
-import { World } from '../src/world.js?v=32';
-import { meshChunk } from '../src/mesh.js?v=32';
+import { CameraMotion } from '../src/camera-motion.js?v=33';
+import { FrameBudget, renderOptions } from '../src/render-performance.js?v=33';
+import { ParticlePool } from '../src/particles.js?v=33';
+import { MovementEffects } from '../src/movement-effects.js?v=33';
+import { World } from '../src/world.js?v=33';
+import { meshChunk } from '../src/mesh.js?v=33';
 
 test('render settings respect explicit custom fields and clamp expensive ranges', () => {
   const settings = renderOptions({ quality: 'custom', renderDistance: 50, fov: 140, shadows: false, ambientOcclusion: false, particles: 'off', antialias: false, cameraEffects: false });

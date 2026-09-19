@@ -1,9 +1,10 @@
-import { ANIMALS,updateAnimal } from './wildlife.js?v=32';
-import { visibleBetween,findMobPath } from './navigation.js?v=32';
-import { updateDragon } from './dragon.js?v=32';
-import { EntityIndex } from './entity-index.js?v=32';
+import { ANIMALS,updateAnimal } from './wildlife.js?v=33';
+import { visibleBetween,findMobPath } from './navigation.js?v=33';
+import { updateDragon } from './dragon.js?v=33';
+import { EntityIndex } from './entity-index.js?v=33';
 
 export const ENEMIES = {
+  trader:{name:'Wayfarer trader',hp:20,speed:0,damage:0,color:'#497b7c',glow:'#d6b894',passive:true,height:1.8,radius:.35,xp:0},
   zombie:{name:'Zombie',hp:22,speed:1.65,damage:4,color:'#667554',glow:'#8c9373',xp:20,drops:{coal:[1,2]}},
   husk:{name:'Husk',hp:28,speed:1.5,damage:5,color:'#948264',glow:'#b7a07a',xp:24,drops:{coal:[1,2]}},
   skeleton:{name:'Skeleton',hp:18,speed:1.8,damage:4,color:'#c9c2aa',glow:'#dfd8be',xp:24,drops:{arrows:[3,6]}},
@@ -39,7 +40,7 @@ export function targetMob(game,reach=4){
 export function launchBolt(game, origin, direction, damage=3, hostile=true,options={}) {
   if(game.projectiles.length>=50)return;
   const len=Math.hypot(direction.x,direction.y,direction.z)||1, speed=options.speed||(hostile?8:27);
-  game.projectiles.push({id:++game.serial,x:origin.x,y:origin.y,z:origin.z,vx:direction.x/len*speed,vy:direction.y/len*speed,vz:direction.z/len*speed,damage,hostile,gravity:options.gravity||0,slow:options.slow||0,color:options.color||'#c9b38a',life:hostile?4:4});
+  game.projectiles.push({id:++game.serial,x:origin.x,y:origin.y,z:origin.z,vx:direction.x/len*speed,vy:direction.y/len*speed,vz:direction.z/len*speed,damage,hostile,impact:options.impact||0,gravity:options.gravity||0,slow:options.slow||0,color:options.color||'#c9b38a',life:hostile?4:4});
 }
 function shootAtPlayer(game,m,spread=0) {
   const origin={x:m.x,y:m.y+(m.kind==='guardian'?2.4:(m.kind==='void_archer'||m.kind==='skeleton')?1.8:1.15),z:m.z};
@@ -60,7 +61,7 @@ export function updateProjectiles(game,dt) {
         p.life=0;break;
       }
       if(p.hostile&&Math.hypot(p.x-game.pos.x,p.z-game.pos.z)<.5&&p.y>game.pos.y&&p.y<game.pos.y+1.8){game.hurt(p.damage,true);p.life=0;}
-      if(!p.hostile)for(const m of index?index.near(p.x,p.z,4):game.mobs)if(m.hp>0&&Math.hypot(m.x-p.x,m.z-p.z)<(m.kind==='guardian'?1.3:(ENEMIES[m.kind]?.radius||.35)+.2)&&p.y>m.y&&p.y<m.y+(m.kind==='guardian'?4:(ENEMIES[m.kind]?.height||1.7))){if(p.slow)m.slow=p.slow;game.hit(m,p.damage);p.life=0;break;}
+      if(!p.hostile)for(const m of index?index.near(p.x,p.z,4):game.mobs)if(m.hp>0&&Math.hypot(m.x-p.x,m.z-p.z)<(m.kind==='guardian'?1.3:(ENEMIES[m.kind]?.radius||.35)+.2)&&p.y>m.y&&p.y<m.y+(m.kind==='guardian'?4:(ENEMIES[m.kind]?.height||1.7))){if(p.slow)m.slow=p.slow;game.hit(m,p.damage);game.knockback?.(m,p.impact);p.life=0;break;}
     }
   }
   game.projectiles=game.projectiles.filter(p=>p.life>0);
@@ -72,6 +73,7 @@ export function updateEnemies(game,dt) {
     m.flash=Math.max(0,m.flash-dt);m.cooldown-=dt*(game.hardAdventure&&!ENEMIES[m.kind]?.passive?1.2:1);m.stun=Math.max(0,(m.stun||0)-dt);
     const d=Math.hypot(game.pos.x-m.x,game.pos.z-m.z), info=ENEMIES[m.kind]||ENEMIES.sentinel;
     if(d>75)continue;
+    if(m.kind==='trader'){m.angle=Math.atan2(game.pos.x-m.x,game.pos.z-m.z);continue;}
     if(info.passive){updateAnimal(game,m,dt);continue;}
     m.slow=Math.max(0,(m.slow||0)-dt);
     if(game.effect('invisibility')&&game.revealTime<=0&&d>2){m.windup=0;m.lunge=0;continue;}

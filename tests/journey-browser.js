@@ -5,7 +5,7 @@ try{
  await c.send('Network.setCacheDisabled',{cacheDisabled:true});
  await c.send('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
  await c.send('Page.navigate',{url:'http://localhost:3001/'});await sleep(1500);
- await ev(`(async()=>{const m=await import('/src/main.js?v=32');window.g=m.game;window.ui=m.ui;g.start('adventure',true);g.pause('pause');g.screen=null;ui.render();})()`);await sleep(1200);
+ await ev(`(async()=>{const m=await import('/src/main.js?v=33');window.g=m.game;window.ui=m.ui;g.start('adventure',true);g.pause('pause');g.screen=null;ui.render();})()`);await sleep(1200);
  assert.match(await ev("document.querySelector('#rift-objective').textContent"),/Gather your first timber/);
  await ev("g.add('wood',6);g.updateJourney();ui.hud()");
  await c.click('#rift-objective button');assert.equal(await ev('g.screen'),'craft');
@@ -18,7 +18,7 @@ try{
  await c.send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await sleep(300);await c.screenshot('journey-mobile');
  const box=await ev("(()=>{const r=document.querySelector('#rift-objective').getBoundingClientRect();return {left:r.left,right:r.right,bottom:r.bottom}})()");assert.ok(box.left>=0&&box.right<=390&&box.bottom<600);
  await ev("g.save()");await c.send('Page.reload');await sleep(1200);
- await ev(`(async()=>{const m=await import('/src/main.js?v=32');window.g=m.game;window.ui=m.ui;g.start();g.pause('journal');ui.render();})()`);
+ await ev(`(async()=>{const m=await import('/src/main.js?v=33');window.g=m.game;window.ui=m.ui;g.start();g.pause('journal');ui.render();})()`);
  assert.equal(await ev('g.state.journeyStage'),2);
  await c.screenshot('journey-journal-mobile');assert.ok(await ev('document.documentElement.scrollWidth<=innerWidth'));
  assert.deepEqual(c.errors,[]);assert.deepEqual(c.failed,[]);

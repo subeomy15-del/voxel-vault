@@ -1,4 +1,4 @@
-import {POTIONS,POTION_FAMILIES,potionDescription} from './potion-content.js?v=32';
+import {POTIONS,POTION_FAMILIES,potionDescription} from './potion-content.js?v=33';
 export const DRINK_COOLDOWN=3;
 const legacy={id:'potion',family:'healing',name:'Healing tonic',power:10,duration:0,color:'#d4abe9'};
 export const potionFor=id=>id==='potion'?legacy:POTIONS[id];

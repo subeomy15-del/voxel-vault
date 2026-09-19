@@ -1,6 +1,6 @@
-import { hash } from './data.js?v=32';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=32';
-import {integerHash} from './climate.js?v=32';
+import { hash } from './data.js?v=33';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=33';
+import {integerHash} from './climate.js?v=33';
 const blend=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
 export function terrainHeight(world,x,z){
   const noise=(a,b,s)=>world.noise(a,b,s),climate=noise(x+170,z-85,160);

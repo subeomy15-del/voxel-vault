@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import { ANIMALS } from './wildlife.js?v=32';
+import { ANIMALS } from './wildlife.js?v=33';
 const sailTextures=new Map();
 function sailTexture(color){
   if(sailTextures.has(color))return sailTextures.get(color);
@@ -66,15 +66,17 @@ export function gliderModel(r,item){
 }
 
 export function toolModel(r,item,name,includeHand=true){
-  const g=new THREE.Group(),metal=!name.startsWith('wood_'),material=new THREE.MeshStandardMaterial({color:item.color,roughness:metal?.38:.8,metalness:metal?.45:0});
+  const g=new THREE.Group(),tier=item.tier||1,metal=!name.startsWith('wood_')&&!name.startsWith('stone_'),material=new THREE.MeshStandardMaterial({color:item.color,roughness:metal?.38:.8,metalness:metal?.45:0});
   const flat=(points,depth=.07)=>{const shape=new THREE.Shape();points.forEach(([x,y],i)=>i?shape.lineTo(x,y):shape.moveTo(x,y));shape.closePath();const mesh=new THREE.Mesh(new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:true,bevelSegments:1,steps:1,bevelSize:.009,bevelThickness:.008}),material);mesh.position.z=-depth/2;g.add(mesh);return mesh;};
   const add=(color,w,h,d,x,y,z)=>g.add(r.part(color,w,h,d,x,y,z));
   if(item.model==='hammer'){add('#786048',.085,.88,.085,0,-.03,0);add(item.color,.56,.3,.25,0,.38,0);add('#d9e3e6',.065,.33,.28,-.27,.38,0);add('#d9e3e6',.065,.33,.28,.27,.38,0);}
   else if(item.kind==='sword'){
-    flat([[-.075,.04],[.075,.04],[.06,.69],[0,.82],[-.06,.69]],.055);
-    flat([[-.2,.01],[-.18,.065],[.18,.065],[.2,.01],[.13,-.015],[-.13,-.015]],.11);
+    const knight=name==='knight_sword',width=knight?.115:tier>=4?.092:.075;
+    flat(tier===1?[[-width,.04],[width,.04],[width,.65],[.035,.74],[-.035,.74],[-width,.65]]:tier===2?[[-width,.04],[width,.04],[width,.43],[.035,.46],[.07,.53],[.055,.69],[0,.8],[-.06,.65]]:[[-width,.04],[width,.04],[width*.8,.69],[0,knight?.9:.82],[-width*.8,.69]],knight?.08:.055);
+    flat(tier>=4?[[-.24,.08],[-.21,.14],[-.14,.06],[.14,.06],[.21,.14],[.24,.08],[.17,-.015],[-.17,-.015]]:[[-.2,.01],[-.18,.065],[.18,.065],[.2,.01],[.13,-.015],[-.13,-.015]],.11);
     add('#7e6344',.095,.28,.095,0,-.16,0);add(item.color,.13,.065,.12,0,-.32,0);
     add('#e7e5cc',.018,.57,.006,-.035,.34,.033);
+    if(tier>=4){add(knight?'#935d45':'#d5dec7',.055,.19,.012,0,.19,.05);add('#d8c487',.095,.07,.12,0,-.015,0);}
   }else{
     add('#957348',.075,.67,.085,0,-.02,0);add('#c8a67a',.025,.52,.009,-.018,.01,.048);
     const points={
@@ -82,7 +84,9 @@ export function toolModel(r,item,name,includeHand=true){
       axe:[[-.06,.27],[-.02,.51],[.15,.55],[.3,.48],[.35,.3],[.28,.15],[.09,.14],[.1,.26]],
       shovel:[[-.06,.23],[-.16,.35],[-.15,.54],[.15,.54],[.16,.35],[.06,.23],[0,.2]],
       hoe:[[-.29,.26],[-.3,.45],[.21,.45],[.24,.36],[-.2,.36],[-.21,.2]],
-    };flat(points[item.kind]);add('#7d7356',.11,.11,.1,0,.4,0);add('#e2d39f',.045,.04,.009,0,.4,.056);
+    };const head=flat(points[item.kind]);if(tier>=4)head.scale.x=1.14;else if(tier===1)head.scale.x=.9;add('#7d7356',.11,.11,.1,0,.4,0);add('#e2d39f',.045,.04,.009,0,.4,.056);
+    if(tier>=3)for(const y of [.18,.28])add(tier>=4?'#dfd8ae':'#768c87',.12,.035,.12,0,y,0);
+    if(tier>=5)add('#d6c1e0',.05,.1,.02,.1,.41,.07);
   }
   for(let i=0;i<4;i++)add('#5f5540',.102,.018,.107,0,-.12-i*.045,0);
   // A blocky grip and sleeve anchor the tool in the player's hand.

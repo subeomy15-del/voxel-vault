@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=32';
-import {World} from '../src/world.js?v=32';
-import {ITEMS,BLOCKS,RECIPES,maxCraft,craft} from '../src/data.js?v=32';
-import {ARMOR_SLOTS,RETIRED_FORGE} from '../src/badlands-content.js?v=32';
-import {armorProtection,gearPower} from '../src/enchanting.js?v=32';
-import {tickTraps} from '../src/traps.js?v=32';
-import {freshState,loadState,saveState} from '../src/save.js?v=32';
-import {updateEnemies} from '../src/combat.js?v=32';
+import {Game} from '../src/game.js?v=33';
+import {World} from '../src/world.js?v=33';
+import {ITEMS,BLOCKS,RECIPES,maxCraft,craft} from '../src/data.js?v=33';
+import {ARMOR_SLOTS,RETIRED_FORGE} from '../src/badlands-content.js?v=33';
+import {armorProtection,gearPower} from '../src/enchanting.js?v=33';
+import {tickTraps} from '../src/traps.js?v=33';
+import {freshState,loadState,saveState} from '../src/save.js?v=33';
+import {updateEnemies} from '../src/combat.js?v=33';
 const make=()=>{const data=new Map();return new Game({setWorld(){},burst(){},stream(){},firework(){this.fired=true;}},{play(){},quiet(){}},{getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)});};
 test('three new biomes generate across seeds with layered Badlands, marsh water and map markers',()=>{
  for(const seed of [1,72,7821]){const w=new World(seed,[],6);assert.equal(w.biome(240,180),'badlands');assert.equal(w.biome(220,-60),'savanna');assert.equal(w.biome(-240,200),'marsh');const h=w.height(240,180);assert.equal(w.get(240,h,180),'red_sand');assert.ok(['red_terracotta','ochre_terracotta','chalk'].includes(w.get(240,h-2,180)));assert.ok(w.landmarks.some(l=>l.id==='badlands'));}
@@ -21,8 +21,8 @@ test('knights drop hearts, kills grant aura once and the Knight Sword consumes h
  const g=make();const m=g.spawnMob(10,10,'draugr_knight',50);g.hit(m,m.hp);assert.equal(g.state.aura,35);assert.ok(g.state.drops.some(d=>d.item==='knight_heart'&&d.count>=1));g.hit(m,999);assert.equal(g.state.aura,35);
  g.pos={x:100.5,y:60,z:100.5};g.world.set(102,60,100,'bench');g.add('knight_heart',4);g.add('diamond_sword');assert.equal(g.craft('knight_sword'),true);assert.equal(g.state.inv.knight_heart,0);assert.equal(g.state.inv.diamond_sword,0);assert.equal(g.state.inv.knight_sword,1);
 });
-test('natural mining earns aura; replacing and remining a block does not',()=>{
- const g=make();g.add('diamond_pickaxe');g.equip('diamond_pickaxe');const y=-42;let x=0;while(!g.world.get(x,y,100)||!Number.isFinite(BLOCKS[g.world.get(x,y,100)]?.hardness))x++;
+test('valuable natural ore earns aura; replacing and remining a block does not',()=>{
+ const g=make();g.add('diamond_pickaxe');g.equip('diamond_pickaxe');const y=-42;let x=0;while(x<4096&&!['coal','iron','gold','diamond','moonstone'].includes(g.world.get(x,y,100)))x++;assert.ok(x<4096,'a valuable natural ore exists in the bounded search');
  const type=g.world.get(x,y,100);g.target={x,y,z:100,type};g.mine(10);assert.ok(g.state.aura>0);const before=g.state.aura;g.world.set(x,y,100,type);g.target={x,y,z:100,type};g.mine(10);assert.equal(g.state.aura,before);
 });
 test('enchanting charges rising aura costs, improves gear and persists across realms and reloads',()=>{

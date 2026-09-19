@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js?v=32';
-import { freshState,loadState } from '../src/save.js?v=32';
-import { ITEMS,RECIPES } from '../src/data.js?v=32';
+import { Game } from '../src/game.js?v=33';
+import { freshState,loadState } from '../src/save.js?v=33';
+import { ITEMS,RECIPES } from '../src/data.js?v=33';
 import { existsSync } from 'node:fs';
-import { FORGE_OFFERS } from '../src/expeditions.js?v=32';
+import { FORGE_OFFERS } from '../src/expeditions.js?v=33';
 const make=()=>{const data=new Map();return new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},{getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)});};
 test('all three outposts generate across terrain seeds and preserve player edits on reload',()=>{
  const g=make();for(const seed of [2,3,8,11,14,22,28]){g.state=freshState(seed);g.loadWorld();assert.equal(g.state.outposts.length,3);for(const p of g.state.outposts)assert.equal(g.world.get(p.x+1,p.y,p.z+1),'treasure_chest');}

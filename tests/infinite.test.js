@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {World,WORLD_BOTTOM} from '../src/world.js?v=32';
-import {freshState,loadState,saveState} from '../src/save.js?v=32';
-import {meshChunk} from '../src/mesh.js?v=32';
+import {World,WORLD_BOTTOM} from '../src/world.js?v=33';
+import {freshState,loadState,saveState} from '../src/save.js?v=33';
+import {meshChunk} from '../src/mesh.js?v=33';
 
 test('terrain and editable meshes continue in both directions in all realms',()=>{
  for(const dimension of ['overworld','nether','ender'])for(const x of [-2400,2400]){

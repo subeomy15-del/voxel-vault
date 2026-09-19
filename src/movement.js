@@ -1,7 +1,8 @@
-import {potionPower} from './potions.js?v=32';
-import { trapAt } from './traps.js?v=32';
-import { BLOCKS, ITEMS } from './data.js?v=32';
-import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=32';
+import {armorInfusion} from './infusions.js?v=33';
+import {potionPower} from './potions.js?v=33';
+import { trapAt } from './traps.js?v=33';
+import { BLOCKS, ITEMS } from './data.js?v=33';
+import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=33';
 
 export const MOVEMENT = Object.freeze({ walk: 4.8, sprint: 7.4, jump: 8.8, gravity: 24, coyote: .11, buffer: .14, step: .52, mantle: 1.25 });
 const approach = (current, target, amount) => current < target ? Math.min(target, current + amount) : Math.max(target, current - amount);
@@ -38,7 +39,7 @@ export function releaseJump(g) {
 
 function tryJump(g) {
   if (g.mantle || g.creative && g.flying || !(g.jumpBuffer > 0) || !(g.grounded || g.coyote > 0)) return false;
-  g.velocity = Math.max(g.state.effects?.jump>0?12.7:MOVEMENT.jump,MOVEMENT.jump*(1+potionPower(g.state,'jump')));
+  g.velocity = Math.max(g.state.effects?.jump>0?12.7:MOVEMENT.jump,MOVEMENT.jump*(1+potionPower(g.state,'jump')+(g.state.dimension==='ender'?armorInfusion(g.state,'void_step'):0)));
   if (g.jumpReleased) g.velocity = 3.8;
   g.state.exhaustion += .18; g.grounded = false; g.coyote = 0; g.jumpBuffer = 0; g.jumpActive = true;
   g.jumpImpulse = 1; g.audio.play('jump'); g.emit?.('jump', { velocity: g.velocity });
@@ -169,7 +170,7 @@ export function movePlayer(g, dt) {
   const wantsSprint = g.touchSprint || (settings(g).sprintMode === 'toggle' ? !!g.sprintToggle : held(g, sprintKeys));
   g.sprinting = g.moving && !g.crouching && !inWater && !g.gliding && !g.eating && (g.creative || g.state.food >= 6) && g.stamina > 3 && wantsSprint;
   g.stamina = Math.max(0, Math.min(100, g.stamina + dt * (g.sprinting ? -9 : 22)));
-  const wing = ITEMS[g.state.glider], boost = Math.max(g.state.effects?.speed>0?1.5:1,1+potionPower(g.state,'speed')) * (trapAt(g, g.pos)?.snare && !g.creative ? .25 : 1);
+  const wing = ITEMS[g.state.glider], boost = Math.max(g.state.effects?.speed>0?1.5:1,1+potionPower(g.state,'speed')) * (1+(g.state.dimension==='nether'?armorInfusion(g.state,'ash_walker'):g.world.landmarks.some(l=>l.type==='ruin'&&Math.hypot(l.x-g.pos.x,l.z-g.pos.z)<24)?armorInfusion(g.state,'ruin_seeker'):0)) * (trapAt(g, g.pos)?.snare && !g.creative ? .25 : 1);
   const speed = g.gliding ? Math.max(7, wing.glideSpeed + Math.max(0, -g.pitch) * 7 - Math.max(0, g.pitch) * 4) : (inWater ? 3.1 : g.dashTime > 0 ? 15 : g.crouching ? 2.1 : g.sprinting ? MOVEMENT.sprint : MOVEMENT.walk) * boost * (g.eating ? .5 : g.drawState ? .75 : 1);
   if (g.dashTime > 0 && !g.moving) { forward = 1; g.moving = true; }
   const wishX = -Math.sin(g.yaw) * forward + Math.cos(g.yaw) * sideways, wishZ = -Math.cos(g.yaw) * forward - Math.sin(g.yaw) * sideways;
@@ -212,7 +213,7 @@ export function movePlayer(g, dt) {
       if (g.grounded) {
         if (!wasGrounded) land(g, impact, inWater, ladder);
         g.gliding = false;
-        if (impact > 17 && !inWater && !ladder && !g.effect('slowfall')) g.hurt(Math.floor((impact - 15) * .5));
+        if (impact > 17 && !inWater && !ladder && !g.effect('slowfall')) g.hurt(Math.floor((impact - 15) * .5),false,'fall');
       } else g.jumpActive = false;
       g.velocity = 0;
     } else if (wasGrounded && g.velocity <= 0 && !g.jumpActive && !inWater && !ladder && !g.grapple) {

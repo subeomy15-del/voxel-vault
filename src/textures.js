@@ -1,4 +1,4 @@
-import { BLOCKS, hash } from './data.js?v=32';
+import { BLOCKS, hash } from './data.js?v=33';
 export const TILE=32,ATLAS_COLS=16;
 export const ATLAS_ROWS=2**Math.ceil(Math.log2(Math.ceil(Object.keys(BLOCKS).length*3/ATLAS_COLS)));
 export const ATLAS_WIDTH=TILE*ATLAS_COLS,ATLAS_HEIGHT=TILE*ATLAS_ROWS;
@@ -94,6 +94,8 @@ export function textureCanvas(){
       fill('#3f4c4b',0,0,32,2);fill('#a0aaa166',2,2,28,1);
       if(side===1){fill('#303b3a',5,6,22,7);fill('#9ba89b',7,7,18,2);fill('#1c2929',5,18,22,12);fill('#b87c44',8,25,16,4);fill('#f2bd67',10,24,3,4);fill('#e6a755',19,22,3,6);}
     }
+    if(type.endsWith('_altar')&&type!=='dragon_altar'){fill('#39474e',0,24,32,8);fill('#cabc8d',0,4,32,2);if(side===0){fill('#d4c9a5',7,7,18,18);fill(b.color,10,10,12,12);fill('#ededd8',14,11,4,10);fill('#ededd8',11,14,10,4);}else{fill('#dacb99',13,9,6,11);fill('#394b52',15,11,2,7);}}
+    if(type==='waystone'){fill('#43585f',3,2,26,28);fill('#b6d5cf',13,5,6,22);fill('#b6d5cf',7,12,18,5);fill('#e5d4a4',11,10,10,9);fill('#6aa8a6',14,12,4,5);}
     if(type==='brewing_station'){fill('#354d48',0,0,32,4);fill('#d5b678',0,25,32,3);if(side===0){fill('#a9c6bd',7,7,18,18);fill('#4f796e',10,10,12,12);}else{for(const x of [5,19]){fill('#accac4',x,9,8,13);fill(x===5?'#9fb979':'#ab91bf',x+1,14,6,7);fill('#d0ac73',x+2,6,4,4);}}}
     if(type==='bench'&&side===0){for(let x=8;x<32;x+=8)fill('#49392566',x,0,1,32);fill('#526467',5,6,12,3);fill('#d4bb88',14,7,3,17);}
     if(type==='bookshelf'&&side===1){fill('#3d4534',2,2,28,27);for(let row=0;row<2;row++)for(let i=0;i<7;i++){const x=3+i*4,y=3+row*14;fill(['#a9755e','#8f9e7a','#708c95','#c2ad79'][i%4],x,y,3,11);fill('#dfd6ad88',x,y+2,3,1);}fill('#ba9667',0,14,32,2);}

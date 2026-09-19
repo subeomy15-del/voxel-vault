@@ -148,3 +148,9 @@ npm run test:render
 Open http://localhost:3001. The multiplayer and competitive browser tests default to `http://localhost:3002`; set `VOXEL_TEST_URL` to your server address. It uses three isolated browser contexts to check invites, readiness, shared edits, avatars, reconnects, late joins, host migration and mobile layouts. Browser tests use an isolated Chrome profile on debugging port 9224, exercising actual rendering, crafting, gear, aura upgrades, saves, mobile layouts and portal travel. The newer Parkour/settings/render suites default to debugging port 9234; set `VOXEL_CDP_PORT` to use another port for these or the multiplayer suites. Screenshots go to /private/tmp/voxel-vault-*.png.
 
 Run `npm run render:items` to regenerate shared 3D item artwork. Before publishing, run `node scripts/stamp.mjs RELEASE` to keep browser modules, terrain worker imports, styles and entry assets synchronized. Three.js r160 is bundled locally under its MIT license in vendor/LICENSE.
+
+### Release 33: prepare and explore
+
+Craft a brewing station and empty flasks at a workbench, fill flasks near water, then brew normal, strong or extended potions. Use a potion directly from the inventory or hotbar. Altars offer three XP investments with visible probabilities; rerolling replaces the current enchantment package.
+
+Craft a fishing rod, aim at water and press E to cast; press E again when the splash signals a bite. Sea catches can reveal treasure charts. Existing outposts now have merchants with limited daily stock. Craft and activate waystones with E for travel between registered stones in the same realm.
