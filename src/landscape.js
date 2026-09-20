@@ -1,6 +1,8 @@
-import { hash } from './data.js?v=33';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=33';
-import {integerHash} from './climate.js?v=33';
+import {BIOME_DEFINITIONS as LEGACY_BIOMES} from './legacy-biomes.js?v=34';
+import {regionalTree} from './regional-trees.js?v=34';
+import { hash } from './data.js?v=34';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=34';
+import {integerHash} from './climate.js?v=34';
 const blend=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
 export function terrainHeight(world,x,z){
   const noise=(a,b,s)=>world.noise(a,b,s),climate=noise(x+170,z-85,160);
@@ -14,10 +16,10 @@ export function terrainHeight(world,x,z){
   return base+hills+dry*Math.sin(wx*.07+wz*.022)*2.2;
 }
 export function plantAt(world,x,z,biome){
-  if(world.terrain>=7&&world.column(x,z).region>.5){
-    const c=world.column(x,z);if(['ocean','beach','snow','snow_plains','mountain','desert','badlands'].includes(biome))return null;
+  if(world.terrain>=7&&(world.column(x,z).region>.5||world.terrain>=8)){
+    const c=world.column(x,z);if(['ocean','beach','snow','snow_plains','mountain','desert','badlands','frozen_badlands','river'].includes(biome))return null;
     if(world.noise(x+312,z-119,34)<.59||hash(x,z,world.seed+218)<.92)return null;
-    const plants=['forest','dense_forest','jungle'].includes(biome)?['fern','fern','mushroom','berries_crop']:biome==='autumn_forest'?['fern','mushroom','flower_red']:['daisy','flower_blue','lavender','cotton_crop','wheat_crop','carrot_crop'];
+    const plants=['forest','dense_forest','jungle','conifer'].includes(biome)?['fern','fern','mushroom','berries_crop']:biome==='autumn_forest'?['fern','mushroom','flower_red']:biome==='cherry'?['flower_red','daisy']:biome==='marsh'?['fern','mushroom']:['daisy','flower_blue','lavender','cotton_crop','wheat_crop','carrot_crop'];
     return plants[Math.floor(hash(Math.floor(x/22),Math.floor(z/22),world.seed+371)*plants.length)];
   }
   if(['snow','mountain'].includes(biome)||world.noise(x+312,z-119,28)<.63||hash(x,z,world.seed+218)<.962)return null;
@@ -25,8 +27,8 @@ export function plantAt(world,x,z,biome){
   return plants[Math.min(plants.length-1,Math.floor(hash(Math.floor(x/24),Math.floor(z/24),world.seed+371)*plants.length))];
 }
 export function treeAt(world,x,z,biome){
-  if(world.terrain>=7&&world.column(x,z).region>.5){
-    const def=BIOME_DEFINITIONS[biome],gx=Math.floor(x/8),gz=Math.floor(z/8);if(!def?.trees.length)return null;
+  if(world.terrain>=7&&(world.column(x,z).region>.5||world.terrain>=8)){
+    const def=(world.terrain>=8?BIOME_DEFINITIONS:LEGACY_BIOMES)[biome],gx=Math.floor(x/8),gz=Math.floor(z/8);if(!def?.trees.length)return null;
     if(x!==gx*8+1+Math.floor(hash(gx,gz,world.seed+302)*6)||z!==gz*8+1+Math.floor(hash(gz,gx,world.seed+904)*6))return null;
     const cluster=.45+world.noise(x+217,z-49,75)*.8;if(hash(gx,gz,world.seed+93)>def.density*cluster)return null;
     return def.trees[Math.floor(hash(gx,gz,world.seed+4)*def.trees.length)];
@@ -37,6 +39,7 @@ export function treeAt(world,x,z,biome){
   return biome==='snow'?'pine':hash(x,z,world.seed+4)>.71?'birch':'oak';
 }
 export function growTree(world,put,x,y,z,species){
+  if(world.terrain>=8)return regionalTree(world,put,x,y,z,species);
   if(['great_oak','jungle','amber','tall_pine','acacia'].includes(species))return growRegionalTree(world,put,x,y,z,species);
   const n=hash(x,z,world.seed+81),height=species==='pine'?7+Math.floor(n*4):species==='birch'?6+Math.floor(n*3):4+Math.floor(n*3);
   const wood=species==='pine'?'pinewood':species==='birch'?'birch':'wood',leaf=species==='pine'?'pine':'leaf';

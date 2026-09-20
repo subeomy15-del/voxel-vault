@@ -1,5 +1,6 @@
-import { hash } from './data.js?v=33';
-import { findMobPath } from './navigation.js?v=33';
+import {BIOME_ECOLOGY} from './biome-ecology.js?v=34';
+import { hash } from './data.js?v=34';
+import { findMobPath } from './navigation.js?v=34';
 export const ANIMALS={
   deer:{name:'Deer',passive:true,hp:12,speed:1.15,flee:5.4,height:1.6,radius:.38,color:'#a88b68',glow:'#d9c6a4',food:['wheat','carrot'],drops:{raw_venison:[2,3],leather:[1,2]}},
   pig:{name:'Pig',passive:true,hp:12,speed:.95,flee:3.9,height:.9,radius:.4,color:'#c79f95',glow:'#dec0ac',food:['carrot','potato'],drops:{raw_pork:[2,3]}},
@@ -9,7 +10,7 @@ export const ANIMALS={
   rabbit:{name:'Rabbit',passive:true,hp:5,speed:1.25,flee:5.7,height:.65,radius:.24,color:'#b3a38a',glow:'#d3c5ac',food:['carrot'],drops:{raw_rabbit:[1,1],rabbit_hide:[1,1]}},
 };
 export function animalKind(world,x,z,salt=0){
-  const biome=world.biome(x,z),list=biome==='forest'?['deer','deer','pig','rabbit','chicken']:biome==='snow'?['deer','rabbit','sheep']:biome==='desert'?['rabbit']:biome==='mountain'?['sheep','rabbit']:['pig','cow','cow','sheep','chicken','rabbit'];
+  const biome=world.biome(x,z),list=world.terrain>=8&&BIOME_ECOLOGY[biome]?.animals.length?BIOME_ECOLOGY[biome].animals:biome==='forest'?['deer','deer','pig','rabbit','chicken']:biome==='snow'?['deer','rabbit','sheep']:biome==='desert'?['rabbit']:biome==='mountain'?['sheep','rabbit']:['pig','cow','cow','sheep','chicken','rabbit'];
   return list[Math.min(list.length-1,Math.floor(hash(Math.floor(x)+salt,Math.floor(z),world.seed+482)*list.length))];
 }
 export function updateAnimal(game,m,dt){

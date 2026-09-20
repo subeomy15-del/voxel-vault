@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {World} from '../src/world.js?v=33';
-import {Game} from '../src/game.js?v=33';
-import {BLOCKS} from '../src/data.js?v=33';
-import {freshState,loadState,saveState} from '../src/save.js?v=33';
-import {climateAt} from '../src/climate.js?v=33';
-import {BIOME_DEFINITIONS} from '../src/biome-registry.js?v=33';
-import {STRUCTURE_TYPES,buildStructure,transform} from '../src/structure-templates.js?v=33';
-import {meshChunk} from '../src/mesh.js?v=33';
+import {World} from '../src/world.js?v=34';
+import {Game} from '../src/game.js?v=34';
+import {BLOCKS} from '../src/data.js?v=34';
+import {freshState,loadState,saveState} from '../src/save.js?v=34';
+import {climateAt} from '../src/climate.js?v=34';
+import {BIOME_DEFINITIONS} from '../src/legacy-biomes.js?v=34';
+import {STRUCTURE_TYPES,buildStructure,transform} from '../src/structure-templates.js?v=34';
+import {meshChunk} from '../src/mesh.js?v=34';
 const cells=w=>[...w.structures].sort(([a],[b])=>a.localeCompare(b));
 test('climate biomes cover all families across a bounded map and form large continuous regions',()=>{
  const found=new Set(),runs=[];let last=null,length=0,maxStep=0;
@@ -16,10 +16,10 @@ test('climate biomes cover all families across a bounded map and form large cont
  for(let x=-12000;x<=12000;x+=4){const c=climateAt(7821,x,1800);maxStep=Math.max(maxStep,Math.abs(c.h-climateAt(7821,x+1,1800).h));if(c.biome===last)length+=4;else{if(length)runs.push(length);length=4;last=c.biome;}}
  assert.ok(runs.toSorted((a,b)=>a-b)[Math.floor(runs.length/2)]>=80,JSON.stringify(runs));assert.ok(maxStep<5,'Climate transitions must not create vertical walls');
 });
-test('terrain versions 5 and 6 remain explicit and new worlds use version 7',()=>{
+test('terrain versions 5 and 6 remain explicit and new worlds use version 8',()=>{
  const data=new Map(),storage={getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};
- for(const terrain of[5,6,7]){const state=freshState();state.terrain=terrain;saveState(storage,state);assert.equal(loadState(storage).terrain,terrain);}
- assert.equal(freshState().terrain,7);
+ for(const terrain of[5,6,7,8]){const state=freshState();state.terrain=terrain;saveState(storage,state);assert.equal(loadState(storage).terrain,terrain);}
+ assert.equal(freshState().terrain,8);
  const a=new World(7821,[],6),b=new World(7821,[],7);for(const[x,z]of[[0,12],[23,-31],[90,20]])assert.equal(a.height(x,z),b.height(x,z));assert.notEqual(a.height(2100,1700),b.height(2100,1700));
 });
 test('deep ocean chunks retain a visible water surface above low seabeds',()=>{
@@ -30,7 +30,7 @@ test('all original ruin templates appear across known seeds with spacing and dry
   const w=new World(seed,[],7),sites=w.ruins.find({radius:18});for(const site of sites){found.add(site.type);assert.ok(site.slope<=4);assert.ok(site.y>=7&&site.y<74);assert.ok(Math.hypot(site.x,site.z)>520+site.radius);}
   for(let i=0;i<sites.length;i++)for(let j=i+1;j<sites.length;j++){const a=sites[i],b=sites[j];assert.ok(Math.abs(a.x-b.x)>=a.radius+b.radius+22||Math.abs(a.z-b.z)>=a.radius+b.radius+22);}
  }
- assert.deepEqual([...found].sort(),Object.keys(STRUCTURE_TYPES).sort());
+ assert.deepEqual([...found].sort(),Object.keys(STRUCTURE_TYPES).filter(k=>!['mine','swamp_hut','outpost'].includes(k)).sort());
 });
 test('templates rotate and mirror with valid original block palettes and intentional interiors',()=>{
  for(const type of Object.keys(STRUCTURE_TYPES)){const a=buildStructure(type,42,'forest'),b=buildStructure(type,42,'forest');assert.deepEqual(a.cells,b.cells);assert.ok(a.cells.size>20);

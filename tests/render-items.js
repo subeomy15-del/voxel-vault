@@ -4,7 +4,7 @@ const c=await connect();
 try{
  await c.send('Page.navigate',{url:'http://localhost:3001/'});await sleep(900);
  await c.evaluate(`(async()=>{
-  const main=await import('/src/main.js?v=33'),THREE=await import('/vendor/three.module.js'),{ITEMS}=await import('/src/data.js?v=33'),{itemModel}=await import('/src/item-model.js?v=33');
+  const main=await import('/src/main.js?v=34'),THREE=await import('/vendor/three.module.js'),{ITEMS}=await import('/src/data.js?v=34'),{itemModel}=await import('/src/item-model.js?v=34');
   const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,preserveDrawingBuffer:true});renderer.setSize(320,320);renderer.setClearColor(0,0);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;
   const scene=new THREE.Scene();scene.add(new THREE.HemisphereLight('#f5faff','#59636b',1.6));const key=new THREE.DirectionalLight('#fff0d4',2.4);key.position.set(-3,5,5);scene.add(key);const rim=new THREE.DirectionalLight('#9bbff4',1.2);rim.position.set(4,2,-3);scene.add(rim);
   const camera=new THREE.OrthographicCamera(-.78,.78,.78,-.78,.1,30);camera.position.set(3,2.1,5);camera.lookAt(0,0,0);
@@ -23,6 +23,7 @@ try{
   window.finishItems=()=>renderer.dispose();window.itemNames=Object.keys(ITEMS);
  })()`);
  await mkdir(new URL('../assets/items/',import.meta.url),{recursive:true});let names=await c.evaluate('itemNames');if(process.argv.includes('--potions'))names=names.filter(n=>n.includes('potion')||['brewing_station','empty_flask','water_flask'].includes(n));
+ if(process.argv.includes('--regions'))names=names.filter(n=>['ice','cherry_leaf','autumnleaf'].includes(n));
  if(process.argv.includes('--altars'))names=names.filter(n=>n.endsWith('_altar'));
  for(const name of names){const data=await c.evaluate(`renderItem(${JSON.stringify(name)})`);await writeFile(new URL('../assets/items/'+name+'.png',import.meta.url),Buffer.from(data,'base64'));}
  await c.evaluate('finishItems()');if(c.errors.length)throw Error(JSON.stringify(c.errors));console.log('Rendered '+names.length+' consistent 3D item icons.');

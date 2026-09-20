@@ -1,5 +1,5 @@
-import {BLOCKS,hash} from './data.js?v=33';
-import {TRADE_OFFERS} from './exploration-content.js?v=33';
+import {BLOCKS,hash} from './data.js?v=34';
+import {TRADE_OFFERS} from './exploration-content.js?v=34';
 const key=p=>`${p.x},${p.y},${p.z}`;
 const validPosition=p=>p&&['x','y','z'].every(k=>Number.isInteger(p[k])&&Math.abs(p[k])<1000000)&&p.y>-64&&p.y<94;
 export function readExploration(raw={}){
@@ -17,7 +17,7 @@ export function useRod(g){
  if(g.fishing){const cast=g.fishing;g.fishing=null;
   if(cast.time<cast.bite||cast.time>cast.bite+2.2){g.toast('The line comes back empty','Wait for the splash, then reel in quickly.');return false;}
   if(Math.hypot(g.pos.x-cast.x,g.pos.z-cast.z)>12||!g.world.waterAt(cast.x,cast.y,cast.z))return false;
-  state.catches++;const sea=['ocean','beach'].includes(g.world.biome(cast.x,cast.z)),item=sea?'sea_fish':'river_fish';g.add(item);g.emit('pickup',{item,count:1});g.audio.play('reward');g.renderer.burst(cast.x,cast.y+1,cast.z,'#9ac8c6',8);
+  state.catches++;const sea=['ocean','beach'].includes(g.world.biome(cast.x,cast.z)),item=sea?'sea_fish':'river_fish';g.add(item);g.audio.play('reward');g.renderer.burst(cast.x,cast.y+1,cast.z,'#9ac8c6',8);
   if(sea&&(state.catches%5===0||hash(state.catches,g.state.seed,741)>.88))recoverChart(g,cast);
   g.save();return true;
  }

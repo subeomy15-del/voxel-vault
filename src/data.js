@@ -1,9 +1,9 @@
-import {installExploration} from './exploration-content.js?v=33';
-import {installAltars} from './infusion-registry.js?v=33';
-import {installPotions} from './potion-content.js?v=33';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=33';
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=33';
-import { installContent } from './badlands-content.js?v=33';
+import {installExploration} from './exploration-content.js?v=34';
+import {installAltars} from './infusion-registry.js?v=34';
+import {installPotions} from './potion-content.js?v=34';
+import {BIOME_DEFINITIONS,UNDERGROUND_BIOMES} from './biome-registry.js?v=34';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=34';
+import { installContent } from './badlands-content.js?v=34';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },
@@ -13,6 +13,8 @@ export const BLOCKS = {
   snow: { name: 'Snow', color: '#d5e8e3', solid: true, hardness: .55 },
   wood: { name: 'Timber', color: '#8e6743', solid: true, hardness: 1.1 },
   leaf: { name: 'Oak leaves', color: '#507540', solid: true, hardness: .3 },
+  cherry_leaf:{name:'Blossom leaves',color:'#dba9b9',solid:true,hardness:.3},
+  ice:{name:'Glacial ice',color:'#a5c7d3',solid:true,hardness:.6},
   autumnleaf: { name: 'Amber leaves', color: '#d2914b', solid: true, hardness: .3 },
   pine: { name: 'Pine needles', color: '#426e65', solid: true, hardness: .3 },
   iron: { name: 'Iron ore', color: '#b6a08b', solid: true, hardness: 1.6 },
@@ -421,6 +423,7 @@ export const BIOMES={
   desert:{name:'Drylands',color:'#c9b489',top:'sand'},snow:{name:'Alpine forest',color:'#cfddda',top:'snow'},
   mountain:{name:'Highlands',color:'#8c9890',top:'stone'},
 };
+Object.assign(BIOMES,UNDERGROUND_BIOMES);
 for(const[id,definition]of Object.entries(BIOME_DEFINITIONS))if(!BIOMES[id])BIOMES[id]=definition;
 export function hash(x,z,seed=1) { let n = Math.imul(x ^ seed, 374761393) + Math.imul(z,668265263); n = Math.imul(n ^ n >>> 13,1274126177); return ((n ^ n >>> 16) >>> 0) / 4294967295; }
 export function dailySeed(date = new Date()) { return Number(date.toISOString().slice(0,10).replaceAll('-','')); }

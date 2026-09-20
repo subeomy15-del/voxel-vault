@@ -1,5 +1,6 @@
 const profile=(day,horizon,ground,cloud='#eff0df')=>Object.freeze({day,horizon,ground,cloud});
 export const ATMOSPHERES=Object.freeze({
+ conifer:profile('#709caf','#b3c8c5','#566752'),cherry:profile('#82b2cf','#dfd0cf','#798a62'),frozen_badlands:profile('#7797bb','#bdcedb','#82919e'),river:profile('#78aac6','#b7d1cf','#687f5e'),
  meadow:profile('#689dca','#a9c6d3','#687252'),forest:profile('#659ab6','#a0b8b5','#465640'),dense_forest:profile('#587f96','#8ca6a1','#344b3c'),
  autumn_forest:profile('#7e9caf','#c3b9a4','#7e6545'),jungle:profile('#629998','#94b5a5','#354f38'),desert:profile('#6ba8c7','#c8c3ad','#97815d'),
  badlands:profile('#719eac','#bdb09c','#875d45'),savanna:profile('#739fab','#bbc3a7','#87784f'),marsh:profile('#769c9b','#a0b8ad','#52614d'),

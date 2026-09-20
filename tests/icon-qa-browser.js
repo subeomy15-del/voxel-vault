@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {mkdir,readFile,writeFile,stat} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {ITEMS} from '../src/data.js?v=33';
-import {canonicalItem} from '../src/resource-map.js?v=33';
+import {ITEMS} from '../src/data.js?v=34';
+import {canonicalItem} from '../src/resource-map.js?v=34';
 import {connect} from './cdp.js';
 let bytes=0;const hashes=new Map();
 for(const name of Object.keys(ITEMS)){const path=new URL('../assets/items/'+name+'.png',import.meta.url),data=await readFile(path);bytes+=(await stat(path)).size;assert.equal(data.readUInt32BE(16),160,name);assert.equal(data.readUInt32BE(20),160,name);assert.equal(data[25],6,name+' RGBA');const hash=createHash('sha256').update(data).digest('hex');if(!ITEMS[name].hidden){const previous=hashes.get(hash);assert.ok(!previous||canonicalItem(previous)===canonicalItem(name),'Duplicate visible icons: '+previous+' / '+name);hashes.set(hash,name);}}

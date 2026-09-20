@@ -1,8 +1,8 @@
-import {World} from '../src/world.js?v=33';
-import {meshChunk} from '../src/mesh.js?v=33';
+import {World} from '../src/world.js?v=34';
+import {meshChunk} from '../src/mesh.js?v=34';
 import {writeFile} from 'node:fs/promises';
 const report={node:process.version,seed:7821,scenes:[],editLookup:{}};
-for(const terrain of[6,7])for(const [name,center]of[['starter',[0,0]],['forest',[80,110]],['distant',[-50,110]]]){
+for(const terrain of[7,8])for(const [name,center]of[['starter',[0,0]],['forest',[80,110]],['distant',[-50,110]]]){
  const w=new World(7821,[],terrain),times=[];let bytes=0;
  for(let x=-2;x<=2;x++)for(let z=-2;z<=2;z++){const start=performance.now(),mesh=meshChunk(w,center[0]+x,center[1]+z);times.push(performance.now()-start);for(const group of Object.values(mesh))for(const a of Object.values(group))bytes+=a.byteLength;}
  times.sort((a,b)=>a-b);report.scenes.push({terrain,name,medianMs:times[12],p95Ms:times[23],bytes,columns:w.columns.size,structures:w.structures.size});

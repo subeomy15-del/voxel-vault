@@ -1,0 +1,70 @@
+{
+  "node": "v24.19.0",
+  "seed": 7821,
+  "scenes": [
+    {
+      "terrain": 7,
+      "name": "starter",
+      "medianMs": 6.980249999999998,
+      "p95Ms": 13.937999999999988,
+      "bytes": 2972176,
+      "columns": 15462,
+      "structures": 2763
+    },
+    {
+      "terrain": 7,
+      "name": "forest",
+      "medianMs": 2.02716700000002,
+      "p95Ms": 3.194708999999989,
+      "bytes": 1280000,
+      "columns": 15436,
+      "structures": 114
+    },
+    {
+      "terrain": 7,
+      "name": "distant",
+      "medianMs": 1.905666999999994,
+      "p95Ms": 2.776124999999979,
+      "bytes": 1286200,
+      "columns": 15430,
+      "structures": 114
+    },
+    {
+      "terrain": 8,
+      "name": "starter",
+      "medianMs": 4.5011670000000095,
+      "p95Ms": 6.477291999999977,
+      "bytes": 2910976,
+      "columns": 15462,
+      "structures": 2676
+    },
+    {
+      "terrain": 8,
+      "name": "forest",
+      "medianMs": 2.2009590000000117,
+      "p95Ms": 3.1253339999999525,
+      "bytes": 1280000,
+      "columns": 15436,
+      "structures": 114
+    },
+    {
+      "terrain": 8,
+      "name": "distant",
+      "medianMs": 1.8748329999999669,
+      "p95Ms": 3.33887500000003,
+      "bytes": 1280000,
+      "columns": 15430,
+      "structures": 114
+    }
+  ],
+  "editLookup": {
+    "fullScan": {
+      "medianMs": 16.80574999999999,
+      "p95Ms": 17.18745799999988
+    },
+    "indexed": {
+      "medianMs": 0.0015419999999721767,
+      "p95Ms": 0.013459000000011656
+    }
+  }
+}

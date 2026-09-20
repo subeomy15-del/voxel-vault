@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { defaultSettings, normalizeSettings, applyQualityPreset, updateSetting } from '../src/settings.js?v=33';
-import { loadSettings, saveSettings } from '../src/save.js?v=33';
+import { defaultSettings, normalizeSettings, applyQualityPreset, updateSetting } from '../src/settings.js?v=34';
+import { loadSettings, saveSettings } from '../src/save.js?v=34';
 const memory = initial => { const data = new Map(Object.entries(initial || {})); return { getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, value) }; };
 const key = 'voxel-vault-v2-settings';
 

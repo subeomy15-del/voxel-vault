@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Audio } from '../src/audio.js?v=33';
-import { normalizeSettings } from '../src/settings.js?v=33';
+import { Audio } from '../src/audio.js?v=34';
+import { normalizeSettings } from '../src/settings.js?v=34';
 class Parameter {
   constructor() { this.value = 0; this.events = []; }
   setValueAtTime(value, time) { this.value = value; this.events.push({ type: 'set', value, time }); }

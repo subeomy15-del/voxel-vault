@@ -7,9 +7,9 @@ try{
  await c.send('Network.setCacheDisabled',{cacheDisabled:true});
  await c.send('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:1,mobile:false});
  await c.send('Page.navigate',{url:'http://localhost:3001/'});await sleep(1500);
- await ev(`(async()=>{const m=await import('/src/main.js?v=33');window.g=m.game;window.v=m.renderer;window.ui=m.ui;ui.settings.perspective=0;window.hideHUD=document.createElement('style');hideHUD.textContent='body>*:not(#world){visibility:hidden!important}';document.head.append(hideHUD);})()`);
+ await ev(`(async()=>{const m=await import('/src/main.js?v=34');window.g=m.game;window.v=m.renderer;window.ui=m.ui;ui.settings.perspective=0;window.hideHUD=document.createElement('style');hideHUD.textContent='body>*:not(#world){visibility:hidden!important}';document.head.append(hideHUD);})()`);
  for(const [name,mode,x,z]of [['survival','adventure',-70,24],['creative','creative',0,14],['daily','daily',-135,-78]]){
-  await ev(`(async()=>{g.state=(await import('/src/save.js?v=33')).freshState(7821,'${mode}');g.loadWorld();g.pos={x:${x},y:g.world.height(${x},${z})+1,z:${z}};g.state.time=110;g.screen='menu';ui.render();})()`);
+  await ev(`(async()=>{g.state=(await import('/src/save.js?v=34')).freshState(7821,'${mode}');g.loadWorld();g.pos={x:${x},y:g.world.height(${x},${z})+1,z:${z}};g.state.time=110;g.screen='menu';ui.render();})()`);
   await ready();await sleep(400);
   await writeFile(process.argv.includes('--previews')?new URL('../assets/'+name+'-preview.png',import.meta.url):'/private/tmp/voxel-vault-natural-'+name+'.png',Buffer.from((await c.send('Page.captureScreenshot')).data,'base64'));
  }

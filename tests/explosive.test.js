@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=33';
-import {ITEMS,RECIPES} from '../src/data.js?v=33';
+import {Game} from '../src/game.js?v=34';
+import {ITEMS,RECIPES} from '../src/data.js?v=34';
 const make=()=>{const data=new Map();return new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},{getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)});};
 test('blast charges craft and arm with a timed detonation',()=>{
  const recipe=RECIPES.find(r=>r.item==='blast_charge');assert.deepEqual(recipe.cost,{coal:3,iron_ingot:2,sand:2});assert.equal(ITEMS.blast_charge.kind,'explosive');

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=33';
-import {journeyStage,journeyMarkup} from '../src/journey.js?v=33';
+import {Game} from '../src/game.js?v=34';
+import {journeyStage,journeyMarkup} from '../src/journey.js?v=34';
 const storage=()=>({data:new Map(),getItem(k){return this.data.get(k)||null;},setItem(k,v){this.data.set(k,v);}});
 const make=s=>new Game({setWorld(){},stream(){},burst(){}},{play(){},quiet(){}},s||storage());
 test('chapters follow preparation, remain complete after spending items and survive reload',()=>{

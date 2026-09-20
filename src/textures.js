@@ -1,4 +1,4 @@
-import { BLOCKS, hash } from './data.js?v=33';
+import { BLOCKS, hash } from './data.js?v=34';
 export const TILE=32,ATLAS_COLS=16;
 export const ATLAS_ROWS=2**Math.ceil(Math.log2(Math.ceil(Object.keys(BLOCKS).length*3/ATLAS_COLS)));
 export const ATLAS_WIDTH=TILE*ATLAS_COLS,ATLAS_HEIGHT=TILE*ATLAS_ROWS;
@@ -36,7 +36,7 @@ export function textureCanvas(){
       }
       ctx.restore();continue;
     }
-    const bright={grass:BLOCKS.grass.color,leaf:BLOCKS.leaf.color,pine:BLOCKS.pine.color,autumnleaf:'#a59162',dirt:'#92785b',sand:'#c7b889',stone:'#8a969e'};
+    const bright={grass:BLOCKS.grass.color,leaf:BLOCKS.leaf.color,pine:BLOCKS.pine.color,autumnleaf:'#cc924e',dirt:'#92785b',sand:'#c7b889',stone:'#8a969e'};
     fill(ores[type]?'#89929a':type==='grass'&&side!==0?bright.dirt:bright[type]||b.color);
     for(let i=0;i<28;i++){const x=Math.floor(hash(i,index+71)*32),y=Math.floor(hash(index+23,i)*32);fill(hash(i,index)>.5?'#ffffff0c':'#15222110',x,y,1+Math.floor(hash(i,5)*4),1+Math.floor(hash(i,9)*3));}
     if(['lava','magma'].includes(type)){
@@ -71,7 +71,7 @@ export function textureCanvas(){
       else{fill(type==='birch'?'#ccbb91':'#b79768',2,2,28,28);for(let a=5;a<16;a+=4){ctx.strokeStyle='#66513366';ctx.strokeRect(a,a,32-a*2,32-a*2);}stroke('#decaa177',[[4,3],[28,3],[28,28]]);}
     }
     if(plank){for(let y=0;y<32;y+=8){fill('#392e274d',0,y,32,1);fill('#f3dab02a',0,y+1,32,1);fill('#4b3b302e',(y*7+5)%30,y,1,8);stroke('#6248302c',[[1,y+4],[10,y+3],[20,y+5],[30,y+4]]);}}
-    if(['leaf','pine','autumnleaf','hedge'].includes(type))for(let i=0;i<28;i++){const x=Math.floor(hash(i,index+2)*29),y=Math.floor(hash(i,index+6)*29);fill('#263f292d',x,y,5,4);fill('#b6c98526',x,y,4,2);}
+    if(['leaf','pine','autumnleaf','cherry_leaf','hedge'].includes(type))for(let i=0;i<28;i++){const x=Math.floor(hash(i,index+2)*29),y=Math.floor(hash(i,index+6)*29);fill(type==='cherry_leaf'?'#b96d8720':'#263f2920',x,y,5,4);fill(type==='cherry_leaf'?'#ffe2ed55':'#b6c98526',x,y,4,2);}
     if(ores[type])for(let i=0;i<7;i++){
       const x=3+Math.floor(hash(i,index+4)*23),y=3+Math.floor(hash(i,index+9)*23);fill('#253c3e66',x-1,y,6,5);fill(ores[type],x,y,4,4);fill('#ffffff55',x,y,3,1);fill('#00000028',x+3,y+2,1,2);
     }

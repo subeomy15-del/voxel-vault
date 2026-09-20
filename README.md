@@ -154,3 +154,13 @@ Run `npm run render:items` to regenerate shared 3D item artwork. Before publishi
 Craft a brewing station and empty flasks at a workbench, fill flasks near water, then brew normal, strong or extended potions. Use a potion directly from the inventory or hotbar. Altars offer three XP investments with visible probabilities; rerolling replaces the current enchantment package.
 
 Craft a fishing rod, aim at water and press E to cast; press E again when the splash signals a bite. Sea catches can reveal treasure charts. Existing outposts now have merchants with limited daily stock. Craft and activate waystones with E for travel between registered stones in the same realm.
+
+### Regional world generation (terrain version 8)
+
+New worlds use large climate regions: plains, oak woods, deep woods, conifers, autumn/maple woods, blossom groves, jungle, dunes, red Badlands, savanna, marsh, snowfields, snowy taiga, frozen Badlands, mountain ranges, palm coasts, river valleys and ocean shelves. Cave/deep-cave labels follow player depth. Existing Overworld → Nether → Ender Dragon progression stays in place.
+
+Ruins include camps, fallen walls, shrines, broken bridges, homesteads, towers/watchtowers, buried halls, underground archives, temples, keeps, gates, observatories, abandoned mines, swamp shelters and mountain refuges. Layouts rotate, mirror and decay deterministically; new major structures add alternate chambers, breakable walls, traps, biome supplies and saved guard defeats. Some deeper caches award modest enchanted equipment. Ruins appear on the map only after discovery. Pickups show actual item icons, names and quantities and merge repeated acquisitions.
+
+**Existing worlds retain their saved terrain version (5, 6 or 7).** Those saves have no historical explored-chunk ledger, so automatically switching even distant chunks could replace terrain you previously visited. This release deliberately does not migrate their generator or erase builds. The new regions are available in newly created worlds; export an existing world before choosing the game's replace-world action. Version 7 worlds retain their original procedural ruins.
+
+Local development: `voxelDebug.ruins(type)` finds bounded nearby sites; `voxelDebug.visit(type)` visits one; `voxelDebug.bounds()` shows footprints. Debug commands are disabled on the public page unless explicitly enabled with `?debug`.

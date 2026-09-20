@@ -1,9 +1,9 @@
-import { NETHER_END } from './nether.js?v=33';
+import { NETHER_END } from './nether.js?v=34';
 import * as THREE from '../vendor/three.module.js';
-import { OUTPOSTS } from './expeditions.js?v=33';
-import { RIFT_ANCHORS } from './realms.js?v=33';
-import { hash } from './data.js?v=33';
-import { DRAGON_TOWERS } from './dragon.js?v=33';
+import { OUTPOSTS } from './expeditions.js?v=34';
+import { RIFT_ANCHORS } from './realms.js?v=34';
+import { hash } from './data.js?v=34';
+import { DRAGON_TOWERS } from './dragon.js?v=34';
 export class RiftEffects {
   constructor(r){
     this.r=r;this.root=new THREE.Group();r.scene.add(this.root);this.epoch=-1;this.time={value:0};this.markers=[];

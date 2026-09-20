@@ -1,0 +1,32 @@
+[
+  {
+    "terrain": 5,
+    "seed": 7821,
+    "sha256": "9901eeda6e21d381b4fbd76f345d60757a71998b114bb130775055bbf8e01f39"
+  },
+  {
+    "terrain": 5,
+    "seed": 42,
+    "sha256": "ccddf51b72fcbd5f190f4968700d71ee7dd22b89d842fc4f30d04c0d4be11810"
+  },
+  {
+    "terrain": 6,
+    "seed": 7821,
+    "sha256": "32809166ad69a65f2219b4c912d8de66b31db273c443bd4bd6d7dee647f3e365"
+  },
+  {
+    "terrain": 6,
+    "seed": 42,
+    "sha256": "65a8d9d442fa23c29e237854e7fef9773ae84cc11ed0e364261f712c8f18d2e0"
+  },
+  {
+    "terrain": 7,
+    "seed": 7821,
+    "sha256": "56a168528954055df68fcc416a370587044e5b8a89456ef525c02fdf03566248"
+  },
+  {
+    "terrain": 7,
+    "seed": 42,
+    "sha256": "eef5d7efb83e8768b4be60571e1e9c54b308191aeb0a33e31e13b875155adde1"
+  }
+]

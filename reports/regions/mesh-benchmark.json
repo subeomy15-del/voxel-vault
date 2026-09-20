@@ -1,0 +1,77 @@
+{
+  "seed": 7821,
+  "node": "v24.19.0",
+  "note": "50 timed chunk builds after one warmup pass; same coordinates, different generator versions may produce different terrain.",
+  "results": [
+    {
+      "name": "badlands",
+      "version": 7,
+      "medianMs": 6.089916999999957,
+      "p95Ms": 9.855000000000018,
+      "bytes": 1465792
+    },
+    {
+      "name": "badlands",
+      "version": 8,
+      "medianMs": 7.533083000000033,
+      "p95Ms": 12.069166999999993,
+      "bytes": 1922392
+    },
+    {
+      "name": "conifer",
+      "version": 7,
+      "medianMs": 4.486667000000125,
+      "p95Ms": 7.593790999999783,
+      "bytes": 4221368
+    },
+    {
+      "name": "conifer",
+      "version": 8,
+      "medianMs": 5.167957999999999,
+      "p95Ms": 7.960875000000215,
+      "bytes": 5290968
+    },
+    {
+      "name": "cherry",
+      "version": 7,
+      "medianMs": 8.176624999999603,
+      "p95Ms": 10.664500000000317,
+      "bytes": 4234376
+    },
+    {
+      "name": "cherry",
+      "version": 8,
+      "medianMs": 6.529624999999669,
+      "p95Ms": 9.185041000000183,
+      "bytes": 3559376
+    },
+    {
+      "name": "jungle",
+      "version": 7,
+      "medianMs": 6.1468330000002425,
+      "p95Ms": 10.848167000000103,
+      "bytes": 8336352
+    },
+    {
+      "name": "jungle",
+      "version": 8,
+      "medianMs": 5.813292000000274,
+      "p95Ms": 9.586499999999887,
+      "bytes": 6310680
+    },
+    {
+      "name": "fortress",
+      "version": 7,
+      "medianMs": 7.750082999999904,
+      "p95Ms": 15.078875000000153,
+      "bytes": 2781016
+    },
+    {
+      "name": "fortress",
+      "version": 8,
+      "medianMs": 5.786958000000595,
+      "p95Ms": 13.001374999999825,
+      "bytes": 3010216
+    }
+  ]
+}

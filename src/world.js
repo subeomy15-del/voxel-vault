@@ -1,13 +1,14 @@
-import {StructureGenerator} from './structure-generator.js?v=33';
-import {climateAt,blendedSurface,smooth} from './climate.js?v=33';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=33';
-import {EditMap} from './edit-map.js?v=33';
-import { netherHeight,netherBlock } from './nether.js?v=33';
-import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=33';
-import { canonicalItem } from './resource-map.js?v=33';
-import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=33';
-import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=33';
-import { CLOUDSTEP,courseGeometry } from './parkour-course.js?v=33';
+import {regionalClimate,regionalSurface} from './regional-climate.js?v=34';
+import {StructureGenerator} from './structure-generator.js?v=34';
+import {climateAt,blendedSurface,smooth} from './climate.js?v=34';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=34';
+import {EditMap} from './edit-map.js?v=34';
+import { netherHeight,netherBlock } from './nether.js?v=34';
+import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=34';
+import { canonicalItem } from './resource-map.js?v=34';
+import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=34';
+import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=34';
+import { CLOUDSTEP,courseGeometry } from './parkour-course.js?v=34';
 export const CHUNK=16, WORLD_LIMIT=Infinity, WORLD_BOTTOM=-64, WORLD_TOP=95, SEA_LEVEL=4;
 export const cellKey=(x,y,z)=>`${x},${y},${z}`;
 export class World {
@@ -43,7 +44,8 @@ export class World {
     // Preserve the original island, then blend into new continents past its ocean.
     const coast=Math.hypot(x*.92,z*.87);
     if(this.terrain<7&&coast>405){const returnToLand=Math.max(0,Math.min(1,(coast-690)/160));h-=(coast-405)*.65*(1-returnToLand);}
-    const region=this.terrain>=7?smooth(280,540,Math.hypot(x,z)):0,climate=region>0?climateAt(this.seed,x,z):null;
+    const region=this.terrain>=7?smooth(280,540,Math.hypot(x,z)):0,climate=region>0?(this.terrain>=8?regionalClimate:climateAt)(this.seed,x,z):null;
+    if(this.terrain>=8){const mesa=smooth(145,210,x)*smooth(115,175,z);h+=mesa*smooth(.28,.64,this.noise(x+57,z-93,90))*24;}
     if(climate){h=h*(1-region)+climate.h*region;if(region>.5)biome=climate.biome;}
     const d=Math.hypot(x,z-12);if(d<42){const a=Math.max(0,Math.min(1,(42-d)/22));h=h*(1-a)+6*a;}
     h=Math.max(this.terrain>=7?-36:-7,Math.min(this.terrain>=7?78:70,Math.floor(h)));
@@ -107,10 +109,11 @@ export class World {
     if(y===WORLD_BOTTOM)return 'bedrock';
     // Walk down a covered, five-block-wide slope into the cave, rather than a flooded shaft.
     if(x>=20&&x<=24&&z<=10&&z>=-32){const floor=this.height(22,10)-Math.floor((10-z)*.65);if(y>floor&&y<floor+6)return null;}
-    if(y>h)return h<SEA_LEVEL&&y<=SEA_LEVEL?'water':null;
+    if(y>h)return h<SEA_LEVEL&&y<=SEA_LEVEL?(this.terrain>=8&&y===SEA_LEVEL&&(['snow','snow_plains','frozen_badlands'].includes(c.biome)||c.climate?.cold>.65)?'ice':'water'):null;
     if(this.inCave(x,y,z,c))return y<-52?'lava':null;
-    if(c.biome==='badlands'&&y<=h&&y>h-15)return y===h?'red_sand':['red_terracotta','ochre_terracotta','red_terracotta','chalk'][Math.floor((y+96)/3)%4];
+    if((c.biome==='badlands'||c.biome==='frozen_badlands')&&y<=h&&y>h-15)return y===h?(c.biome==='frozen_badlands'?'snow':'red_sand'):['red_terracotta','ochre_terracotta','red_terracotta','chalk'][Math.floor((y+96)/3)%4];
     if(c.biome==='marsh'&&y===h&&this.noise(x+91,z,12)>.58)return 'water';
+    if(y===h&&c.region>.5&&this.terrain>=8)return regionalSurface({...c.climate,h,biome:c.biome},x,z,this.seed);
     if(y===h&&c.region>.5)return blendedSurface({...c.climate,h},x,z,this.seed);
     if(y>h-4&&c.region>.5)return y===h-3&&c.climate.river<22?'clay':BIOME_DEFINITIONS[c.biome].subsurface;
     if(y===h)return h<=SEA_LEVEL+1?'sand':h>48&&!['savanna','marsh'].includes(c.biome)?'snow':BIOMES[c.biome].top;
@@ -141,19 +144,21 @@ export class World {
     const sites=this.ruins?.forChunk(cx,cz)||[],reserved=new Set();
     const stamp=(x,y,z,type)=>{if(Math.floor(x/16)!==cx||Math.floor(z/16)!==cz||y>WORLD_TOP||y<=WORLD_BOTTOM)return;const k=cellKey(x,y,z);this.structures.set(k,type);reserved.add(k);if(type)this.chunkTops.set(tag,Math.max(this.chunkTops.get(tag)||0,y+2));};
     this.ruins?.stamp(cx,cz,sites,stamp);
-    const put=(x,y,z,type)=>{if(Math.floor(x/16)!==cx||Math.floor(z/16)!==cz)return;const key=cellKey(x,y,z),old=this.structures.get(key);if(reserved.has(key))return;if(!this.structures.has(key)||['leaf','pine','autumnleaf'].includes(old)){this.structures.set(key,type);this.chunkTops.set(tag,Math.max(this.chunkTops.get(tag)||0,y+2));}};
+    const put=(x,y,z,type)=>{if(Math.floor(x/16)!==cx||Math.floor(z/16)!==cz)return;const key=cellKey(x,y,z),old=this.structures.get(key);if(reserved.has(key))return;if(!this.structures.has(key)||['leaf','pine','autumnleaf','cherry_leaf'].includes(old)){this.structures.set(key,type);this.chunkTops.set(tag,Math.max(this.chunkTops.get(tag)||0,y+2));}};
     const margin=this.terrain>=7?6:4;
     for(let x=cx*16-margin;x<cx*16+16+margin;x++)for(let z=cz*16-margin;z<cz*16+16+margin;z++){
       const c=this.column(x,z),safe=Math.hypot(x,z-14)<9||x>16&&x<29&&z>-38&&z<16;
-      if(safe||c.h<SEA_LEVEL||c.h>(this.terrain>=7?70:58)||this.ruins?.reserved(x,z,sites,3))continue;
+      if(safe||c.h<(this.terrain>=8?SEA_LEVEL+1:SEA_LEVEL)||c.h>(this.terrain>=7?70:58)||this.ruins?.reserved(x,z,sites,3))continue;
       if(c.h<=SEA_LEVEL+2&&c.river<14){if(hash(x,z,this.seed+32)>.982)put(x,c.h+1,z,'cane');continue;}
       if(c.biome==='desert'||c.biome==='badlands'){if(hash(x,z,this.seed+32)>.997)for(let y=1;y<=2+Math.floor(hash(z,x,this.seed)*2);y++)put(x,c.h+y,z,'cactus');continue;}
       if(c.biome==='marsh'&&this.noise(x+91,z,12)>.58){if(hash(x,z,this.seed+32)>.97)put(x,c.h+1,z,'cane');continue;}
       const tree=treeAt(this,x,z,c.biome);
-      if(tree){growTree(this,put,x,c.h,z,tree);continue;}
+      if(tree&&!(this.terrain>=8&&['water','ice'].includes(this.baseSurface(x,z)))){growTree(this,put,x,c.h,z,tree);continue;}
       const plant=plantAt(this,x,z,c.biome);if(plant)put(x,c.h+1,z,plant);
     }
   }
+  baseSurface(x,z){const c=this.column(x,z);return c.biome==='marsh'&&this.noise(x+91,z,12)>.58?'water':c.h<SEA_LEVEL?'water':'land';}
+  biomeAtHeight(x,y,z){return this.dimension==='overworld'&&y<this.height(x,z)-6?(y<-28?'deep_cave':'cave'):this.biome(x,z);}
   prepareLegacy(cx,cz){
     const tag=`${cx},${cz}`;if(this.prepared.has(tag))return;this.prepared.add(tag);
     const put=(x,y,z,t)=>{if(Math.floor(x/16)===cx&&Math.floor(z/16)===cz){const k=cellKey(x,y,z);if(!this.structures.has(k)||this.structures.get(k)==='leaf'||this.structures.get(k)==='pine')this.structures.set(k,t);}};

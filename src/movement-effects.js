@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import { BLOCKS } from './data.js?v=33';
+import { BLOCKS } from './data.js?v=34';
 
 /** Bounded movement feedback, sharing the existing particle pool. */
 export class MovementEffects {

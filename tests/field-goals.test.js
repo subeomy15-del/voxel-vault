@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { FieldGoals, DAILY_GOALS, DAILY_REWARD, dailyGoalsKey, dailyGoalsComplete, normalizeDailyGoals, advanceDailyGoals, dailyGoalsMarkup } from '../src/field-goals.js?v=33';
-import { freshState, loadState, saveState } from '../src/save.js?v=33';
+import { FieldGoals, DAILY_GOALS, DAILY_REWARD, dailyGoalsKey, dailyGoalsComplete, normalizeDailyGoals, advanceDailyGoals, dailyGoalsMarkup } from '../src/field-goals.js?v=34';
+import { freshState, loadState, saveState } from '../src/save.js?v=34';
 
 const seed = 20260918;
 const storage = () => ({ data: new Map(), getItem(key) { return this.data.get(key) || null; }, setItem(key, value) { this.data.set(key, value); } });

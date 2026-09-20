@@ -1,8 +1,8 @@
-import {potionModel} from './potion-model.js?v=33';
-import {foodModel} from './food-model.js?v=33';
+import {potionModel} from './potion-model.js?v=34';
+import {foodModel} from './food-model.js?v=34';
 import * as THREE from '../vendor/three.module.js';
-import { ITEMS,BLOCKS,hash } from './data.js?v=33';
-import { toolModel,bowModel,gliderModel } from './models.js?v=33';
+import { ITEMS,BLOCKS,hash } from './data.js?v=34';
+import { toolModel,bowModel,gliderModel } from './models.js?v=34';
 // The same models supply catalogue renders and held equipment.
 export function itemModel(r,name){
  if(ITEMS[name]?.kind==='potion'||['potion','water_flask','empty_flask'].includes(name))return potionModel(name);

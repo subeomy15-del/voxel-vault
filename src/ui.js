@@ -1,27 +1,29 @@
-import {explorationMarkup,updateTrading} from './exploration-ui.js?v=33';
-import {InfusionUI} from './infusion-ui.js?v=33';
-import {potionFor,potionHUD} from './potions.js?v=33';
-import {InventoryBindings} from './inventory-bindings.js?v=33';
-import {exportWorld,parseWorldBackup} from './world-backup.js?v=33';
-import {saveHealth,preserveBeforeReplacement} from './save-health.js?v=33';
-import { inventoryLayout } from './inventory-layout.js?v=33';
-import { journeyMarkup,journeyJournal } from './journey.js?v=33';
-import { recipeMarkup,enchantingMarkup } from './workshop-ui.js?v=33';
-import { armorProtection } from './enchanting.js?v=33';
-import { realmDestination } from './nether.js?v=33';
-import { FORGE_OFFERS,OUTPOSTS } from './expeditions.js?v=33';
-import { ITEMS, BLOCKS, RECIPES, BIOMES, SMELTING, CROPS, EFFECTS, canCraft, ingredientCount, dailySeed } from './data.js?v=33';
-import { brandMark } from './brand.js?v=33';
-import { ENEMIES } from './combat.js?v=33';
-import { loadState, saveState, slotKey, saveSettings } from './save.js?v=33';
-import { defaultSettings, updateSetting } from './settings.js?v=33';
-import { icon } from './icons.js?v=33';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=34';
+import {PickupFeed} from './pickup-feed.js?v=34';
+import {explorationMarkup,updateTrading} from './exploration-ui.js?v=34';
+import {InfusionUI} from './infusion-ui.js?v=34';
+import {potionFor,potionHUD} from './potions.js?v=34';
+import {InventoryBindings} from './inventory-bindings.js?v=34';
+import {exportWorld,parseWorldBackup} from './world-backup.js?v=34';
+import {saveHealth,preserveBeforeReplacement} from './save-health.js?v=34';
+import { inventoryLayout } from './inventory-layout.js?v=34';
+import { journeyMarkup,journeyJournal } from './journey.js?v=34';
+import { recipeMarkup,enchantingMarkup } from './workshop-ui.js?v=34';
+import { armorProtection } from './enchanting.js?v=34';
+import { realmDestination } from './nether.js?v=34';
+import { FORGE_OFFERS,OUTPOSTS } from './expeditions.js?v=34';
+import { ITEMS, BLOCKS, RECIPES, BIOMES, SMELTING, CROPS, EFFECTS, canCraft, ingredientCount, dailySeed } from './data.js?v=34';
+import { brandMark } from './brand.js?v=34';
+import { ENEMIES } from './combat.js?v=34';
+import { loadState, saveState, slotKey, saveSettings } from './save.js?v=34';
+import { defaultSettings, updateSetting } from './settings.js?v=34';
+import { icon } from './icons.js?v=34';
 export { icon };
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const heldBow=g=>ITEMS[g.held]?.kind==='bow'&&g.attackCooldown>0;
 const timeString=t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`;
 export class UI {
-  constructor(game,settings){this.game=game;this.settings=settings;this.overlay=document.querySelector('#overlay');this.filter='All';this.search='';this.catalogue=false;this.inspect=null;this.tab='inventory';this.lastHud='';this.previousScreen=null;this.settingsTab='gameplay';this.settingsMessage='';this.touch=matchMedia('(pointer: coarse)').matches;document.querySelector('.hud-top .brand').innerHTML=brandMark(28)+' VOXEL VAULT';this.infusionView=new InfusionUI(this);this.inventoryView=new InventoryBindings(this);this.bind();this.render();}
+  constructor(game,settings){this.game=game;this.settings=settings;this.overlay=document.querySelector('#overlay');this.filter='All';this.search='';this.catalogue=false;this.inspect=null;this.tab='inventory';this.lastHud='';this.previousScreen=null;this.settingsTab='gameplay';this.settingsMessage='';this.touch=matchMedia('(pointer: coarse)').matches;document.querySelector('.hud-top .brand').innerHTML=brandMark(28)+' VOXEL VAULT';this.infusionView=new InfusionUI(this);this.inventoryView=new InventoryBindings(this);this.pickups=new PickupFeed();this.bind();this.render();}
   refreshItems(){this.inventoryView.update();this.infusionView.update();updateTrading(this);}
   bind(){
     document.addEventListener('click',e=>{const trade=e.target.closest('[data-trade]');if(trade){this.game.trade(trade.dataset.trade);this.refreshItems();return;}const stone=e.target.closest('[data-waystone]');if(stone){this.game.travelWaystone(stone.dataset.waystone);return;}const forget=e.target.closest('[data-forget-stone]');if(forget){this.game.state.exploration.stones=this.game.state.exploration.stones.filter(s=>s.id!==forget.dataset.forgetStone);this.game.save();forget.closest('article').remove();return;}const drink=e.target.closest('[data-drink]');if(drink){this.game.drink(drink.dataset.drink);this.refreshItems();return;}const quick=e.target.closest('[data-use-firecracker]');if(quick){this.game.useFirecracker();this.refreshItems();return;}const b=e.target.closest('[data-action]');if(b){this.action(b.dataset.action,b);return;}const discover=e.target.closest('[data-discover]');if(discover){this.catalogue=true;this.filter=discover.dataset.discover==='glider'?'Gear':'All';this.search=discover.dataset.discover;this.inspect=null;this.game.pause('inventory');this.render();return;}const scope=e.target.closest('[data-scope]');if(scope){this.catalogue=scope.dataset.scope==='all';this.inspect=null;this.render();return;}const inspect=e.target.closest('[data-inspect]');if(inspect){this.inspect=inspect.dataset.inspect;this.render();return;}const recipe=e.target.closest('[data-recipe]');if(recipe){this.filter='All';this.search=ITEMS[recipe.dataset.recipe].name;this.game.pause('craft');this.render();return;}const forge=e.target.closest('[data-forge]');if(forge){this.game.forge(forge.dataset.forge);this.refreshItems();return;}const smelt=e.target.closest('[data-smelt]');if(smelt){this.game.smelt(smelt.dataset.smelt);this.refreshItems();return;}const transfer=e.target.closest('[data-transfer]');if(transfer){this.game.transfer(transfer.dataset.transfer,transfer.dataset.withdraw==='true');this.refreshItems();return;}const enchanting=e.target.closest('[data-enchant]');if(enchanting){this.game.enchant(enchanting.dataset.enchant);this.refreshItems();return;}const unequip=e.target.closest('[data-unequip]');if(unequip){delete this.game.state.armorParts[unequip.dataset.unequip];this.game.save();this.refreshItems();return;}const craftAll=e.target.closest('[data-craft-all]');if(craftAll){this.game.craft(craftAll.dataset.craftAll,true);this.refreshItems();return;}const craftButton=e.target.closest('[data-craft]');if(craftButton){this.game.craft(craftButton.dataset.craft);this.refreshItems();return;}const equip=e.target.closest('[data-equip]');if(equip){this.game.equip(equip.dataset.equip);this.refreshItems();return;}const filter=e.target.closest('[data-filter]');if(filter){this.filter=filter.dataset.filter;this.render();}const waypoint=e.target.closest('[data-waypoint]');if(waypoint){this.game.state.waypoint=waypoint.dataset.waypoint;this.game.save();this.render();}});
@@ -151,11 +153,11 @@ export class UI {
     ctx.fillStyle=g.state.dimension==='ender'?'#30243f':'#7499ad';ctx.fillRect(0,0,600,600);
     for(let px=0;px<600;px+=6)for(let pz=0;pz<600;pz+=6){const x=Math.floor(ox+px/scale),z=Math.floor(oz+pz/scale),h=g.world.height(x,z);if(h<4)continue;ctx.fillStyle=BIOMES[g.world.biome(x,z)].color;ctx.fillRect(px,pz,6,6);if(h>32){ctx.fillStyle='#ffffff22';ctx.fillRect(px,pz,6,6);}}
     ctx.strokeStyle='#ece8d529';for(let a=0;a<600;a+=60){ctx.beginPath();ctx.moveTo(a,0);ctx.lineTo(a,600);ctx.moveTo(0,a);ctx.lineTo(600,a);ctx.stroke();}
-    for(const l of g.world.landmarks){const x=(l.x-ox)*scale,z=(l.z-oz)*scale;ctx.fillStyle='#293e36';ctx.beginPath();ctx.arc(x,z,8,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f1e9ce';ctx.font='12px system-ui';ctx.textAlign='center';ctx.fillText(l.type==='camp'?'⌂':'•',x,z+4);}
+    for(const l of g.world.landmarks.filter(l=>!l.hidden||g.state.discovered.includes(l.id))){const x=(l.x-ox)*scale,z=(l.z-oz)*scale;ctx.fillStyle='#293e36';ctx.beginPath();ctx.arc(x,z,8,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f1e9ce';ctx.font='12px system-ui';ctx.textAlign='center';ctx.fillText(l.type==='camp'?'⌂':'•',x,z+4);}
     ctx.save();ctx.translate(300,300);ctx.rotate(-g.yaw);ctx.fillStyle='#fff2ba';ctx.strokeStyle='#253c33';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-11);ctx.lineTo(8,9);ctx.lineTo(0,5);ctx.lineTo(-8,9);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
   }
   hud(){
-    const g=this.game,s=g.state,b=BIOMES[g.world.biome(g.pos.x,g.pos.z)];const l=document.querySelector('#location');l.querySelector('.eyebrow').textContent=s.dimension==='nether'?'NETHER WORLD':s.dimension==='ender'?'ENDER WORLD':g.creative?'CREATIVE WORLD':s.mode==='daily'?'DAILY WORLD':'SURVIVAL WORLD';l.querySelector('strong').textContent=b.name;l.querySelector('small').textContent=`Day ${Math.floor(s.time/600)+1} · ${g.creative?'Creative mode':['Morning','Afternoon','Evening','Moonrise'][Math.floor(s.time%600/150)]}`;
+    const g=this.game,s=g.state,biome=g.world.biomeAtHeight(g.pos.x,g.pos.y,g.pos.z),b=(g.world.terrain>=8?BIOME_DEFINITIONS[biome]:null)||BIOMES[biome];const l=document.querySelector('#location');l.querySelector('.eyebrow').textContent=s.dimension==='nether'?'NETHER WORLD':s.dimension==='ender'?'ENDER WORLD':g.creative?'CREATIVE WORLD':s.mode==='daily'?'DAILY WORLD':'SURVIVAL WORLD';l.querySelector('strong').textContent=b.name;l.querySelector('small').textContent=`Day ${Math.floor(s.time/600)+1} · ${g.creative?'Creative mode':['Morning','Afternoon','Evening','Moonrise'][Math.floor(s.time%600/150)]}`;
     const quest=document.querySelector('#quest');quest.innerHTML=`<span class="eyebrow">YOUR WORLD</span><strong>${Math.floor(g.pos.x)}, ${Math.floor(g.pos.y)}, ${Math.floor(g.pos.z)}</strong><small>${s.stats.built} built · ${s.stats.mined} mined · ${s.stats.harvested} harvested</small>`;
     document.querySelector('#aura-points').textContent='Aura '+(s.aura||0)+' · Enchant';
     const challenge=document.querySelector('#rift-objective');
@@ -183,7 +185,7 @@ export class UI {
     progress.hidden=!eating&&!draw&&!cross&&g.mineProgress<=0;
     if(!progress.hidden){progress.querySelector('span').textContent=g.mineProgress>0?'Mining '+(BLOCKS[g.target?.type]?.name||'block')+' · '+Math.floor(g.mineProgress*100)+'%':eating?'Eating '+ITEMS[eating.item].name:draw?'Draw · release to shoot':`Reloading · ${g.attackCooldown.toFixed(1)}s`;progress.querySelector('i').style.width=Math.min(100,100*(g.mineProgress>0?g.mineProgress:eating?1-eating.time/eating.total:draw?draw.time/g.drawDuration():1-g.attackCooldown/(ITEMS[g.held].cooldown||.45)))+'%';}
     this.inventoryView.updateHotbar();
-    const wp=g.world.landmarks.find(l=>l.id===s.waypoint)||g.world.landmarks.at(-1);if(wp){let angle=Math.atan2(-(wp.x-g.pos.x),-(wp.z-g.pos.z))-g.yaw;angle=Math.atan2(Math.sin(angle),Math.cos(angle));document.querySelector('#compass').innerHTML=`<span>W</span><i></i><span>N</span><i></i><span>E</span><div class="waypoint" style="transform:translateX(${Math.max(-120,Math.min(120,-angle*80))}px)">◇<small>${Math.round(Math.hypot(wp.x-g.pos.x,wp.z-g.pos.z))}m · ${wp.name}</small></div>`;}
+    const wp=g.world.landmarks.find(l=>l.id===s.waypoint&&(!l.hidden||s.discovered.includes(l.id)))||g.world.landmarks.find(l=>l.id==='home')||g.world.landmarks.find(l=>!l.hidden||s.discovered.includes(l.id));if(wp){let angle=Math.atan2(-(wp.x-g.pos.x),-(wp.z-g.pos.z))-g.yaw;angle=Math.atan2(Math.sin(angle),Math.cos(angle));document.querySelector('#compass').innerHTML=`<span>W</span><i></i><span>N</span><i></i><span>E</span><div class="waypoint" style="transform:translateX(${Math.max(-120,Math.min(120,-angle*80))}px)">◇<small>${Math.round(Math.hypot(wp.x-g.pos.x,wp.z-g.pos.z))}m · ${wp.name}</small></div>`;}
     const nearby=g.nearest(),interaction=document.querySelector('#interaction'),held=ITEMS[g.held],target=g.target;
     const contextual=held.kind==='hoe'&&['grass','dirt'].includes(target?.type)?'Prepare garden soil':held.crop&&target?.type==='farmland'?'Plant '+held.crop:null;
     const labels={trader:'Trade with the wayfarer',waystone:'Activate waystone',sea_cache:'Open submerged cache',brewing_station:'Use brewing station',relic_forge:'Retired station',anchor:'Activate '+(nearby?.name||'anchor'),ender_gate:'Travel to '+realmDestination(g,nearby),moonstone_chest:'Open shared moonstone storage',supply:'Open supplies',camp:'Rest',furnace:'Use furnace',campfire:'Cook over fire',chest:'Open storage',bed:'Sleep & set spawn',wheat_crop:'Harvest wheat',carrot_crop:'Harvest carrots'};
@@ -194,10 +196,11 @@ export class UI {
     document.querySelector('#boss').hidden=!g.boss;if(g.boss){document.querySelector('#boss>div>span').textContent=ENEMIES[g.boss.kind].name.toUpperCase();document.querySelector('#boss-fill').style.width=g.boss.hp/g.boss.maxHp*100+'%';document.querySelector('#boss-phase').textContent=g.boss.kind==='dragon'?`${Math.ceil(g.boss.hp)} / ${g.boss.maxHp} · ${g.boss.phase===2?'ENRAGED':'AWAKENED'}`:['','AWAKENED','ENRAGED','LAST STAND'][g.boss.phase||1];}
   }
   update(){
+    this.pickups.update(this.game.screen);
     for(const event of this.game.events.splice(0)){
+      if(event.type==='collected')this.pickups.add(event.name,event.count);
       if(event.type==='dragonDefeated'){const el=document.querySelector('#combat-message');el.classList.add('rift-victory');el.innerHTML='<small>THE ISLANDS ARE YOURS</small>DRAGON DEFEATED<small>Take your Dragon Egg home through the portal</small>';setTimeout(()=>{el.classList.remove('rift-victory');el.textContent='';},5500);}
       if(event.type==='toast'){if(this.game.screen==='menu')continue;const el=document.createElement('div');el.className='toast '+event.kind;el.innerHTML=`<span>${event.kind==='reward'?'✦':event.kind==='discovery'?'◇':'↗'}</span><div><strong>${escape(event.title)}</strong>${event.text?`<small>${escape(event.text)}</small>`:''}</div>`;const parent=document.querySelector('#toasts');parent.append(el);while(parent.children.length>(this.game.screen?1:3))parent.firstChild.remove();setTimeout(()=>el.remove(),4300);}
-      if(event.type==='pickup'){const el=document.createElement('div');el.className='pickup';el.innerHTML=`${icon(event.item,25)}<span>${ITEMS[event.item]?.name||event.item}</span><b>+${event.count}</b>`;const list=document.querySelector('#pickups');list.append(el);while(list.children.length>4)list.firstChild.remove();setTimeout(()=>el.remove(),2200);}
       if(event.type==='saved'){document.querySelector('#save-state').textContent=event.ok?'✓ World saved locally':event.status==='saving'?'Saving…':event.status==='storage full'?'Storage full · export a backup':'Save failed · export a backup';}
       if(event.type==='hurt'){const el=document.querySelector('#damage');el.classList.remove('hit');void el.offsetWidth;el.classList.add('hit');}
       if(event.type==='browse'){this.catalogue=!event.category;this.inspect=null;this.filter=event.category||(event.search==='glider'?'Gear':'All');this.search=event.search||'';this.render();}

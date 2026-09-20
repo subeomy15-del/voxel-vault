@@ -1,4 +1,5 @@
-import {integerHash} from './climate.js?v=33';
+import {REGIONAL_STRUCTURES,buildRegionalRoom,embellishRuin} from './regional-structures.js?v=34';
+import {integerHash} from './climate.js?v=34';
 const key=(x,y,z)=>`${x},${y},${z}`;
 export class StructureTemplate {
  constructor(seed){this.seed=seed;this.cells=new Map();this.protected=new Set();this.footprint=new Set();}
@@ -23,7 +24,7 @@ export class StructureTemplate {
   for(const[k,type]of this.cells)if(type&&!connected.has(k)&&!this.protected.has(k))this.cells.set(k,null);
  }
 }
-export const STRUCTURE_TYPES=Object.freeze({
+export const STRUCTURE_TYPES=Object.freeze({...REGIONAL_STRUCTURES,
  camp:{name:'Wayfarer Remains',radius:5,tier:0},wall:{name:'Fallen Rampart',radius:9,tier:0},shrine:{name:'Listening Stones',radius:5,tier:0},bridge:{name:'Broken Causeway',radius:9,tier:0},
  house:{name:'Forgotten Homestead',radius:7,tier:1},tower:{name:'Hollow Tower',radius:6,tier:1},watchtower:{name:'Last Watch',radius:6,tier:1},buried:{name:'Buried Hall',radius:8,tier:1},dungeon:{name:'Deep Archive',radius:12,tier:2},temple:{name:'Sunken Colonnade',radius:10,tier:2},
  fortress:{name:'Crownfall Keep',radius:19,tier:3},gate:{name:'Broken Meridian',radius:11,tier:2},observatory:{name:'Starless Observatory',radius:15,tier:3}
@@ -31,12 +32,13 @@ export const STRUCTURE_TYPES=Object.freeze({
 export function structurePalette(biome){
  if(['desert','savanna','beach'].includes(biome))return {stone:'sandstone',floor:'limestone',wood:'plank',moss:0};
  if(biome==='badlands')return {stone:'red_terracotta',floor:'ochre_terracotta',wood:'pine_plank',moss:0};
- if(['snow','snow_plains','mountain'].includes(biome))return {stone:'stonebrick',floor:'cobblestone',wood:'pine_plank',moss:.08};
+ if(['snow','snow_plains','mountain','frozen_badlands'].includes(biome))return {stone:'stonebrick',floor:'cobblestone',wood:'pine_plank',moss:.08};
  return {stone:'stonebrick',floor:'cobblestone',wood:'plank',moss:['jungle','dense_forest','marsh'].includes(biome)?.5:.23};
 }
-export function buildStructure(type,seed,biome){
+export function buildStructure(type,seed,biome,version=7){
  const t=new StructureTemplate(seed),p=structurePalette(biome),roll=integerHash(7,11,seed),height=6+Math.floor(roll*5);let loot={x:1,y:0,z:1};
- if(type==='camp'){
+ if(REGIONAL_STRUCTURES[type]){loot=buildRegionalRoom(t,type,p,roll);
+ }else if(type==='camp'){
   t.floor(-3,-2,3,2,-1,'gravel');t.pillar(-3,-2,0,3,'wood');t.pillar(3,-2,0,2,'wood');t.wall(-3,-2,3,-2,2,1,p.wood);t.block(-1,0,0,'campfire',true);t.block(2,0,-1,'wood');
  }else if(type==='wall'){
   t.floor(-8,-1,8,1,-1,p.floor);t.wall(-8,0,8,0,0,3,p.stone);t.pillar(-6,0,0,5,p.stone);t.pillar(6,0,0,6,p.stone);loot={x:-5,y:0,z:1};
@@ -69,8 +71,10 @@ export function buildStructure(type,seed,biome){
   t.floor(-11,-11,11,11,-1,p.floor);t.room(-8,-8,8,8,0,4,p.stone);for(const x of[-10,10])for(const z of[-10,10])t.pillar(x,z,0,9,p.stone);
   t.room(-4,-4,4,4,0,12,p.stone);t.floor(-4,-4,4,4,10,p.wood);t.ladder(-3,0,0,11);t.block(-3,10,0,'ladder',true);t.block(0,11,0,'lantern',true);loot={x:1,y:11,z:1};
  }
+ if(version>=8)embellishRuin(t,type,p,seed,roll);
  t.block(loot.x,loot.y-1,loot.z,p.floor,true);t.block(loot.x,loot.y,loot.z,'treasure_chest',true);
- t.decay(.13+roll*.13,p.moss);
+ t.decay(version>=8?.1+roll*.09:.13+roll*.13,p.moss);
+ if(version>=8&&['snow','snow_plains','frozen_badlands'].includes(biome)){const tops=new Map();for(const[k,v]of t.cells)if(v){const[x,y,z]=k.split(',').map(Number),key=x+','+z;if(!tops.has(key)||y>tops.get(key))tops.set(key,y);}for(const[k,y]of tops){const[x,z]=k.split(',').map(Number);if(y>0&&integerHash(x,z,seed+71)>.45)t.block(x,y+1,z,'snow');}}
  // Rubble belongs to the terrain-adaptation pass, which places it on real ground.
  return {cells:t.cells,footprint:t.footprint,loot,height:Math.max(...[...t.cells.keys()].map(k=>Number(k.split(',')[1]))),palette:p};
 }
