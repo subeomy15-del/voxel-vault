@@ -1,5 +1,5 @@
 // Map-compatible edits retain explicit air; dirty entries feed incremental saves.
-import {SpatialLights} from './spatial-lights.js?v=34';
+import {SpatialLights} from './spatial-lights.js?v=35';
 export class EditMap extends Map {
   constructor(entries=[]){super();this.revision=0;this.pending=new Map();this.chunks=new Map();this.lights=new SpatialLights();for(const[k,v]of entries){super.set(k,v);this.index(k,v);this.lights.update(k,v,null);}}
   index(key,value,remove=false){const[x,,z]=key.split(',').map(Number),tag=`${Math.floor(x/16)},${Math.floor(z/16)}`;let chunk=this.chunks.get(tag);if(remove){chunk?.delete(key);if(!chunk?.size)this.chunks.delete(tag);}else{if(!chunk){chunk=new Map();this.chunks.set(tag,chunk);}chunk.set(key,value);}}

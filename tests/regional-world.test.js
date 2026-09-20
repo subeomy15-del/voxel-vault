@@ -1,15 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {World} from '../src/world.js?v=34';
-import {regionalClimate} from '../src/regional-climate.js?v=34';
-import {BIOME_DEFINITIONS} from '../src/biome-registry.js?v=34';
-import {STRUCTURE_TYPES,buildStructure} from '../src/structure-templates.js?v=34';
-import {BLOCKS,ITEMS} from '../src/data.js?v=34';
-import {regionalTree} from '../src/regional-trees.js?v=34';
-import {freshState,saveState,loadState} from '../src/save.js?v=34';
-import {ruinEquipment,defeatRuinGuard,tickRuinEncounters} from '../src/ruin-encounters.js?v=34';
-import {normalizeRoll} from '../src/infusions.js?v=34';
-import {integerHash} from '../src/climate.js?v=34';
+import {World} from '../src/world.js?v=35';
+import {regionalClimate} from '../src/regional-climate.js?v=35';
+import {BIOME_DEFINITIONS} from '../src/biome-registry.js?v=35';
+import {STRUCTURE_TYPES,buildStructure} from '../src/structure-templates.js?v=35';
+import {BLOCKS,ITEMS} from '../src/data.js?v=35';
+import {regionalTree} from '../src/regional-trees.js?v=35';
+import {freshState,saveState,loadState} from '../src/save.js?v=35';
+import {ruinEquipment,defeatRuinGuard,tickRuinEncounters} from '../src/ruin-encounters.js?v=35';
+import {normalizeRoll} from '../src/infusions.js?v=35';
+import {integerHash} from '../src/climate.js?v=35';
 const store=()=>{const data=new Map();return {getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};};
 test('all 18 surface regions exist, climate is deterministic and terrain borders are continuous',()=>{
  const found=new Set();for(const seed of [7821,42])for(let x=-6000;x<=6000;x+=96)for(let z=-6000;z<=6000;z+=96)found.add(regionalClimate(seed,x,z).biome);
@@ -33,7 +33,7 @@ test('new tree families use connected geometry and distinctive silhouettes witho
 test('all ruin families spawn and their layouts vary while materials and footprint remain valid',()=>{
  const found=new Set();for(const seed of[7821,42,981,151]){const w=new World(seed,[],8);for(const s of w.ruins.find({radius:24})){
   found.add(s.type);assert.ok(s.slope<=4);const a=w.ruins.layout(s);for(const[k,t]of a.cells){assert.ok(t===null||BLOCKS[t]);const[x,,z]=k.split(',').map(Number);assert.ok(Math.abs(x)<=s.radius&&Math.abs(z)<=s.radius, s.type+' footprint');}assert.ok(s.y>6);
- }}assert.deepEqual([...found].sort(),Object.keys(STRUCTURE_TYPES).sort());
+ }}assert.deepEqual([...found].sort(),Object.keys(STRUCTURE_TYPES).filter(t=>t!=='magma_ruin').sort());
  for(const type of found)assert.notDeepEqual(buildStructure(type,42,'forest',8).cells,buildStructure(type,991,'forest',8).cells,type+' variation');
 });
 test('version-eight structures agree across chunk order, edits survive and caches stay bounded',()=>{

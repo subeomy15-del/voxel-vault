@@ -1,5 +1,5 @@
-import {REGIONAL_STRUCTURES,buildRegionalRoom,embellishRuin} from './regional-structures.js?v=34';
-import {integerHash} from './climate.js?v=34';
+import {REGIONAL_STRUCTURES,buildRegionalRoom,embellishRuin} from './regional-structures.js?v=35';
+import {integerHash} from './climate.js?v=35';
 const key=(x,y,z)=>`${x},${y},${z}`;
 export class StructureTemplate {
  constructor(seed){this.seed=seed;this.cells=new Map();this.protected=new Set();this.footprint=new Set();}

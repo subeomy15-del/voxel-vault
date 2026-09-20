@@ -1,9 +1,9 @@
-import {infusionTooltip} from './infusion-ui.js?v=34';
-import {ITEMS,RECIPES,SMELTING,canCraft,maxCraft,ingredientCount,ingredientKeys} from './data.js?v=34';
-import {icon} from './icons.js?v=34';
-import {packSlot} from './inventory-layout.js?v=34';
-import {enchantRow} from './workshop-ui.js?v=34';
-import {enchantKind,enchantLevel,enchantCost} from './enchanting.js?v=34';
+import {infusionTooltip} from './infusion-ui.js?v=35';
+import {ITEMS,RECIPES,SMELTING,canCraft,maxCraft,ingredientCount,ingredientKeys} from './data.js?v=35';
+import {icon} from './icons.js?v=35';
+import {packSlot} from './inventory-layout.js?v=35';
+import {enchantRow} from './workshop-ui.js?v=35';
+import {enchantKind,enchantLevel,enchantCost} from './enchanting.js?v=35';
 const text=(node,value)=>{if(node&&node.textContent!==String(value))node.textContent=String(value);};
 const flag=(node,name,value)=>{if(node.classList.contains(name)!==!!value)node.classList.toggle(name,!!value);};
 const attr=(node,name,value)=>{if(node.getAttribute(name)!==String(value))node.setAttribute(name,String(value));};

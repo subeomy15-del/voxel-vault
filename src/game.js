@@ -1,27 +1,28 @@
-import {tickRuinEncounters,defeatRuinGuard,ruinEquipment} from './ruin-encounters.js?v=34';
-import {biomeEnemy} from './biome-ecology.js?v=34';
-import {useRod,claimSeaCache,activateWaystone,travelWaystone,trade,tickExploration} from './exploration.js?v=34';
-import {infuse,infusionValue,armorInfusion,secureRandom} from './infusions.js?v=34';
-import {ALTARS} from './infusion-registry.js?v=34';
-import {drinkPotion,potionFor,potionPower,potionDamageMultiplier} from './potions.js?v=34';
-import { armBlast,cancelDelayedActions } from './delayed-actions.js?v=34';
-import { saveHealth,preserveBeforeReplacement } from './save-health.js?v=34';
-import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=34';
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=34';
-import { canonicalItem,normalizeResources } from './resource-map.js?v=34';
-import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=34';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=34';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=34';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,maxCraft,hash,dailySeed } from './data.js?v=34';
-import { freshState,loadState,saveState,slotKey,importLegacy } from './save.js?v=34';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=34';
-import { movePlayer,requestJump } from './movement.js?v=34';
-import { overlapsBlock } from './shapes.js?v=34';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=34';
-import { ANIMALS,animalKind } from './wildlife.js?v=34';
-import { CHAPTERS,journeyStage } from './journey.js?v=34';
-import { enchantGear,weaponPower,miningPower,armorProtection,awardAura } from './enchanting.js?v=34';
-import { tickTraps,trapAt } from './traps.js?v=34';
+import {creatureSpawn} from './creature-registry.js?v=35';
+import {tickRuinEncounters,defeatRuinGuard,ruinEquipment} from './ruin-encounters.js?v=35';
+import {biomeEnemy} from './biome-ecology.js?v=35';
+import {useRod,claimSeaCache,activateWaystone,travelWaystone,trade,tickExploration} from './exploration.js?v=35';
+import {infuse,infusionValue,armorInfusion,secureRandom} from './infusions.js?v=35';
+import {ALTARS} from './infusion-registry.js?v=35';
+import {drinkPotion,potionFor,potionPower,potionDamageMultiplier} from './potions.js?v=35';
+import { armBlast,cancelDelayedActions } from './delayed-actions.js?v=35';
+import { saveHealth,preserveBeforeReplacement } from './save-health.js?v=35';
+import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=35';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=35';
+import { canonicalItem,normalizeResources } from './resource-map.js?v=35';
+import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=35';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=35';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=35';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,maxCraft,hash,dailySeed } from './data.js?v=35';
+import { freshState,loadState,saveState,slotKey,importLegacy } from './save.js?v=35';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=35';
+import { movePlayer,requestJump } from './movement.js?v=35';
+import { overlapsBlock } from './shapes.js?v=35';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=35';
+import { ANIMALS,animalKind } from './wildlife.js?v=35';
+import { CHAPTERS,journeyStage } from './journey.js?v=35';
+import { enchantGear,weaponPower,miningPower,armorProtection,awardAura } from './enchanting.js?v=35';
+import { tickTraps,trapAt } from './traps.js?v=35';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}
@@ -269,7 +270,7 @@ export class Game {
       const x=this.pos.x+d.x*5,y=this.pos.y+1.1+d.y*5,z=this.pos.z+d.z*5;this.renderer.burst(x,y,z,'#efaa66',34);this.renderer.burst(x,y+.7,z,'#f5d18a',18);this.audio.play('firecracker');this.toast('Firecracker!','Aerial burst! Nearby enemies are startled. Craft more with coal and sand.','reward');
     }
     const fx=this.pos.x+d.x*5,fz=this.pos.z+d.z*5;
-    this.renderer.firework?.(fx,this.pos.y+5,fz);
+    this.renderer.firework?.(fx+d.x*5,this.pos.y+5,fz+d.z*5);
     for(const m of this.mobs)if(m.kind!=='dragon'&&m.kind!=='guardian'&&Math.hypot(m.x-fx,m.z-fz)<8&&Math.abs(m.y-this.pos.y)<5)m.stun=Math.max(m.stun||0,2.2);
     this.save();return true;
   }
@@ -441,12 +442,12 @@ export class Game {
     if(this.drawState){if(this.drawState.item!==this.held)this.drawState=null;else this.drawState.time+=dt;}
     this.mobTarget=targetMob(this,6);
     if(this.attackHeld){if(['sword','bow'].includes(ITEMS[this.held]?.kind)||this.mobTarget?.distance<=4){this.mineProgress=0;this.attack();}else this.mine(dt);}else{this.mineProgress=0;this.mineKey='';}
-    for(const l of this.world.landmarks)if(Math.hypot(l.x-this.pos.x,l.z-this.pos.z)<14&&!this.state.discovered.includes(l.id)){this.state.discovered.push(l.id);if(l.id!=='home'&&l.id!=='camp')awardAura(this,8);this.toast(l.name,l.subtitle);}
+    for(const l of this.world.landmarks)if(Math.hypot(l.x-this.pos.x,l.z-this.pos.z)<14&&(!l.generated||Math.abs(l.y-this.pos.y)<12)&&!this.state.discovered.includes(l.id)){this.state.discovered.push(l.id);if(l.id!=='home'&&l.id!=='camp')awardAura(this,8);this.toast(l.name,l.subtitle);}
     tickRuinEncounters(this,dt);
     this.spawnTimer+=dt;if(!this.multiplayer?.active&&this.spawnTimer>(this.hardAdventure?8:14)){
       this.spawnTimer=0;this.mobs=this.mobs.filter(m=>ANIMALS[m.kind]||Math.hypot(m.x-this.pos.x,m.z-this.pos.z)<85);
       const ender=this.state.dimension==='ender',hostile=!this.creative&&(ender||this.state.dimension==='nether'||this.pos.y<-7||this.state.time%600>(this.hardAdventure?300:420)||this.world.biome(this.pos.x,this.pos.z)==='badlands'),cap=hostile?(this.hardAdventure?(ender?11:9):(ender?7:5)):10,group=this.mobs.filter(m=>!!ENEMIES[m.kind]?.passive!==hostile&&Math.hypot(m.x-this.pos.x,m.z-this.pos.z)<70);
-      if(group.length<cap&&(hostile||this.mobs.filter(m=>ANIMALS[m.kind]).length<128)){const a=hash(Math.floor(this.state.time),this.serial,this.state.seed)*Math.PI*2,x=this.pos.x+Math.sin(a)*22,z=this.pos.z+Math.cos(a)*22,y=this.world.ground(x,z,hostile?this.pos.y+3:this.world.height(x,z)+1);if(Math.abs(y-this.pos.y)<10&&y>-60&&!this.world.waterAt(x,y,z)&&!this.world.intersects(x,y,z,1.7,.4)){const biome=this.world.biome?.(x,z);const kind=this.state.dimension==='nether'?(this.serial%3===0?'brute':'stalker'):ender?(this.serial%3===0?'void_archer':'enderling'):(biome==='badlands'?(this.serial%3?'draugr_knight':'skeleton'):this.pos.y<-25?'brute':biome==='snow'?'frost_howler':biome==='desert'?'husk':biome==='marsh'&&this.serial%2?'spider':this.serial%2?'zombie':'skeleton');this.spawnMob(x,z,hostile?(this.world.terrain>=8&&this.state.dimension==='overworld'?biomeEnemy(this.world,x,y,z,this.serial):kind):animalKind(this.world,x,z,this.serial),y);}}
+      if(group.length<cap&&(hostile||this.mobs.filter(m=>ANIMALS[m.kind]).length<128)){const a=hash(Math.floor(this.state.time),this.serial,this.state.seed)*Math.PI*2,x=this.pos.x+Math.sin(a)*22,z=this.pos.z+Math.cos(a)*22,y=this.world.ground(x,z,hostile?this.pos.y+3:this.world.height(x,z)+1);if(Math.abs(y-this.pos.y)<10&&y>-60&&!this.world.waterAt(x,y,z)&&!this.world.intersects(x,y,z,1.7,.4)){const biome=this.world.biome?.(x,z);const kind=this.state.dimension==='nether'?(this.serial%3===0?'brute':'stalker'):ender?(this.serial%3===0?'void_archer':'enderling'):(biome==='badlands'?(this.serial%3?'draugr_knight':'skeleton'):this.pos.y<-25?'brute':biome==='snow'?'frost_howler':biome==='desert'?'husk':biome==='marsh'&&this.serial%2?'spider':this.serial%2?'zombie':'skeleton');const selected=hostile?(this.world.terrain>=8?creatureSpawn(this.world,x,y,z,this.serial,this.state.time):this.world.terrain>=8&&this.state.dimension==='overworld'?biomeEnemy(this.world,x,y,z,this.serial):kind):animalKind(this.world,x,z,this.serial);const info=ENEMIES[selected];if(!this.world.intersects(x,y,z,info.height||1.8,info.radius||.4))this.spawnMob(x,z,selected,y);}}
     }
     this.saveTimer+=dt;if(this.saveTimer>15){this.saveTimer=0;this.save();}
   }

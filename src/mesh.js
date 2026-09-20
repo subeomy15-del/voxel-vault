@@ -1,6 +1,6 @@
-import { BLOCKS } from './data.js?v=34';
-import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=34';
-import { TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=34';
+import { BLOCKS } from './data.js?v=35';
+import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=35';
+import { TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=35';
 export const BLOCK_TYPES=Object.keys(BLOCKS);
 const ids=Object.fromEntries(BLOCK_TYPES.map((t,i)=>[t,i+1]));
 const faces=[
@@ -20,7 +20,7 @@ export function meshChunk(world,cx,cz,underground=false,options={}){
   for(const[k,t]of world.edits.chunkEntries?.(cx,cz)||world.edits){if(!t)continue;const[x,y,z]=k.split(',').map(Number);if(Math.floor(x/16)===cx&&Math.floor(z/16)===cz)high=Math.max(high,y+2);}
   world.prepare(cx,cz);high=Math.max(high,world.chunkTops?.get(`${cx},${cz}`)||0);
   high=Math.min(WORLD_TOP+1,high);const depth=high-low+2,vox=new Uint16Array(18*18*depth),at=(x,y,z)=>(x*18+z)*depth+y;
-  for(let x=0;x<18;x++)for(let z=0;z<18;z++)for(let y=0;y<depth;y++)vox[at(x,y,z)]=ids[world.get(cx*16+x-1,low+y-1,cz*16+z-1)]||0;
+  for(let x=0;x<18;x++)for(let z=0;z<18;z++){const wx=cx*16+x-1,wz=cz*16+z-1;world.prepare(Math.floor(wx/16),Math.floor(wz/16));const column=world.column(wx,wz);for(let y=0;y<depth;y++)vox[at(x,y,z)]=ids[world.getPrepared(wx,low+y-1,wz,column)]||0;}
   const transparency=BLOCK_TYPES.map(type=>!!(BLOCKS[type].boxes||BLOCKS[type].plant||isGlass(type)||['lava','water','ladder','torch','lantern','campfire'].includes(type)));
   const transparent=id=>!id||transparency[id-1],strides=[18*depth,1,depth];
   for(let x=1;x<17;x++)for(let z=1;z<17;z++)for(let y=1;y<depth-1;y++){

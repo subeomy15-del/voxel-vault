@@ -1,7 +1,7 @@
-import {BIOME_DEFINITIONS as LEGACY_BIOMES} from './legacy-biomes.js?v=34';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=34';
-import {integerHash} from './climate.js?v=34';
-import {STRUCTURE_TYPES,buildStructure,transform} from './structure-templates.js?v=34';
+import {BIOME_DEFINITIONS as LEGACY_BIOMES} from './legacy-biomes.js?v=35';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=35';
+import {integerHash} from './climate.js?v=35';
+import {STRUCTURE_TYPES,buildStructure,transform} from './structure-templates.js?v=35';
 export const STRUCTURE_RULES=Object.freeze({cellSize:144,jitter:76,occupancy:.62,spacing:22,protectedRadius:520,maxSlope:4});
 const key=(x,y,z)=>`${x},${y},${z}`;
 const overlaps=(a,b,pad=0)=>Math.abs(a.x-b.x)<a.radius+b.radius+pad&&Math.abs(a.z-b.z)<a.radius+b.radius+pad;
@@ -15,10 +15,14 @@ export class StructureGenerator {
    const x=mx*r.cellSize+Math.floor(r.cellSize/2+(integerHash(mx,mz,seed+91)-.5)*r.jitter),z=mz*r.cellSize+Math.floor(r.cellSize/2+(integerHash(mx,mz,seed+191)-.5)*r.jitter),c=w.column(x,z),pool=(w.terrain>=8?BIOME_DEFINITIONS:LEGACY_BIOMES)[c.biome]?.structures||[];
    const rarity=integerHash(mx,mz,seed+3421);let type=pool[Math.floor(integerHash(mx,mz,seed+2731)*pool.length)];
    if(rarity>.96&&pool.length)type='observatory';else if(rarity>.88&&pool.length)type='fortress';
+   if(w.terrain>=9&&rarity<.14)type='magma_ruin';
    if(type){const def=STRUCTURE_TYPES[type],radius=def.radius+2,heights=[];let wet=false;
     for(const dx of[-radius,0,radius])for(const dz of[-radius,0,radius]){const column=w.column(x+dx,z+dz);heights.push(column.h);if(column.h<6||column.biome==='ocean'||type!=='swamp_hut'&&column.biome==='marsh'&&w.noise(x+dx+91,z+dz,12)>.58)wet=true;}
-    const slope=Math.max(...heights)-Math.min(...heights),y=Math.floor(heights.toSorted((a,b)=>a-b)[4])+1;
-    if(Math.hypot(x,z)>r.protectedRadius+radius&&!wet&&slope<=r.maxSlope&&y<74){
+    const slope=Math.max(...heights)-Math.min(...heights);let y=Math.floor(heights.toSorted((a,b)=>a-b)[4])+1;
+    if(type==='magma_ruin'){
+     y=null;for(let depth=-14;depth>=-46;depth--)if(w.inCave(x,depth,z,c)&&!w.inCave(x,depth-1,z,c)){y=depth;break;}
+    }
+    if(Math.hypot(x,z)>r.protectedRadius+radius&&y!==null&&(type==='magma_ruin'||!wet&&slope<=r.maxSlope&&y<74)){
      site={id:`ruin:${w.seed}:${w.terrain}:${mx}:${mz}`,mx,mz,type,biome:c.biome,x,y,z,radius,rotation:Math.floor(integerHash(mx,mz,seed+409)*4),mirror:integerHash(mx,mz,seed+419)>.5,seed:(integerHash(mx,mz,seed+431)*2147483647)|0,priority:integerHash(mx,mz,seed+443),slope};
     }
    }
@@ -37,8 +41,8 @@ export class StructureGenerator {
    const layout=this.layout(site),world=this.world;
    for(const[k,type]of layout.cells){const[x,y,z]=k.split(',').map(Number),[dx,dz]=transform(x,z,site.rotation,site.mirror);put(site.x+dx,site.y+y,site.z+dz,type);}
    for(const point of layout.footprint){const[x,z]=point.split(',').map(Number),[dx,dz]=transform(x,z,site.rotation,site.mirror),wx=site.x+dx,wz=site.z+dz;if(Math.floor(wx/16)!==cx||Math.floor(wz/16)!==cz)continue;const ground=world.height(wx,wz);for(let y=ground;y<site.y-1;y++)put(wx,y,wz,layout.palette.floor);}
-   for(let i=0;i<18;i++){const a=integerHash(i,7,site.seed)*Math.PI*2,r=site.radius-1+integerHash(i,8,site.seed)*2,x=site.x+Math.round(Math.cos(a)*r),z=site.z+Math.round(Math.sin(a)*r);if(integerHash(i,9,site.seed)>.5)put(x,world.height(x,z)+1,z,layout.palette.floor);}
-   const[lx,lz]=transform(layout.loot.x,layout.loot.z,site.rotation,site.mirror),chest={id:site.id,x:site.x+lx,y:site.y+layout.loot.y,z:site.z+lz,loot:{...ruinLoot(site.type,site.seed),...(world.terrain>=8?biomeSupplies(site.biome):{})},biome:site.biome,tier:STRUCTURE_TYPES[site.type].tier,siteSeed:site.seed,block:true,generated:true,name:(world.terrain>=8?['Common','Uncommon','Rare','Relic'][STRUCTURE_TYPES[site.type].tier]+' cache · ':'')+STRUCTURE_TYPES[site.type].name};
+   for(let i=0;i<(site.type==='magma_ruin'?0:18);i++){const a=integerHash(i,7,site.seed)*Math.PI*2,r=site.radius-1+integerHash(i,8,site.seed)*2,x=site.x+Math.round(Math.cos(a)*r),z=site.z+Math.round(Math.sin(a)*r);if(integerHash(i,9,site.seed)>.5)put(x,world.height(x,z)+1,z,layout.palette.floor);}
+   const[lx,lz]=transform(layout.loot.x,layout.loot.z,site.rotation,site.mirror),chest={id:site.id,x:site.x+lx,y:site.y+layout.loot.y,z:site.z+lz,loot:{...ruinLoot(site.type,site.seed),...(site.type==='magma_ruin'?{coal:8,iron_ingot:5}:{}),...(world.terrain>=8?biomeSupplies(site.biome):{})},biome:site.biome,tier:STRUCTURE_TYPES[site.type].tier,siteSeed:site.seed,block:true,generated:true,name:(world.terrain>=8?['Common','Uncommon','Rare','Relic'][STRUCTURE_TYPES[site.type].tier]+' cache · ':'')+STRUCTURE_TYPES[site.type].name};
    if(Math.floor(chest.x/16)===cx&&Math.floor(chest.z/16)===cz&&!this.registered.has(site.id)){
     this.registered.set(site.id,site);world.chests.push(chest);world.landmarks.push({id:site.id,x:site.x,y:site.y,z:site.z,name:chest.name,subtitle:STRUCTURE_TYPES[site.type].tier>1?'Ancient chambers · approach prepared':'Weathered stone and forgotten supplies',type:'ruin',color:'#b8a47f',generated:true,hidden:true});
    }

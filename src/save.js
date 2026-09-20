@@ -1,16 +1,16 @@
-import {readExploration} from './exploration.js?v=34';
-import {normalizeRoll,recoverInfusion} from './infusions.js?v=34';
-import {ENCHANTS} from './infusion-registry.js?v=34';
-import {normalizeBrews,DRINK_COOLDOWN} from './potions.js?v=34';
-import {WORLDGEN_VERSION} from './biome-registry.js?v=34';
-import { recoverDelayedActions } from './delayed-actions.js?v=34';
-import { readDocument,writeDocument,setSaveHealth,storageFailure } from './save-health.js?v=34';
-import { VERSION, ITEMS, STARTER_BAR, starterInventory, dailySeed, BLOCKS,CROPS,EFFECTS } from './data.js?v=34';
-import { ANIMALS } from './wildlife.js?v=34';
-import { normalizeResources } from './resource-map.js?v=34';
-import { REALM_FIELDS,captureRealm } from './realms.js?v=34';
-import { defaultSettings, normalizeSettings } from './settings.js?v=34';
-export { defaultSettings } from './settings.js?v=34';
+import {readExploration} from './exploration.js?v=35';
+import {normalizeRoll,recoverInfusion} from './infusions.js?v=35';
+import {ENCHANTS} from './infusion-registry.js?v=35';
+import {normalizeBrews,DRINK_COOLDOWN} from './potions.js?v=35';
+import {WORLDGEN_VERSION} from './biome-registry.js?v=35';
+import { recoverDelayedActions } from './delayed-actions.js?v=35';
+import { readDocument,writeDocument,setSaveHealth,storageFailure } from './save-health.js?v=35';
+import { VERSION, ITEMS, STARTER_BAR, starterInventory, dailySeed, BLOCKS,CROPS,EFFECTS } from './data.js?v=35';
+import { ANIMALS } from './wildlife.js?v=35';
+import { normalizeResources } from './resource-map.js?v=35';
+import { REALM_FIELDS,captureRealm } from './realms.js?v=35';
+import { defaultSettings, normalizeSettings } from './settings.js?v=35';
+export { defaultSettings } from './settings.js?v=35';
 const prefix='voxel-vault-v2-';
 export function freshState(seed=7821,mode='adventure') {
   const inv=starterInventory();if(mode==='creative')for(const k of Object.keys(ITEMS))inv[k]=999;
@@ -21,7 +21,7 @@ export function slotKey(mode){return prefix+mode+(mode==='daily'?'-'+dailySeed()
 export function loadState(storage,mode='adventure') {
   try {
     const cached=storage.readState?.(slotKey(mode)),raw=cached===undefined?readDocument(storage,slotKey(mode),raw=>raw&&raw.version===VERSION):cached;if(!raw||raw.version!==VERSION)return null;
-    const s=freshState(Number.isFinite(raw.seed)?raw.seed:7821,mode);s.terrain=[5,6,7,8].includes(raw.terrain)?raw.terrain:5;
+    const s=freshState(Number.isFinite(raw.seed)?raw.seed:7821,mode);s.terrain=[5,6,7,8,9].includes(raw.terrain)?raw.terrain:5;
     for(const [k,n]of Object.entries(raw.inv||{}))if(ITEMS[k]&&Number.isFinite(n))s.inv[k]=Math.max(0,Math.min(999999,Math.floor(n)));
     if(Array.isArray(raw.bar)&&raw.bar.length===9)s.bar=raw.bar.map((k,i)=>ITEMS[k]?k:STARTER_BAR[i]);
     if(mode==='creative')for(const k of Object.keys(ITEMS))s.inv[k]=Math.max(999,s.inv[k]||0);
@@ -29,7 +29,7 @@ export function loadState(storage,mode='adventure') {
     for(const k of ['yaw','pitch','time','elapsed'])if(Number.isFinite(raw[k]))s[k]=raw[k];
     if(raw.pos&&['x','y','z'].every(k=>Number.isFinite(raw.pos[k])))s.pos={x:raw.pos.x,y:Math.max(-63,Math.min(94,raw.pos.y)),z:raw.pos.z};
     for(const k of ['seals','opened','discovered'])if(Array.isArray(raw[k]))s[k]=[...new Set(raw[k].filter(v=>typeof v==='string'))];
-    s.ruinDefeated=Array.isArray(raw.ruinDefeated)?[...new Set(raw.ruinDefeated.filter(id=>typeof id==='string'&&/^ruin:-?\d+:[78]:-?\d+:-?\d+:guard:[0-2]$/.test(id)))]:[];
+    s.ruinDefeated=Array.isArray(raw.ruinDefeated)?[...new Set(raw.ruinDefeated.filter(id=>typeof id==='string'&&/^ruin:-?\d+:[789]:-?\d+:-?\d+:guard:[0-2]$/.test(id)))]:[];
     s.seals=s.seals.filter(k=>['grove','dunes','frost'].includes(k));
     s.edits=Array.isArray(raw.edits)?raw.edits.filter(e=>Array.isArray(e)&&e.length===2&&/^-?\d+,-?\d+,-?\d+$/.test(e[0])&&(e[1]===null||BLOCKS[e[1]])):[];
     if(raw.spawn&&['x','y','z'].every(k=>Number.isFinite(raw.spawn[k])))s.spawn={x:raw.spawn.x,y:Math.max(-63,Math.min(94,raw.spawn.y)),z:raw.spawn.z};

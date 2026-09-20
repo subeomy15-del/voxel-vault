@@ -118,7 +118,7 @@ export class Audio {
     else if (name === 'heal') this.tone(380, .22, 'sine', .065, 130);
     else if (name === 'reward') this.tone(660, .22, 'sine', .06, 110);
     else if (name === 'warning') this.tone(110, .5, 'triangle', .07, 50);
-    else if (name === 'firecracker') { this.noise(.22, .35, 1200); this.tone(180, .18, 'triangle', .12, 720); this.tone(720, .22, 'sine', .08, -90, 'effects', .09); }
+    else if (name === 'firecracker') { this.noise(.32, .3, 1200); this.tone(82,.3,'sine',.1,-42,'effects',.16); this.tone(180, .18, 'triangle', .12, 720); this.tone(720, .22, 'sine', .08, -90, 'effects', .09); }
     else if (name === 'fuse') { this.tone(640, .08, 'square', .04, -80); this.tone(820, .08, 'square', .035, -80, 'effects', .13); }
     else if (name === 'explosion') { this.noise(.5, .6, 180); this.tone(72, .4, 'sawtooth', .13, -40); }
   }

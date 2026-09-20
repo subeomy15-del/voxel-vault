@@ -1,9 +1,9 @@
-import {installExploration} from './exploration-content.js?v=34';
-import {installAltars} from './infusion-registry.js?v=34';
-import {installPotions} from './potion-content.js?v=34';
-import {BIOME_DEFINITIONS,UNDERGROUND_BIOMES} from './biome-registry.js?v=34';
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=34';
-import { installContent } from './badlands-content.js?v=34';
+import {installExploration} from './exploration-content.js?v=35';
+import {installAltars} from './infusion-registry.js?v=35';
+import {installPotions} from './potion-content.js?v=35';
+import {BIOME_DEFINITIONS,UNDERGROUND_BIOMES} from './biome-registry.js?v=35';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=35';
+import { installContent } from './badlands-content.js?v=35';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },

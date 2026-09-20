@@ -1,19 +1,20 @@
-import {regionalClimate,regionalSurface} from './regional-climate.js?v=34';
-import {StructureGenerator} from './structure-generator.js?v=34';
-import {climateAt,blendedSurface,smooth} from './climate.js?v=34';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=34';
-import {EditMap} from './edit-map.js?v=34';
-import { netherHeight,netherBlock } from './nether.js?v=34';
-import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=34';
-import { canonicalItem } from './resource-map.js?v=34';
-import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=34';
-import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=34';
-import { CLOUDSTEP,courseGeometry } from './parkour-course.js?v=34';
+import {SpatialLights} from './spatial-lights.js?v=35';
+import {regionalClimate,regionalSurface} from './regional-climate.js?v=35';
+import {StructureGenerator} from './structure-generator.js?v=35';
+import {climateAt,blendedSurface,smooth} from './climate.js?v=35';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=35';
+import {EditMap} from './edit-map.js?v=35';
+import { netherHeight,netherBlock } from './nether.js?v=35';
+import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=35';
+import { canonicalItem } from './resource-map.js?v=35';
+import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=35';
+import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=35';
+import { CLOUDSTEP,courseGeometry } from './parkour-course.js?v=35';
 export const CHUNK=16, WORLD_LIMIT=Infinity, WORLD_BOTTOM=-64, WORLD_TOP=95, SEA_LEVEL=4;
 export const cellKey=(x,y,z)=>`${x},${y},${z}`;
 export class World {
   constructor(seed=7821,edits=[],terrain=6,dimension='overworld') {
-    this.seed=seed;this.terrain=terrain;this.dimension=dimension;this.edits=new EditMap(edits);this.structures=new Map();this.columns=new Map();this.prepared=new Set();this.dirty=new Set();this.chests=[];this.changes=[];
+    this.seed=seed;this.terrain=terrain;this.dimension=dimension;this.edits=new EditMap(edits);this.structures=new Map();this.structureLights=new SpatialLights();this.columns=new Map();this.prepared=new Set();this.dirty=new Set();this.chests=[];this.changes=[];
     this.course=dimension==='parkour'?courseGeometry():null;
     this.landmarks=LANDMARKS.map(l=>({...l,y:this.height(l.x,l.z)+1}));
     if(this.course)this.landmarks=CLOUDSTEP.checkpoints.map((cp,i)=>({...cp,id:'course-'+i,type:'landscape',subtitle:'Cloudstep checkpoint',color:'#a9e8ce'}));
@@ -55,7 +56,7 @@ export class World {
     // Retain nearby terrain so travel does not periodically regenerate the entire view.
     const outside=(x,z)=>Math.abs(Math.floor(x/16)-cx)>radius||Math.abs(Math.floor(z/16)-cz)>radius;
     for(const key of this.columns.keys()){const [x,z]=key.split(',').map(Number);if(outside(x,z))this.columns.delete(key);}
-    for(const key of this.structures.keys()){const [x,,z]=key.split(',').map(Number);if(outside(x,z))this.structures.delete(key);}
+    for(const key of this.structures.keys()){const [x,,z]=key.split(',').map(Number);if(outside(x,z)){this.structureLights.update(key,null,this.structures.get(key));this.structures.delete(key);}}
     for(const key of this.prepared){const [x,z]=key.split(',').map(Number);if(Math.abs(x-cx)>radius||Math.abs(z-cz)>radius)this.prepared.delete(key);}
     for(const tag of this.chunkTops.keys()){const[x,z]=tag.split(',').map(Number);if(Math.abs(x-cx)>radius||Math.abs(z-cz)>radius)this.chunkTops.delete(tag);}
     this.ruins?.prune(cx,cz,radius);this.makeCamp();
@@ -87,7 +88,7 @@ export class World {
     // The nearby hillside entrance opens into a dry chamber and a natural tunnel.
     return ((x-23)/12)**2+((z+31)/16)**2+((y+16)/7)**2<1;
   }
-  base(x,y,z){
+  base(x,y,z,column=null){
     if((!Number.isFinite(x)||!Number.isFinite(y)||!Number.isFinite(z))||y<WORLD_BOTTOM||y>WORLD_TOP)return null;
     if(this.course)return this.course.blocks.get(cellKey(x,y,z))??null;
     if(this.dimension==='nether')return netherBlock(this,x,y,z);
@@ -103,9 +104,9 @@ export class World {
       if(y===c.h)return 'end_stone';
       return hash(Math.floor(x/3)+Math.floor(y/3)*127,Math.floor(z/3),this.seed+52)>.6&&hash(x+y*127,z,this.seed)<.07?'moonstone':y<c.bottom+2?'obsidian':'end_stone';
     }
-    this.prepare(Math.floor(x/16),Math.floor(z/16));
+    if(!column)this.prepare(Math.floor(x/16),Math.floor(z/16));
     const key=cellKey(x,y,z);if(this.structures.has(key))return this.structures.get(key);
-    const c=this.column(x,z),h=c.h;
+    const c=column||this.column(x,z),h=c.h;
     if(y===WORLD_BOTTOM)return 'bedrock';
     // Walk down a covered, five-block-wide slope into the cave, rather than a flooded shaft.
     if(x>=20&&x<=24&&z<=10&&z>=-32){const floor=this.height(22,10)-Math.floor((10-z)*.65);if(y>floor&&y<floor+6)return null;}
@@ -128,6 +129,7 @@ export class World {
     return rock;
   }
   get(x,y,z){const k=cellKey(x,y,z),type=this.edits.has(k)?this.edits.get(k):this.base(x,y,z);return canonicalItem(type);}
+  getPrepared(x,y,z,column){const k=cellKey(x,y,z);return canonicalItem(this.edits.has(k)?this.edits.get(k):this.base(x,y,z,column));}
   solid(x,y,z){return !!BLOCKS[this.get(x,y,z)]?.solid;}
   hydrated(x,y,z){for(let a=-4;a<=4;a++)for(let b=-4;b<=4;b++)if(this.waterAt(x+a,y,z+b)||this.waterAt(x+a,y-1,z+b))return true;return false;}
   waterAt(x,y,z){return this.get(Math.floor(x),Math.floor(y),Math.floor(z))==='water';}
@@ -142,7 +144,7 @@ export class World {
     if(this.terrain<6)return this.prepareLegacy(cx,cz);
     const tag=`${cx},${cz}`;if(this.prepared.has(tag))return;this.prepared.add(tag);
     const sites=this.ruins?.forChunk(cx,cz)||[],reserved=new Set();
-    const stamp=(x,y,z,type)=>{if(Math.floor(x/16)!==cx||Math.floor(z/16)!==cz||y>WORLD_TOP||y<=WORLD_BOTTOM)return;const k=cellKey(x,y,z);this.structures.set(k,type);reserved.add(k);if(type)this.chunkTops.set(tag,Math.max(this.chunkTops.get(tag)||0,y+2));};
+    const stamp=(x,y,z,type)=>{if(Math.floor(x/16)!==cx||Math.floor(z/16)!==cz||y>WORLD_TOP||y<=WORLD_BOTTOM)return;const k=cellKey(x,y,z);this.structureLights.update(k,type,this.structures.get(k));this.structures.set(k,type);reserved.add(k);if(type)this.chunkTops.set(tag,Math.max(this.chunkTops.get(tag)||0,y+2));};
     this.ruins?.stamp(cx,cz,sites,stamp);
     const put=(x,y,z,type)=>{if(Math.floor(x/16)!==cx||Math.floor(z/16)!==cz)return;const key=cellKey(x,y,z),old=this.structures.get(key);if(reserved.has(key))return;if(!this.structures.has(key)||['leaf','pine','autumnleaf','cherry_leaf'].includes(old)){this.structures.set(key,type);this.chunkTops.set(tag,Math.max(this.chunkTops.get(tag)||0,y+2));}};
     const margin=this.terrain>=7?6:4;

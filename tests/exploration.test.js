@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=34';
-import {loadState} from '../src/save.js?v=34';
-import {useRod,tickExploration,activateWaystone,claimSeaCache,readExploration} from '../src/exploration.js?v=34';
+import {Game} from '../src/game.js?v=35';
+import {loadState} from '../src/save.js?v=35';
+import {useRod,tickExploration,activateWaystone,claimSeaCache,readExploration} from '../src/exploration.js?v=35';
 const make=()=>{const data=new Map(),g=new Game({setWorld(){},stream(){},burst(){}},{play(){},quiet(){}},{getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)});g.screen=null;g.pos={x:100.5,y:80,z:100.5};g.mobs=[];return g;};
 test('fishing uses real water, requires bite timing, cancels on pause, and saves catches',()=>{const g=make();g.add('fishing_rod');g.equip('fishing_rod');g.pitch=-.5;g.yaw=0;assert.equal(useRod(g),false);for(let x=98;x<104;x++)for(let z=94;z<100;z++)g.world.set(x,80,z,'water');assert.ok(useRod(g));assert.equal(useRod(g),false);assert.ok(useRod(g));tickExploration(g,g.fishing.bite+.05);assert.ok(useRod(g));assert.equal(g.state.inv.river_fish,1);assert.equal(loadState(g.storage).exploration.catches,1);assert.ok(useRod(g));g.pause();assert.equal(g.fishing,null);});
 test('waystone travel needs active intact stones and safe landing and preserves inventory',()=>{const g=make();for(const x of [100,130]){for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){g.world.set(x+dx,79,100+dz,'stone');for(let y=80;y<84;y++)g.world.set(x+dx,y,100+dz,null);}g.world.set(x,80,100,'waystone');g.pos={x:x+1.5,y:80,z:100.5};assert.ok(activateWaystone(g,{x,y:80,z:100}));g.resume();}const bag={...g.state.inv};g.pos={x:101.5,y:80,z:100.5};activateWaystone(g,{x:100,y:80,z:100});assert.ok(g.travelWaystone('overworld:130,80,100'));assert.ok(g.pos.x>128);assert.deepEqual(g.state.inv,bag);g.pos={x:101.5,y:80,z:100.5};activateWaystone(g,{x:100,y:80,z:100});g.world.set(130,80,100,null);assert.equal(g.travelWaystone('overworld:130,80,100'),false);assert.equal(loadState(g.storage).exploration.stones.length,2);});

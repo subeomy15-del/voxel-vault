@@ -1,6 +1,7 @@
-import {BIOME_ECOLOGY} from './biome-ecology.js?v=34';
-import { hash } from './data.js?v=34';
-import { findMobPath } from './navigation.js?v=34';
+import {NEW_ANIMALS} from './creature-registry.js?v=35';
+import {BIOME_ECOLOGY} from './biome-ecology.js?v=35';
+import { hash } from './data.js?v=35';
+import { findMobPath } from './navigation.js?v=35';
 export const ANIMALS={
   deer:{name:'Deer',passive:true,hp:12,speed:1.15,flee:5.4,height:1.6,radius:.38,color:'#a88b68',glow:'#d9c6a4',food:['wheat','carrot'],drops:{raw_venison:[2,3],leather:[1,2]}},
   pig:{name:'Pig',passive:true,hp:12,speed:.95,flee:3.9,height:.9,radius:.4,color:'#c79f95',glow:'#dec0ac',food:['carrot','potato'],drops:{raw_pork:[2,3]}},
@@ -9,8 +10,14 @@ export const ANIMALS={
   chicken:{name:'Chicken',passive:true,hp:5,speed:1.1,flee:3.3,height:.65,radius:.23,color:'#e0d7bd',glow:'#caa664',food:['seeds','corn_seeds'],drops:{raw_chicken:[1,1],feather:[1,3]}},
   rabbit:{name:'Rabbit',passive:true,hp:5,speed:1.25,flee:5.7,height:.65,radius:.24,color:'#b3a38a',glow:'#d3c5ac',food:['carrot'],drops:{raw_rabbit:[1,1],rabbit_hide:[1,1]}},
 };
+Object.assign(ANIMALS,NEW_ANIMALS);
 export function animalKind(world,x,z,salt=0){
   const biome=world.biome(x,z),list=world.terrain>=8&&BIOME_ECOLOGY[biome]?.animals.length?BIOME_ECOLOGY[biome].animals:biome==='forest'?['deer','deer','pig','rabbit','chicken']:biome==='snow'?['deer','rabbit','sheep']:biome==='desert'?['rabbit']:biome==='mountain'?['sheep','rabbit']:['pig','cow','cow','sheep','chicken','rabbit'];
+  if(world.terrain>=8){const roll=hash(Math.floor(x)+salt,Math.floor(z),world.seed+919);
+    if(['forest','dense_forest','cherry','autumn_forest'].includes(biome)&&roll<.008)return 'gold_watermelon_stag';
+    if(['forest','conifer','dense_forest','autumn_forest'].includes(biome)&&roll<.24)return 'stag';
+    if(['meadow','savanna'].includes(biome)&&roll<.25)return 'horse';
+  }
   return list[Math.min(list.length-1,Math.floor(hash(Math.floor(x)+salt,Math.floor(z),world.seed+482)*list.length))];
 }
 export function updateAnimal(game,m,dt){

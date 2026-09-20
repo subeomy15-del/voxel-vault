@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import {POTIONS} from './potion-content.js?v=34';
+import {POTIONS} from './potion-content.js?v=35';
 /** Chunky silhouettes and large embossed emblems survive hotbar downsampling. */
 export function potionModel(name){
  const p=POTIONS[name]||{shape:0,color:name==='empty_flask'?'#bed1cd':name==='water_flask'?'#68adc6':'#d98baa',symbol:name==='potion'?'cross':'bubbles'},g=new THREE.Group();

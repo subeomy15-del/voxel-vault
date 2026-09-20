@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {DurableStorage} from '../src/durable-storage.js?v=34';
-import {EditMap} from '../src/edit-map.js?v=34';
-import {freshState,slotKey} from '../src/save.js?v=34';
-import {saveHealth} from '../src/save-health.js?v=34';
+import {DurableStorage} from '../src/durable-storage.js?v=35';
+import {EditMap} from '../src/edit-map.js?v=35';
+import {freshState,slotKey} from '../src/save.js?v=35';
+import {saveHealth} from '../src/save-health.js?v=35';
 function setup(){const messages=[],worker={postMessage(m){messages.push(m);if(m.type==='commit')queueMicrotask(()=>worker.onmessage({data:worker.fail?{id:m.id,ok:false,error:'Full',name:'QuotaExceededError'}:{id:m.id,ok:true,bytes:200,workerMs:1}}));},terminate(){}};return {messages,worker,storage:new DurableStorage({getItem:()=>null,setItem(){}},worker)};}
 test('debounced saves coalesce metadata and transfer large edits in bounded batches',async()=>{
  const {storage,messages}=setup(),state=freshState(),world={edits:new EditMap(Array.from({length:1200},(_,i)=>[`${i},4,0`,'stone']))};

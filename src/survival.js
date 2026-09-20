@@ -1,6 +1,6 @@
-import {armorInfusion} from './infusions.js?v=34';
-import {potionPower,tickPotions} from './potions.js?v=34';
-import { ITEMS,EFFECTS } from './data.js?v=34';
+import {armorInfusion} from './infusions.js?v=35';
+import {potionPower,tickPotions} from './potions.js?v=35';
+import { ITEMS,EFFECTS } from './data.js?v=35';
 export function activeEffect(game,name){return (game.state.effects?.[name]||0)>0||potionPower(game.state,name)>0;}
 export function canEat(game,name){
   const item=ITEMS[name],s=game.state;if(!item||item.kind!=='food'||!(s.inv[name]>0))return false;

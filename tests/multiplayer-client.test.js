@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js?v=34';
-import { Multiplayer } from '../src/multiplayer.js?v=34';
-import { slotKey } from '../src/save.js?v=34';
+import { Game } from '../src/game.js?v=35';
+import { Multiplayer } from '../src/multiplayer.js?v=35';
+import { slotKey } from '../src/save.js?v=35';
 
 const storage = () => ({ data: new Map(), getItem(key) { return this.data.get(key) || null; }, setItem(key, value) { this.data.set(key, value); } });
 const response = (body = { ok: true }, status = 200) => ({ ok: status < 400, status, json: async () => body });

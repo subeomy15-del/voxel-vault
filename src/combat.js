@@ -1,7 +1,8 @@
-import { ANIMALS,updateAnimal } from './wildlife.js?v=34';
-import { visibleBetween,findMobPath } from './navigation.js?v=34';
-import { updateDragon } from './dragon.js?v=34';
-import { EntityIndex } from './entity-index.js?v=34';
+import {CREATURES} from './creature-registry.js?v=35';
+import { ANIMALS,updateAnimal } from './wildlife.js?v=35';
+import { visibleBetween,findMobPath } from './navigation.js?v=35';
+import { updateDragon } from './dragon.js?v=35';
+import { EntityIndex } from './entity-index.js?v=35';
 
 export const ENEMIES = {
   trader:{name:'Wayfarer trader',hp:20,speed:0,damage:0,color:'#497b7c',glow:'#d6b894',passive:true,height:1.8,radius:.35,xp:0},
@@ -21,7 +22,7 @@ export const ENEMIES = {
   guardian: { name:'Vault guardian', hp:180, speed:1.6, damage:6, color:'#687b70', glow:'#a8efd9', xp:180 },
   grazer: { name:'Wild grazer', hp:5, speed:.45, damage:0, color:'#b9976e', glow:'#ead4a5', xp:0 },
 };
-Object.assign(ENEMIES,ANIMALS);
+Object.assign(ENEMIES,ANIMALS,CREATURES);
 export function targetMob(game,reach=4){
   const origin={x:game.pos.x,y:game.pos.y+(game.crouching?1.15:1.58),z:game.pos.z},dir=game.direction();let best=null;
   for(const mob of game.mobs){
@@ -45,7 +46,7 @@ export function launchBolt(game, origin, direction, damage=3, hostile=true,optio
 function shootAtPlayer(game,m,spread=0) {
   const origin={x:m.x,y:m.y+(m.kind==='guardian'?2.4:(m.kind==='void_archer'||m.kind==='skeleton')?1.8:1.15),z:m.z};
   const dx=game.pos.x-origin.x,dz=game.pos.z-origin.z,a=Math.atan2(dx,dz)+spread;
-  launchBolt(game,origin,{x:Math.sin(a),y:(game.pos.y+1-origin.y)/Math.max(1,Math.hypot(dx,dz)),z:Math.cos(a)},m.kind==='guardian'?4:3);
+  launchBolt(game,origin,{x:Math.sin(a),y:(game.pos.y+1-origin.y)/Math.max(1,Math.hypot(dx,dz)),z:Math.cos(a)},m.kind==='guardian'?4:CREATURES[m.kind]?.damage||3,true,{color:CREATURES[m.kind]?.glow});
   game.audio.play('shoot');
 }
 export function updateProjectiles(game,dt) {
@@ -96,23 +97,35 @@ export function updateEnemies(game,dt) {
       if(d>3&&!game.slam)game.moveMob(m,(game.pos.x-m.x)/d*dt*1.7,(game.pos.z-m.z)/d*dt*1.7);
       if(d<2.3&&m.cooldown<1)game.hurt(4,true);continue;
     }
-    if((d>15&&!m.trial)||Math.abs(game.pos.y-m.y)>10)continue;
+    const role=info.behavior||(['wisp','void_archer','skeleton'].includes(m.kind)?'ranged':['brute','draugr_knight'].includes(m.kind)?'heavy':m.kind==='stalker'?'lunge':'melee');
+    if((d>Math.max(15,info.range||0)&&!m.trial)||Math.abs(game.pos.y-m.y)>10)continue;
     if(m.windup>0){
       m.windup-=dt;
       if(m.windup<=0){
-        if(m.kind==='wisp'||(m.kind==='void_archer'||m.kind==='skeleton'))shootAtPlayer(game,m);
-        else if(m.kind==='stalker'){m.lunge=.35;m.lungeX=(game.pos.x-m.x)/Math.max(d,.1);m.lungeZ=(game.pos.z-m.z)/Math.max(d,.1);}
-        else if(d<((m.kind==='brute'||m.kind==='draugr_knight')?2.8:2.1)&&Math.abs(game.pos.y-m.y)<2.5)game.hurt(info.damage,true);
-        m.cooldown=(m.kind==='brute'||m.kind==='draugr_knight')?2:(m.kind==='wisp'||(m.kind==='void_archer'||m.kind==='skeleton'))?2.6:1.4;
+        if(role==='ranged')shootAtPlayer(game,m);
+        else if(role==='lunge'){m.lunge=.35;m.lungeX=(game.pos.x-m.x)/Math.max(d,.1);m.lungeZ=(game.pos.z-m.z)/Math.max(d,.1);}
+        else if(role==='warp'&&d>3){warpCreature(game,m,info);}
+        else if(d<(role==='heavy'?2.8:2.1)&&Math.abs(game.pos.y-m.y)<2.5)game.hurt(info.damage,true);
+        m.cooldown=role==='heavy'?2:role==='ranged'?2.6:role==='warp'?3:1.4;
       }
       continue;
     }
     if(m.lunge>0){m.lunge-=dt;game.moveMob(m,m.lungeX*dt*9,m.lungeZ*dt*9);if(d<1.6)game.hurt(info.damage,true);continue;}
-    const range=m.kind==='wisp'?12:(m.kind==='void_archer'||m.kind==='skeleton')?14:m.kind==='stalker'?4:(m.kind==='brute'||m.kind==='draugr_knight')?2.6:1.9;
-    if(d<range&&m.cooldown<=0){m.windup=(m.kind==='brute'||m.kind==='draugr_knight')?.85:(m.kind==='wisp'||(m.kind==='void_archer'||m.kind==='skeleton'))?.65:.5;m.windupMax=m.windup;continue;}
-    if((m.kind==='wisp'&&d<5)||((m.kind==='void_archer'||m.kind==='skeleton')&&d<7)){game.moveMob(m,-Math.sin(m.angle)*dt*1.7,-Math.cos(m.angle)*dt*1.7);}
-    else if(d>(m.kind==='wisp'?8:1.5))game.moveMob(m,(game.pos.x-m.x)/Math.max(d,.1)*dt*(info.speed*(game.hardAdventure?1.15:1))*(m.slow>0?.35:1),(game.pos.z-m.z)/Math.max(d,.1)*dt*(info.speed*(game.hardAdventure?1.15:1))*(m.slow>0?.35:1));
+    const range=role==='ranged'?(info.range||14):role==='warp'?9:role==='lunge'?4:role==='heavy'?2.6:1.9;
+    if(d<range&&m.cooldown<=0){m.windup=role==='heavy'?.85:role==='ranged'||role==='warp'?.65:.5;m.windupMax=m.windup;continue;}
+    const speed=info.speed*(game.hardAdventure?1.15:1)*(m.slow>0?.35:1)*(role==='hop'?Math.max(0,Math.sin(game.state.time*5+m.id))*2:1);
+    if(role==='ranged'&&d<6)game.moveMob(m,-Math.sin(m.angle)*dt*speed,-Math.cos(m.angle)*dt*speed);
+    else if(d>(role==='ranged'?9:1.5))game.moveMob(m,(game.pos.x-m.x)/Math.max(d,.1)*dt*speed,(game.pos.z-m.z)/Math.max(d,.1)*dt*speed);
   }
   if(game.slam){game.slam.time-=dt;if(game.slam.time<=0){const s=game.slam;game.renderer.burst(s.x,s.y+.3,s.z,'#e2b0a0',40);if(Math.hypot(game.pos.x-s.x,game.pos.z-s.z)<s.radius&&game.pos.y-s.y<1.2)game.hurt(7,true);game.slam=null;}}
   updateProjectiles(game,dt);
+}
+
+export function warpCreature(game,m,info=ENEMIES[m.kind]){
+ // Bounded, telegraphed steps need both a clear destination and a visible route.
+ for(let i=0;i<4;i++){
+  const a=m.angle+(i-1.5)*.55,x=m.x+Math.sin(a)*3.5,z=m.z+Math.cos(a)*3.5,y=game.world.ground(x,z,m.y+2);
+  if(Math.hypot(x-game.pos.x,z-game.pos.z)<2.5||Math.abs(y-m.y)>2||game.world.waterAt(x,y,z)||game.world.intersects(x,y,z,info.height,info.radius)||!visibleBetween(game.world,{x:m.x,y:m.y+1,z:m.z},{x,y:y+1,z}))continue;
+  game.renderer.burst(m.x,m.y+1,m.z,info.glow,9);Object.assign(m,{x,y,z});game.renderer.burst(x,y+1,z,info.glow,9);return true;
+ }return false;
 }

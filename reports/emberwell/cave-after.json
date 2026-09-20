@@ -1,0 +1,26 @@
+{
+  "overworld": {
+    "chunks": 75,
+    "medianMs": 7.024374999999964,
+    "p95Ms": 9.633625000000052,
+    "totalMs": 536.846256,
+    "bytes": 6887376,
+    "sha256": "af2fa6f7a028abd2b70358378b4fddb11519405b67b443ebd9036f4b4b42ce3e"
+  },
+  "nether": {
+    "chunks": 75,
+    "medianMs": 5.805333000000019,
+    "p95Ms": 6.634167000000161,
+    "totalMs": 438.0164119999997,
+    "bytes": 3566200,
+    "sha256": "a9e7496eefb8b2391769f1a5c6f3de8b66ad7a0d10c08d772997e0be52940fdc"
+  },
+  "ender": {
+    "chunks": 75,
+    "medianMs": 3.304875000000038,
+    "p95Ms": 3.6968749999998636,
+    "totalMs": 248.47308699999917,
+    "bytes": 2252600,
+    "sha256": "8c1388f8034b53c2a40fc54d237c991ab722a6a6ad9957811aa29d9a3ac5fa63"
+  }
+}

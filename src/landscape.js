@@ -1,8 +1,8 @@
-import {BIOME_DEFINITIONS as LEGACY_BIOMES} from './legacy-biomes.js?v=34';
-import {regionalTree} from './regional-trees.js?v=34';
-import { hash } from './data.js?v=34';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=34';
-import {integerHash} from './climate.js?v=34';
+import {BIOME_DEFINITIONS as LEGACY_BIOMES} from './legacy-biomes.js?v=35';
+import {regionalTree} from './regional-trees.js?v=35';
+import { hash } from './data.js?v=35';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=35';
+import {integerHash} from './climate.js?v=35';
 const blend=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
 export function terrainHeight(world,x,z){
   const noise=(a,b,s)=>world.noise(a,b,s),climate=noise(x+170,z-85,160);

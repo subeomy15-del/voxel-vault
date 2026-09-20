@@ -19,7 +19,7 @@ export const BIOME_DEFINITIONS=Object.freeze({
  marsh:biome('Reedwater Marsh','#6a8061','grass',.62,.95,5,['oak'],.3,['swamp_hut','bridge','shrine'],{roughness:.8}),
  savanna:biome('Sungrass Savannah','#a9a16c','grass',.8,.43,9,['acacia','oak'],.2,['camp','wall','gate'])
 });
-export const WORLDGEN_VERSION=8;
+export const WORLDGEN_VERSION=9;
 export const SAVE_SCHEMA_VERSION=2;
 
 export const UNDERGROUND_BIOMES=Object.freeze({cave:{name:'Caves',color:'#6a7976',top:'stone'},deep_cave:{name:'Deep Caves',color:'#555d70',top:'slate'}});

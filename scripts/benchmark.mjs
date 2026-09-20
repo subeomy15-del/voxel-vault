@@ -1,7 +1,7 @@
-import {World} from '../src/world.js?v=34';
-import {meshChunk} from '../src/mesh.js?v=34';
-import {Game} from '../src/game.js?v=34';
-import {freshState,loadState} from '../src/save.js?v=34';
+import {World} from '../src/world.js?v=35';
+import {meshChunk} from '../src/mesh.js?v=35';
+import {Game} from '../src/game.js?v=35';
+import {freshState,loadState} from '../src/save.js?v=35';
 import {writeFile} from 'node:fs/promises';
 const out={date:new Date().toISOString(),node:process.version,terrain:{},saves:[]};
 for(const dimension of ['overworld','nether','ender']){const w=new World(7821,[],6,dimension),times=[];let bytes=0;for(let x=-2;x<=2;x++)for(let z=-2;z<=2;z++){const t=performance.now(),m=meshChunk(w,x,z);times.push(performance.now()-t);for(const group of Object.values(m))for(const a of Object.values(group))bytes+=a.byteLength;}const sorted=times.toSorted((a,b)=>a-b);out.terrain[dimension]={totalMs:times.reduce((a,b)=>a+b),medianMs:sorted[12],p95Ms:sorted[23],bytes};}

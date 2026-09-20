@@ -1,10 +1,23 @@
 // Templates use existing materials and a compact construction vocabulary.
 export const REGIONAL_STRUCTURES={
+ magma_ruin:{name:"Emberwell Remains",radius:11,tier:2},
  mine:{name:'Lanternless Mine',radius:12,tier:2},
  swamp_hut:{name:'Reedkeeper Shelter',radius:8,tier:1},
  outpost:{name:'Windward Refuge',radius:9,tier:1}
 };
 export function buildRegionalRoom(t,type,p,roll){
+ if(type==='magma_ruin'){
+  // Two dry chambers surround a sunken, visibly hazardous molten channel.
+  t.room(-7,-5,7,5,0,5,'basalt');t.floor(-7,-5,7,5,5,'basalt');
+  for(const x of [-5,5])for(const z of [-3,3]){t.pillar(x,z,0,4,'stonebrick');t.block(x,3,z,'lantern',true);}
+  for(let z=-3;z<=3;z++){t.block(0,-2,z,'basalt',true);t.block(0,-1,z,'lava',true);}
+  t.floor(-2,-1,2,1,0,'stonebrick');
+  for(let x=-10;x<=10;x++)for(let y=0;y<3;y++){t.block(x,y,0,null,true);t.block(x,-1,0,'basalt',true);}
+  t.room(3,-8,7,-5,0,3,'basalt');t.floor(3,-8,7,-5,3,'basalt');
+  t.block(5,0,-5,'cobblestone',true);t.block(5,1,-5,'cobblestone',true);
+  t.block(-5,0,roll>.5?2:-2,'furnace',true);t.block(-3,0,-3,'stone_spikes',true);
+  return {x:5,y:0,z:-7};
+ }
  if(type==='mine'){
   const end=roll>.5?9:7;
   t.room(-3,-end,3,3,-7,4,p.stone);t.floor(-3,-end,3,3,-3,p.stone);
