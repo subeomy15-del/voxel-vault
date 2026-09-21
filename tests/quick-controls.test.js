@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=35';
+import {Game} from '../src/game.js?v=36';
 const make=()=>{const data=new Map(),g=new Game({setWorld(){},stream(){},burst(){},firework(){}},{play(){}},{getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)});g.screen=null;g.pos={x:500.5,y:85,z:500.5};g.mobs=[];return g;};
 test('firecracker uses backpack stock instantly without changing equipped item or slot, and respects cooldown',()=>{
  const g=make();g.add('firecracker',3);const bar=[...g.state.bar],selected=g.state.selected;g.gliding=true;g.yaw=0;g.pitch=0;

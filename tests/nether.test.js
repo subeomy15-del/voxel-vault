@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=35';
-import {World} from '../src/world.js?v=35';
+import {Game} from '../src/game.js?v=36';
+import {World} from '../src/world.js?v=36';
 const make=(storage)=>new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},storage||{data:new Map(),getItem(k){return this.data.get(k)||null;},setItem(k,v){this.data.set(k,v);}});
 test('three realm portal journey preserves inventory, terrain and reloads',()=>{
  const g=make();g.start();g.add('diamond',8);g.world.set(9,45,9,'gold_block');

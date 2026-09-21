@@ -1,9 +1,9 @@
-import {installExploration} from './exploration-content.js?v=35';
-import {installAltars} from './infusion-registry.js?v=35';
-import {installPotions} from './potion-content.js?v=35';
-import {BIOME_DEFINITIONS,UNDERGROUND_BIOMES} from './biome-registry.js?v=35';
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=35';
-import { installContent } from './badlands-content.js?v=35';
+import {installExploration} from './exploration-content.js?v=36';
+import {installAltars} from './infusion-registry.js?v=36';
+import {installPotions} from './potion-content.js?v=36';
+import {BIOME_DEFINITIONS,UNDERGROUND_BIOMES} from './biome-registry.js?v=36';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=36';
+import { installContent } from './badlands-content.js?v=36';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },
@@ -407,7 +407,8 @@ RECIPES.push(
  {item:'quartz_bricks',count:4,cost:{quartz_block:4},category:'Building'},
  {item:'magma',count:2,cost:{netherrack:4,basalt:2},category:'Building'}
 );
-const HAND_RECIPES=new Set(['bench','plank','birch_plank','pine_plank','torch','arrows','cloth','cotton_cloth','sugar','watermelon_slice','melon_slice','seeds']);
+RECIPES.push({item:'wood_sword',cost:{wood:3},category:'Gear'});
+const HAND_RECIPES=new Set(['wood_sword','stone_sword','bench','plank','birch_plank','pine_plank','torch','arrows','cloth','cotton_cloth','sugar','watermelon_slice','melon_slice','seeds']);
 for(const recipe of RECIPES)recipe.station=HAND_RECIPES.has(recipe.item)?'hand':'bench';
 export const LANDMARKS = [
   {id:'camp',name:'Base camp',subtitle:'A place to begin',x:0,z:14,color:'#c5b58a',type:'camp'},

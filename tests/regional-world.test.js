@@ -1,15 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {World} from '../src/world.js?v=35';
-import {regionalClimate} from '../src/regional-climate.js?v=35';
-import {BIOME_DEFINITIONS} from '../src/biome-registry.js?v=35';
-import {STRUCTURE_TYPES,buildStructure} from '../src/structure-templates.js?v=35';
-import {BLOCKS,ITEMS} from '../src/data.js?v=35';
-import {regionalTree} from '../src/regional-trees.js?v=35';
-import {freshState,saveState,loadState} from '../src/save.js?v=35';
-import {ruinEquipment,defeatRuinGuard,tickRuinEncounters} from '../src/ruin-encounters.js?v=35';
-import {normalizeRoll} from '../src/infusions.js?v=35';
-import {integerHash} from '../src/climate.js?v=35';
+import {World} from '../src/world.js?v=36';
+import {regionalClimate} from '../src/regional-climate.js?v=36';
+import {BIOME_DEFINITIONS} from '../src/biome-registry.js?v=36';
+import {STRUCTURE_TYPES,buildStructure} from '../src/structure-templates.js?v=36';
+import {BLOCKS,ITEMS} from '../src/data.js?v=36';
+import {regionalTree} from '../src/regional-trees.js?v=36';
+import {freshState,saveState,loadState} from '../src/save.js?v=36';
+import {ruinEquipment,defeatRuinGuard,tickRuinEncounters} from '../src/ruin-encounters.js?v=36';
+import {normalizeRoll} from '../src/infusions.js?v=36';
+import {integerHash} from '../src/climate.js?v=36';
 const store=()=>{const data=new Map();return {getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};};
 test('all 18 surface regions exist, climate is deterministic and terrain borders are continuous',()=>{
  const found=new Set();for(const seed of [7821,42])for(let x=-6000;x<=6000;x+=96)for(let z=-6000;z<=6000;z+=96)found.add(regionalClimate(seed,x,z).biome);

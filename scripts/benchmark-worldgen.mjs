@@ -1,5 +1,5 @@
-import {World} from '../src/world.js?v=35';
-import {meshChunk} from '../src/mesh.js?v=35';
+import {World} from '../src/world.js?v=36';
+import {meshChunk} from '../src/mesh.js?v=36';
 import {writeFile} from 'node:fs/promises';
 const report={node:process.version,seed:7821,scenes:[],editLookup:{}};
 for(const terrain of[7,8])for(const [name,center]of[['starter',[0,0]],['forest',[80,110]],['distant',[-50,110]]]){

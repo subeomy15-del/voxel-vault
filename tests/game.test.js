@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { World,WORLD_BOTTOM,WORLD_LIMIT } from '../src/world.js?v=35';
-import { Game } from '../src/game.js?v=35';
-import { ITEMS,craft,starterInventory,dailySeed } from '../src/data.js?v=35';
-import { freshState,loadState,saveState,slotKey,importLegacy } from '../src/save.js?v=35';
-import { updateProjectiles } from '../src/combat.js?v=35';
-import { meshChunk } from '../src/mesh.js?v=35';
+import { World,WORLD_BOTTOM,WORLD_LIMIT } from '../src/world.js?v=36';
+import { Game } from '../src/game.js?v=36';
+import { ITEMS,craft,starterInventory,dailySeed } from '../src/data.js?v=36';
+import { freshState,loadState,saveState,slotKey,importLegacy } from '../src/save.js?v=36';
+import { updateProjectiles } from '../src/combat.js?v=36';
+import { meshChunk } from '../src/mesh.js?v=36';
 const storage=()=>{const m=new Map();return{getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v)};};
 const renderer={setWorld(){},stream(){},burst(){},swing:0},audio={play(){},tone(){}};
 const game=()=>{const g=new Game(renderer,audio,storage());g.screen=null;g.yaw=0;return g;};

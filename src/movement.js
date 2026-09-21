@@ -1,8 +1,8 @@
-import {armorInfusion} from './infusions.js?v=35';
-import {potionPower} from './potions.js?v=35';
-import { trapAt } from './traps.js?v=35';
-import { BLOCKS, ITEMS } from './data.js?v=35';
-import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=35';
+import {armorInfusion} from './infusions.js?v=36';
+import {potionPower} from './potions.js?v=36';
+import { trapAt } from './traps.js?v=36';
+import { BLOCKS, ITEMS } from './data.js?v=36';
+import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=36';
 
 export const MOVEMENT = Object.freeze({ walk: 4.8, sprint: 7.4, jump: 8.8, gravity: 24, coyote: .11, buffer: .14, step: .52, mantle: 1.25 });
 const approach = (current, target, amount) => current < target ? Math.min(target, current + amount) : Math.max(target, current - amount);

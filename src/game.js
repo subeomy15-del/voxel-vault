@@ -1,28 +1,29 @@
-import {creatureSpawn} from './creature-registry.js?v=35';
-import {tickRuinEncounters,defeatRuinGuard,ruinEquipment} from './ruin-encounters.js?v=35';
-import {biomeEnemy} from './biome-ecology.js?v=35';
-import {useRod,claimSeaCache,activateWaystone,travelWaystone,trade,tickExploration} from './exploration.js?v=35';
-import {infuse,infusionValue,armorInfusion,secureRandom} from './infusions.js?v=35';
-import {ALTARS} from './infusion-registry.js?v=35';
-import {drinkPotion,potionFor,potionPower,potionDamageMultiplier} from './potions.js?v=35';
-import { armBlast,cancelDelayedActions } from './delayed-actions.js?v=35';
-import { saveHealth,preserveBeforeReplacement } from './save-health.js?v=35';
-import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=35';
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=35';
-import { canonicalItem,normalizeResources } from './resource-map.js?v=35';
-import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=35';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=35';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=35';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,maxCraft,hash,dailySeed } from './data.js?v=35';
-import { freshState,loadState,saveState,slotKey,importLegacy } from './save.js?v=35';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=35';
-import { movePlayer,requestJump } from './movement.js?v=35';
-import { overlapsBlock } from './shapes.js?v=35';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=35';
-import { ANIMALS,animalKind } from './wildlife.js?v=35';
-import { CHAPTERS,journeyStage } from './journey.js?v=35';
-import { enchantGear,weaponPower,miningPower,armorProtection,awardAura } from './enchanting.js?v=35';
-import { tickTraps,trapAt } from './traps.js?v=35';
+import {bagRoom,bagCount,BAG_CAPACITY} from './bag-capacity.js?v=36';
+import {creatureSpawn} from './creature-registry.js?v=36';
+import {tickRuinEncounters,defeatRuinGuard,ruinEquipment} from './ruin-encounters.js?v=36';
+import {biomeEnemy} from './biome-ecology.js?v=36';
+import {useRod,claimSeaCache,activateWaystone,travelWaystone,trade,tickExploration} from './exploration.js?v=36';
+import {infuse,infusionValue,armorInfusion,secureRandom} from './infusions.js?v=36';
+import {ALTARS} from './infusion-registry.js?v=36';
+import {drinkPotion,potionFor,potionPower,potionDamageMultiplier} from './potions.js?v=36';
+import { armBlast,cancelDelayedActions } from './delayed-actions.js?v=36';
+import { saveHealth,preserveBeforeReplacement } from './save-health.js?v=36';
+import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=36';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=36';
+import { canonicalItem,normalizeResources } from './resource-map.js?v=36';
+import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=36';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=36';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=36';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,maxCraft,hash,dailySeed } from './data.js?v=36';
+import { freshState,loadState,saveState,slotKey,importLegacy } from './save.js?v=36';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=36';
+import { movePlayer,requestJump } from './movement.js?v=36';
+import { overlapsBlock } from './shapes.js?v=36';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=36';
+import { ANIMALS,animalKind } from './wildlife.js?v=36';
+import { CHAPTERS,journeyStage } from './journey.js?v=36';
+import { enchantGear,weaponPower,miningPower,armorProtection,awardAura } from './enchanting.js?v=36';
+import { tickTraps,trapAt } from './traps.js?v=36';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}
@@ -145,6 +146,7 @@ export class Game {
     const recipe=RECIPES.find(r=>r.item===name);
     if(recipe&&!this.stationAvailable(recipe.station)){this.toast(recipe.station==='water'?'Water required':recipe.station==='brewing_station'?'Brewing station required':'Crafting table required','Stand within three blocks of the required station or water.');return false;}
     const batches=all?maxCraft(this.state.inv,recipe):1;
+    const planned={...this.state.inv};if(!this.creative&&craft(planned,name,batches)&&bagCount(planned)>Math.max(BAG_CAPACITY,bagCount(this.state.inv))){this.toast('Backpack full','Store items in a chest or craft a smaller batch.');return false;}
     if(!craft(this.state.inv,name,batches)){this.toast('More materials needed','The crafting book shows exactly what is missing.');return false;}
     this.state.stats.crafted+=batches;if(!this.creative)this.emit('collected',{name,count:(recipe.count||1)*batches});this.audio.play('craft');this.toast(ITEMS[name].name+' crafted',((recipe.count||1)*batches)+' added to your backpack.');
     const kind=ITEMS[name].kind;if(kind==='armor')this.equip(name);else if(['sword','pickaxe','axe','shovel','hoe','bow'].includes(kind)){const i=this.state.bar.findIndex(k=>ITEMS[k].kind===kind);if(i>=0)this.state.bar[i]=name;else if(kind==='armor')this.equip(name);}
@@ -161,9 +163,15 @@ export class Game {
   transfer(name,withdraw=false){
     if(!this.containerKey||!ITEMS[name])return false;
     const store=this.containerKey==='moon'?this.state.moonChest:(this.state.containers[this.containerKey]??={}),source=withdraw?store:this.state.inv,target=withdraw?this.state.inv:store;
-    const n=Math.min(64,source[name]||0);if(!n)return false;source[name]-=n;if(withdraw&&!source[name])delete source[name];target[name]=(target[name]||0)+n;this.save();return true;
+    const n=Math.min(64,source[name]||0,withdraw&&!this.creative?bagRoom(this.state.inv):Infinity);if(!n)return false;source[name]-=n;if(withdraw&&!source[name])delete source[name];target[name]=(target[name]||0)+n;this.save();return true;
   }
-  add(name,n=1){name=canonicalItem(name);if(!ITEMS[name]||!Number.isFinite(n)||n<=0)return;this.state.inv[name]=(this.state.inv[name]||0)+n;if(!this.creative)this.emit('collected',{name,count:n});}
+  add(name,n=1,dropOverflow=true){
+    name=canonicalItem(name);if(!ITEMS[name]||!Number.isFinite(n)||n<=0)return 0;
+    const accepted=this.creative||this.multiplayer?.competitive?n:Math.min(n,bagRoom(this.state.inv));
+    if(accepted){this.state.inv[name]=(this.state.inv[name]||0)+accepted;if(!this.creative)this.emit('collected',{name,count:accepted});}
+    if(accepted<n&&dropOverflow){this.dropItem(name,n-accepted,this.pos.x,this.pos.y,this.pos.z);if(!this.bagNoticeAt||performance.now()-this.bagNoticeAt>3000){this.toast('Backpack full','Store items in a chest. Extra items stay on the ground.');this.bagNoticeAt=performance.now();}}
+    return accepted;
+  }
   heal(item){const ok=consumeFood(this,item);if(ok)this.save();return ok;}
   eat(item=this.held){
     if(potionFor(item))return this.drink(item);
@@ -196,7 +204,7 @@ export class Game {
   updateDrops(dt){
     this.state.drops=this.state.drops.filter(d=>{
       d.age+=dt;if(d.age>600)return false;
-      if(d.age>.45&&Math.hypot(d.x-this.pos.x,d.y-this.pos.y,d.z-this.pos.z)<1.8){this.add(d.item,d.count);return false;}
+      if(d.age>.45&&Math.hypot(d.x-this.pos.x,d.y-this.pos.y,d.z-this.pos.z)<1.8){d.count-=this.add(d.item,d.count,false);return d.count>0;}
       return true;
     });
   }

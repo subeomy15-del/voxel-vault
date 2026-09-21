@@ -1,26 +1,26 @@
-import {creatureModel,animateCreature} from './creature-model.js?v=35';
-import {GeometryCache,ModelPool} from './model-cache.js?v=35';
-import {AutoQuality} from './auto-quality.js?v=35';
+import {creatureModel,animateCreature} from './creature-model.js?v=36';
+import {GeometryCache,ModelPool} from './model-cache.js?v=36';
+import {AutoQuality} from './auto-quality.js?v=36';
 import * as THREE from '../vendor/three.module.js';
-import { BLOCKS, ITEMS, hash } from './data.js?v=35';
-import { ENEMIES } from './combat.js?v=35';
-import { textureCanvas,TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=35';
-import { Scenery } from './scenery.js?v=35';
-import { boxesFor } from './shapes.js?v=35';
-import { animalModel,bowModel,arrowModel,toolModel } from './models.js?v=35';
-import { itemModel } from './item-model.js?v=35';
-import { dragonModel,animateDragon } from './dragon-model.js?v=35';
-import { RiftEffects } from './rift-effects.js?v=35';
-import { PostProcess } from './post-process.js?v=35';
-import { PlayerModel } from './player-model.js?v=35';
-import { cameraPosition } from './perspective.js?v=35';
-import { ViewEffects } from './view-effects.js?v=35';
-import { undeadModel } from './undead-model.js?v=35';
-import { ParticlePool } from './particles.js?v=35';
-import { CameraMotion } from './camera-motion.js?v=35';
-import { FrameBudget,renderOptions } from './render-performance.js?v=35';
-import { Diagnostics } from './diagnostics.js?v=35';
-import { MovementEffects } from './movement-effects.js?v=35';
+import { BLOCKS, ITEMS, hash } from './data.js?v=36';
+import { ENEMIES } from './combat.js?v=36';
+import { textureCanvas,TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=36';
+import { Scenery } from './scenery.js?v=36';
+import { boxesFor } from './shapes.js?v=36';
+import { animalModel,bowModel,arrowModel,toolModel } from './models.js?v=36';
+import { itemModel } from './item-model.js?v=36';
+import { dragonModel,animateDragon } from './dragon-model.js?v=36';
+import { RiftEffects } from './rift-effects.js?v=36';
+import { PostProcess } from './post-process.js?v=36';
+import { PlayerModel } from './player-model.js?v=36';
+import { cameraPosition } from './perspective.js?v=36';
+import { ViewEffects } from './view-effects.js?v=36';
+import { undeadModel } from './undead-model.js?v=36';
+import { ParticlePool } from './particles.js?v=36';
+import { CameraMotion } from './camera-motion.js?v=36';
+import { FrameBudget,renderOptions } from './render-performance.js?v=36';
+import { Diagnostics } from './diagnostics.js?v=36';
+import { MovementEffects } from './movement-effects.js?v=36';
 export class Renderer {
   constructor(container,settings){
     this.geometryCache=new GeometryCache();this.mobPool=new ModelPool(g=>this.disposeGroup(g));this.projectilePool=new ModelPool(g=>this.disposeGroup(g),50);this.autoQuality=new AutoQuality();this.crosshair=document.querySelector('#crosshair');this.projectedPoint=new THREE.Vector3();this.handMaterials=[];this.bowBindings=[];this.shadowTimer=0;this.diagnostics=new Diagnostics();this.settings=settings;this.options=renderOptions(settings,this.autoQuality.level);this.performance=new FrameBudget();this.cameraMotion=new CameraMotion();this.telemetry={fps:60,frameMs:16.7,drawCalls:0,triangles:0,chunks:0,queued:0,particles:0,pixelRatio:1,quality:this.options.quality,workerMs:0};this.scene=new THREE.Scene();this.scene.background=new THREE.Color('#b6cddd');this.scene.fog=new THREE.Fog('#b6cddd',62,125);
@@ -28,10 +28,10 @@ export class Renderer {
     this.renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});this.renderer.setSize(innerWidth,innerHeight);this.renderer.setPixelRatio(Math.min(devicePixelRatio,this.options.maxPixelRatio));this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1;this.renderer.info.autoReset=false;container.append(this.renderer.domElement);
     this.ambient=new THREE.HemisphereLight('#e1ecff','#525b48',1.3);this.scene.add(this.ambient);this.sun=new THREE.DirectionalLight('#fff6e4',1.8);this.sun.position.set(-40,75,35);this.scene.add(this.sun);this.sun.castShadow=true;this.sun.shadow.mapSize.set(2048,2048);Object.assign(this.sun.shadow.camera,{left:-40,right:40,top:40,bottom:-40,near:1,far:170});this.sun.shadow.bias=-.0007;this.sun.shadow.normalBias=.04;this.sun.shadow.autoUpdate=false;this.renderer.shadowMap.enabled=settings.quality==='high';this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.scene.add(this.sun.target);
     this.material=new THREE.MeshStandardMaterial({map:this.atlas(),vertexColors:true,alphaTest:.45,roughness:.94,metalness:.02});this.chunks=new Map();this.queue=[];this.center='';this.decor=new THREE.Group();this.scene.add(this.decor);this.particles=new ParticlePool(this.scene);this.movementEffects=new MovementEffects(this.camera,this.particles);this.effects=this.particles;this.beacons=[];this.mobMeshes=new Map();this.chestMeshes=new Map();
-    this.waterMaterial=new THREE.MeshStandardMaterial({color:'#42a7dd',roughness:.6,metalness:0,transparent:true,opacity:.78,vertexColors:true});
+    this.waterMaterial=new THREE.MeshStandardMaterial({color:'#42a7dd',roughness:.28,metalness:.08,transparent:true,opacity:.72,vertexColors:true});
     this.glassMaterial=new THREE.MeshLambertMaterial({color:'#ffffff',transparent:true,opacity:.28,vertexColors:true});
     this.epoch=0;this.revision=0;this.chunkVersions=new Map();this.ready=[];this.inflight=false;this.underground=false;
-    this.worker=new Worker(new URL('./terrain-worker.js?v=35',import.meta.url),{type:'module'});
+    this.worker=new Worker(new URL('./terrain-worker.js?v=36',import.meta.url),{type:'module'});
     this.worker.onmessage=({data})=>{if(data.epoch!==this.epoch)return;this.inflight=false;this.telemetry.workerMs=data.buildMs||0;if(data.ambientOcclusion!==this.options.ambientOcclusion){if(!this.queue.some(([x,z])=>x===data.cx&&z===data.cz))this.queue.push([data.cx,data.cz]);return;}if(data.revision<(this.chunkVersions.get(`${data.cx},${data.cz}`)||0))return;this.ready.push(data);};
     this.worker.onerror=e=>{console.error('Terrain worker failed',e);document.querySelector('#loading').hidden=false;document.querySelector('#loading').textContent='Terrain could not load. Reload the page to try again.';};
     this.projectileMeshes=new Map();
@@ -161,7 +161,8 @@ export class Renderer {
     this.fireworks??=[];
     // A bounded ascending volley with a broad gold finale; all sparks share one draw call.
     this.fireworks=this.fireworks.filter(f=>!f.done).slice(-12);
-    for(let i=0;i<4;i++)this.fireworks.push({x:x+(i===1?-2:i===2?2:0),y:y+i*1.25,z,time:.08+i*.24,ring:i===3,color:['#ffd17e','#ed926b','#8adbc6','#fff0ba'][i]});
+    this.particles.fireworkRing(x,y,z,'#fff1c2');
+    for(let i=0;i<5;i++)this.fireworks.push({x:x+(i===1?-2:i===2?2:0),y:y+i*1.25,z,time:.12+i*.32,ring:i===4,color:['#ffd17e','#ff6e8a','#78dfff','#bba0ff','#fff0ba'][i]});
   }
   updateShadows(game,dt){
     if(!this.options.shadows)return;
@@ -212,7 +213,7 @@ export class Renderer {
       g.rotation.z=mob.flash>0?Math.sin(mob.flash*70)*.06:0;(animal?g.userData.body:g.children[0])?.material.emissive.set(mob.flash>0?'#89463b':'#000000');
     }
     for(const [id,g]of this.mobMeshes)if(!alive.has(id)){this.mobPool.release(g.userData.poolKey,g);this.mobMeshes.delete(id);}
-    for(const f of this.fireworks||[]){f.time-=dt;if(f.time<=0&&!f.done){f.done=true;this.particles.firework(f.x,f.y,f.z,f.color);if(f.ring)this.particles.fireworkRing(f.x,f.y,f.z,'#ffe9a1');}}
+    for(const f of this.fireworks||[]){if(f.time>0&&f.time<.6)this.particles.dust(f.x,f.y-f.time*5,f.z,f.color,1);f.time-=dt;if(f.time<=0&&!f.done){f.done=true;this.particles.firework(f.x,f.y,f.z,f.color);if(f.ring)this.particles.fireworkRing(f.x,f.y,f.z,'#ffe9a1');}}
     this.fireworks=(this.fireworks||[]).filter(f=>!f.done);this.particles.update(dt);
     this.telegraph.visible=!!game.slam;if(game.slam){this.telegraph.position.set(game.slam.x,game.slam.y+.04,game.slam.z);this.telegraph.scale.setScalar(game.slam.radius);this.telegraph.material.opacity=.4+Math.sin(performance.now()*.02)*.3;}
     const bolts=new Set();for(const p of game.projectiles){bolts.add(p.id);let mesh=this.projectileMeshes.get(p.id);if(!mesh){const key=p.hostile?'hostile':p.color;mesh=this.projectilePool.take(key)||(p.hostile?new THREE.Mesh(new THREE.BoxGeometry(.1,.1,.35),new THREE.MeshBasicMaterial({color:'#a7cbe4'})):arrowModel(this,p.color));mesh.userData.poolKey=key;this.scene.add(mesh);this.projectileMeshes.set(p.id,mesh);}mesh.position.set(p.x,p.y,p.z);mesh.lookAt(p.x+p.vx,p.y+p.vy,p.z+p.vz);}for(const[id,mesh]of this.projectileMeshes)if(!bolts.has(id)){this.projectilePool.release(mesh.userData.poolKey,mesh);this.projectileMeshes.delete(id);}

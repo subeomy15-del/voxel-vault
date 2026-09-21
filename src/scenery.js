@@ -1,6 +1,6 @@
-import {ATMOSPHERES} from './atmosphere-profiles.js?v=35';
+import {ATMOSPHERES} from './atmosphere-profiles.js?v=36';
 import * as THREE from '../vendor/three.module.js';
-import { hash } from './data.js?v=35';
+import { hash } from './data.js?v=36';
 export class Scenery {
   constructor(renderer){
     this.atmospheres=Object.fromEntries(Object.entries(ATMOSPHERES).map(([id,p])=>[id,Object.fromEntries(Object.entries(p).map(([k,color])=>[k,new THREE.Color(color)]))]));this.targetZenith=new THREE.Color();this.targetHorizon=new THREE.Color();
@@ -47,8 +47,13 @@ export class Scenery {
       shader.fragmentShader='uniform float uWaterTime;varying vec3 vWaterPos;\n'+shader.fragmentShader;
       shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_begin>',`#include <normal_fragment_begin>
       if(abs(vNormal.y)>.7){vec2 wave=vec2(sin(vWaterPos.x*1.8+vWaterPos.z*.8+uWaterTime*.9),cos(vWaterPos.z*2.-vWaterPos.x*.6-uWaterTime*.7));normal=normalize(normal+vec3(wave.x,0.,wave.y)*.1);}`);
+      shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
+      vec3 rippleNormal=vec3(sin(vWaterPos.x*.8+vWaterPos.z*.4+uWaterTime*.9)*.11,0.,cos(vWaterPos.z*.9-vWaterPos.x*.3-uWaterTime*.7)*.11);
+      normal=normalize(normal+mat3(viewMatrix)*rippleNormal);`);
       shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>',`float crest=pow(max(0.,sin(vWaterPos.x*2.+vWaterPos.z*1.7+uWaterTime)*cos(vWaterPos.z*1.4-uWaterTime*.65)),12.);
-      outgoingLight+=vec3(.32,.46,.42)*crest*.12;
+      float fresnel=pow(1.-max(dot(normal,normalize(vViewPosition)),0.),3.);
+      outgoingLight=mix(outgoingLight,vec3(.36,.59,.69),fresnel*.24);
+      outgoingLight+=vec3(.65,.83,.86)*crest*.2;
       #include <opaque_fragment>`);
     };
   }

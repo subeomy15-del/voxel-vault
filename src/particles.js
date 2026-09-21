@@ -84,7 +84,7 @@ export class ParticlePool {
       this.dummy.position.set(this.position[j], this.position[j + 1], this.position[j + 2]);
       this.dummy.rotation.set(this.rotation[j], this.rotation[j + 1], this.rotation[j + 2]);
       this.dummy.scale.setScalar(this.size[i] * (.45 + remaining * .55)); this.dummy.updateMatrix();
-      this.mesh.setMatrixAt(i, this.dummy.matrix); this.alpha[i] = Math.min(1, remaining * 2) * remaining;
+      this.mesh.setMatrixAt(i, this.dummy.matrix); this.alpha[i] = Math.min(1, remaining * 2) * remaining * (this.glow[i] ? .75+.25*Math.sin(this.age[i]*35+i) : 1);
       i++;
     }
     this.mesh.count = this.count;

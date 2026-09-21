@@ -1,8 +1,8 @@
-import {CREATURES} from './creature-registry.js?v=35';
-import { ANIMALS,updateAnimal } from './wildlife.js?v=35';
-import { visibleBetween,findMobPath } from './navigation.js?v=35';
-import { updateDragon } from './dragon.js?v=35';
-import { EntityIndex } from './entity-index.js?v=35';
+import {CREATURES} from './creature-registry.js?v=36';
+import { ANIMALS,updateAnimal } from './wildlife.js?v=36';
+import { visibleBetween,findMobPath } from './navigation.js?v=36';
+import { updateDragon } from './dragon.js?v=36';
+import { EntityIndex } from './entity-index.js?v=36';
 
 export const ENEMIES = {
   trader:{name:'Wayfarer trader',hp:20,speed:0,damage:0,color:'#497b7c',glow:'#d6b894',passive:true,height:1.8,radius:.35,xp:0},

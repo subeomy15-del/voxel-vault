@@ -1,9 +1,10 @@
-import {infusionTooltip} from './infusion-ui.js?v=35';
-import {ITEMS,RECIPES,SMELTING,canCraft,maxCraft,ingredientCount,ingredientKeys} from './data.js?v=35';
-import {icon} from './icons.js?v=35';
-import {packSlot} from './inventory-layout.js?v=35';
-import {enchantRow} from './workshop-ui.js?v=35';
-import {enchantKind,enchantLevel,enchantCost} from './enchanting.js?v=35';
+import {bagCount,BAG_CAPACITY} from './bag-capacity.js?v=36';
+import {infusionTooltip} from './infusion-ui.js?v=36';
+import {ITEMS,RECIPES,SMELTING,canCraft,maxCraft,ingredientCount,ingredientKeys} from './data.js?v=36';
+import {icon} from './icons.js?v=36';
+import {packSlot} from './inventory-layout.js?v=36';
+import {enchantRow} from './workshop-ui.js?v=36';
+import {enchantKind,enchantLevel,enchantCost} from './enchanting.js?v=36';
 const text=(node,value)=>{if(node&&node.textContent!==String(value))node.textContent=String(value);};
 const flag=(node,name,value)=>{if(node.classList.contains(name)!==!!value)node.classList.toggle(name,!!value);};
 const attr=(node,name,value)=>{if(node.getAttribute(name)!==String(value))node.setAttribute(name,String(value));};
@@ -40,6 +41,7 @@ export class InventoryBindings {
   const fresh=this.bind(),changed=diff(this.inv,s.inv),gear=JSON.stringify([s.selected,s.bar,s.armor,s.armorParts,s.glider,s.ammo]),gearChanged=gear!==this.gear;
   const store=g.containerKey==='moon'?s.moonChest:s.containers[g.containerKey]||{},stored=diff(this.store,store),enchantChanged=diff(this.enchants,s.enchants||{}),auraChanged=this.aura!==s.aura;
   if(!fresh&&!changed.size&&!stored.size&&!gearChanged&&!auraChanged&&!enchantChanged.size)return;
+  text(this.root.querySelector('[data-bag-capacity]'),g.creative?'Unlimited creative inventory':`${bagCount(s.inv)} / ${BAG_CAPACITY} items · store extras in a chest`);
   if(g.screen==='inventory'){
    const grid=this.root.querySelector('.pack-storage');
    for(const name of changed){

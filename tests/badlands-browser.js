@@ -5,7 +5,7 @@ const ready=async()=>{for(let i=0;i<300;i++){if(await ev('v.chunks.size>=9&&!v.i
 try{
  await c.send('Network.setCacheDisabled',{cacheDisabled:true});await c.send('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
  await c.send('Page.navigate',{url:'http://localhost:3001/'});await sleep(1500);
- await ev(`(async()=>{const m=await import('/src/main.js?v=35');window.g=m.game;window.v=m.renderer;window.ui=m.ui;g.state=(await import('/src/save.js?v=35')).freshState(72);g.loadWorld();g.pos={x:240.5,y:g.world.height(240,180)+1,z:180.5};g.state.time=110;g.screen='pause';ui.settings.perspective=0;ui.render();})()`);await ready();
+ await ev(`(async()=>{const m=await import('/src/main.js?v=36');window.g=m.game;window.v=m.renderer;window.ui=m.ui;g.state=(await import('/src/save.js?v=36')).freshState(72);g.loadWorld();g.pos={x:240.5,y:g.world.height(240,180)+1,z:180.5};g.state.time=110;g.screen='pause';ui.settings.perspective=0;ui.render();})()`);await ready();
  await ev("g.world.set(242,Math.floor(g.pos.y),180,'bench');g.add('knight_heart',9);g.add('diamond_sword',3);g.pause('craft');ui.search='Knight Sword';ui.render()");
  await c.click('[data-craft-all="knight_sword"]');assert.equal(await ev('g.state.inv.knight_sword'),2);assert.equal(await ev('g.state.inv.knight_heart'),1);await c.screenshot('badlands-craft-all');
  await ev("g.state.aura=500;for(const slot of ['helm','chestplate','gauntlets','leggings','boots']){g.add('diamond_'+slot);g.equip('diamond_'+slot);}g.pause('inventory');ui.search='';ui.catalogue=false;ui.render()");
@@ -18,7 +18,7 @@ try{
  await ev("g.pitch=-.55;g.yaw=0;document.querySelector('#overlay').style.visibility='hidden';document.querySelector('#hud').hidden=false");await sleep(250);await c.screenshot('badlands-traps');await ev("document.querySelector('#overlay').style.visibility='';document.querySelector('#hud').hidden=true;g.save()");
  await c.send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await ev("ui.render()");await sleep(200);await c.screenshot('badlands-mobile-armor');assert.ok(await ev('document.documentElement.scrollWidth<=innerWidth'));
  await c.click('[data-action="enchant"]');await c.screenshot('badlands-mobile-enchant');assert.ok(await ev('document.documentElement.scrollWidth<=innerWidth'));
- await c.send('Page.reload');await sleep(1200);await ev(`(async()=>{const m=await import('/src/main.js?v=35');window.g=m.game;window.ui=m.ui;g.start();g.pause('inventory');ui.render();})()`);
+ await c.send('Page.reload');await sleep(1200);await ev(`(async()=>{const m=await import('/src/main.js?v=36');window.g=m.game;window.ui=m.ui;g.start();g.pause('inventory');ui.render();})()`);
  assert.equal(await ev('g.state.enchants.knight_sword'),1);assert.equal(await ev('g.state.armorParts.boots'),'diamond_boots');assert.ok(await ev('g.state.aura>=475'));
  assert.deepEqual(c.errors,[]);assert.deepEqual(c.failed,[]);console.log('PASS: Badlands, Knight Sword Craft All, five armor slots, aura enchanting, knight rendering, fireworks, traps, mobile and saved upgrades');
 }finally{c.socket.close();}

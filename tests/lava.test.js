@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=35';
-import {World} from '../src/world.js?v=35';
-import {BLOCKS,craft} from '../src/data.js?v=35';
-import {meshChunk} from '../src/mesh.js?v=35';
+import {Game} from '../src/game.js?v=36';
+import {World} from '../src/world.js?v=36';
+import {BLOCKS,craft} from '../src/data.js?v=36';
+import {meshChunk} from '../src/mesh.js?v=36';
 const make=()=>new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},{getItem(){return null;},setItem(){}});
 test('lava basins exist across seeds while both Nether arrivals stay safe',()=>{
   for(const seed of [1,72,7821]){

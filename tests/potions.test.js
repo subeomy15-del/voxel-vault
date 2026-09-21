@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=35';
-import {ITEMS,RECIPES} from '../src/data.js?v=35';
-import {POTIONS} from '../src/potion-content.js?v=35';
-import {tickPotions,normalizeBrews,potionDamageMultiplier} from '../src/potions.js?v=35';
-import {loadState} from '../src/save.js?v=35';
+import {Game} from '../src/game.js?v=36';
+import {ITEMS,RECIPES} from '../src/data.js?v=36';
+import {POTIONS} from '../src/potion-content.js?v=36';
+import {tickPotions,normalizeBrews,potionDamageMultiplier} from '../src/potions.js?v=36';
+import {loadState} from '../src/save.js?v=36';
 const make=()=>{const data=new Map(),g=new Game({setWorld(){},stream(){},burst(){}},{play(){},quiet(){}},{getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)});g.screen=null;g.pos={x:100.5,y:80,z:100.5};g.mobs=[];return g;};
 const bottle=(g,id)=>{g.add(id,2);g.state.potionCooldown=0;return g.drink(id);};
 test('all 36 infusions require a real nearby brewing station and exact materials',()=>{

@@ -1,5 +1,5 @@
-import {World} from '../src/world.js?v=35';
-import {meshChunk} from '../src/mesh.js?v=35';
+import {World} from '../src/world.js?v=36';
+import {meshChunk} from '../src/mesh.js?v=36';
 import {writeFile} from 'node:fs/promises';
 const scenes=[['badlands',416,-992],['conifer',1056,352],['cherry',-1632,-480],['jungle',288,-608],['fortress',965,352]],results=[];
 for(const[name,x,z]of scenes)for(const version of[7,8]){

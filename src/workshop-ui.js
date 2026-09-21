@@ -1,6 +1,6 @@
-import {ITEMS,ingredientCount,maxCraft} from './data.js?v=35';
-import {icon} from './icons.js?v=35';
-import {enchantKind,enchantLevel,enchantCost} from './enchanting.js?v=35';
+import {ITEMS,ingredientCount,maxCraft} from './data.js?v=36';
+import {icon} from './icons.js?v=36';
+import {enchantKind,enchantLevel,enchantCost} from './enchanting.js?v=36';
 export function recipeMarkup(g,r,ready){
  const batches=maxCraft(g.state.inv,r),amount=batches*(r.count||1);
  return `<article data-recipe-item="${r.item}" class="recipe ${ready?'ready':''}">${icon(r.item,44)}<div><strong>${ITEMS[r.item].name}${r.count?' ×'+r.count:''}</strong><small>${r.station==='brewing_station'?'Brewing station required':r.station==='water'?'Nearby water required':r.station==='bench'?'Workbench required':'Craft by hand'} · ${ITEMS[r.item].description||'Building material'}</small><div class="costs">${Object.entries(r.cost).map(([k,n])=>`<span data-ingredient="${k}" class="${ingredientCount(g.state.inv,k,r)>=n?'enough':'missing'}">${ingredientCount(g.state.inv,k,r)}/${n} ${ITEMS[k].name}</span>`).join('')}</div></div><div class="craft-actions"><button data-craft="${r.item}" ${ready?'':'disabled'}>Craft ${r.count||1}</button><button data-craft-all="${r.item}" ${ready?'':'disabled'}>Craft All${amount?' ('+amount+')':''}</button></div></article>`;

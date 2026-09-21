@@ -1,4 +1,4 @@
-import {climateAt,noise2,smooth,integerHash} from './climate.js?v=35';
+import {climateAt,noise2,smooth,integerHash} from './climate.js?v=36';
 // Version eight is separate: saved version-seven terrain never changes underneath builds.
 export function regionalClimate(seed,x,z){
  const c=climateAt(seed,x,z),n=(s,o)=>noise2(c.wx,c.wz,seed+o,s),t=c.temperature,m=c.moisture;

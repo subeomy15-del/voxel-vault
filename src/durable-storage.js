@@ -1,5 +1,5 @@
-import {slotKey} from './save.js?v=35';
-import {saveHealth,setSaveHealth,storageFailure} from './save-health.js?v=35';
+import {slotKey} from './save.js?v=36';
+import {saveHealth,setSaveHealth,storageFailure} from './save-health.js?v=36';
 const yieldFrame=()=>new Promise(resolve=>setTimeout(resolve,0));
 function metadata(state){
   const {edits,realms,...rest}=state;return structuredClone({...rest,realms:Object.fromEntries(Object.entries(realms||{}).map(([d,{edits,...fields}])=>[d,fields]))});
@@ -47,12 +47,12 @@ export class DurableStorage {
   }
   preserveBeforeReplacement(key){this.replacements.add(key);setSaveHealth(this,key,{blocked:false});return true;}
   async replaceState(state){
-    await this.flush();const {EditMap}=await import('./edit-map.js?v=35');const world={edits:new EditMap(state.edits)};
+    await this.flush();const {EditMap}=await import('./edit-map.js?v=36');const world={edits:new EditMap(state.edits)};
     this.preserveBeforeReplacement(slotKey(state.mode));this.queueWorld(state,world);return this.flush();
   }
   dispose(){clearTimeout(this.timer);this.worker.terminate();for(const call of this.calls.values()){clearTimeout(call.timer);call.reject(Error('Save worker closed'));}this.calls.clear();}
 }
 export async function openDurableStorage(local){
-  const worker=new Worker(new URL('./save-worker.js?v=35',import.meta.url),{type:'module'}),storage=new DurableStorage(local,worker);
+  const worker=new Worker(new URL('./save-worker.js?v=36',import.meta.url),{type:'module'}),storage=new DurableStorage(local,worker);
   try{return await storage.initialize();}catch(error){storage.dispose();throw error;}
 }

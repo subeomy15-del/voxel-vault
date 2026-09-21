@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {World} from '../src/world.js?v=35';
-import {Game} from '../src/game.js?v=35';
-import {BLOCKS} from '../src/data.js?v=35';
-import {freshState,loadState,saveState} from '../src/save.js?v=35';
-import {climateAt} from '../src/climate.js?v=35';
-import {BIOME_DEFINITIONS} from '../src/legacy-biomes.js?v=35';
-import {STRUCTURE_TYPES,buildStructure,transform} from '../src/structure-templates.js?v=35';
-import {meshChunk} from '../src/mesh.js?v=35';
+import {World} from '../src/world.js?v=36';
+import {Game} from '../src/game.js?v=36';
+import {BLOCKS} from '../src/data.js?v=36';
+import {freshState,loadState,saveState} from '../src/save.js?v=36';
+import {climateAt} from '../src/climate.js?v=36';
+import {BIOME_DEFINITIONS} from '../src/legacy-biomes.js?v=36';
+import {STRUCTURE_TYPES,buildStructure,transform} from '../src/structure-templates.js?v=36';
+import {meshChunk} from '../src/mesh.js?v=36';
 const cells=w=>[...w.structures].sort(([a],[b])=>a.localeCompare(b));
 test('climate biomes cover all families across a bounded map and form large continuous regions',()=>{
  const found=new Set(),runs=[];let last=null,length=0,maxStep=0;

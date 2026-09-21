@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import {CREATURES,NEW_ANIMALS} from './creature-registry.js?v=35';
+import {CREATURES,NEW_ANIMALS} from './creature-registry.js?v=36';
 
 // Original silhouettes share cached box geometry and per-model materials.
 export function creatureModel(renderer,mob){

@@ -1,15 +1,15 @@
-import {SpatialLights} from './spatial-lights.js?v=35';
-import {regionalClimate,regionalSurface} from './regional-climate.js?v=35';
-import {StructureGenerator} from './structure-generator.js?v=35';
-import {climateAt,blendedSurface,smooth} from './climate.js?v=35';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=35';
-import {EditMap} from './edit-map.js?v=35';
-import { netherHeight,netherBlock } from './nether.js?v=35';
-import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=35';
-import { canonicalItem } from './resource-map.js?v=35';
-import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=35';
-import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=35';
-import { CLOUDSTEP,courseGeometry } from './parkour-course.js?v=35';
+import {SpatialLights} from './spatial-lights.js?v=36';
+import {regionalClimate,regionalSurface} from './regional-climate.js?v=36';
+import {StructureGenerator} from './structure-generator.js?v=36';
+import {climateAt,blendedSurface,smooth} from './climate.js?v=36';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=36';
+import {EditMap} from './edit-map.js?v=36';
+import { netherHeight,netherBlock } from './nether.js?v=36';
+import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=36';
+import { canonicalItem } from './resource-map.js?v=36';
+import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=36';
+import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=36';
+import { CLOUDSTEP,courseGeometry } from './parkour-course.js?v=36';
 export const CHUNK=16, WORLD_LIMIT=Infinity, WORLD_BOTTOM=-64, WORLD_TOP=95, SEA_LEVEL=4;
 export const cellKey=(x,y,z)=>`${x},${y},${z}`;
 export class World {
