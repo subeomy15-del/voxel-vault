@@ -151,7 +151,11 @@ export class UI {
   drawMap(){
     const canvas=document.querySelector('#map-canvas');if(!canvas)return;const ctx=canvas.getContext('2d'),g=this.game,span=640,scale=600/span,ox=g.pos.x-span/2,oz=g.pos.z-span/2;
     ctx.fillStyle=g.state.dimension==='ender'?'#30243f':'#7499ad';ctx.fillRect(0,0,600,600);
-    for(let px=0;px<600;px+=6)for(let pz=0;pz<600;pz+=6){const x=Math.floor(ox+px/scale),z=Math.floor(oz+pz/scale),h=g.world.height(x,z);if(h<4)continue;ctx.fillStyle=BIOMES[g.world.biome(x,z)].color;ctx.fillRect(px,pz,6,6);if(h>32){ctx.fillStyle='#ffffff22';ctx.fillRect(px,pz,6,6);}}
+    // Sample the terrain in larger tiles. The map is a paused overview, so
+    // 75×75 terrain queries preserve the visual read while opening instantly
+    // on phones and low-power laptops.
+    const tile=8;
+    for(let px=0;px<600;px+=tile)for(let pz=0;pz<600;pz+=tile){const x=Math.floor(ox+px/scale),z=Math.floor(oz+pz/scale),h=g.world.height(x,z);if(h<4)continue;ctx.fillStyle=BIOMES[g.world.biome(x,z)].color;ctx.fillRect(px,pz,tile,tile);if(h>32){ctx.fillStyle='#ffffff22';ctx.fillRect(px,pz,tile,tile);}}
     ctx.strokeStyle='#ece8d529';for(let a=0;a<600;a+=60){ctx.beginPath();ctx.moveTo(a,0);ctx.lineTo(a,600);ctx.moveTo(0,a);ctx.lineTo(600,a);ctx.stroke();}
     for(const l of g.world.landmarks.filter(l=>!l.hidden||g.state.discovered.includes(l.id))){const x=(l.x-ox)*scale,z=(l.z-oz)*scale;ctx.fillStyle='#293e36';ctx.beginPath();ctx.arc(x,z,8,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f1e9ce';ctx.font='12px system-ui';ctx.textAlign='center';ctx.fillText(l.type==='camp'?'⌂':'•',x,z+4);}
     ctx.save();ctx.translate(300,300);ctx.rotate(-g.yaw);ctx.fillStyle='#fff2ba';ctx.strokeStyle='#253c33';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-11);ctx.lineTo(8,9);ctx.lineTo(0,5);ctx.lineTo(-8,9);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();

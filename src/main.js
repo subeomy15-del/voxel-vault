@@ -52,13 +52,15 @@ try{
   addEventListener('blur',()=>{game.keys.clear();game.attackHeld=false;game.placeHeld=false;if(!game.screen){game.pause();ui.render();}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){game.save();storage.flush?.();if(!game.screen){game.pause();ui.render();}}});
   document.addEventListener('pointerlockchange',()=>{if(!document.pointerLockElement&&!game.screen&&!expectedUnlock){game.pause();ui.render();}expectedUnlock=false;});
-  addEventListener('mousemove',e=>{if(game.screen)return;if(document.pointerLockElement===canvas||dragging){game.yaw-=e.movementX*.0022*settings.sensitivity;game.pitch=Math.max(-1.52,Math.min(1.52,game.pitch-e.movementY*.0022*settings.sensitivity));}});
+  // A small input delta should produce a useful turn. The old multiplier made
+  // the camera feel heavy on high-DPI mice, especially while sprinting.
+  addEventListener('mousemove',e=>{if(game.screen)return;if(document.pointerLockElement===canvas||dragging){game.yaw-=e.movementX*.0032*settings.sensitivity;game.pitch=Math.max(-1.52,Math.min(1.52,game.pitch-e.movementY*.0032*settings.sensitivity));}});
   canvas.addEventListener('pointerdown',e=>{
     if(game.screen)return;game.audio.start();if(e.pointerType==='touch'){lastTouch={id:e.pointerId,x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);return;}
     if(document.pointerLockElement!==canvas){try{canvas.requestPointerLock()?.catch(()=>{});}catch{}dragging=true;if(e.button===0){game.attackHeld=true;game.attack();}if(e.button===2)use();return;}
     if(e.button===0){game.attackHeld=true;game.attack();}if(e.button===2)use();
   });
-  canvas.addEventListener('pointermove',e=>{if(e.pointerType!=='touch'||!lastTouch||lastTouch.id!==e.pointerId||game.screen)return;game.yaw-=(e.clientX-lastTouch.x)*.005*settings.sensitivity;game.pitch=Math.max(-1.52,Math.min(1.52,game.pitch-(e.clientY-lastTouch.y)*.005*settings.sensitivity));lastTouch.x=e.clientX;lastTouch.y=e.clientY;});
+  canvas.addEventListener('pointermove',e=>{if(e.pointerType!=='touch'||!lastTouch||lastTouch.id!==e.pointerId||game.screen)return;game.yaw-=(e.clientX-lastTouch.x)*.007*settings.sensitivity;game.pitch=Math.max(-1.52,Math.min(1.52,game.pitch-(e.clientY-lastTouch.y)*.007*settings.sensitivity));lastTouch.x=e.clientX;lastTouch.y=e.clientY;});
   addEventListener('pointerup',e=>{if(e.pointerType==='touch'){if(lastTouch?.id===e.pointerId)lastTouch=null;return;}if(e.button===0){if(!game.screen)game.releaseAttack();else game.attackHeld=false;}if(e.button===2)game.placeHeld=false;dragging=false;});
   addEventListener('pointercancel',e=>{if(e.pointerType==='touch'){if(lastTouch?.id===e.pointerId)lastTouch=null;return;}game.drawState=null;game.attackHeld=false;game.placeHeld=false;dragging=false;});
   canvas.addEventListener('auxclick',e=>{if(e.button===1&&!game.screen&&game.target){e.preventDefault();const name=BLOCKS[game.target.type].drop||game.target.type;if(game.creative&&!game.state.inv[name])game.add(name,999);game.equip(name);}});
