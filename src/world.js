@@ -48,6 +48,11 @@ export class World {
     const region=this.terrain>=7?smooth(280,540,Math.hypot(x,z)):0,climate=region>0?(this.terrain>=10?expandedClimate:this.terrain>=8?regionalClimate:climateAt)(this.seed,x,z):null;
     if(this.terrain>=8){const mesa=smooth(145,210,x)*smooth(115,175,z);h+=mesa*smooth(.28,.64,this.noise(x+57,z-93,90))*24;}
     if(climate){h=h*(1-region)+climate.h*region;if(region>.5)biome=climate.biome;}
+    // Seeded needles, crater bowls, and karst ridges make the expanded continents geological.
+    if(this.terrain>=10){
+      const gx=Math.floor(x/128),gz=Math.floor(z/128),fx=x-(gx*128+64+((hash(gx,gz,this.seed+611)-.5)*48)),fz=z-(gz*128+64+((hash(gz,gx,this.seed+617)-.5)*48)),d=Math.hypot(fx,fz),feature=hash(gx,gz,this.seed+623);
+      if(feature<.18)h+=Math.max(0,30-d*.72);else if(feature<.34)h-=Math.max(0,17-d*.42);else if(feature<.48)h+=Math.max(0,12-d*.28)+Math.sin(x*.18+z*.09)*2;
+    }
     const d=Math.hypot(x,z-12);if(d<42){const a=Math.max(0,Math.min(1,(42-d)/22));h=h*(1-a)+6*a;}
     h=Math.max(this.terrain>=7?-36:-7,Math.min(this.terrain>=7?78:70,Math.floor(h)));
     const wrap=(n,span)=>((n+span/2)%span+span)%span-span/2,cx=Math.floor(x/52),cz=Math.floor(z/52),px=cx*52+20+hash(cx,cz,this.seed)*12,pz=cz*52+22;const v={h,biome,climate,region,t1:-16+Math.sin(z*.047)*5,t2:-34+Math.sin(x*.039)*7,river,a2:(wrap(x-Math.sin(z*.033)*17,80)/3.2)**2,b2:(wrap(z-Math.sin(x*.035)*19,88)/4.4)**2,chamber:((x-px)/13)**2+((z-pz)/16)**2,cy:-22-hash(cz,cx,this.seed+7)*23,rock:this.noise(x+9,z-31,28)>.7?'granite':this.noise(x-67,z+84,34)>.64?'limestone':'stone'};this.columns.set(key,v);return v;

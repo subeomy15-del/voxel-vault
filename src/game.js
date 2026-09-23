@@ -13,7 +13,7 @@ import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=37';
 import { canonicalItem,normalizeResources } from './resource-map.js?v=37';
 import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=37';
 import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=37';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP } from './world.js?v=37';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP,SEA_LEVEL } from './world.js?v=37';
 import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,maxCraft,hash,dailySeed } from './data.js?v=37';
 import { freshState,loadState,saveState,slotKey,importLegacy } from './save.js?v=37';
 import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=37';
@@ -483,7 +483,7 @@ export class Game {
     this.spawnTimer+=dt;if(!this.multiplayer?.active&&this.spawnTimer>(this.hardAdventure?8:14)){
       this.spawnTimer=0;this.mobs=this.mobs.filter(m=>ANIMALS[m.kind]||Math.hypot(m.x-this.pos.x,m.z-this.pos.z)<85);
       const ender=this.state.dimension==='ender',hostile=!this.creative&&(ender||this.state.dimension==='nether'||this.pos.y<-7||this.state.time%600>(this.hardAdventure?300:420)||this.world.biome(this.pos.x,this.pos.z)==='badlands'),cap=hostile?(this.hardAdventure?(ender?11:9):(ender?7:5)):10,group=this.mobs.filter(m=>!!ENEMIES[m.kind]?.passive!==hostile&&Math.hypot(m.x-this.pos.x,m.z-this.pos.z)<70);
-      if(group.length<cap&&(hostile||this.mobs.filter(m=>ANIMALS[m.kind]).length<128)){const a=hash(Math.floor(this.state.time),this.serial,this.state.seed)*Math.PI*2,x=this.pos.x+Math.sin(a)*22,z=this.pos.z+Math.cos(a)*22,y=this.world.ground(x,z,hostile?this.pos.y+3:this.world.height(x,z)+1);if(Math.abs(y-this.pos.y)<10&&y>-60&&!this.world.waterAt(x,y,z)&&!this.world.intersects(x,y,z,1.7,.4)){const biome=this.world.biome?.(x,z);const kind=this.state.dimension==='nether'?(this.serial%3===0?'brute':'stalker'):ender?(this.serial%3===0?'void_archer':'enderling'):(biome==='badlands'?(this.serial%3?'draugr_knight':'skeleton'):this.pos.y<-25?'brute':biome==='snow'?'frost_howler':biome==='desert'?'husk':biome==='marsh'&&this.serial%2?'spider':this.serial%2?'zombie':'skeleton');const selected=hostile?(this.world.terrain>=8?creatureSpawn(this.world,x,y,z,this.serial,this.state.time):this.world.terrain>=8&&this.state.dimension==='overworld'?biomeEnemy(this.world,x,y,z,this.serial):kind):animalKind(this.world,x,z,this.serial);const info=ENEMIES[selected];if(!this.world.intersects(x,y,z,info.height||1.8,info.radius||.4))this.spawnMob(x,z,selected,y);}}
+      if(group.length<cap&&(hostile||this.mobs.filter(m=>ANIMALS[m.kind]).length<128)){const a=hash(Math.floor(this.state.time),this.serial,this.state.seed)*Math.PI*2,x=this.pos.x+Math.sin(a)*22,z=this.pos.z+Math.cos(a)*22,biome=this.world.biome?.(x,z),aquatic=!hostile&&['ocean','river','beach'].includes(biome)&&this.world.get(Math.floor(x),2,Math.floor(z))==='water',y=aquatic?SEA_LEVEL-1:this.world.ground(x,z,hostile?this.pos.y+3:this.world.height(x,z)+1);if(Math.abs(y-this.pos.y)<10&&y>-60&&(aquatic||!this.world.waterAt(x,y,z))&&!this.world.intersects(x,y,z,1.7,.4)){const kind=this.state.dimension==='nether'?(this.serial%3===0?'brute':'stalker'):ender?(this.serial%3===0?'void_archer':'enderling'):(biome==='badlands'?(this.serial%3?'draugr_knight':'skeleton'):this.pos.y<-25?'brute':biome==='snow'?'frost_howler':biome==='desert'?'husk':biome==='marsh'&&this.serial%2?'spider':this.serial%2?'zombie':'skeleton');const selected=hostile?(this.world.terrain>=8?creatureSpawn(this.world,x,y,z,this.serial,this.state.time):this.world.terrain>=8&&this.state.dimension==='overworld'?biomeEnemy(this.world,x,y,z,this.serial):kind):animalKind(this.world,x,z,this.serial);const info=ENEMIES[selected];if(info&&(aquatic||!info.aquatic)&&!this.world.intersects(x,y,z,info.height||1.8,info.radius||.4))this.spawnMob(x,z,selected,y);}}
     }
     this.saveTimer+=dt;if(this.saveTimer>15){this.saveTimer=0;this.save();}
   }
@@ -516,6 +516,7 @@ export class Game {
   moveMob(m,dx,dz){
     if(trapAt(this,m)?.snare){dx*=.2;dz*=.2;}
     const info=ENEMIES[m.kind]||{},height=info.height||1.7,radius=info.radius||.25;
+    if(info.aquatic){const x=m.x+dx,z=m.z+dz;if(this.world.get(Math.floor(x),Math.floor(m.y),Math.floor(z))==='water'){m.x=x;m.z=z;m.angle=Math.atan2(dx,dz);}return;}
     for(const[a,b]of[[dx,dz],[dx,0],[0,dz]]){
       const x=m.x+a,z=m.z+b,y=this.world.ground(x,z,m.y+1.1);
       if(Math.abs(x)>WORLD_LIMIT-1||Math.abs(z)>WORLD_LIMIT-1||info.passive&&this.world.waterAt(x,y,z))continue;

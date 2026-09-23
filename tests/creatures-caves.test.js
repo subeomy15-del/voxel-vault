@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import * as THREE from '../vendor/three.module.js';
 import {World} from '../src/world.js?v=37';
 import {CREATURES,NEW_ANIMALS,creatureSpawn} from '../src/creature-registry.js?v=37';
+import {ANIMALS,animalKind} from '../src/wildlife.js?v=37';
 import {ENEMIES,warpCreature,updateEnemies} from '../src/combat.js?v=37';
 import {creatureModel,animateCreature} from '../src/creature-model.js?v=37';
 import {ITEMS,BLOCKS} from '../src/data.js?v=37';
@@ -40,6 +41,12 @@ test('terrain ten caves form a deterministic connected room-and-tunnel network',
   }}
  assert.equal(reachable.size,rooms.length);
  assert.deepEqual(w.caveNode(2,-1),w.caveNode(2,-1));
+});
+test('terrain ten exposes broad geology and aquatic wildlife',()=>{
+ const w=new World(7821,[],10),heights=[],fish=[];
+ for(let x=-700;x<=700;x+=64)for(let z=-700;z<=700;z+=64){heights.push(w.height(x,z));if(['ocean','river','beach'].includes(w.biome(x,z))&&w.get(x,2,z)==='water')fish.push(animalKind(w,x,z,fish.length));}
+ assert.ok(Math.max(...heights)-Math.min(...heights)>45);
+ assert.ok(fish.length>2);assert.ok(fish.every(kind=>ANIMALS[kind]?.aquatic));assert.ok(ANIMALS.camel);
 });
 test('magma cache opens once and stores mined blocks, defeated guards and world version',()=>{
  const g=game(),s=g.world.ruins.find({radius:18,type:'magma_ruin'})[0],l=g.world.ruins.layout(s),[dx,dz]=transform(l.loot.x,l.loot.z,s.rotation,s.mirror);

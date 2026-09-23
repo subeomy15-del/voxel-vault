@@ -8,7 +8,10 @@ export function creatureModel(renderer,mob){
  const part=(color,w,h,d,x,y,z,parent=g)=>{const mesh=renderer.part(color,w,h,d,x,y,z);parent.add(mesh);return mesh;};
  const joint=(x,y,z,w,h,d,color=base)=>{const pivot=new THREE.Group();pivot.position.set(x,y,z);g.add(pivot);part(color,w,h,d,0,-h/2,0,pivot);limbs.push(pivot);return pivot;};
  let head,body;
- if(['wolf','cat','bear','horse','stag','camel'].includes(def.model)){
+ if(def.model==='fish'){
+  body=part(base,.72,.28,.34,0,.35,0);part(trim,.34,.2,.08,0,.35,.2);const tail=part(trim,.25,.42,.08,0,.35,-.28);tail.rotation.y=Math.PI/2;for(const side of[-1,1])part(trim,.16,.06,.22,side*.2,.35,0);
+  head=new THREE.Group();head.position.set(0,.37,.29);g.add(head);part(base,.32,.24,.2,0,0,0,head);part('#263636',.045,.045,.025,.11,.03,.11,head);
+ }else if(['wolf','cat','bear','horse','stag','camel'].includes(def.model)){
   const large=def.model==='bear',tall=['horse','stag','camel'].includes(def.model),h=large?1.05:tall?1.15:.58,len=large?1.05:tall?1.2:.92;
   body=part(base,large?.9:.55,large?.75:.48,len,0,h,0);
   for(const x of[-1,1])for(const z of[-1,1])joint(x*(large?.3:.2),h-.1,z*len*.34,large?.25:.14,h-.1,large?.27:.16);
