@@ -1,6 +1,6 @@
-import {infusionValue,armorInfusion} from './infusions.js?v=36';
-import {ITEMS} from './data.js?v=36';
-import {ARMOR_SLOTS} from './badlands-content.js?v=36';
+import {infusionValue,armorInfusion} from './infusions.js?v=37';
+import {ITEMS} from './data.js?v=37';
+import {ARMOR_SLOTS} from './badlands-content.js?v=37';
 export const enchantKind=item=>item?.slot?'Protection':['sword','bow'].includes(item?.kind)?'Power':['pickaxe','axe','shovel','hoe'].includes(item?.kind)?'Efficiency':null;
 export const enchantLevel=(s,name)=>Math.min(5,Math.max(0,s.enchants?.[name]||0));
 export const enchantCost=(s,name)=>25*(enchantLevel(s,name)+1)**2;

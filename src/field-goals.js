@@ -1,4 +1,4 @@
-import { awardAura } from './enchanting.js?v=36';
+import { awardAura } from './enchanting.js?v=37';
 
 export const DAILY_GOALS = Object.freeze([
   Object.freeze({ stat: 'mined', target: 30, title: 'Gather 30 blocks', hint: 'Equip your axe or pickaxe. Hold mine on timber and stone to gather building supplies.', action: 'inventory', button: 'Choose a tool' }),

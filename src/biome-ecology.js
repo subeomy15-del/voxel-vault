@@ -1,4 +1,5 @@
-export const BIOME_ECOLOGY=Object.freeze({
+import {EXPANDED_BIOMES} from './expanded-biomes.js?v=37';
+const ecology={
  meadow:{animals:['cow','sheep','rabbit'],enemies:['zombie','skeleton'],feature:'Open grasslands and fallen ramparts',resource:'wheat'},
  forest:{animals:['deer','pig','rabbit'],enemies:['zombie','skeleton'],feature:'Branching oaks and hidden homesteads',resource:'apple'},
  dense_forest:{animals:['deer','pig'],enemies:['spider','sentinel'],feature:'Great oaks above moss-covered chambers',resource:'mushroom'},
@@ -19,5 +20,7 @@ export const BIOME_ECOLOGY=Object.freeze({
  ocean:{animals:[],enemies:[],feature:'Deep shelves and submerged chart treasures',resource:'sea_fish'},
  cave:{animals:[],enemies:['spider','skeleton'],feature:'Mine passages and underground archives',resource:'iron'},
  deep_cave:{animals:[],enemies:['brute','spider'],feature:'Basalt chambers and deep crystal veins',resource:'diamond'}
-});
+};
+for(const [id,def] of Object.entries(EXPANDED_BIOMES))ecology[id]={...ecology[def.parent],feature:def.name,animals:id==='oasis'?['camel']:ecology[def.parent].animals};
+export const BIOME_ECOLOGY=Object.freeze(ecology);
 export function biomeEnemy(world,x,y,z,salt=0){const id=world.biomeAtHeight(x,y,z),list=BIOME_ECOLOGY[id]?.enemies||['zombie','skeleton'];return list[Math.abs(salt)%list.length]||'zombie';}

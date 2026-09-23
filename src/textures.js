@@ -1,4 +1,5 @@
-import { BLOCKS, hash } from './data.js?v=36';
+import {paintBlockStyle} from './block-style.js?v=37';
+import { BLOCKS, hash } from './data.js?v=37';
 export const TILE=32,ATLAS_COLS=16;
 export const ATLAS_ROWS=2**Math.ceil(Math.log2(Math.ceil(Object.keys(BLOCKS).length*3/ATLAS_COLS)));
 export const ATLAS_WIDTH=TILE*ATLAS_COLS,ATLAS_HEIGHT=TILE*ATLAS_ROWS;
@@ -34,7 +35,8 @@ export function textureCanvas(){
         if(!sprout&&['tomato_crop','berries_crop'].includes(type)){for(const[x,y]of[[7,12],[21,15],[13,22]]){fill(type==='tomato_crop'?'#b56c58':'#7d7b9d',x,y,5,5);fill(type==='tomato_crop'?'#dc9579':'#a3a1c0',x,y,3,2);}}
         if(carrot&&!sprout){fill('#b87943',13,27,7,5);fill('#e1a268',15,26,3,6);}
       }
-      ctx.restore();continue;
+      if(!b.plant)paintBlockStyle(ctx,type,side);
+    ctx.restore();continue;
     }
     const bright={grass:BLOCKS.grass.color,leaf:BLOCKS.leaf.color,pine:BLOCKS.pine.color,autumnleaf:'#cc924e',dirt:'#92785b',sand:'#c7b889',stone:'#8a969e'};
     fill(ores[type]?'#89929a':type==='grass'&&side!==0?bright.dirt:bright[type]||b.color);
@@ -104,6 +106,7 @@ export function textureCanvas(){
     if(type==='ladder'){ctx.clearRect(0,0,32,32);fill('#9b7d51',4,0,4,32);fill('#9b7d51',24,0,4,32);for(let y=3;y<32;y+=9){fill('#c1a173',4,y,24,3);fill('#ecd1a44d',4,y,24,1);}}
     if(type==='torch'||type==='lantern'){fill('#605343',0,0,32,32);fill('#edc479',5,5,22,20);fill('#ffedb8',10,7,12,16);fill('#7a7460',0,0,32,4);fill('#7a7460',0,28,32,4);}
     if(type==='campfire'){ctx.clearRect(0,0,32,32);stroke('#97704b',[[4,29],[28,25]],5);stroke('#775c40',[[5,24],[28,30]],5);ctx.fillStyle='#e7a459';ctx.beginPath();ctx.moveTo(7,25);ctx.lineTo(9,13);ctx.lineTo(18,2);ctx.lineTo(18,14);ctx.lineTo(24,8);ctx.lineTo(28,20);ctx.lineTo(22,27);ctx.fill();fill('#ffdf99',14,17,7,10);}
+    if(!b.plant)paintBlockStyle(ctx,type,side);
     ctx.restore();
   }
   return canvas;

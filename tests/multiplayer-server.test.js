@@ -211,6 +211,6 @@ test('HTTP accepts allowed origins, validates bodies and serves only browser ass
   assert.equal((await api.request('/api/rooms', { maxPlayers: 9 })).status, 400);
   assert.equal((await api.request('/api/rooms', { public: 'yes' })).status, 400);
   assert.equal((await api.request('/api/rooms', { playerName: '' })).status, 400);
-  for (const path of ['/.git/config', '/package.json', '/server.js', '/server/lobbies.js', '/tests/multiplayer-server.test.js', '/assets/../../server.js', '/src/%2e%2e/server.js?v=36']) assert.equal((await fetch(api.base + path)).status, 404, path);
-  for (const path of ['/', '/src/main.js?v=36', '/style.css', '/favicon.svg', '/vendor/three.module.js']) assert.equal((await fetch(api.base + path)).status, 200, path);
+  for (const path of ['/.git/config', '/package.json', '/server.js', '/server/lobbies.js', '/tests/multiplayer-server.test.js', '/assets/../../server.js', '/src/%2e%2e/server.js?v=37']) assert.equal((await fetch(api.base + path)).status, 404, path);
+  for (const path of ['/', '/src/main.js?v=37', '/style.css', '/favicon.svg', '/vendor/three.module.js']) assert.equal((await fetch(api.base + path)).status, 200, path);
 });

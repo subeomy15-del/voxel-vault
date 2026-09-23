@@ -1,5 +1,5 @@
-import { ITEMS } from './data.js?v=36';
-import { BEDWARS_BEDS, BEDWARS_BLOCKS, BEDWARS_SHOP, MODE_RULES } from './mode-rules.js?v=36';
+import { ITEMS } from './data.js?v=37';
+import { BEDWARS_BEDS, BEDWARS_BLOCKS, BEDWARS_SHOP, MODE_RULES } from './mode-rules.js?v=37';
 
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const number = value => Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
@@ -39,7 +39,7 @@ export class MultiplayerModes {
     });
     this.document.addEventListener('keydown', event => {
       if (!this.active || /INPUT|SELECT|TEXTAREA/.test(event.target.tagName)) return;
-      if (event.code === 'KeyK' && (!game.screen || game.screen === 'match-shop')) {
+      if (['KeyB','KeyK'].includes(event.code) && (!game.screen || game.screen === 'match-shop')) {
         event.preventDefault(); event.stopImmediatePropagation();
         if (game.screen === 'match-shop') this.closeShop(); else this.shop();
       } else if (event.code === 'Escape' && modeScreens.has(game.screen)) {

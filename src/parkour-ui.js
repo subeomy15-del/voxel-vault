@@ -1,4 +1,4 @@
-import { formatRunTime } from './game-timer.js?v=36';
+import { formatRunTime } from './game-timer.js?v=37';
 
 export class ParkourUI {
   constructor(game,ui,parkour){

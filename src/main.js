@@ -1,22 +1,24 @@
-import {potionFor} from './potions.js?v=36';
-import {installWorldDebug} from './world-debug.js?v=36';
-import {openDurableStorage} from './durable-storage.js?v=36';
-import {showStartupFailure} from './startup-errors.js?v=36';
-import { MultiplayerModes } from './multiplayer-modes.js?v=36';
-import { Parkour } from './parkour.js?v=36';
-import { ParkourUI } from './parkour-ui.js?v=36';
-import { ParkourView } from './parkour-view.js?v=36';
-import { movementInput,releaseJump } from './movement.js?v=36';
-import { Multiplayer } from './multiplayer.js?v=36';
-import { MultiplayerUI } from './multiplayer-ui.js?v=36';
-import { MultiplayerPlayers } from './multiplayer-players.js?v=36';
-import { FieldGoals } from './field-goals.js?v=36';
-import { ITEMS,BLOCKS } from './data.js?v=36';
-import { Renderer } from './render.js?v=36';
-import { Game } from './game.js?v=36';
-import { Audio } from './audio.js?v=36';
-import { UI } from './ui.js?v=36';
-import { loadSettings,saveSettings } from './save.js?v=36';
+import {potionFor} from './potions.js?v=37';
+import {installWorldDebug} from './world-debug.js?v=37';
+import {openDurableStorage} from './durable-storage.js?v=37';
+import {showStartupFailure} from './startup-errors.js?v=37';
+import { MultiplayerModes } from './multiplayer-modes.js?v=37';
+import { Parkour } from './parkour.js?v=37';
+import { ParkourUI } from './parkour-ui.js?v=37';
+import { ParkourView } from './parkour-view.js?v=37';
+import { movementInput,releaseJump } from './movement.js?v=37';
+import { applyLook, clearControls, hotbarIndex } from './controls.js?v=37';
+import { installControlPanels } from './control-panels.js?v=37';
+import { Multiplayer } from './multiplayer.js?v=37';
+import { MultiplayerUI } from './multiplayer-ui.js?v=37';
+import { MultiplayerPlayers } from './multiplayer-players.js?v=37';
+import { FieldGoals } from './field-goals.js?v=37';
+import { ITEMS,BLOCKS } from './data.js?v=37';
+import { Renderer } from './render.js?v=37';
+import { Game } from './game.js?v=37';
+import { Audio } from './audio.js?v=37';
+import { UI } from './ui.js?v=37';
+import { loadSettings,saveSettings } from './save.js?v=37';
 let storage;try{storage=localStorage;}catch{storage={getItem:()=>null,setItem:()=>{throw Error('Storage unavailable');}};}
 export const settings=loadSettings(storage);
 if(matchMedia('(prefers-reduced-motion: reduce)').matches){settings.bobbing=false;settings.cameraEffects=false;}
@@ -29,41 +31,47 @@ try{
   game=new Game(renderer,new Audio(settings),storage);startupStage='interface';ui=new UI(game,settings);installWorldDebug(game,renderer);
   multiplayer=new Multiplayer(game);multiplayerUI=new MultiplayerUI(game,ui,multiplayer);multiplayerPlayers=new MultiplayerPlayers(renderer,multiplayer);fieldGoals=new FieldGoals(game);game.fieldGoals=fieldGoals;new MultiplayerModes(game,ui,multiplayer);multiplayer.restore();
   parkour=new Parkour(game);parkourUI=new ParkourUI(game,ui,parkour);parkourView=new ParkourView(renderer,parkour);
+  installControlPanels(game,ui,multiplayer);
   const canvas=renderer.renderer.domElement;const use=()=>{if(game.interact()===true){game.placeHeld=true;game.placeTimer=.3;}};let dragging=false,lastTouch=null,lastSpace=0,expectedUnlock=false;
   const open=screen=>{if(game.screen===screen){ui.resume();return;}game.pause(screen);ui.render();};
   addEventListener('keydown',e=>{
-    if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName))return;if(game.screen==='multiplayer'||game.screen?.startsWith('match-'))return;if(e.code==='Tab'&&game.screen)return;
-    if(['F3','F5','Tab','Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
-    if(e.code==='F3'&&!e.repeat){settings.debugFPS=!settings.debugFPS;saveSettings(storage,settings);renderer.applySettings?.(settings);return;}
+    if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)||e.target.isContentEditable)return;if(game.screen==='multiplayer'||game.screen?.startsWith('match-'))return;
+    if(e.code==='Tab'&&game.screen){if(['inventory','craft','enchant'].includes(game.screen)&&!e.shiftKey){e.preventDefault();ui.resume();}return;}
+    if(['F2','F3','F4','F5','Tab','Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+    if(['F2','F3'].includes(e.code)&&!e.repeat){settings.debugFPS=!settings.debugFPS;saveSettings(storage,settings);renderer.applySettings?.(settings);return;}
+    if(e.code==='F4'&&!game.screen){document.body.classList.add('hide-game-ui');return;}
     if(game.screen==='parkour-results'){if(e.code==='Escape')ui.action('menu');return;}
     if(e.code==='Escape'){if(game.screen==='menu')return;if(game.screen==='death'||game.screen==='victory')return;if(game.screen){if(['settings','help','controls','credits'].includes(game.screen))ui.action('back');else ui.resume();}else{game.pause();ui.render();}return;}
     if(!game.screen&&e.ctrlKey&&['KeyW','KeyA','KeyS','KeyD','Space'].includes(e.code))e.preventDefault();
     if(e.repeat)return;
-    const screens=parkour.active?{}:{Tab:'inventory',KeyC:'craft',KeyM:'map',KeyJ:'journal'};if(screens[e.code]&&game.screen!=='menu'&&!['death','victory','confirm'].includes(game.screen)){open(screens[e.code]);return;}
+    const screens=parkour.active?{}:{Tab:'inventory',KeyM:'journal',KeyJ:'map',KeyN:'character'};if(screens[e.code]&&game.screen!=='menu'&&!['death','victory','confirm'].includes(game.screen)){open(screens[e.code]);return;}
+    if(e.code==='KeyO'&&!['death','victory','confirm'].includes(game.screen)){if(game.screen==='settings')ui.action('back');else{if(!game.screen)game.pause();ui.action('settings');}return;}
+    const panels={KeyG:'players',KeyZ:'emotes',KeyI:'invite',KeyU:'explorer'};
+    if(panels[e.code]&&(!game.screen||game.screen===panels[e.code])){open(panels[e.code]);return;}
     if(e.code==='KeyH'&&(!game.screen||game.screen==='inventory')){game.useFirecracker();ui.refreshItems();return;}
-    if(game.screen)return;if(e.code==='KeyV'||e.code==='F5'){ui.action('camera');return;}movementInput(game,e.code,true);
+    if(game.screen)return;if(e.code==='KeyP'||e.code==='F5'){ui.action('camera');return;}movementInput(game,e.code,true);
     if(parkour.active&&e.code==='KeyR'){parkour.resetToCheckpoint();return;}
-    if(/^Digit[1-9]$/.test(e.code)){const index=Number(e.code.at(-1))-1;if(game.state.bar[index]==='firecracker')game.useFirecracker();else if(potionFor(game.state.bar[index]))game.drink(game.state.bar[index]);else game.select(index);}
+    const slot=hotbarIndex(e.code);if(slot>=0&&slot<game.state.bar.length)game.select(slot);
     if(e.code==='Space'){if(game.creative&&performance.now()-lastSpace<300){game.flying=!game.flying;game.toast(game.flying?'Taking the scenic route':'Back on solid ground',game.flying?'Space to rise · X to descend':'');}lastSpace=performance.now();game.jump();}
     if(parkour.active)return;
-    if(e.code==='KeyP'&&multiplayer.active)multiplayer.ping().catch(error=>game.toast('Could not send ping',error.message));if(e.code==='KeyG')game.toggleGlide();if(e.code==='KeyR')game.dash();if(e.code==='KeyT')game.rotateBuilding();if(e.code==='KeyE')use();if(e.code==='KeyB')game.place(true);if(e.code==='KeyF')game.eatAvailable();if(e.code==='KeyQ')game.drink(potionFor(game.held)?game.held:'potion');
+    if(e.code==='KeyY'&&multiplayer.active)multiplayer.ping().catch(error=>game.toast('Could not send ping',error.message));if(e.code==='KeyL')game.toggleGlide();if(e.code==='KeyR')game.dash();if(e.code==='KeyT')game.rotateBuilding();if(e.code==='KeyE')use();if(e.code==='KeyB'){ui.catalogue=true;open('inventory');}if(e.code==='KeyF'){if(potionFor(game.held))game.drink(game.held);else game.eatAvailable();}if(e.code==='KeyQ')game.dropHeld(e.shiftKey);
   });
-  addEventListener('keyup',e=>{movementInput(game,e.code,false);if(e.code==='Space')releaseJump(game);if(e.code==='KeyE')game.placeHeld=false;});
-  addEventListener('blur',()=>{game.keys.clear();game.attackHeld=false;game.placeHeld=false;if(!game.screen){game.pause();ui.render();}});
+  addEventListener('keyup',e=>{movementInput(game,e.code,false);if(e.code==='Space')releaseJump(game);if(e.code==='KeyE')game.placeHeld=false;if(e.code==='F4')document.body.classList.remove('hide-game-ui');});
+  addEventListener('blur',()=>{clearControls(game);dragging=false;lastTouch=null;document.body.classList.remove('hide-game-ui');if(!game.screen){game.pause();ui.render();}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){game.save();storage.flush?.();if(!game.screen){game.pause();ui.render();}}});
   document.addEventListener('pointerlockchange',()=>{if(!document.pointerLockElement&&!game.screen&&!expectedUnlock){game.pause();ui.render();}expectedUnlock=false;});
-  // A small input delta should produce a useful turn. The old multiplier made
-  // the camera feel heavy on high-DPI mice, especially while sprinting.
-  addEventListener('mousemove',e=>{if(game.screen)return;if(document.pointerLockElement===canvas||dragging){game.yaw-=e.movementX*.0032*settings.sensitivity;game.pitch=Math.max(-1.52,Math.min(1.52,game.pitch-e.movementY*.0032*settings.sensitivity));}});
+  addEventListener('mousemove',e=>{if(game.screen)return;if(document.pointerLockElement===canvas||dragging)applyLook(game,e.movementX,e.movementY,settings.sensitivity);});
+  const pickBlock=()=>{if(!game.creative||!game.target)return;const name=BLOCKS[game.target.type].drop||game.target.type;if(!game.state.inv[name])game.add(name,999);game.equip(name);};
   canvas.addEventListener('pointerdown',e=>{
     if(game.screen)return;game.audio.start();if(e.pointerType==='touch'){lastTouch={id:e.pointerId,x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);return;}
+    if(e.button===0&&e.altKey&&game.creative){e.preventDefault();pickBlock();return;}
     if(document.pointerLockElement!==canvas){try{canvas.requestPointerLock()?.catch(()=>{});}catch{}dragging=true;if(e.button===0){game.attackHeld=true;game.attack();}if(e.button===2)use();return;}
     if(e.button===0){game.attackHeld=true;game.attack();}if(e.button===2)use();
   });
-  canvas.addEventListener('pointermove',e=>{if(e.pointerType!=='touch'||!lastTouch||lastTouch.id!==e.pointerId||game.screen)return;game.yaw-=(e.clientX-lastTouch.x)*.007*settings.sensitivity;game.pitch=Math.max(-1.52,Math.min(1.52,game.pitch-(e.clientY-lastTouch.y)*.007*settings.sensitivity));lastTouch.x=e.clientX;lastTouch.y=e.clientY;});
+  canvas.addEventListener('pointermove',e=>{if(e.pointerType!=='touch'||!lastTouch||lastTouch.id!==e.pointerId||game.screen)return;applyLook(game,e.clientX-lastTouch.x,e.clientY-lastTouch.y,settings.sensitivity,true);lastTouch.x=e.clientX;lastTouch.y=e.clientY;});
   addEventListener('pointerup',e=>{if(e.pointerType==='touch'){if(lastTouch?.id===e.pointerId)lastTouch=null;return;}if(e.button===0){if(!game.screen)game.releaseAttack();else game.attackHeld=false;}if(e.button===2)game.placeHeld=false;dragging=false;});
   addEventListener('pointercancel',e=>{if(e.pointerType==='touch'){if(lastTouch?.id===e.pointerId)lastTouch=null;return;}game.drawState=null;game.attackHeld=false;game.placeHeld=false;dragging=false;});
-  canvas.addEventListener('auxclick',e=>{if(e.button===1&&!game.screen&&game.target){e.preventDefault();const name=BLOCKS[game.target.type].drop||game.target.type;if(game.creative&&!game.state.inv[name])game.add(name,999);game.equip(name);}});
+  canvas.addEventListener('auxclick',e=>{if(e.button===1&&!game.screen){e.preventDefault();if(game.creative)pickBlock();else open('emotes');}});
   canvas.addEventListener('contextmenu',e=>e.preventDefault());
   canvas.addEventListener('wheel',e=>{if(game.screen)return;e.preventDefault();game.select(game.state.selected+Math.sign(e.deltaY));},{passive:false});
   const stick=document.querySelector('#stick');let stickId=null;

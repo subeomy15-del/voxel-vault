@@ -1,11 +1,11 @@
-import {integerHash} from './climate.js?v=36';
+import {integerHash} from './climate.js?v=37';
 // Each crown grows from connected branches. No per-leaf random deletion/floating scraps.
 export function regionalTree(world,put,x,y,z,species){
  const n=integerHash(x,z,world.seed+81),snowy=['snow','snow_plains'].includes(world.biome(x,z));
  const pine=['pine','tall_pine','conifer','tall_conifer'].includes(species),palm=species==='palm',jungle=species==='jungle';
  const tall=['tall_pine','tall_conifer'].includes(species);
- const height=pine?(tall?12:8)+Math.floor(n*4):palm?7+Math.floor(n*3):jungle?13+Math.floor(n*5):species==='great_oak'?9+Math.floor(n*3):5+Math.floor(n*3);
- const wood=pine?'pinewood':species==='birch'?'birch':'wood',leaf=pine?'pine':species==='amber'?'autumnleaf':species==='cherry'?'cherry_leaf':'leaf';
+ const height=pine?(tall?12:8)+Math.floor(n*4):palm?7+Math.floor(n*3):jungle?13+Math.floor(n*5):species==='spectral'?20:species==='great_oak'?9+Math.floor(n*3):5+Math.floor(n*3);
+ const wood=pine?'pinewood':species==='birch'?'birch':'wood',leaf=pine?'pine':species==='amber'?'autumnleaf':species==='cherry'?'cherry_leaf':species==='plum'?'plum_leaf':species==='pear'?'pear_leaf':species==='spectral'?'spectral_leaf':'leaf';
  const block=(dx,h,dz,t)=>put(x+dx,y+h,z+dz,t);
  for(let h=1;h<=height;h++){block(0,h,0,wood);if(jungle&&height>15)block(1,h,0,wood);}
  if(pine){
@@ -25,6 +25,7 @@ export function regionalTree(world,put,x,y,z,species){
   for(let i=1;i<=steps;i++)block(Math.round(ox*i/steps),height-2+Math.round((oy+2)*i/steps),Math.round(oz*i/steps),wood);
   for(let dx=-r;dx<=r;dx++)for(let dz=-r;dz<=r;dz++)for(let h=-ry;h<=ry;h++)if((dx*dx+dz*dz)/(r*r+.6)+h*h/(ry*ry+.6)<=1.2)block(ox+dx,height+oy+h,oz+dz,leaf);
  }
+ if(species==='pear'||species==='plum')for(const dx of[-1,1])block(dx,height-2,1,species==='pear'?'autumnleaf':'cherry_leaf');
  // Hanging foliage remains connected to the crown; it is not a separate floating vine.
  if(jungle)for(const[dx,dz]of[[-3,1],[3,-1]])for(let h=height-3;h<height;h++)block(dx,h,dz,leaf);
 }

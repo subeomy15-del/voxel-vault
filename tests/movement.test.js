@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { World } from '../src/world.js?v=36';
-import { movePlayer, requestJump, releaseJump, movementInput, startMantle, MOVEMENT } from '../src/movement.js?v=36';
+import { World } from '../src/world.js?v=37';
+import { movePlayer, requestJump, releaseJump, movementInput, startMantle, MOVEMENT } from '../src/movement.js?v=37';
 
 function player(options = {}) {
   const world = new World();
@@ -94,9 +94,9 @@ test('toggle sprint and crouch respond to fresh presses and release does not unt
   assert.equal(g.crouching, false);
 });
 
-test('Ctrl and X crouch everywhere while C crouches only inside the parkour course', () => {
+test('Ctrl, X and C crouch in both adventure and parkour', () => {
   const g = player();
-  movementInput(g, 'KeyC', true); movePlayer(g, .02); assert.equal(g.crouching, false);
+  movementInput(g, 'KeyC', true); movePlayer(g, .02); assert.equal(g.crouching, true);
   movementInput(g, 'KeyC', false); g.state.mode = 'parkour'; movementInput(g, 'KeyC', true); movePlayer(g, .02); assert.equal(g.crouching, true);
   movementInput(g, 'KeyC', false); movementInput(g, 'ControlRight', true); movePlayer(g, .02); assert.equal(g.crouching, true);
   movementInput(g, 'ControlRight', false); movePlayer(g, .02); assert.equal(g.crouching, false);

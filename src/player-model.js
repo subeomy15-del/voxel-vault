@@ -1,11 +1,11 @@
 import * as THREE from '../vendor/three.module.js';
-import { itemModel } from './item-model.js?v=36';
-import { ITEMS } from './data.js?v=36';
-import { toolModel,bowModel } from './models.js?v=36';
+import { itemModel } from './item-model.js?v=37';
+import { ITEMS } from './data.js?v=37';
+import { toolModel,bowModel } from './models.js?v=37';
 export class PlayerModel {
   constructor(r){
-    this.r=r;this.group=new THREE.Group();this.limbs=[];this.held='';
-    const part=(parent,c,w,h,d,x,y,z)=>{const p=r.part(c,w,h,d,x,y,z);parent.add(p);return p;};
+    this.r=r;this.group=new THREE.Group();this.limbs=[];this.held='';this.customParts=[];
+    const part=(parent,c,w,h,d,x,y,z)=>{const p=r.part(c,w,h,d,x,y,z);parent.add(p);const key={'#397dba':'shirtColor','#d9ae8c':'skinColor','#47352f':'hairColor','#34475f':'pantsColor'}[c];if(key)this.customParts.push([p,key]);return p;};
     this.shirt=part(this.group,'#397dba',.57,.62,.3,0,1.03,0);
     part(this.group,'#275b91',.14,.57,.012,0,1.03,-.157);
     part(this.group,'#263444',.58,.09,.32,0,.73,0);
@@ -38,7 +38,8 @@ export class PlayerModel {
     const swing=g.moving&&g.grounded?Math.sin(g.walk*10)*.55:0;
     this.limbs.forEach((limb,i)=>limb.rotation.x=swing*(i<2?1:-1)*(i%2?-1:1));
     this.arm.rotation.x-=this.r.swing*.9;
-    this.shirt.material.color.set(ITEMS[g.state.armor]?.color||'#397dba');
+    for(const [mesh,key] of this.customParts)mesh.material.color.set(this.r.settings[key]);
+    if(g.emote?.until>g.state.elapsed){const t=g.state.elapsed*8;this.arm.rotation.x=-2.5;this.arm.rotation.z=Math.sin(t)*.3;this.limbs[1].rotation.x=g.emote.name==='wave'?0:-2.5;if(g.emote.name==='dance'){this.group.rotation.z=Math.sin(t)*.12;this.limbs[0].rotation.x=Math.sin(t)*.6;this.limbs[2].rotation.x=-Math.sin(t)*.6;}}else{this.group.rotation.z=0;this.arm.rotation.z=0;}
     for(const [slot,meshes]of Object.entries(this.armorVisuals)){const item=ITEMS[g.state.armorParts?.[slot]];for(const mesh of meshes){mesh.visible=!!item;mesh.material.color.set(item?.color||'#a7b3aa');}}
     if(this.held!==g.held){
       for(const child of [...this.grip.children])this.r.disposeGroup(child);this.grip.clear();this.held=g.held;

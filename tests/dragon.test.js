@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=36';
-import {World} from '../src/world.js?v=36';
-import {ITEMS,RECIPES,craft} from '../src/data.js?v=36';
-import {freshState,saveState,loadState} from '../src/save.js?v=36';
-import {summonDragon,DRAGON_TOWERS} from '../src/dragon.js?v=36';
-import {launchBolt,updateProjectiles} from '../src/combat.js?v=36';
+import {Game} from '../src/game.js?v=37';
+import {World} from '../src/world.js?v=37';
+import {ITEMS,RECIPES,craft} from '../src/data.js?v=37';
+import {freshState,saveState,loadState} from '../src/save.js?v=37';
+import {summonDragon,DRAGON_TOWERS} from '../src/dragon.js?v=37';
+import {launchBolt,updateProjectiles} from '../src/combat.js?v=37';
 const make=()=>{const data=new Map();return new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},{getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)});};
 const arena=()=>{const g=make();g.start('adventure');g.state.fortressCleared=true;g.save();g.start('ender');g.add('hang_glider');g.state.glider='hang_glider';g.add('moonstone_orb',12);g.pos={x:.5,y:19,z:-4.5};return g;};
 test('dragon requires its altar, requires player-supplied gear and cycles flight, breath, swoop and melee landing',()=>{

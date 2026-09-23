@@ -1,0 +1,18 @@
+.character-colors{display:grid;grid-template-columns:repeat(4,minmax(90px,1fr));gap:16px;margin:24px 0}
+.character-colors label{display:grid;gap:8px;font-weight:700}.character-colors input{width:100%;height:70px;padding:4px;cursor:pointer;border-radius:8px}
+.biome-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin:20px 0}
+.biome-cards article{display:flex;flex-direction:column;gap:10px;padding:18px 12px 12px;border:1px solid #b9cbd1;border-top:8px solid var(--biome);border-radius:6px;background:#f1f7f7}
+.biome-cards small{font-size:11px;line-height:1.5;color:#526571}.biome-cards button{margin-top:auto;padding:9px;font-size:12px}
+body[data-screen="explorer"] .modal>label{display:inline-flex;gap:10px;align-items:center;margin:8px 16px 8px 0}
+body[data-screen="explorer"] select{max-width:235px;padding:10px;border:1px solid #a8bac2;border-radius:5px;background:white}
+body[data-screen="emotes"] .modal>button,body[data-screen="character"] .modal>button{margin:8px;padding:16px}
+.hide-game-ui #hud,.hide-game-ui #touch-controls,.hide-game-ui #toasts{visibility:hidden!important}
+#hotbar{gap:4px;max-width:calc(100vw - 16px);padding:6px;background:#253b4ee6;border:2px solid #97b5c3;border-radius:5px;box-shadow:0 3px 0 #14232d,0 5px 20px #172a3940}
+#hotbar .slot{border-radius:2px;background:#718993c9;border:2px solid #a1b2b7;box-shadow:inset 2px 2px #cbd8d340,inset -2px -2px #24374660;flex-shrink:1;min-width:0}
+#hotbar .slot.selected{border:2px solid white;background:#4a8eba;box-shadow:0 0 0 1px #d7f6ff,inset 0 0 0 2px #82bdd6;transform:translateY(-3px)}
+#hotbar .slot small,#hotbar .slot b{color:#fff;text-shadow:1px 1px #172933}
+@media(max-width:600px){.character-colors{grid-template-columns:repeat(2,1fr)}#hotbar .slot{width:8.6vw;height:10vw}#hotbar .slot-art{transform:scale(.85)}#hotbar{gap:2px;padding:3px}}
+
+.survival-mode .mode-art{background-image:url('../assets/survival-blocks.svg?v=37');background-size:cover;image-rendering:auto}
+.creative-mode .mode-art{background-image:url('../assets/creative-blocks.svg?v=37');background-size:cover;image-rendering:auto}
+.daily-mode .mode-art{background-image:url('../assets/daily-blocks.svg?v=37');background-size:cover;image-rendering:auto}

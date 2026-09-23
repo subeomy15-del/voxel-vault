@@ -1,14 +1,15 @@
+import {variationColor} from './mob-variations.js?v=37';
 import * as THREE from '../vendor/three.module.js';
-import {CREATURES,NEW_ANIMALS} from './creature-registry.js?v=36';
+import {CREATURES,NEW_ANIMALS} from './creature-registry.js?v=37';
 
 // Original silhouettes share cached box geometry and per-model materials.
 export function creatureModel(renderer,mob){
- const def=CREATURES[mob.kind]||NEW_ANIMALS[mob.kind],g=new THREE.Group(),limbs=[],base=def.color,trim=def.glow;
+ const def=CREATURES[mob.kind]||NEW_ANIMALS[mob.kind],g=new THREE.Group(),limbs=[],base=variationColor(mob,def.color),trim=def.glow;
  const part=(color,w,h,d,x,y,z,parent=g)=>{const mesh=renderer.part(color,w,h,d,x,y,z);parent.add(mesh);return mesh;};
  const joint=(x,y,z,w,h,d,color=base)=>{const pivot=new THREE.Group();pivot.position.set(x,y,z);g.add(pivot);part(color,w,h,d,0,-h/2,0,pivot);limbs.push(pivot);return pivot;};
  let head,body;
- if(['wolf','cat','bear','horse','stag'].includes(def.model)){
-  const large=def.model==='bear',tall=['horse','stag'].includes(def.model),h=large?1.05:tall?1.15:.58,len=large?1.05:tall?1.2:.92;
+ if(['wolf','cat','bear','horse','stag','camel'].includes(def.model)){
+  const large=def.model==='bear',tall=['horse','stag','camel'].includes(def.model),h=large?1.05:tall?1.15:.58,len=large?1.05:tall?1.2:.92;
   body=part(base,large?.9:.55,large?.75:.48,len,0,h,0);
   for(const x of[-1,1])for(const z of[-1,1])joint(x*(large?.3:.2),h-.1,z*len*.34,large?.25:.14,h-.1,large?.27:.16);
   head=new THREE.Group();head.position.set(0,h+(tall?.35:.12),len*.43);g.add(head);
@@ -16,6 +17,7 @@ export function creatureModel(renderer,mob){
   part(large?'#5a5046':trim,.27,.18,.28,0,-.08,.35,head);
   for(const x of[-.14,.14]){part(base,.12,tall?.22:.14,.12,x,.24,.04,head);part('#263636',.045,.055,.035,x,.035,.318,head);}
   part(base,.12,.13,def.model==='cat'?.7:.4,0,h,-len*.67).rotation.x=-.35;
+  if(def.model==='camel'){part(base,.48,.5,.52,0,h+.36,-.2);part(base,.26,.75,.3,0,h+.37,.47);}
   if(def.model==='horse')part('#51473e',.13,.4,.6,0,h+.31,.2);
   if(def.model==='stag')for(const side of[-1,1]){part(trim,.07,.5,.07,side*.2,.43,.04,head);part(trim,.32,.065,.065,side*.3,.48,.04,head);part(trim,.065,.22,.065,side*.43,.57,.04,head);}
   if(mob.kind==='gold_watermelon_stag')for(const x of[-.18,0,.18])part('#657b43',.065,.04,.85,x,h+.26,-.05);
@@ -43,6 +45,10 @@ export function creatureModel(renderer,mob){
   }
   if(def.model==='crone'){part('#8b7759',.075,1.55,.075,.61,.82,.25);part(trim,.18,.18,.18,.61,1.63,.25);}
  }
+ if(mob.variation?.includes('Hair')){part('#403d40',.44,.15,.43,0,1.81,.02);if(mob.variation.startsWith('long'))part('#403d40',.45,.42,.1,0,1.55,-.2);if(mob.variation.includes('Chestplate'))part('#8698a4',.59,.6,.47,0,1.02,0);}
+ if(mob.kind==='mob_67'){part('#f1dc81',.25,.2,.08,-.21,1.3,.25);part('#f1dc81',.25,.2,.08,.21,1.3,.25);}
+ if(mob.kind==='capitano_explovissimo')part('#28394f',.62,.16,.48,0,1.83,0);
+ if(mob.kind==='bobino_musculino')for(const x of[-.57,.57])part('#cd9f76',.39,.42,.4,x,1.22,0);
  if(def.spirit){for(const side of[-1,1]){const shard=part(trim,.09,.38,.09,side*.35,def.height-.24,-.1);shard.rotation.z=-side*.4;}part(trim,.14,.19,.05,0,def.height*.55,.3);}
  g.userData.creature={def,limbs,head,body};return g;
 }

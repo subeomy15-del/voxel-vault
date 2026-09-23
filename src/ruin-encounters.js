@@ -1,7 +1,7 @@
-import {ENEMIES} from './combat.js?v=36';
-import {integerHash} from './climate.js?v=36';
-import {STRUCTURE_TYPES,transform} from './structure-templates.js?v=36';
-import {biomeEnemy} from './biome-ecology.js?v=36';
+import {ENEMIES} from './combat.js?v=37';
+import {integerHash} from './climate.js?v=37';
+import {STRUCTURE_TYPES,transform} from './structure-templates.js?v=37';
+import {biomeEnemy} from './biome-ecology.js?v=37';
 export function tickRuinEncounters(g,dt){
  if(g.world.terrain<8||g.state.dimension!=='overworld'||g.creative||g.multiplayer?.active)return;
  g.ruinTimer=(g.ruinTimer||0)-dt;if(g.ruinTimer>0)return;g.ruinTimer=1;

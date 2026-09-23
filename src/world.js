@@ -1,15 +1,15 @@
-import {SpatialLights} from './spatial-lights.js?v=36';
-import {regionalClimate,regionalSurface} from './regional-climate.js?v=36';
-import {StructureGenerator} from './structure-generator.js?v=36';
-import {climateAt,blendedSurface,smooth} from './climate.js?v=36';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=36';
-import {EditMap} from './edit-map.js?v=36';
-import { netherHeight,netherBlock } from './nether.js?v=36';
-import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=36';
-import { canonicalItem } from './resource-map.js?v=36';
-import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=36';
-import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=36';
-import { CLOUDSTEP,courseGeometry } from './parkour-course.js?v=36';
+import {SpatialLights} from './spatial-lights.js?v=37';
+import {expandedClimate,regionalClimate,regionalSurface} from './regional-climate.js?v=37';
+import {StructureGenerator} from './structure-generator.js?v=37';
+import {climateAt,blendedSurface,smooth} from './climate.js?v=37';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=37';
+import {EditMap} from './edit-map.js?v=37';
+import { netherHeight,netherBlock } from './nether.js?v=37';
+import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=37';
+import { canonicalItem } from './resource-map.js?v=37';
+import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=37';
+import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=37';
+import { CLOUDSTEP,courseGeometry } from './parkour-course.js?v=37';
 export const CHUNK=16, WORLD_LIMIT=Infinity, WORLD_BOTTOM=-64, WORLD_TOP=95, SEA_LEVEL=4;
 export const cellKey=(x,y,z)=>`${x},${y},${z}`;
 export class World {
@@ -45,7 +45,7 @@ export class World {
     // Preserve the original island, then blend into new continents past its ocean.
     const coast=Math.hypot(x*.92,z*.87);
     if(this.terrain<7&&coast>405){const returnToLand=Math.max(0,Math.min(1,(coast-690)/160));h-=(coast-405)*.65*(1-returnToLand);}
-    const region=this.terrain>=7?smooth(280,540,Math.hypot(x,z)):0,climate=region>0?(this.terrain>=8?regionalClimate:climateAt)(this.seed,x,z):null;
+    const region=this.terrain>=7?smooth(280,540,Math.hypot(x,z)):0,climate=region>0?(this.terrain>=10?expandedClimate:this.terrain>=8?regionalClimate:climateAt)(this.seed,x,z):null;
     if(this.terrain>=8){const mesa=smooth(145,210,x)*smooth(115,175,z);h+=mesa*smooth(.28,.64,this.noise(x+57,z-93,90))*24;}
     if(climate){h=h*(1-region)+climate.h*region;if(region>.5)biome=climate.biome;}
     const d=Math.hypot(x,z-12);if(d<42){const a=Math.max(0,Math.min(1,(42-d)/22));h=h*(1-a)+6*a;}

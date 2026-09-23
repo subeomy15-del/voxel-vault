@@ -5,6 +5,7 @@ export const GRAPHICS_PRESETS = Object.freeze({
   high: Object.freeze({ renderDistance: 5, shadows: true, ambientOcclusion: true, particles: 'high', antialias: true })
 });
 export const defaultSettings = Object.freeze({
+  shirtColor:'#397dba',skinColor:'#d9ae8c',hairColor:'#47352f',pantsColor:'#34475f',invertY:false,
   sensitivity: 1, fov: 74, sprintMode: 'hold', crouchMode: 'hold', perspective: 0,
   quality: 'auto', ...GRAPHICS_PRESETS.medium,
   masterVolume: .45, musicVolume: .16, effectsVolume: 1, volume: .45,
@@ -20,7 +21,9 @@ export function normalizeSettings(raw = {}) {
   const quality = choice(raw.quality, ['auto', 'low', 'medium', 'high', 'custom'], defaultSettings.quality);
   const preset = GRAPHICS_PRESETS[quality] || (quality==='auto'?GRAPHICS_PRESETS.medium:GRAPHICS_PRESETS.high);
   const masterVolume = numeric(raw.masterVolume ?? raw.volume, defaultSettings.masterVolume, 0, 1);
+  const color=(key)=>/^#[0-9a-f]{6}$/i.test(raw[key])?raw[key]:defaultSettings[key];
   return {
+    shirtColor:color('shirtColor'),skinColor:color('skinColor'),hairColor:color('hairColor'),pantsColor:color('pantsColor'),invertY:flag(raw.invertY,false),
     sensitivity: numeric(raw.sensitivity, 1, .3, 2.5),
     fov: numeric(raw.fov, 74, 60, 100),
     sprintMode: choice(raw.sprintMode, ['hold', 'toggle'], 'hold'),

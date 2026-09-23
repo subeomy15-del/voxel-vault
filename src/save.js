@@ -1,35 +1,36 @@
-import {readExploration} from './exploration.js?v=36';
-import {normalizeRoll,recoverInfusion} from './infusions.js?v=36';
-import {ENCHANTS} from './infusion-registry.js?v=36';
-import {normalizeBrews,DRINK_COOLDOWN} from './potions.js?v=36';
-import {WORLDGEN_VERSION} from './biome-registry.js?v=36';
-import { recoverDelayedActions } from './delayed-actions.js?v=36';
-import { readDocument,writeDocument,setSaveHealth,storageFailure } from './save-health.js?v=36';
-import { VERSION, ITEMS, STARTER_BAR, starterInventory, dailySeed, BLOCKS,CROPS,EFFECTS } from './data.js?v=36';
-import { ANIMALS } from './wildlife.js?v=36';
-import { normalizeResources } from './resource-map.js?v=36';
-import { REALM_FIELDS,captureRealm } from './realms.js?v=36';
-import { defaultSettings, normalizeSettings } from './settings.js?v=36';
-export { defaultSettings } from './settings.js?v=36';
+import {validVariation} from './mob-variations.js?v=37';
+import {readExploration} from './exploration.js?v=37';
+import {normalizeRoll,recoverInfusion} from './infusions.js?v=37';
+import {ENCHANTS} from './infusion-registry.js?v=37';
+import {normalizeBrews,DRINK_COOLDOWN} from './potions.js?v=37';
+import {WORLDGEN_VERSION} from './biome-registry.js?v=37';
+import { recoverDelayedActions } from './delayed-actions.js?v=37';
+import { readDocument,writeDocument,setSaveHealth,storageFailure } from './save-health.js?v=37';
+import { VERSION, ITEMS, STARTER_BAR, starterInventory, dailySeed, BLOCKS,CROPS,EFFECTS } from './data.js?v=37';
+import { ANIMALS } from './wildlife.js?v=37';
+import { normalizeResources } from './resource-map.js?v=37';
+import { REALM_FIELDS,captureRealm } from './realms.js?v=37';
+import { defaultSettings, normalizeSettings } from './settings.js?v=37';
+export { defaultSettings } from './settings.js?v=37';
 const prefix='voxel-vault-v2-';
 export function freshState(seed=7821,mode='adventure') {
   const inv=starterInventory();if(mode==='creative')for(const k of Object.keys(ITEMS))inv[k]=999;
   if(mode==='ender')Object.assign(inv,{end_stone:128,moonstone_orb:9,moonstone_pickaxe:1,moonstone_sword:1,moonstone_glider:1,ender_berry:16,obsidian:32,moonstone_chest:1,ender_gate:1});
-  return {version:VERSION,seed,mode,dimension:mode==='ender'?'ender':'overworld',realms:{},gate:null,outposts:[],ruinDefeated:[],rift:{collected:[],started:0,finished:0,best:0,rewarded:false,kit:false,runs:0},moonChest:{},inv,bar:mode==='ender'?['moonstone_sword','moonstone_pickaxe','moonstone_orb','end_stone','obsidian','ender_berry','torch','moonstone_chest','ender_gate']:[...STARTER_BAR],selected:0,hp:20,armor:null,armorParts:{},aura:0,enchants:{},exploration:readExploration(),infusions:{},infusionSeq:0,enchantCodex:[],pos:null,yaw:0,pitch:0,time:70,elapsed:0,seals:[],opened:[],discovered:['camp'],edits:[],victory:false,stats:{mined:0,built:0,kills:0,crafted:0,deaths:0,smelted:0,harvested:0},waypoint:'home',spawn:null,origin:null,containers:{},crops:{},terrain:WORLDGEN_VERSION,food:20,saturation:5,exhaustion:0,effects:{},brews:{},potionCooldown:0,breath:20,glider:mode==='ender'?'moonstone_glider':null,ammo:'arrows',drops:[],animals:[]};
+  return {version:VERSION,seed,mode,dimension:mode==='ender'?'ender':'overworld',realms:{},gate:null,outposts:[],ruinDefeated:[],rift:{collected:[],started:0,finished:0,best:0,rewarded:false,kit:false,runs:0},moonChest:{},inv,bar:mode==='ender'?['moonstone_sword','moonstone_pickaxe','moonstone_orb','end_stone','obsidian','ender_berry','torch','moonstone_chest','ender_gate','compass']:[...STARTER_BAR],selected:0,hp:20,armor:null,armorParts:{},aura:0,enchants:{},exploration:readExploration(),infusions:{},infusionSeq:0,enchantCodex:[],pos:null,yaw:0,pitch:0,time:70,elapsed:0,seals:[],opened:[],discovered:['camp'],edits:[],victory:false,stats:{mined:0,built:0,kills:0,crafted:0,deaths:0,smelted:0,harvested:0},waypoint:'home',spawn:null,origin:null,containers:{},crops:{},terrain:WORLDGEN_VERSION,food:20,saturation:5,exhaustion:0,effects:{},brews:{},potionCooldown:0,breath:20,glider:mode==='ender'?'moonstone_glider':null,ammo:'arrows',drops:[],animals:[]};
 }
 export function slotKey(mode){return prefix+mode+(mode==='daily'?'-'+dailySeed():'');}
 export function loadState(storage,mode='adventure') {
   try {
     const cached=storage.readState?.(slotKey(mode)),raw=cached===undefined?readDocument(storage,slotKey(mode),raw=>raw&&raw.version===VERSION):cached;if(!raw||raw.version!==VERSION)return null;
-    const s=freshState(Number.isFinite(raw.seed)?raw.seed:7821,mode);s.terrain=[5,6,7,8,9].includes(raw.terrain)?raw.terrain:5;
+    const s=freshState(Number.isFinite(raw.seed)?raw.seed:7821,mode);s.terrain=[5,6,7,8,9,10].includes(raw.terrain)?raw.terrain:5;
     for(const [k,n]of Object.entries(raw.inv||{}))if(ITEMS[k]&&Number.isFinite(n))s.inv[k]=Math.max(0,Math.min(999999,Math.floor(n)));
-    if(Array.isArray(raw.bar)&&raw.bar.length===9)s.bar=raw.bar.map((k,i)=>ITEMS[k]?k:STARTER_BAR[i]);
+    if(Array.isArray(raw.bar)&&[9,10].includes(raw.bar.length))s.bar=Array.from({length:10},(_,i)=>ITEMS[raw.bar[i]]?raw.bar[i]:STARTER_BAR[i]);
     if(mode==='creative')for(const k of Object.keys(ITEMS))s.inv[k]=Math.max(999,s.inv[k]||0);
-    s.selected=Math.max(0,Math.min(8,raw.selected|0));s.hp=Math.max(1,Math.min(20,Number(raw.hp)||20));s.armor=ITEMS[raw.armor]?.kind==='armor'&&s.inv[raw.armor]?raw.armor:null;
+    s.selected=Math.max(0,Math.min(s.bar.length-1,raw.selected|0));s.hp=Math.max(1,Math.min(20,Number(raw.hp)||20));s.armor=ITEMS[raw.armor]?.kind==='armor'&&s.inv[raw.armor]?raw.armor:null;
     for(const k of ['yaw','pitch','time','elapsed'])if(Number.isFinite(raw[k]))s[k]=raw[k];
     if(raw.pos&&['x','y','z'].every(k=>Number.isFinite(raw.pos[k])))s.pos={x:raw.pos.x,y:Math.max(-63,Math.min(94,raw.pos.y)),z:raw.pos.z};
     for(const k of ['seals','opened','discovered'])if(Array.isArray(raw[k]))s[k]=[...new Set(raw[k].filter(v=>typeof v==='string'))];
-    s.ruinDefeated=Array.isArray(raw.ruinDefeated)?[...new Set(raw.ruinDefeated.filter(id=>typeof id==='string'&&/^ruin:-?\d+:[789]:-?\d+:-?\d+:guard:[0-2]$/.test(id)))]:[];
+    s.ruinDefeated=Array.isArray(raw.ruinDefeated)?[...new Set(raw.ruinDefeated.filter(id=>typeof id==='string'&&/^ruin:-?\d+:(?:[789]|10):-?\d+:-?\d+:guard:[0-2]$/.test(id)))]:[];
     s.seals=s.seals.filter(k=>['grove','dunes','frost'].includes(k));
     s.edits=Array.isArray(raw.edits)?raw.edits.filter(e=>Array.isArray(e)&&e.length===2&&/^-?\d+,-?\d+,-?\d+$/.test(e[0])&&(e[1]===null||BLOCKS[e[1]])):[];
     if(raw.spawn&&['x','y','z'].every(k=>Number.isFinite(raw.spawn[k])))s.spawn={x:raw.spawn.x,y:Math.max(-63,Math.min(94,raw.spawn.y)),z:raw.spawn.z};
@@ -46,7 +47,7 @@ export function loadState(storage,mode='adventure') {
     if(ITEMS[raw.glider]?.kind==='glider'&&s.inv[raw.glider]>0)s.glider=raw.glider;
     if(ITEMS[raw.ammo]?.kind==='ammo')s.ammo=raw.ammo;
     for(const d of (Array.isArray(raw.drops)?raw.drops:[]).slice(0,128))if(ITEMS[d?.item]&&['x','y','z','count'].every(k=>Number.isFinite(d[k]))&&d.count>=1&&d.y>=-64&&d.y<=96)s.drops.push({id:s.drops.length+1,item:d.item,count:Math.min(999,Math.floor(d.count)),x:d.x,y:d.y,z:d.z,age:Math.max(0,Math.min(599,Number.isFinite(d.age)?d.age:0))});
-    for(const a of (Array.isArray(raw.animals)?raw.animals:[]).slice(0,128))if(ANIMALS[a?.kind]&&['x','y','z','hp'].every(k=>Number.isFinite(a[k]))&&a.hp>0&&a.y>=-63&&a.y<=94)s.animals.push({kind:a.kind,x:a.x,y:a.y,z:a.z,hp:Math.min(ANIMALS[a.kind].hp,a.hp),angle:Number.isFinite(a.angle)?a.angle:0});
+    for(const a of (Array.isArray(raw.animals)?raw.animals:[]).slice(0,128))if(ANIMALS[a?.kind]&&['x','y','z','hp'].every(k=>Number.isFinite(a[k]))&&a.hp>0&&a.y>=-63&&a.y<=94)s.animals.push({variation:validVariation(a.kind,a.variation),kind:a.kind,x:a.x,y:a.y,z:a.z,hp:Math.min(ANIMALS[a.kind].hp,a.hp),angle:Number.isFinite(a.angle)?a.angle:0});
     s.outposts=(Array.isArray(raw.outposts)?raw.outposts:[]).filter(p=>['lodge','tower','ruins'].includes(p?.id)&&['x','y','z'].every(k=>Number.isFinite(p[k]))&&Math.abs(p.x)<491&&Math.abs(p.z)<491&&p.y>5&&p.y<79).slice(0,3).map(({id,x,y,z})=>({id,x:x|0,y:y|0,z:z|0}));
     s.dimension=['overworld','nether','ender'].includes(raw.dimension)?raw.dimension:(mode==='ender'?'ender':'overworld');
     const point=p=>p&&['x','y','z'].every(k=>Number.isFinite(p[k]))&&p.y>=-60&&p.y<=89;

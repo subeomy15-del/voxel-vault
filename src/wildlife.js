@@ -1,7 +1,7 @@
-import {NEW_ANIMALS} from './creature-registry.js?v=36';
-import {BIOME_ECOLOGY} from './biome-ecology.js?v=36';
-import { hash } from './data.js?v=36';
-import { findMobPath } from './navigation.js?v=36';
+import {NEW_ANIMALS} from './creature-registry.js?v=37';
+import {BIOME_ECOLOGY} from './biome-ecology.js?v=37';
+import { hash } from './data.js?v=37';
+import { findMobPath } from './navigation.js?v=37';
 export const ANIMALS={
   deer:{name:'Deer',passive:true,hp:12,speed:1.15,flee:5.4,height:1.6,radius:.38,color:'#a88b68',glow:'#d9c6a4',food:['wheat','carrot'],drops:{raw_venison:[2,3],leather:[1,2]}},
   pig:{name:'Pig',passive:true,hp:12,speed:.95,flee:3.9,height:.9,radius:.4,color:'#c79f95',glow:'#dec0ac',food:['carrot','potato'],drops:{raw_pork:[2,3]}},

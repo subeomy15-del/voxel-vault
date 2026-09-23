@@ -1,5 +1,10 @@
 const creature=(name,model,behavior,hp,speed,damage,color,extra={})=>Object.freeze({name,model,behavior,hp,speed,damage,color,xp:Math.round(12+hp*.4),glow:'#d1d8c3',height:1.9,radius:.4,drops:{coal:[1,2]},...extra});
 export const NEW_ANIMALS={
+ camel:creature('Camel','camel','graze',26,1.4,0,'#d4ad72',{passive:true,height:2.2,radius:.5,flee:5,food:['wheat','apple'],drops:{leather:[1,2]}}),
+ npc:creature('NPC','undead','graze',20,0,0,'#cda583',{passive:true,height:1.9,flee:0,food:[],drops:{}}),
+ mob_67:creature('67','ape','graze',24,1.2,0,'#589dc5',{passive:true,height:1.9,flee:4,food:['apple'],drops:{}}),
+ bobino_musculino:creature('Bobino Musculino','ape','graze',24,1.4,0,'#b77b50',{passive:true,height:1.9,flee:4,food:['apple'],drops:{}}),
+ capitano_explovissimo:creature('Capitano Explovissimo','reaver','graze',24,1.3,0,'#557ba5',{passive:true,height:1.9,flee:4,food:['apple'],drops:{}}),
  horse:creature('Horse','horse','graze',22,1.6,0,'#9b7958',{passive:true,height:1.9,radius:.48,flee:7,food:['apple','wheat'],drops:{leather:[1,2]}}),
  stag:creature('Stag','stag','graze',20,1.4,0,'#9c7854',{passive:true,height:2.25,flee:6,food:['wheat','carrot'],drops:{raw_venison:[2,3],leather:[1,2]}}),
  gold_watermelon_stag:creature('Gold Watermelon Stag','stag','graze',24,1.7,0,'#b49a4e',{passive:true,height:2.25,flee:7,food:['watermelon'],glow:'#e0cf77',rare:true,drops:{watermelon:[2,3],gold_ingot:[1,1]}})
@@ -36,8 +41,9 @@ export function creatureSpawn(world,x,y,z,serial,time){
  if(biome==='deep_cave')return ['cave_golem','magma_golem','slime','draugr_warper'][index%4];
  if(biome==='cave')return ['slime','cave_golem','draugr_zombie','draugr_skeleton'][index%4];
  if(['snow','snow_plains','frozen_badlands'].includes(biome))return ['frost_zombie','frost_skeleton','frost_golem','frost_wraith'][index%4];
+ if(biome==='spectral_forest')return ['spirit_wolf','spirit_bear','spirit_stag','spirit_gorilla','spirit_golem'][index%5];
  if(biome==='badlands')return ['draugr_skeleton','draugr_knight','draugr_knight','draugr_huntress','draugr_reaver','draugr_warper'][index%6];
  if(night&&index%13===0)return biome==='jungle'?'spirit_gorilla':biome==='mountain'?'spirit_golem':['spirit_wolf','spirit_bear','spirit_stag'][Math.floor(index/13)%3];
- const list=biome==='jungle'?['gorilla','wildcat','draugr_huntress']:biome==='marsh'?['slime','crone','spider']:['forest','conifer','dense_forest'].includes(biome)?['wolf','bear','draugr_zombie','draugr_skeleton']:['zombie','skeleton','stalker'];
+ const list=biome==='jungle'?['gorilla','wildcat','draugr_huntress']:biome==='marsh'?['slime','crone','spider']:(['forest','conifer','dense_forest'].includes(biome)||biome.endsWith('_forest'))?['wolf','bear','draugr_zombie','draugr_skeleton']:['zombie','skeleton','stalker'];
  return list[index%list.length];
 }

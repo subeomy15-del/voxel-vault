@@ -1,8 +1,8 @@
-import {BIOME_DEFINITIONS as LEGACY_BIOMES} from './legacy-biomes.js?v=36';
-import {regionalTree} from './regional-trees.js?v=36';
-import { hash } from './data.js?v=36';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=36';
-import {integerHash} from './climate.js?v=36';
+import {BIOME_DEFINITIONS as LEGACY_BIOMES} from './legacy-biomes.js?v=37';
+import {regionalTree} from './regional-trees.js?v=37';
+import { hash } from './data.js?v=37';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=37';
+import {integerHash} from './climate.js?v=37';
 const blend=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
 export function terrainHeight(world,x,z){
   const noise=(a,b,s)=>world.noise(a,b,s),climate=noise(x+170,z-85,160);
@@ -16,6 +16,14 @@ export function terrainHeight(world,x,z){
   return base+hills+dry*Math.sin(wx*.07+wz*.022)*2.2;
 }
 export function plantAt(world,x,z,biome){
+  if(world.terrain>=10){const n=hash(x,z,world.seed+218);
+    if(biome==='many_cactus_desert')return n>.975?'cactus':null;
+    if(biome==='red_sand_desert')return null;
+    if(biome==='bluebell_forest'&&n>.6)return 'flower_blue';
+    if(biome==='flower_meadow'&&n>.7)return ['daisy','flower_red','lavender','flower_blue'][Math.floor(n*100)%4];
+    if(biome==='spectral_forest'&&n>.93)return 'lavender';
+    if(biome==='grassy_plains'&&n>.8)return 'fern';
+  }
   if(world.terrain>=7&&(world.column(x,z).region>.5||world.terrain>=8)){
     const c=world.column(x,z);if(['ocean','beach','snow','snow_plains','mountain','desert','badlands','frozen_badlands','river'].includes(biome))return null;
     if(world.noise(x+312,z-119,34)<.59||hash(x,z,world.seed+218)<.92)return null;

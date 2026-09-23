@@ -1,5 +1,6 @@
+import {variationColor} from './mob-variations.js?v=37';
 import * as THREE from '../vendor/three.module.js';
-import { ANIMALS } from './wildlife.js?v=36';
+import { ANIMALS } from './wildlife.js?v=37';
 const sailTextures=new Map();
 function sailTexture(color){
   if(sailTextures.has(color))return sailTextures.get(color);
@@ -13,7 +14,7 @@ function sailTexture(color){
 
 // Small articulated voxel models, with shared animation anchors across species.
 export function animalModel(r,mob){
-  const g=new THREE.Group(),info=ANIMALS[mob.kind],c=info.color,dark='#665b4b',cream=info.glow;
+  const g=new THREE.Group(),info=ANIMALS[mob.kind],c=variationColor(mob,info.color),dark='#665b4b',cream=mob.kind==='sheep'?variationColor(mob,info.glow):info.glow;
   const add=(color,w,h,d,x,y,z,parent=g)=>{const p=r.part(color,w,h,d,x,y,z);parent.add(p);return p;};
   const head=new THREE.Group();g.add(head);g.userData.head=head;g.userData.legs=[];
   const leg=(x,y,z,length,width=.14)=>{const pivot=new THREE.Group();pivot.position.set(x,y,z);add(dark,width,length,width,0,-length/2,0,pivot);add('#48483d',width+.015,.1,width+.02,0,-length+.05,.01,pivot);g.add(pivot);g.userData.legs.push(pivot);};

@@ -1,9 +1,9 @@
-import {installExploration} from './exploration-content.js?v=36';
-import {installAltars} from './infusion-registry.js?v=36';
-import {installPotions} from './potion-content.js?v=36';
-import {BIOME_DEFINITIONS,UNDERGROUND_BIOMES} from './biome-registry.js?v=36';
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=36';
-import { installContent } from './badlands-content.js?v=36';
+import {installExploration} from './exploration-content.js?v=37';
+import {installAltars} from './infusion-registry.js?v=37';
+import {installPotions} from './potion-content.js?v=37';
+import {BIOME_DEFINITIONS,UNDERGROUND_BIOMES} from './biome-registry.js?v=37';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=37';
+import { installContent } from './badlands-content.js?v=37';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },
@@ -13,6 +13,9 @@ export const BLOCKS = {
   snow: { name: 'Snow', color: '#d5e8e3', solid: true, hardness: .55 },
   wood: { name: 'Timber', color: '#8e6743', solid: true, hardness: 1.1 },
   leaf: { name: 'Oak leaves', color: '#507540', solid: true, hardness: .3 },
+  spectral_leaf:{name:'Spectral leaves',color:'#57798f',solid:true,hardness:.3},
+  pear_leaf:{name:'Pear leaves',color:'#88b249',solid:true,hardness:.3},
+  plum_leaf:{name:'Plum leaves',color:'#825f92',solid:true,hardness:.3},
   cherry_leaf:{name:'Blossom leaves',color:'#dba9b9',solid:true,hardness:.3},
   ice:{name:'Glacial ice',color:'#a5c7d3',solid:true,hardness:.6},
   autumnleaf: { name: 'Amber leaves', color: '#d2914b', solid: true, hardness: .3 },
@@ -181,8 +184,8 @@ Object.assign(ITEMS,{
   repeater_crossbow:{name:'Repeating crossbow',color:'#b8956f',kind:'bow',damage:8,cooldown:.36,boltSpeed:29,tier:3,description:'Fast follow-up shots. Every bolt consumes an arrow.'},
   iron_arrows:{name:'Iron arrows',color:'#b9c5bf',kind:'ammo',bonus:3,description:'Sharper tips add 3 damage. Select to use with any bow or crossbow.'},
   frost_arrows:{name:'Frost arrows',color:'#9acccc',kind:'ammo',bonus:1,slow:4,description:'Slow a target for four seconds. Select as ammunition.'},
-  hang_glider:{name:'Canvas hang glider',color:'#d6c59e',kind:'glider',glideSpeed:11,sink:1.5,description:'Equip, jump from a height, then press G to glide. Look down to dive; up to slow your descent.'},
-  sail_glider:{name:'Reinforced hang glider',color:'#96b6ac',kind:'glider',glideSpeed:14,sink:1.05,description:'A lighter reinforced wing for longer flights. Equip and press G while airborne.'},
+  hang_glider:{name:'Canvas hang glider',color:'#d6c59e',kind:'glider',glideSpeed:11,sink:1.5,description:'Equip, jump from a height, then press L to glide. Look down to dive; up to slow your descent.'},
+  sail_glider:{name:'Reinforced hang glider',color:'#96b6ac',kind:'glider',glideSpeed:14,sink:1.05,description:'A lighter reinforced wing for longer flights. Equip and press L while airborne.'},
 });
 for(const[animal,raw,cooked,nutrition,saturation]of [
   ['venison','Raw venison','Roast venison',8,12],['pork','Raw porkchop','Cooked porkchop',8,12],['beef','Raw beef','Steak',8,13],
@@ -201,7 +204,7 @@ export const ORE_GLIDERS=[
   ['iron','Iron','#bfcac5',14,1.1],['gold','Gold','#e2bf63',16,1.35],
  ['diamond','Diamond','#92d3d1',15,.8],['crystal','Diamond','#9ed8d8',16,.65],
 ];
-for(const[id,name,color,glideSpeed,sink]of ORE_GLIDERS)ITEMS[id+'_glider']={name:name+' hang glider',color,kind:'glider',glideSpeed,sink,ore:id,description:`${glideSpeed} blocks/s cruise · ${sink} blocks/s descent. Equip, then press G in the air. Look down to dive; up to float.`};
+for(const[id,name,color,glideSpeed,sink]of ORE_GLIDERS)ITEMS[id+'_glider']={name:name+' hang glider',color,kind:'glider',glideSpeed,sink,ore:id,description:`${glideSpeed} blocks/s cruise · ${sink} blocks/s descent. Equip, then press L in the air. Look down to dive; up to float.`};
 for(const[kind,speed,damage]of [['pickaxe',5.8,3],['axe',6.5,6],['shovel',6.5,2],['hoe',1,2],['sword',1,7]])ITEMS['gold_'+kind]={name:'Gold '+kind,color:'#e2bf63',kind,speed,damage,tier:3,description:kind==='hoe'?'Prepare a clear 3 × 3 garden patch.':kind==='sword'?'A swift golden blade. 7 damage.':'Fast golden tools for your workshop.'};
 ITEMS.gold_armor={name:'Gold armor',color:'#e2bf63',kind:'armor',reduction:.3,description:'Equip to reduce damage by 30%.'};
 ITEMS.armor.reduction=.35;ITEMS.crystal_armor.reduction=.55;
@@ -425,7 +428,7 @@ export const BIOMES={
   mountain:{name:'Highlands',color:'#8c9890',top:'stone'},
 };
 Object.assign(BIOMES,UNDERGROUND_BIOMES);
-for(const[id,definition]of Object.entries(BIOME_DEFINITIONS))if(!BIOMES[id])BIOMES[id]=definition;
+for(const[id,definition]of Object.entries(BIOME_DEFINITIONS))BIOMES[id]=definition;
 export function hash(x,z,seed=1) { let n = Math.imul(x ^ seed, 374761393) + Math.imul(z,668265263); n = Math.imul(n ^ n >>> 13,1274126177); return ((n ^ n >>> 16) >>> 0) / 4294967295; }
 export function dailySeed(date = new Date()) { return Number(date.toISOString().slice(0,10).replaceAll('-','')); }
 export const TIMBER=['wood','birch','pinewood'];
@@ -455,7 +458,7 @@ export function maxCraft(inv,recipe){
 }
 export function craft(inv,item,batches=1){const recipe=RECIPES.find(r=>r.item===item);if(!Number.isSafeInteger(batches)||batches<1)return false;const cost=craftingPlan(inv,recipe,batches);if(!cost)return false;for(const[k,n]of Object.entries(cost))inv[k]-=n;inv[item]=(inv[item]||0)+(recipe.count||1)*batches;return true;}
 export function starterInventory() { return { wood_sword:1, wood_pickaxe:1, wood_axe:1, grass:32, wood:0, stone:0, torch:12, apple:5, potion:2,seeds:6,carrot:2,cotton_seeds:3,watermelon_seeds:2 }; }
-export const STARTER_BAR = ['wood_sword','wood_pickaxe','wood_axe','grass','wood','stone','torch','apple','potion'];
+export const STARTER_BAR = ['wood_sword','wood_pickaxe','wood_axe','grass','wood','stone','torch','apple','potion','compass'];
 installContent(BLOCKS,ITEMS,RECIPES,BIOMES);
 
 installPotions(BLOCKS,ITEMS,RECIPES);

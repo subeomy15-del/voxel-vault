@@ -1,6 +1,6 @@
-import {ATMOSPHERES} from './atmosphere-profiles.js?v=36';
+import {ATMOSPHERES} from './atmosphere-profiles.js?v=37';
 import * as THREE from '../vendor/three.module.js';
-import { hash } from './data.js?v=36';
+import { hash } from './data.js?v=37';
 export class Scenery {
   constructor(renderer){
     this.atmospheres=Object.fromEntries(Object.entries(ATMOSPHERES).map(([id,p])=>[id,Object.fromEntries(Object.entries(p).map(([k,color])=>[k,new THREE.Color(color)]))]));this.targetZenith=new THREE.Color();this.targetHorizon=new THREE.Color();

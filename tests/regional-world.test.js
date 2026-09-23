@@ -1,19 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {World} from '../src/world.js?v=36';
-import {regionalClimate} from '../src/regional-climate.js?v=36';
-import {BIOME_DEFINITIONS} from '../src/biome-registry.js?v=36';
-import {STRUCTURE_TYPES,buildStructure} from '../src/structure-templates.js?v=36';
-import {BLOCKS,ITEMS} from '../src/data.js?v=36';
-import {regionalTree} from '../src/regional-trees.js?v=36';
-import {freshState,saveState,loadState} from '../src/save.js?v=36';
-import {ruinEquipment,defeatRuinGuard,tickRuinEncounters} from '../src/ruin-encounters.js?v=36';
-import {normalizeRoll} from '../src/infusions.js?v=36';
-import {integerHash} from '../src/climate.js?v=36';
+import {World} from '../src/world.js?v=37';
+import {regionalClimate} from '../src/regional-climate.js?v=37';
+import {BIOME_DEFINITIONS} from '../src/biome-registry.js?v=37';
+import {STRUCTURE_TYPES,buildStructure} from '../src/structure-templates.js?v=37';
+import {BLOCKS,ITEMS} from '../src/data.js?v=37';
+import {regionalTree} from '../src/regional-trees.js?v=37';
+import {freshState,saveState,loadState} from '../src/save.js?v=37';
+import {ruinEquipment,defeatRuinGuard,tickRuinEncounters} from '../src/ruin-encounters.js?v=37';
+import {normalizeRoll} from '../src/infusions.js?v=37';
+import {integerHash} from '../src/climate.js?v=37';
 const store=()=>{const data=new Map();return {getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};};
 test('all 18 surface regions exist, climate is deterministic and terrain borders are continuous',()=>{
  const found=new Set();for(const seed of [7821,42])for(let x=-6000;x<=6000;x+=96)for(let z=-6000;z<=6000;z+=96)found.add(regionalClimate(seed,x,z).biome);
- assert.deepEqual([...found].sort(),Object.keys(BIOME_DEFINITIONS).sort());
+ assert.deepEqual([...found].sort(),Object.keys(BIOME_DEFINITIONS).filter(id=>!BIOME_DEFINITIONS[id].parent).sort());
  const runs=[];let last='',length=0,max=0;for(let x=-9000;x<9000;x+=2){const c=regionalClimate(7821,x,1700);assert.deepEqual(c,regionalClimate(7821,x,1700));max=Math.max(max,Math.abs(c.h-regionalClimate(7821,x+1,1700).h));if(c.biome===last)length+=2;else{if(length)runs.push(length);last=c.biome;length=2;}}
  assert.ok(max<3,'no quantized mesa cliffs: '+max);assert.ok(runs.toSorted((a,b)=>a-b)[Math.floor(runs.length/2)]>70);
 });

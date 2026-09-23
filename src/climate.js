@@ -1,4 +1,4 @@
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=36';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=37';
 export const smooth=(a,b,v)=>{const t=Math.max(0,Math.min(1,(v-a)/(b-a)));return t*t*(3-2*t);};
 export function integerHash(x,z,seed){let n=Math.imul(x|0,374761393)^Math.imul(z|0,668265263)^Math.imul(seed|0,1442695041);n=Math.imul(n^(n>>>13),1274126177);return((n^(n>>>16))>>>0)/4294967296;}
 export function noise2(x,z,seed,scale){const a=Math.floor(x/scale),b=Math.floor(z/scale),u=smooth(0,1,x/scale-a),v=smooth(0,1,z/scale-b);return (integerHash(a,b,seed)*(1-u)+integerHash(a+1,b,seed)*u)*(1-v)+(integerHash(a,b+1,seed)*(1-u)+integerHash(a+1,b+1,seed)*u)*v;}

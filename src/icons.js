@@ -1,4 +1,5 @@
-import { ITEMS, BLOCKS } from './data.js?v=36';
+import {itemAssetPath} from './item-assets.js?v=37';
+import { ITEMS, BLOCKS } from './data.js?v=37';
 const cache=new Map();let iconSerial=0;
 const shade=(hex,amount)=>'#'+[1,3,5].map(i=>Math.round(Math.max(0,Math.min(255,parseInt(hex.slice(i,i+2),16)+amount))).toString(16).padStart(2,'0')).join('');
 const path=(d,fill,stroke='',width=1.3)=>`<path d="${d}" fill="${fill}"${stroke?` stroke="${stroke}" stroke-width="${width}" stroke-linejoin="round" stroke-linecap="round"`:''}/>`;
@@ -92,6 +93,6 @@ export function vectorIcon(name,size=36){
 
 export function icon(name,size=36){
   if(!ITEMS[name])return vectorIcon(name,size);
-  const src=new URL('../assets/items/'+name+'.png'+new URL(import.meta.url).search,import.meta.url).href;
+  const src=new URL(itemAssetPath(name)+new URL(import.meta.url).search,import.meta.url).href;
   return `<svg class="item-icon" width="${size}" height="${size}" viewBox="0 0 160 160" aria-hidden="true"><image href="${src}" width="160" height="160"/></svg>`;
 }

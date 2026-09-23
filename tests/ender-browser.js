@@ -7,11 +7,11 @@ const key=async code=>{await c.send('Input.dispatchKeyEvent',{type:'keyDown',cod
 try{
  await c.send('Emulation.setDeviceMetricsOverride',{width:960,height:600,deviceScaleFactor:1,mobile:false});
  await c.send('Page.navigate',{url:'http://localhost:3001/'});await sleep(700);
- await ev(`(async()=>{const m=await import('/src/main.js?v=36');window.g=m.game;window.v=m.renderer;window.ui=m.ui;ui.settings.perspective=0;})()`);
+ await ev(`(async()=>{const m=await import('/src/main.js?v=37');window.g=m.game;window.v=m.renderer;window.ui=m.ui;ui.settings.perspective=0;})()`);
  if(process.argv.includes('--previews')){
   await ev(`window.captureStyle=document.createElement('style');captureStyle.textContent='body>*:not(#world){visibility:hidden!important}';document.head.append(captureStyle)`);
   for(const [name,mode,x,z]of [['survival','adventure',-70,24],['creative','creative',0,14],['daily','daily',-135,-78],['ender','ender',0,0]]){
-   await ev(`(async()=>{g.state=(await import('/src/save.js?v=36')).freshState(7821,'${mode}'==='ender'?'adventure':'${mode}');g.loadWorld();if('${mode}'==='ender')g.travel('ender');g.pos={x:${x},y:g.world.height(${x},${z})+1,z:${z}};g.state.time=110;g.screen='menu';ui.render();})()`);
+   await ev(`(async()=>{g.state=(await import('/src/save.js?v=37')).freshState(7821,'${mode}'==='ender'?'adventure':'${mode}');g.loadWorld();if('${mode}'==='ender')g.travel('ender');g.pos={x:${x},y:g.world.height(${x},${z})+1,z:${z}};g.state.time=110;g.screen='menu';ui.render();})()`);
    if(mode==='creative')await ev(`for(let x=-12;x<12;x++)for(let z=-10;z<12;z++)g.world.set(x,7,z,'white_concrete');for(let x=-9;x<=9;x+=6)for(let z=-7;z<=5;z+=6)for(let y=8;y<17;y++)g.world.set(x,y,z,y===16?'moonstone_block':'blue_concrete');for(let x=-10;x<=10;x++)for(let z=-8;z<=6;z++)if(x===-10||x===10||z===-8||z===6)g.world.set(x,17,z,'white_concrete')`);
    await ready();await sleep(300);
    await writeFile(new URL('../assets/'+name+'-preview.png',import.meta.url),Buffer.from((await c.send('Page.captureScreenshot',{format:'png'})).data,'base64'));
@@ -26,7 +26,7 @@ try{
  await key('KeyV');assert.equal(await ev('ui.settings.perspective'),0);assert.equal(await ev('v.hand.visible'),true);assert.equal(await ev('v.player.group.visible'),false);
  await ev('g.select(4);g.pitch=0;g.yaw=0');const orbs=await ev('g.state.inv.moonstone_orb');await c.send('Input.dispatchKeyEvent',{type:'keyDown',code:'KeyE',key:'e'});await c.send('Input.dispatchKeyEvent',{type:'keyUp',code:'KeyE',key:'e'});assert.equal(await ev('g.state.inv.moonstone_orb'),orbs-1);
  await ev(`g.world.set(2,27,2,'moonstone_block');g.save();ui.action('camera');g.pause();ui.render()`);
- await c.send('Page.reload');await sleep(700);await ev(`(async()=>{const m=await import('/src/main.js?v=36');window.g=m.game;window.v=m.renderer;window.ui=m.ui;})()`);await c.click('[data-action="ender"]');await ready();assert.equal(await ev('g.world.get(2,27,2)'),'moonstone_block');assert.equal(await ev('ui.settings.perspective'),1);
+ await c.send('Page.reload');await sleep(700);await ev(`(async()=>{const m=await import('/src/main.js?v=37');window.g=m.game;window.v=m.renderer;window.ui=m.ui;})()`);await c.click('[data-action="ender"]');await ready();assert.equal(await ev('g.world.get(2,27,2)'),'moonstone_block');assert.equal(await ev('ui.settings.perspective'),1);
  await ev(`g.pause('inventory');ui.catalogue=true;ui.search='moonstone';ui.render()`);assert.ok(await ev('document.querySelectorAll(".item-card").length')>=8);await c.screenshot('moonstone-inventory');
  await ev('ui.resume()');
  for(const [id,x,z]of [['dawn',0,-48],['ember',48,-48],['dusk',48,0]]){

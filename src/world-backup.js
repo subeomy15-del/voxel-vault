@@ -1,5 +1,5 @@
-import {VERSION,BLOCKS,ITEMS} from './data.js?v=36';
-import {loadState,slotKey} from './save.js?v=36';
+import {VERSION,BLOCKS,ITEMS} from './data.js?v=37';
+import {loadState,slotKey} from './save.js?v=37';
 export const BACKUP_VERSION=1;
 export function exportWorld(state){return JSON.stringify({format:'voxel-vault-world',backupVersion:BACKUP_VERSION,exportedAt:new Date().toISOString(),state});}
 export function parseWorldBackup(text){

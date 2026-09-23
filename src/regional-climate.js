@@ -1,4 +1,5 @@
-import {climateAt,noise2,smooth,integerHash} from './climate.js?v=36';
+import {BIOME_FAMILIES} from './expanded-biomes.js?v=37';
+import {climateAt,noise2,smooth,integerHash} from './climate.js?v=37';
 // Version eight is separate: saved version-seven terrain never changes underneath builds.
 export function regionalClimate(seed,x,z){
  const c=climateAt(seed,x,z),n=(s,o)=>noise2(c.wx,c.wz,seed+o,s),t=c.temperature,m=c.moisture;
@@ -24,6 +25,9 @@ export function regionalClimate(seed,x,z){
 }
 export function regionalSurface(c,x,z,seed){
  const n=noise2(x,z,seed+917,13);
+ if(c.biome==='red_sand_desert')return 'red_sand';
+ if(c.biome==='many_cactus_desert')return 'sand';
+ if(c.biome==='oasis')return c.h<5?'sand':'grass';
  if(c.biome==='badlands')return 'red_sand';
  if(c.biome==='frozen_badlands')return n>.65?'chalk':'snow';
  if(c.biome==='river')return n>.5?'gravel':'sand';
@@ -36,4 +40,12 @@ export function regionalSurface(c,x,z,seed){
  // Transitional surface flecks are spatially coherent, not random checkerboards.
  const snow=1-smooth(.23,.3,c.temperature),sand=smooth(.6,.7,c.temperature)*(1-smooth(.27,.36,c.moisture));
  return n<snow?'snow':n<sand?'sand':c.h>62&&integerHash(x,z,seed)<smooth(62,76,c.h)?'snow':'grass';
+}
+
+export function expandedClimate(seed,x,z){
+ const c=regionalClimate(seed,x,z),family=BIOME_FAMILIES[c.biome];
+ if(family){const patch=integerHash(Math.floor(c.wx/210),Math.floor(c.wz/210),seed+4013);c.biome=family[Math.floor(patch*family.length)];}
+ // Pools follow a continuous local depression; surrounding dunes remain intact.
+ if(c.biome==='oasis'){const edge=Math.min(((c.wx%210)+210)%210,210-((c.wx%210)+210)%210,((c.wz%210)+210)%210,210-((c.wz%210)+210)%210);const pool=(1-smooth(.10,.25,noise2(c.wx,c.wz,seed+4021,85)))*smooth(0,55,edge)*smooth(.65,.71,c.temperature)*(1-smooth(.24,.3,c.moisture))*(1-smooth(.2,.48,c.mountain));c.h=c.h*(1-pool)+2*pool;c.water=Math.max(c.water,pool);}
+ return c;
 }

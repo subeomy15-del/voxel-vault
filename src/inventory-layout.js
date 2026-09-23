@@ -1,8 +1,8 @@
-import {bagCount,BAG_CAPACITY} from './bag-capacity.js?v=36';
-import {infusionTooltip} from './infusion-ui.js?v=36';
-import {potionFor} from './potions.js?v=36';
-import { ITEMS } from './data.js?v=36';
-import { icon } from './icons.js?v=36';
+import {bagCount,BAG_CAPACITY} from './bag-capacity.js?v=37';
+import {infusionTooltip} from './infusion-ui.js?v=37';
+import {potionFor} from './potions.js?v=37';
+import { ITEMS } from './data.js?v=37';
+import { icon } from './icons.js?v=37';
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 export function packSlot(g,name,count,extra=''){return `<button class="pack-slot ${(name===g.held?'selected ':'')+(g.state.infusions?.[name]?'infused':'')}" ${extra||(potionFor(name)?`data-drink="${name}"`:name==='firecracker'?'data-use-firecracker':`data-equip="${name}"`)} data-item="${name||''}" title="${esc((ITEMS[name]?.name||'Empty slot')+' · '+(ITEMS[name]?.description||'')+' '+infusionTooltip(g.state,name))}" aria-label="${esc(ITEMS[name]?.name||'Empty slot')}${count?' · '+count:''}">${name?icon(name,48):''}${count?`<b>${g.creative?'∞':count}</b>`:''}</button>`;}
 export function inventoryLayout(g,items){

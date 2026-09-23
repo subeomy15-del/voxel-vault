@@ -1,13 +1,14 @@
-import {armorInfusion} from './infusions.js?v=36';
-import {potionPower} from './potions.js?v=36';
-import { trapAt } from './traps.js?v=36';
-import { BLOCKS, ITEMS } from './data.js?v=36';
-import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=36';
+import {armorInfusion} from './infusions.js?v=37';
+import {potionPower} from './potions.js?v=37';
+import { trapAt } from './traps.js?v=37';
+import { BLOCKS, ITEMS } from './data.js?v=37';
+import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=37';
+import { CROUCH_KEYS } from './controls.js?v=37';
 
 export const MOVEMENT = Object.freeze({ walk: 4.8, sprint: 7.4, jump: 8.8, gravity: 24, coyote: .11, buffer: .14, step: .52, mantle: 1.25 });
 const approach = (current, target, amount) => current < target ? Math.min(target, current + amount) : Math.max(target, current - amount);
 const sprintKeys = ['ShiftLeft', 'ShiftRight'];
-const crouchKeys = g => ['ControlLeft', 'ControlRight', 'KeyX', ...(g.state.mode === 'parkour' ? ['KeyC'] : [])];
+const crouchKeys = () => CROUCH_KEYS;
 const held = (g, keys) => keys.some(key => g.keys.has(key));
 const settings = g => g.renderer?.settings || {};
 const collides = (g, p, height = 1.75) => g.world.intersects(p.x, p.y, p.z, height);
@@ -176,7 +177,7 @@ export function movePlayer(g, dt) {
   const wishX = -Math.sin(g.yaw) * forward + Math.cos(g.yaw) * sideways, wishZ = -Math.cos(g.yaw) * forward - Math.sin(g.yaw) * sideways;
   if (g.gliding) { const current=Math.hypot(g.vx,g.vz),flightSpeed=current+(speed-current)*(1-Math.exp(-3*dt));g.vx=wishX*flightSpeed;g.vz=wishZ*flightSpeed; }
   else if (!g.grounded && !inWater && !flying && g.dashTime <= 0) airControl(g, wishX, wishZ, speed, dt);
-  else approachHorizontal(g, wishX * speed, wishZ * speed, dt * (g.dashTime > 0 ? 85 : inWater ? 18 : !g.moving ? 72 : g.vx * wishX + g.vz * wishZ < 0 ? 72 : 55));
+  else approachHorizontal(g, wishX * speed, wishZ * speed, dt * (g.dashTime > 0 ? 100 : inWater ? 18 : !g.moving ? 110 : g.vx * wishX + g.vz * wishZ < 0 ? 110 : 90));
   if (g.grapple) {
     g.grapple.time -= dt; const dx = g.grapple.x - g.pos.x, dy = g.grapple.y - g.pos.y, dz = g.grapple.z - g.pos.z, distance = Math.hypot(dx, dy, dz);
     if (g.grapple.time <= 0 || distance < .8) g.grapple = null;

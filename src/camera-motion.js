@@ -27,7 +27,7 @@ export class CameraMotion {
     const targetRoll = active && settings.bobbing ? clamp(-strafe * (game.gliding ? .006 : .002), -.04, .04) : 0;
     this.roll += (targetRoll - this.roll) * (1 - Math.exp(-dt * 9));
     const speedFov = active ? game.gliding ? 7 : game.dashTime > 0 ? 6 : game.sprinting ? 3 : 0 : 0;
-    const zoom = game.keys?.has('KeyZ');
+    const zoom = game.keys?.has('KeyV');
     const targetFov = zoom ? Math.min(38, settings.fov * .48) : settings.fov + speedFov + this.kick;
     this.fov += (targetFov - this.fov) * (1 - Math.exp(-dt * 10));
     return { y: bob + this.offset, eyeHeight: this.eyeHeight, pitch: active ? -this.offset * .11 : 0, roll: this.roll, fov: this.fov };

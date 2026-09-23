@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { World } from '../src/world.js?v=36';
-import { Game } from '../src/game.js?v=36';
-import { CROPS,ITEMS } from '../src/data.js?v=36';
-import { freshState,loadState,saveState } from '../src/save.js?v=36';
+import { World } from '../src/world.js?v=37';
+import { Game } from '../src/game.js?v=37';
+import { CROPS,ITEMS } from '../src/data.js?v=37';
+import { freshState,loadState,saveState } from '../src/save.js?v=37';
 const storage=()=>{const m=new Map();return{getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v)};};
 const renderer={setWorld(){},stream(){},burst(){}},audio={play(){}};
 const game=()=>{const g=new Game(renderer,audio,storage());g.screen=null;g.pos={x:.5,y:7,z:9.5};return g;};
