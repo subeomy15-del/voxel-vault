@@ -26,6 +26,21 @@ test('magma ruins spawn in natural caves, preserve terrain eight and regenerate 
   a.set(chest.x,chest.y,chest.z,null);assert.equal(new World(seed,[...a.edits],9).get(chest.x,chest.y,chest.z),null);
  }
 });
+test('terrain ten caves form a deterministic connected room-and-tunnel network',()=>{
+ const w=new World(7821,[],10),rooms=[];
+ for(let cx=-3;cx<=3;cx++)for(let cz=-3;cz<=3;cz++){
+  const n=w.caveNode(cx,cz),x=Math.round(n.x),z=Math.round(n.z),y=n.y;
+  if(w.inCave(x,y,z))rooms.push({x,y,z});
+ }
+ assert.ok(rooms.length>=20);
+ const first=rooms[0],reachable=new Set([`${first.x},${first.y},${first.z}`]),queue=[first];
+ while(queue.length){const p=queue.shift();for(const q of rooms)if(!reachable.has(`${q.x},${q.y},${q.z}`)&&Math.hypot(q.x-p.x,q.z-p.z)<90){
+   const steps=12;let open=true;for(let i=1;i<steps;i++){const t=i/steps,x=Math.round(p.x+(q.x-p.x)*t),y=Math.round(p.y+(q.y-p.y)*t),z=Math.round(p.z+(q.z-p.z)*t);if(!w.inCave(x,y,z)){open=false;break;}}
+   if(open){reachable.add(`${q.x},${q.y},${q.z}`);queue.push(q);}
+  }}
+ assert.equal(reachable.size,rooms.length);
+ assert.deepEqual(w.caveNode(2,-1),w.caveNode(2,-1));
+});
 test('magma cache opens once and stores mined blocks, defeated guards and world version',()=>{
  const g=game(),s=g.world.ruins.find({radius:18,type:'magma_ruin'})[0],l=g.world.ruins.layout(s),[dx,dz]=transform(l.loot.x,l.loot.z,s.rotation,s.mirror);
  const x=s.x+dx,y=s.y+l.loot.y,z=s.z+dz;g.world.prepare(Math.floor(x/16),Math.floor(z/16));g.pos={x:x+1.5,y,z:z+.5};g.screen=null;g.target={x,y,z,type:'treasure_chest'};

@@ -3,20 +3,21 @@ const color = value => /^#[\da-f]{6}$/i.test(value || '') ? value : '#a5b985';
 const milestones = [[25, 'Camp'], [100, 'Village'], [300, 'Citadel']];
 const modes = {creative:{name:'Build Together',tag:'SHARED CREATIVE',description:'Unlimited blocks. Shared builds. Create a world with your crew.'},bedwars:{name:'Bed Wars',tag:'TEAM BATTLE',description:'Protect your bed, gather resources, and break the other team’s bed.'},manhunt:{name:'Manhunt',tag:'HUNTERS VS RUNNER',description:'One runner. A crew of hunters. A chase across the wilds.'}};
 const modeInfo = room => modes[room?.mode] || modes.creative;
+const roomCode = value => String(value ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
 
 export class MultiplayerUI {
   constructor(game, ui, client) {
     this.game = game; this.ui = ui; this.client = client; this.tab = 'browse'; this.pending = ''; this.message = ''; this.localError = ''; this.listed = false;
     let savedName = ''; try { savedName = localStorage.getItem('voxel-vault-builder-name') || ''; } catch {}
     const query = new URLSearchParams(location.search);
-    this.fields = { mode: 'creative', playerName: savedName, code: query.get('room') || '', name: '', maxPlayers: '8', public: false, endpoint: query.get('server') || client.endpoint || '' };
+    this.fields = { mode: 'creative', playerName: savedName, code: roomCode(query.get('room')), name: '', maxPlayers: '8', public: false, endpoint: query.get('server') || client.endpoint || '' };
     this.serverOpen = !!query.get('server'); this.unconfirmedServer = !!query.get('server');
     this.hud = document.createElement('aside'); this.hud.id = 'mp-party'; this.hud.hidden = true; document.querySelector('#hud').append(this.hud);
     const originalRender = ui.render.bind(ui);
     ui.render = (...args) => { if (game.screen === 'multiplayer') this.render(); else { originalRender(...args); this.decorateMenu(); this.decoratePause(); } this.update(); };
     client.addEventListener('change', () => { if (game.screen === 'multiplayer') this.render(); this.update(); });
     document.addEventListener('click', event => { if(event.target.matches('[data-mp-select]'))event.target.select(); const button = event.target.closest('[data-mp-action]'); if (button && !button.disabled) { event.preventDefault(); this.action(button.dataset.mpAction, button); } });
-    document.addEventListener('input', event => { const key = event.target.dataset.mpField; if (key) { this.fields[key] = event.target.type === 'checkbox' ? event.target.checked : event.target.value; if (key === 'playerName') { try { localStorage.setItem('voxel-vault-builder-name', this.fields.playerName); } catch {} } } });
+    document.addEventListener('input', event => { const key = event.target.dataset.mpField; if (key) { this.fields[key] = event.target.type === 'checkbox' ? event.target.checked : key === 'code' ? roomCode(event.target.value) : event.target.value; if (key === 'code' && event.target.value !== this.fields.code) event.target.value = this.fields.code; if (key === 'playerName') { try { localStorage.setItem('voxel-vault-builder-name', this.fields.playerName); } catch {} } } });
     document.addEventListener('change', event => { const key = event.target.dataset.mpField; if (key) { this.fields[key] = event.target.type === 'checkbox' ? event.target.checked : event.target.value; if (key === 'mode' || key === 'public') this.render(); } });
     document.addEventListener('submit', event => { if (event.target.matches('[data-mp-form]')) { event.preventDefault(); this.action(event.target.dataset.mpForm); } });
     window.addEventListener('keydown', event => { if (game.screen === 'multiplayer' && event.key === 'Escape') { event.preventDefault(); event.stopImmediatePropagation(); this.back(); } }, true);
@@ -53,7 +54,8 @@ export class MultiplayerUI {
       if (!this.fields.playerName.trim()) { this.localError = 'Choose a builder name first.'; this.render(); document.querySelector('#mp-player-name')?.focus(); return; }
       if (this.unconfirmedServer) { this.localError = 'Connect to the server from this invite in Server settings first.'; this.serverOpen = true; this.render(); return; }
       if (action === 'create') return this.run('create', () => this.client.create({ mode: this.fields.mode, name: this.fields.name.trim() || `${this.fields.playerName.trim()}'s world`, playerName: this.fields.playerName.trim(), public: !!this.fields.public, maxPlayers: Number(this.fields.maxPlayers) }));
-      return this.run('join', () => this.client.join(button?.dataset.code || this.fields.code, this.fields.playerName.trim()));
+      this.fields.code = roomCode(button?.dataset.code || this.fields.code);
+      return this.run('join', () => this.client.join(this.fields.code, this.fields.playerName.trim()));
     }
   }
   button(action, text, className = '', disabled = false) { return `<button type="button" data-mp-action="${action}" class="mp-button ${className}" ${disabled || this.pending ? 'disabled' : ''}>${text}</button>`; }

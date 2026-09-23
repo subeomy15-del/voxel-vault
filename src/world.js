@@ -75,6 +75,26 @@ export class World {
     }
     return{x:.5,y:7,z:20.5};
   }
+  caveNode(cx,cz){
+    const ox=(hash(cx,cz,this.seed+701)-.5)*22,oz=(hash(cz,cx,this.seed+709)-.5)*22;
+    return {x:cx*64+32+ox,z:cz*64+32+oz,y:-20-Math.floor(hash(cx,cz,this.seed+719)*30)};
+  }
+  caveNetwork(x,y,z){
+    // A jittered grid makes rooms and tunnels that stay connected as far as the player explores.
+    const cx=Math.floor(x/64),cz=Math.floor(z/64), point={x,y,z};
+    const near=(a,b,r)=>{
+      const vx=b.x-a.x,vy=b.y-a.y,vz=b.z-a.z,wx=point.x-a.x,wy=point.y-a.y,wz=point.z-a.z;
+      const length=vx*vx+vy*vy+vz*vz, t=length?Math.max(0,Math.min(1,(wx*vx+wy*vy+wz*vz)/length)):0;
+      const dx=point.x-(a.x+vx*t),dy=point.y-(a.y+vy*t),dz=point.z-(a.z+vz*t);
+      return dx*dx+dy*dy+dz*dz<r*r;
+    };
+    for(let ix=cx-1;ix<=cx+1;ix++)for(let iz=cz-1;iz<=cz+1;iz++){
+      const node=this.caveNode(ix,iz),dx=x-node.x,dz=z-node.z;
+      if((dx*dx)/144+(dz*dz)/169+((y-node.y)*(y-node.y))/81<1)return true;
+      if(near(node,this.caveNode(ix+1,iz),3.2)||near(node,this.caveNode(ix,iz+1),3.2))return true;
+    }
+    return false;
+  }
   spawnFacing(p){
     let best=0,score=-Infinity;
     for(let i=0;i<16;i++){const yaw=i*Math.PI/8;let open=0;
@@ -84,6 +104,7 @@ export class World {
   }
   inCave(x,y,z,column=this.column(x,z)){
     if(y>=column.h-4||y<WORLD_BOTTOM+5)return false;
+    if(this.terrain>=10&&this.caveNetwork(x,y,z))return true;
     if(column.a2+((y-column.t1)/3.4)**2<1||column.b2+((y-column.t2)/4.5)**2<1||column.chamber+((y-column.cy)/8)**2<1)return true;
     // The nearby hillside entrance opens into a dry chamber and a natural tunnel.
     return ((x-23)/12)**2+((z+31)/16)**2+((y+16)/7)**2<1;
