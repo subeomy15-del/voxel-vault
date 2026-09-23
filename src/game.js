@@ -1,4 +1,4 @@
-import {bagRoom,bagCount,BAG_CAPACITY} from './bag-capacity.js?v=37';
+import {bagRoom,bagCount,BAG_CAPACITY,STACK_SIZE} from './bag-capacity.js?v=37';
 import {creatureSpawn} from './creature-registry.js?v=37';
 import {tickRuinEncounters,defeatRuinGuard,ruinEquipment} from './ruin-encounters.js?v=37';
 import {biomeEnemy} from './biome-ecology.js?v=37';
@@ -163,11 +163,12 @@ export class Game {
   transfer(name,withdraw=false){
     if(!this.containerKey||!ITEMS[name])return false;
     const store=this.containerKey==='moon'?this.state.moonChest:(this.state.containers[this.containerKey]??={}),source=withdraw?store:this.state.inv,target=withdraw?this.state.inv:store;
-    const n=Math.min(64,source[name]||0,withdraw&&!this.creative?bagRoom(this.state.inv):Infinity);if(!n)return false;source[name]-=n;if(withdraw&&!source[name])delete source[name];target[name]=(target[name]||0)+n;this.save();return true;
+    const destinationRoom=this.creative?Infinity:bagRoom(target,name);
+    const n=Math.min(STACK_SIZE,source[name]||0,destinationRoom);if(!n)return false;source[name]-=n;if(!source[name])delete source[name];target[name]=(target[name]||0)+n;this.save();return true;
   }
   add(name,n=1,dropOverflow=true){
     name=canonicalItem(name);if(!ITEMS[name]||!Number.isFinite(n)||n<=0)return 0;
-    const accepted=this.creative||this.multiplayer?.competitive?n:Math.min(n,bagRoom(this.state.inv));
+    const accepted=this.creative||this.multiplayer?.competitive?n:Math.min(n,bagRoom(this.state.inv,name));
     if(accepted){this.state.inv[name]=(this.state.inv[name]||0)+accepted;if(!this.creative)this.emit('collected',{name,count:accepted});}
     if(accepted<n&&dropOverflow){this.dropItem(name,n-accepted,this.pos.x,this.pos.y,this.pos.z);if(!this.bagNoticeAt||performance.now()-this.bagNoticeAt>3000){this.toast('Backpack full','Store items in a chest. Extra items stay on the ground.');this.bagNoticeAt=performance.now();}}
     return accepted;
@@ -204,9 +205,9 @@ export class Game {
   }
   dropItem(item,count,x,y,z){
     const nearby=this.state.drops.find(d=>d.item===item&&Math.hypot(d.x-x,d.y-y,d.z-z)<1.5);
-    if(nearby){nearby.count+=count;nearby.age=0;return;}
+    if(nearby&&nearby.count<STACK_SIZE){const moved=Math.min(STACK_SIZE-nearby.count,count);nearby.count+=moved;nearby.age=0;count-=moved;if(!count)return;}
     if(this.state.drops.length>=128)this.state.drops.shift();
-    this.state.drops.push({id:++this.serial,item,count,x,y:Math.max(-63,this.world.ground(x,z,y+1)+.2),z,age:0});
+    this.state.drops.push({id:++this.serial,item,count:Math.min(STACK_SIZE,count),x,y:Math.max(-63,this.world.ground(x,z,y+1)+.2),z,age:0});
   }
   updateDrops(dt){
     this.state.drops=this.state.drops.filter(d=>{
@@ -432,7 +433,7 @@ export class Game {
       if(m.kind==='dragon'){defeatDragon(this,m);return;}
       if(m.fortress){this.state.fortressCleared=true;this.boss=null;this.slam=null;this.toast('Ender portal unsealed','The fortress is conquered. Prepare a bow, armor and a glider before entering.','reward');this.save();}
       const drops=ENEMIES[m.kind]?.drops||ANIMALS[m.kind]?.drops||{coal:[1,1]};let offset=0;
-      for(const[item,[low,high]]of Object.entries(drops)){const count=low+Math.min(high-low,Math.floor(hash(m.id+offset,Math.floor(this.state.elapsed),this.state.seed)*(high-low+1)));this.dropItem(item,count,m.x+offset*.25,m.y,m.z);offset++;}
+      for(const[item,[low,high]]of Object.entries(drops)){const count=low+1+Math.min(high-low,Math.floor(hash(m.id+offset,Math.floor(this.state.elapsed),this.state.seed)*(high-low+1)));this.dropItem(item,count,m.x+offset*.25,m.y,m.z);offset++;}
     }
   }
   hurt(amount,combat=false,source=combat?'combat':'physical'){if(this.state.mode==='parkour'||this.multiplayer?.competitive||this.creative||this.hurtCooldown>0||this.dashTime>0)return;const reduction=(1-armorProtection(this.state))*potionDamageMultiplier(this,source)*(1-Math.min(.5,source==='fall'?armorInfusion(this.state,'featherstep'):source==='fire'||source==='ash'?armorInfusion(this.state,'ash_ward'):source==='void'||source==='combat'&&this.state.dimension==='ender'?armorInfusion(this.state,'void_ward'):0));this.state.hp=Math.max(0,this.state.hp-amount*reduction*(combat&&this.hardAdventure?1.65:1));this.hurtCooldown=.7;this.audio.play('hurt');this.emit('hurt');if(this.state.hp<=0){this.state.stats.deaths++;this.pause('death');this.emit('screen');}}

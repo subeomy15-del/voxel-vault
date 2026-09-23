@@ -5,7 +5,7 @@ export const CONTROL_ROWS = Object.freeze([
  ['WASD / arrows','Move'],['Mouse','Look'],['Space','Jump · hold to repeat'],['Shift','Run'],
  ['Ctrl / C / Caps Lock / \\','Crouch · fly down'],['Double Space','Toggle Creative flight'],
  ['Left click','Mine / attack'],['Right click / E','Use / place / pick up drops'],['Middle click / Alt + left click','Pick block in Creative'],
- ['1–9 / 0 / wheel','Select one of 10 hotbar slots'],['Q / Shift + Q','Drop one / stack (solo)'],
+ ['1–9 / wheel','Select one of 9 hotbar slots'],['Q / Shift + Q','Drop one / stack (solo)'],
  ['Tab','Inventory & crafting · Tab again to close'],['V (hold)','Zoom'],['P / F5','Camera view'],
  ['O','Settings'],['F2','Performance display'],['F4 (hold)','Hide interface'],
  ['Z','Emotes'],['G','Player list'],['B','Bed Wars shop / solo item catalogue'],
@@ -13,7 +13,7 @@ export const CONTROL_ROWS = Object.freeze([
  ['J','World map'],['L','Glider'],['H','Firecracker boost'],['Y','Multiplayer ping'],
  ['R','Dash · retry checkpoint in Parkour'],['F','Eat / use held potion'],['T','Rotate building block']
 ]);
-export function hotbarIndex(code) { return /^Digit[0-9]$/.test(code) ? (Number(code.at(-1))+9)%10 : -1; }
+export function hotbarIndex(code) { return /^Digit[1-9]$/.test(code) ? Number(code.at(-1))-1 : -1; }
 export function applyLook(game, dx, dy, sensitivity=1, touch=false) {
  if (!Number.isFinite(dx)||!Number.isFinite(dy)) return;
  const factor=(touch?.007:.0032)*sensitivity;

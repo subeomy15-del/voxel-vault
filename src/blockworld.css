@@ -11,6 +11,8 @@ body[data-screen="emotes"] .modal>button,body[data-screen="character"] .modal>bu
 #hotbar .slot{border-radius:2px;background:#718993c9;border:2px solid #a1b2b7;box-shadow:inset 2px 2px #cbd8d340,inset -2px -2px #24374660;flex-shrink:1;min-width:0}
 #hotbar .slot.selected{border:2px solid white;background:#4a8eba;box-shadow:0 0 0 1px #d7f6ff,inset 0 0 0 2px #82bdd6;transform:translateY(-3px)}
 #hotbar .slot small,#hotbar .slot b{color:#fff;text-shadow:1px 1px #172933}
+.storage-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:6px!important}
+.storage-slot.locked{display:grid;place-items:center;min-height:54px;border:1px dashed #9fb0b4;border-radius:4px;color:#8ea0a4;background:#dce6e844;font-size:13px}
 @media(max-width:600px){.character-colors{grid-template-columns:repeat(2,1fr)}#hotbar .slot{width:8.6vw;height:10vw}#hotbar .slot-art{transform:scale(.85)}#hotbar{gap:2px;padding:3px}}
 
 .survival-mode .mode-art{background-image:url('../assets/survival-blocks.svg?v=37');background-size:cover;image-rendering:auto}

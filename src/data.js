@@ -458,7 +458,7 @@ export function maxCraft(inv,recipe){
 }
 export function craft(inv,item,batches=1){const recipe=RECIPES.find(r=>r.item===item);if(!Number.isSafeInteger(batches)||batches<1)return false;const cost=craftingPlan(inv,recipe,batches);if(!cost)return false;for(const[k,n]of Object.entries(cost))inv[k]-=n;inv[item]=(inv[item]||0)+(recipe.count||1)*batches;return true;}
 export function starterInventory() { return { wood_sword:1, wood_pickaxe:1, wood_axe:1, grass:32, wood:0, stone:0, torch:12, apple:5, potion:2,seeds:6,carrot:2,cotton_seeds:3,watermelon_seeds:2 }; }
-export const STARTER_BAR = ['wood_sword','wood_pickaxe','wood_axe','grass','wood','stone','torch','apple','potion','compass'];
+export const STARTER_BAR = ['wood_sword','wood_pickaxe','wood_axe','grass','wood','stone','torch','apple','potion'];
 installContent(BLOCKS,ITEMS,RECIPES,BIOMES);
 
 installPotions(BLOCKS,ITEMS,RECIPES);

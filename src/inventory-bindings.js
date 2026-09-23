@@ -42,7 +42,7 @@ export class InventoryBindings {
   const fresh=this.bind(),changed=diff(this.inv,s.inv),gear=JSON.stringify([s.selected,s.bar,s.armor,s.armorParts,s.glider,s.ammo]),gearChanged=gear!==this.gear;
   const store=g.containerKey==='moon'?s.moonChest:s.containers[g.containerKey]||{},stored=diff(this.store,store),enchantChanged=diff(this.enchants,s.enchants||{}),auraChanged=this.aura!==s.aura;
   if(!fresh&&!changed.size&&!stored.size&&!gearChanged&&!auraChanged&&!enchantChanged.size)return;
-  text(this.root.querySelector('[data-bag-capacity]'),g.creative?'Unlimited creative inventory':`${bagCount(s.inv)} / ${BAG_CAPACITY} items · store extras in a chest`);
+  text(this.root.querySelector('[data-bag-capacity]'),g.creative?'Unlimited creative inventory':`${bagCount(s.inv)} / ${BAG_CAPACITY} slots · stacks hold 999 · store extras in a chest`);
   if(g.screen==='inventory'){
    const grid=this.root.querySelector('.pack-storage');
    for(const name of changed){

@@ -44,7 +44,7 @@ test('smelting requires a nearby furnace, ingredients and fuel',()=>{
  g.pos.x=30;assert.equal(g.smelt('iron_ingot'),false);
 });
 test('storage transfers stacks without duplicating items and survives reload',()=>{
- const g=game();g.containerKey='0,8,3';g.add('stone',80);assert.equal(g.transfer('stone'),true);assert.equal(g.state.inv.stone,16);assert.equal(g.state.containers[g.containerKey].stone,64);g.transfer('stone',true);assert.equal(g.state.inv.stone,80);g.transfer('stone');g.save();const r=loadState(g.storage);assert.equal(r.containers['0,8,3'].stone,64);
+ const g=game();g.containerKey='0,8,3';g.add('stone',80);assert.equal(g.transfer('stone'),true);assert.equal(g.state.inv.stone||0,0);assert.equal(g.state.containers[g.containerKey].stone,80);g.transfer('stone',true);assert.equal(g.state.inv.stone,80);g.transfer('stone');g.save();const r=loadState(g.storage);assert.equal(r.containers['0,8,3'].stone,80);
 });
 test('new items, bed spawn and far-away positions survive save/load',()=>{
  const st=storage(),s=freshState();s.pos={x:330,y:-40,z:-205};s.spawn={x:40,y:15,z:30};s.inv.diamond=9;s.edits=[['330,-40,-205','stonebrick']];saveState(st,s);const r=loadState(st);assert.deepEqual(r.pos,s.pos);assert.deepEqual(r.spawn,s.spawn);assert.equal(r.inv.diamond,9);assert.deepEqual(r.edits,s.edits);assert.equal(loadState(st,'creative'),null);assert.equal(dailySeed(new Date('2026-09-12T03:00:00Z')),20260912);

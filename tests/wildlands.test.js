@@ -14,7 +14,7 @@ test('all six huntable species drop their own raw meat and collect it once',()=>
   for(const[kind,info]of Object.entries(ANIMALS).filter(([kind])=>['deer','pig','cow','sheep','chicken','rabbit'].includes(kind))){
     const g=make(),m=g.spawnMob(.5,7,kind,7);g.state.bar[0]='diamond_sword';g.add('diamond_sword');g.pitch=Math.atan2(info.height*.6-1.58,2.5);
     g.attack();if(g.mobs.includes(m)){g.attackCooldown=0;g.attack();}assert.equal(g.mobs.includes(m),false,kind);
-    for(const[item,[low,high]]of Object.entries(info.drops)){const drop=g.state.drops.find(d=>d.item===item);assert.ok(drop&&drop.count>=low&&drop.count<=high,kind+' '+item);assert.equal(g.state.inv[item]||0,0);}
+    for(const[item,[low,high]]of Object.entries(info.drops)){const drop=g.state.drops.find(d=>d.item===item);assert.ok(drop&&drop.count>=low+1&&drop.count<=high+1,kind+' '+item);assert.equal(g.state.inv[item]||0,0);}
     const drops=g.state.drops.map(d=>({...d}));g.hit(m,99);assert.deepEqual(g.state.drops,drops);
     g.pos={x:.5,y:7,z:7};g.updateDrops(.6);assert.equal(g.state.drops.length,drops.length);assert.equal(g.state.inv[drops[0].item]||0,0);for(const d of drops){g.pickupDrop(d);assert.equal(g.state.inv[d.item],d.count);}assert.equal(g.state.drops.length,0);g.updateDrops(2);for(const d of drops)assert.equal(g.state.inv[d.item],d.count);
   }

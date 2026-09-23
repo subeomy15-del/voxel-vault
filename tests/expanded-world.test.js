@@ -22,9 +22,9 @@ test('all expanded surface biomes generate deterministically and old terrain ret
 });
 test('nine-slot saves migrate without losing items, all ten slots and terrain versions round-trip',()=>{
  const st=storage(),s=freshState();s.bar=s.bar.slice(0,9);s.selected=8;s.terrain=9;saveState(st,s);
- const migrated=loadState(st);assert.deepEqual(migrated.bar.slice(0,9),s.bar);assert.equal(migrated.bar.length,10);assert.equal(migrated.terrain,9);
- migrated.selected=9;migrated.terrain=10;saveState(st,migrated);assert.equal(loadState(st).selected,9);assert.equal(loadState(st).terrain,10);
- assert.deepEqual(Array.from({length:10},(_,i)=>hotbarIndex('Digit'+((i+1)%10))),Array.from({length:10},(_,i)=>i));assert.equal(hotbarIndex('KeyQ'),-1);
+ const migrated=loadState(st);assert.deepEqual(migrated.bar.slice(0,9),s.bar);assert.equal(migrated.bar.length,9);assert.equal(migrated.terrain,9);
+ migrated.selected=8;migrated.terrain=10;saveState(st,migrated);assert.equal(loadState(st).selected,8);assert.equal(loadState(st).terrain,10);
+ assert.deepEqual(Array.from({length:9},(_,i)=>hotbarIndex('Digit'+(i+1))),Array.from({length:9},(_,i)=>i));assert.equal(hotbarIndex('Digit0'),-1);assert.equal(hotbarIndex('KeyQ'),-1);
 });
 test('mob variations are validated and passive appearance survives save/load',()=>{
  for(const [kind,variants]of Object.entries(MOB_VARIATIONS)){assert.ok(ENEMIES[kind],kind);for(const variation of variants)assert.equal(validVariation(kind,variation),variation);}
