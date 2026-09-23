@@ -27,7 +27,7 @@ test('walking climbs slabs and stairs smoothly but cannot step up a full block',
 test('stairs rotate on placement, keep shape on reload and mine to the original item',()=>{
   const g=game();g.add('oak_stairs',2);g.equip('oak_stairs');g.target={x:0,y:6,z:8,type:'grass',normal:{x:0,y:1,z:0}};assert.ok(g.place());assert.equal(g.world.get(0,7,8),'oak_stairs');
   g.rotateBuilding();g.target.x=1;assert.ok(g.place());assert.equal(g.world.get(1,7,8),'oak_stairs_e');const w=new World(g.world.seed,[...g.world.edits]);assert.equal(w.ground(1.75,8.5,9),8);assert.equal(w.ground(1.1,8.5,9),7.5);
-  g.state.bar[g.state.selected]='wood_pickaxe';g.target={x:1,y:7,z:8,type:'oak_stairs_e'};g.mine(5);assert.equal(g.state.inv.oak_stairs,1);assert.equal(g.state.inv.oak_stairs_e,undefined);
+  g.state.bar[g.state.selected]='wood_pickaxe';g.target={x:1,y:7,z:8,type:'oak_stairs_e'};g.mine(5);assert.equal(g.state.inv.oak_stairs||0,0);assert.equal(g.state.inv.oak_stairs_e||0,0);assert.equal(g.state.drops.some(d=>d.item==='oak_stairs'),true);g.pos={x:1.5,y:7,z:8.5};g.updateDrops(.3);g.pickupDrop();assert.equal(g.state.inv.oak_stairs,1);
 });
 test('matching slabs combine into a full block and blocked placement spends nothing',()=>{
   const g=game();g.add('oak_slab',3);g.equip('oak_slab');g.target={x:0,y:6,z:8,type:'grass',normal:{x:0,y:1,z:0}};assert.ok(g.place());g.target={x:0,y:7,z:8,type:'oak_slab',normal:{x:0,y:1,z:0}};assert.ok(g.place());assert.equal(g.world.get(0,7,8),'plank');assert.equal(g.state.inv.oak_slab,1);

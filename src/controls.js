@@ -4,7 +4,7 @@ export const CROUCH_KEYS = Object.freeze(['ControlLeft','ControlRight','KeyC','C
 export const CONTROL_ROWS = Object.freeze([
  ['WASD / arrows','Move'],['Mouse','Look'],['Space','Jump · hold to repeat'],['Shift','Run'],
  ['Ctrl / C / Caps Lock / \\','Crouch · fly down'],['Double Space','Toggle Creative flight'],
- ['Left click','Mine / attack'],['Right click / E','Use / place'],['Middle click / Alt + left click','Pick block in Creative'],
+ ['Left click','Mine / attack'],['Right click / E','Use / place / pick up drops'],['Middle click / Alt + left click','Pick block in Creative'],
  ['1–9 / 0 / wheel','Select one of 10 hotbar slots'],['Q / Shift + Q','Drop one / stack (solo)'],
  ['Tab','Inventory & crafting · Tab again to close'],['V (hold)','Zoom'],['P / F5','Camera view'],
  ['O','Settings'],['F2','Performance display'],['F4 (hold)','Hide interface'],

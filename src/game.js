@@ -211,9 +211,26 @@ export class Game {
   updateDrops(dt){
     this.state.drops=this.state.drops.filter(d=>{
       d.age+=dt;if(d.age>600)return false;
-      if(d.age>.45&&Math.hypot(d.x-this.pos.x,d.y-this.pos.y,d.z-this.pos.z)<1.8){d.count-=this.add(d.item,d.count,false);return d.count>0;}
       return true;
     });
+  }
+  nearestDrop(reach=2.25){
+    if(this.state.mode==='parkour'||this.multiplayer?.competitive)return null;
+    let best=null,distance=reach;
+    for(const drop of this.state.drops){
+      const d=Math.hypot(drop.x-this.pos.x,drop.z-this.pos.z),vertical=Math.abs(drop.y-this.pos.y);
+      if(drop.age<.2||d>=distance||vertical>2.5)continue;
+      best=drop;distance=d;
+    }
+    return best;
+  }
+  pickupDrop(drop=this.nearestDrop()){
+    if(!drop)return false;
+    const current=this.state.drops.find(d=>d.id===drop.id);if(!current)return false;
+    const accepted=this.add(current.item,current.count,false);
+    if(!accepted){this.toast('Backpack full',`Make room before picking up ${ITEMS[current.item]?.name||current.item}.`);return false;}
+    current.count-=accepted;if(current.count<=0)this.state.drops=this.state.drops.filter(d=>d.id!==current.id);
+    this.emit('collected',{name:current.item,count:accepted});this.audio.play('pickup');this.save();this.emit('hud');return true;
   }
   dash(){if(this.state.mode==='parkour'||this.dashCooldown>0||this.stamina<25)return;this.dashTime=.2;this.dashCooldown=1.2;this.stamina-=25;}
   jump(){requestJump(this);}
@@ -222,6 +239,8 @@ export class Game {
   nearest(){
     if(this.state.mode==='parkour')return null;
     if(this.multiplayer?.competitive)return null;
+    const drop=this.nearestDrop();
+    if(drop)return {...drop,type:'drop',name:ITEMS[drop.item]?.name||drop.item};
     if(this.state.dimension==='nether'&&Math.hypot(this.pos.x-72.5,this.pos.y-25,this.pos.z+47.5)<3&&this.world.get(72,25,-48)==='ender_gate')return {...NETHER_END,type:'ender_gate',name:'Enter the Ender',placed:true};
     const t=this.target;
     if(t?.type==='treasure_chest'&&this.state.dimension==='overworld'&&this.state.exploration.caches.some(c=>!c.claimed&&c.x===t.x&&c.y===t.y&&c.z===t.z))return {...t,type:'sea_cache',name:'Mariner’s cache'};
@@ -236,6 +255,7 @@ export class Game {
     const camp=this.world.landmarks[0];if(!best&&Math.hypot(camp.x-this.pos.x,camp.z-this.pos.z)<2.5)best=camp;return best;
   }
   interact(){
+    if(this.pickupDrop())return true;
     if(ITEMS[this.held]?.kind==='fishing')return useRod(this);
     if(this.held==='sea_chart'){this.pause('sea-charts');this.emit('screen');return;}
     if(potionFor(this.held))return this.drink();
@@ -478,8 +498,9 @@ export class Game {
       if(t.type==='treasure_chest'&&claimSeaCache(this,t)){this.mineProgress=0;return;}
       if(CROP_BLOCKS.includes(t.type)){this.harvest(t);this.mineProgress=0;return;}
       if(t.type==='chest'){const store=this.state.containers[key]||{};for(const[k,n]of Object.entries(store))this.add(k,n);delete this.state.containers[key];}
-      this.world.set(t.x,t.y,t.z,null);this.state.stats.mined++;const ore=['diamond','moonstone','coal','iron','gold'].includes(t.type);if(natural&&ore){awardAura(this,(['diamond','moonstone'].includes(t.type)?8:4)*(1+infusionValue(this.state,this.held,'miners_aura')));if(secureRandom()<infusionValue(this.state,this.held,'fortune'))this.add(BLOCKS[t.type].drop||t.type);const sight=infusionValue(this.state,this.held,'vein_sense');if(sight)this.state.effects.xray=Math.max(this.state.effects.xray||0,sight);}this.miningChain=this.state.elapsed-(this.lastMinedAt||0)<2?Math.min(5,(this.miningChain||0)+1):1;this.lastMinedAt=this.state.elapsed;this.state.exhaustion+=.025;
-      if(this.held==='moonstone_pickaxe'){this.add(BLOCKS[t.type].drop||t.type);}else if(['leaf','pine','autumnleaf'].includes(t.type)){this.add('leaf');this.add('fiber');if(hash(t.x+t.y,t.z,this.state.seed)<.22)this.add('apple');}else {this.add(BLOCKS[t.type].drop||t.type);if(t.type==='fern'){this.add('fiber',2);this.add('seeds');}}
+      const dropX=t.x+.5,dropY=t.y+.5,dropZ=t.z+.5;
+      this.world.set(t.x,t.y,t.z,null);this.state.stats.mined++;const ore=['diamond','moonstone','coal','iron','gold'].includes(t.type);if(natural&&ore){awardAura(this,(['diamond','moonstone'].includes(t.type)?8:4)*(1+infusionValue(this.state,this.held,'miners_aura')));if(secureRandom()<infusionValue(this.state,this.held,'fortune'))this.dropItem(BLOCKS[t.type].drop||t.type,1,dropX,dropY,dropZ);const sight=infusionValue(this.state,this.held,'vein_sense');if(sight)this.state.effects.xray=Math.max(this.state.effects.xray||0,sight);}this.miningChain=this.state.elapsed-(this.lastMinedAt||0)<2?Math.min(5,(this.miningChain||0)+1):1;this.lastMinedAt=this.state.elapsed;this.state.exhaustion+=.025;
+      if(this.held==='moonstone_pickaxe'){this.dropItem(BLOCKS[t.type].drop||t.type,1,dropX,dropY,dropZ);}else if(['leaf','pine','autumnleaf'].includes(t.type)){this.dropItem('leaf',1,dropX,dropY,dropZ);this.dropItem('fiber',1,dropX,dropY,dropZ);if(hash(t.x+t.y,t.z,this.state.seed)<.22)this.dropItem('apple',1,dropX,dropY,dropZ);}else {this.dropItem(BLOCKS[t.type].drop||t.type,1,dropX,dropY,dropZ);if(t.type==='fern'){this.dropItem('fiber',2,dropX,dropY,dropZ);this.dropItem('seeds',1,dropX,dropY,dropZ);}}
 
       this.renderer.burst(t.x+.5,t.y+.5,t.z+.5,BLOCKS[t.type].color,8);this.renderer.swing=1;this.audio.play('mine',t.type);this.mineProgress=0;this.mineKey='';this.emit('hud');
     }
