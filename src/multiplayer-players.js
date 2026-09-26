@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import { PlayerModel } from './player-model.js?v=37';
+import { PlayerModel } from './player-model.js?v=38';
 
 export class MultiplayerPlayers {
   constructor(renderer, client) {

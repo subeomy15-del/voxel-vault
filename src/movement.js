@@ -1,9 +1,9 @@
-import {armorInfusion} from './infusions.js?v=37';
-import {potionPower} from './potions.js?v=37';
-import { trapAt } from './traps.js?v=37';
-import { BLOCKS, ITEMS } from './data.js?v=37';
-import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=37';
-import { CROUCH_KEYS } from './controls.js?v=37';
+import {armorInfusion} from './infusions.js?v=38';
+import {potionPower} from './potions.js?v=38';
+import { trapAt } from './traps.js?v=38';
+import { BLOCKS, ITEMS } from './data.js?v=38';
+import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=38';
+import { CROUCH_KEYS } from './controls.js?v=38';
 
 export const MOVEMENT = Object.freeze({ walk: 4.8, sprint: 7.4, jump: 8.8, gravity: 24, coyote: .11, buffer: .14, step: .52, mantle: 1.25 });
 const approach = (current, target, amount) => current < target ? Math.min(target, current + amount) : Math.max(target, current - amount);
@@ -172,7 +172,7 @@ export function movePlayer(g, dt) {
   g.sprinting = g.moving && !g.crouching && !inWater && !g.gliding && !g.eating && (g.creative || g.state.food >= 6) && g.stamina > 3 && wantsSprint;
   g.stamina = Math.max(0, Math.min(100, g.stamina + dt * (g.sprinting ? -9 : 22)));
   const wing = ITEMS[g.state.glider], boost = Math.max(g.state.effects?.speed>0?1.5:1,1+potionPower(g.state,'speed')) * (1+(g.state.dimension==='nether'?armorInfusion(g.state,'ash_walker'):g.world.landmarks.some(l=>l.type==='ruin'&&Math.hypot(l.x-g.pos.x,l.z-g.pos.z)<24)?armorInfusion(g.state,'ruin_seeker'):0)) * (trapAt(g, g.pos)?.snare && !g.creative ? .25 : 1);
-  const speed = g.gliding ? Math.max(7, wing.glideSpeed + Math.max(0, -g.pitch) * 7 - Math.max(0, g.pitch) * 4) : (inWater ? 3.1 : g.dashTime > 0 ? 15 : g.crouching ? 2.1 : g.sprinting ? MOVEMENT.sprint : MOVEMENT.walk) * boost * (g.eating ? .5 : g.drawState ? .75 : 1);
+  const speed = g.gliding ? Math.max(7, wing.glideSpeed + Math.max(0, -g.pitch) * 7 - Math.max(0, g.pitch) * 4) : (inWater ? 3.1 : g.dashTime > 0 ? 15 : g.crouching ? 2.1 : g.sprinting ? MOVEMENT.sprint : MOVEMENT.walk) * boost * (g.grounded&&!flying&&g.world.get(Math.floor(g.pos.x),Math.floor(g.pos.y-.05),Math.floor(g.pos.z))==='mud'?.78:1) * (g.eating ? .5 : g.drawState ? .75 : 1);
   if (g.dashTime > 0 && !g.moving) { forward = 1; g.moving = true; }
   const wishX = -Math.sin(g.yaw) * forward + Math.cos(g.yaw) * sideways, wishZ = -Math.cos(g.yaw) * forward - Math.sin(g.yaw) * sideways;
   if (g.gliding) { const current=Math.hypot(g.vx,g.vz),flightSpeed=current+(speed-current)*(1-Math.exp(-3*dt));g.vx=wishX*flightSpeed;g.vz=wishZ*flightSpeed; }

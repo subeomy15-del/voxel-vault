@@ -1,6 +1,9 @@
-import {ATMOSPHERES} from './atmosphere-profiles.js?v=37';
+import {habitatInstances} from './visual-habitat.js?v=38';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=38';
+import {BIOME_DETAIL} from './biome-detail.js?v=38';
+import {ATMOSPHERES} from './atmosphere-profiles.js?v=38';
 import * as THREE from '../vendor/three.module.js';
-import { hash } from './data.js?v=37';
+import { hash } from './data.js?v=38';
 export class Scenery {
   constructor(renderer){
     this.atmospheres=Object.fromEntries(Object.entries(ATMOSPHERES).map(([id,p])=>[id,Object.fromEntries(Object.entries(p).map(([k,color])=>[k,new THREE.Color(color)]))]));this.targetZenith=new THREE.Color();this.targetHorizon=new THREE.Color();
@@ -40,54 +43,76 @@ export class Scenery {
       transformed.x+=sway*position.y*uWind;transformed.z+=sway*.5*position.y*uWind;`);
     };
     this.grassMaterial.userData.shared=true;
+    this.aquaticMaterial=new THREE.MeshLambertMaterial({color:'#ffffff',side:THREE.DoubleSide});
+    this.aquaticMaterial.onBeforeCompile=shader=>{
+      shader.uniforms.uCurrentTime=this.time;shader.vertexShader='uniform float uCurrentTime;\n'+shader.vertexShader;
+      shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+      vec3 root=instanceMatrix[3].xyz;float sway=sin(uCurrentTime*.7+root.x*.3+root.z*.4)*.12;
+      transformed.x+=sway*position.y*position.y;transformed.z+=cos(uCurrentTime*.5+root.x*.2)*.07*position.y;`);
+    };
+    this.aquaticMaterial.userData.shared=true;
     this.scratch=new THREE.Matrix4();this.rotation=new THREE.Quaternion();this.tint=new THREE.Color();
     renderer.waterMaterial.onBeforeCompile=shader=>{
-      shader.uniforms.uWaterTime=this.time;shader.vertexShader='varying vec3 vWaterPos;\n'+shader.vertexShader;
-      shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvWaterPos=position;');
-      shader.fragmentShader='uniform float uWaterTime;varying vec3 vWaterPos;\n'+shader.fragmentShader;
-      shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_begin>',`#include <normal_fragment_begin>
-      if(abs(vNormal.y)>.7){vec2 wave=vec2(sin(vWaterPos.x*1.8+vWaterPos.z*.8+uWaterTime*.9),cos(vWaterPos.z*2.-vWaterPos.x*.6-uWaterTime*.7));normal=normalize(normal+vec3(wave.x,0.,wave.y)*.1);}`);
+      shader.uniforms.uWaterTime=this.time;shader.vertexShader='attribute float waterDepth;varying float vWaterDepth;varying vec3 vWaterPos;\n'+shader.vertexShader;
+      shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvWaterPos=(modelMatrix*vec4(position,1.)).xyz;vWaterDepth=waterDepth;');
+      shader.fragmentShader='uniform float uWaterTime;varying float vWaterDepth;varying vec3 vWaterPos;\n'+shader.fragmentShader;
       shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
-      vec3 rippleNormal=vec3(sin(vWaterPos.x*.8+vWaterPos.z*.4+uWaterTime*.9)*.11,0.,cos(vWaterPos.z*.9-vWaterPos.x*.3-uWaterTime*.7)*.11);
+      float pi=3.14159265;
+      vec3 rippleNormal=vec3(sin(vWaterPos.x*pi/8.+vWaterPos.z*pi/16.+uWaterTime*.7)*.085,0.,cos(vWaterPos.z*pi/8.-vWaterPos.x*pi/32.-uWaterTime*.6)*.085);
       normal=normalize(normal+mat3(viewMatrix)*rippleNormal);`);
-      shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>',`float crest=pow(max(0.,sin(vWaterPos.x*2.+vWaterPos.z*1.7+uWaterTime)*cos(vWaterPos.z*1.4-uWaterTime*.65)),12.);
-      float fresnel=pow(1.-max(dot(normal,normalize(vViewPosition)),0.),3.);
-      outgoingLight=mix(outgoingLight,vec3(.36,.59,.69),fresnel*.24);
-      outgoingLight+=vec3(.65,.83,.86)*crest*.2;
+      shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>',`
+      float depthMix=smoothstep(1.,18.,vWaterDepth);
+      vec3 depthTint=mix(vec3(.33,.75,.65),vec3(.055,.29,.41),depthMix);
+      outgoingLight=mix(outgoingLight,outgoingLight*depthTint*1.7,.55);
+      float fresnel=pow(1.-max(dot(normal,normalize(vViewPosition)),0.),4.);
+      outgoingLight=mix(outgoingLight,vec3(.46,.66,.72),fresnel*.36);
+      float shallow=1.-smoothstep(.4,2.4,vWaterDepth);
+      float foam=smoothstep(.68,.94,sin(vWaterPos.x*.785398+vWaterPos.z*.392699+uWaterTime*.6));
+      outgoingLight+=vec3(.5,.62,.58)*shallow*foam*.2;
+      diffuseColor.a=mix(.3,.72,depthMix)+fresnel*.15;
       #include <opaque_fragment>`);
     };
   }
   addGroundDetail(group,cx,cz,world){
-    const underground=this.owner.underground;if(underground||world.dimension!=='overworld'||this.owner.options.quality==='low')return;
-    const instances=[],high=this.owner.options.quality==='high'||this.owner.options.quality==='custom';
-    for(let a=0;a<16;a++)for(let b=0;b<16;b++){
-      const x=cx*16+a,z=cz*16+b,n=hash(x,z,world.seed+718);const patch=world.noise(x+94,z-37,22);if(n<(high?(patch>.58?.86:.965):.975))continue;
-      const y=world.height(x,z)+1;if(world.get(x,y-1,z)!=='grass'||world.get(x,y,z))continue;
-      instances.push({x:x+.18+hash(x,z,91)*.64,y,z:z+.18+hash(z,x,52)*.64,n});
+    if(this.owner.underground||world.dimension!=='overworld')return;
+    const {ground,water}=habitatInstances(world,cx,cz,this.owner.options.quality);
+    const up=new THREE.Vector3(0,1,0);
+    for(const [aquatic,points,tall]of[[false,ground,false],[true,water.filter(p=>!p.tall),false],[true,water.filter(p=>p.tall),true]]){
+      if(!points.length)continue;
+      // Tapered leaf ribbons, with several bends rather than a tall rectangular card.
+      const positions=[];
+      for(let blade=0;blade<3;blade++)for(let step=0;step<4;step++){
+        const angle=blade*Math.PI*2/3,point=(s,side)=>{const t=s/4,w=(1-t)* (aquatic?.09:.055),bend=Math.sin(t*1.8)* (aquatic?.22:.15);return [Math.cos(angle)*bend+Math.sin(angle)*w*side,t*(aquatic?1:.52),Math.sin(angle)*bend-Math.cos(angle)*w*side];};
+        const a=point(step,-1),b=point(step,1),c=point(step+1,1),d=point(step+1,-1);positions.push(...a,...b,...c,...a,...c,...d);
+      }
+      if(tall){
+        positions.length=0;
+        // Original alternating kelp fronds on a narrow flexible stem.
+        for(let s=0;s<10;s++){
+          const y=s/10,next=(s+1)/10,x=Math.sin(y*3)*.045,nx=Math.sin(next*3)*.045;
+          positions.push(x-.012,y,0,x+.012,y,0,nx+.012,next,0,x-.012,y,0,nx+.012,next,0,nx-.012,next,0);
+          const side=s%2?1:-1,tip=x+side*(.14+(s%3)*.025),z=(s%3-1)*.045;
+          positions.push(x,y,0,tip,y+.025,z,tip-side*.04,y+.075,z,x,y,0,tip-side*.04,y+.075,z,x,y+.05,0);
+        }
+      }
+      const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.computeVertexNormals();
+      const mesh=new THREE.InstancedMesh(geometry,aquatic?this.aquaticMaterial:this.grassMaterial,points.length);
+      points.forEach((p,i)=>{this.rotation.setFromAxisAngle(up,p.angle);this.scratch.compose(new THREE.Vector3(p.x-cx*16,p.y,p.z-cz*16),this.rotation,new THREE.Vector3(tall?Math.min(2,p.scale):p.scale,p.scale,tall?Math.min(2,p.scale):p.scale));mesh.setMatrixAt(i,this.scratch);this.tint.set(p.color);mesh.setColorAt(i,this.tint);});
+      mesh.position.set(cx*16,0,cz*16);mesh.receiveShadow=true;mesh.computeBoundingSphere();mesh.userData.visualHabitat=true;mesh.userData.aquatic=aquatic;group.add(mesh);
     }
-    if(!instances.length)return;
-    const geometry=new THREE.BufferGeometry();
-    geometry.setAttribute('position',new THREE.Float32BufferAttribute([-.055,0,0,.015,0,0,.04,.28,0, .01,0,-.055,.01,0,.045,.01,.24,.015, -.09,0,.04,-.035,0,.025,-.12,.2,.035],3));geometry.computeVertexNormals();
-    const mesh=new THREE.InstancedMesh(geometry,this.grassMaterial,instances.length),up=new THREE.Vector3(0,1,0);
-    instances.forEach((p,i)=>{
-      this.rotation.setFromAxisAngle(up,hash(p.x|0,p.z|0)*Math.PI*2);
-      this.scratch.compose(new THREE.Vector3(p.x,p.y,p.z),this.rotation,new THREE.Vector3(1,.55+(p.n-.5)*.9,1));mesh.setMatrixAt(i,this.scratch);
-      this.tint.set(p.n>.86?'#9aa17b':p.n>.73?'#7d916e':'#6d825f');mesh.setColorAt(i,this.tint);
-    });
-    mesh.receiveShadow=true;mesh.computeBoundingSphere();group.add(mesh);
   }
   update(game,inCave,dt=1/60){
     const t=game.state.time,phase=t/600*Math.PI*2,elevation=Math.sin(phase),day=THREE.MathUtils.smoothstep(elevation,-.22,.35),dusk=(1-Math.abs(elevation))**5;
     this.time.value=t;this.wind.value=this.owner.settings.bobbing?1:0;
     const uniforms=this.skyUniforms;uniforms.sunDirection.value.set(-Math.cos(phase)*.8,elevation,.25).normalize();uniforms.night.value=1-day;uniforms.rift.value=game.state.dimension==='ender'?1:0;
-    const profile=this.atmospheres[game.world.biome(game.pos.x,game.pos.z)]||this.atmospheres.meadow,blend=1-Math.exp(-dt*1.4);
+    const biome=game.world.biome(game.pos.x,game.pos.z),profile=this.atmospheres[biome]||this.atmospheres[BIOME_DEFINITIONS[biome]?.parent]||this.atmospheres.meadow,blend=1-Math.exp(-dt*1.4);
     this.targetZenith.set('#16283e').lerp(profile.day,day);this.targetHorizon.set('#354654').lerp(profile.horizon,day).lerp(this.palette.dusk,dusk*.35);
     uniforms.zenith.value.lerp(this.targetZenith,blend);uniforms.horizon.value.lerp(this.targetHorizon,blend);
     this.sky.visible=!inCave;this.sky.position.copy(this.owner.camera.position);
     this.clouds.visible=!inCave;this.clouds.position.set(game.pos.x+Math.sin(t*.002)*10,0,game.pos.z);this.clouds.material.color.set('#8b9ba5').lerp(profile.cloud,day);this.clouds.material.opacity=.7*day+.22;
     const r=this.owner;r.scene.background.copy(inCave?this.palette.cave:uniforms.horizon.value);r.scene.fog.color.copy(r.scene.background);
     this.clouds.count=r.options.quality==='low'?40:r.options.quality==='medium'?80:120;
-    const distance=r.options.renderDistance*16;r.scene.fog.near=inCave?20:distance*.7;r.scene.fog.far=inCave?45:distance+16;
+    const distance=r.options.renderDistance*16*(BIOME_DETAIL[biome]?.fog||1);r.scene.fog.near=inCave?20:distance*.7;r.scene.fog.far=inCave?45:distance+16;
     r.sun.intensity=inCave?.06:.14+day*1.45;r.sun.color.set('#b7cee7').lerp(this.palette.sun,day).lerp(this.palette.sunset,dusk*.3);
     r.ambient.intensity=game.effect('nightvision')?Math.max(2.3,2.3+(game.potionPower('nightvision')-1)*.45):inCave?.38:.45+day*.68;r.ambient.color.set('#e1e8e5');r.ambient.groundColor.lerp(profile.ground,blend);
     if(game.effect('nightvision')){r.scene.fog.near=45;r.scene.fog.far=95;r.lantern.intensity=Math.max(r.lantern.intensity,5);}
@@ -106,6 +131,16 @@ export class Scenery {
       this.sky.visible=true;this.clouds.visible=true;this.clouds.position.y=-78;this.clouds.material.color.set('#f2f7ff');this.clouds.material.opacity=.48;
       r.scene.background.copy(uniforms.horizon.value);r.scene.fog.color.copy(uniforms.horizon.value);r.scene.fog.near=distance*.65;r.scene.fog.far=distance+22;
       r.ambient.intensity=1.45;r.ambient.color.set('#e6f2ff');r.ambient.groundColor.set('#899cc2');r.sun.intensity=1.65;r.sun.color.set('#fff0d6');
+    }
+    if(game.state.dimension==='overworld'){
+      const wetland=game.world.biome(game.pos.x,game.pos.z)==='marsh';
+      r.waterMaterial.color.set(wetland?'#84946d':'#7ec8d0');
+      if(game.world.waterAt(r.camera.position.x,r.camera.position.y,r.camera.position.z)){
+        this.sky.visible=false;this.clouds.visible=false;
+        r.scene.background.set(wetland?'#405e48':'#17567e');r.scene.fog.color.copy(r.scene.background);
+        r.scene.fog.near=wetland?2:7;r.scene.fog.far=wetland?17:44;
+        r.sun.intensity*=.65;r.ambient.color.set('#aed8d4');
+      }
     }
     const direction=uniforms.sunDirection.value;r.sun.position.set(game.pos.x+direction.x*50,game.pos.y+Math.max(.3,Math.abs(direction.y))*70,game.pos.z+direction.z*60);r.sun.target.position.set(game.pos.x,game.pos.y,game.pos.z);
   }

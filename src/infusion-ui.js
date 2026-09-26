@@ -1,7 +1,7 @@
-import {ITEMS} from './data.js?v=37';
-import {icon} from './icons.js?v=37';
-import {ENCHANTS,ALTARS,OFFERS,INFUSION_TIERS,itemTags,enchantText} from './infusion-registry.js?v=37';
-import {nearbyAltar,enchantPool,infusionMaterial} from './infusions.js?v=37';
+import {ITEMS} from './data.js?v=38';
+import {icon} from './icons.js?v=38';
+import {ENCHANTS,ALTARS,OFFERS,INFUSION_TIERS,itemTags,enchantText} from './infusion-registry.js?v=38';
+import {nearbyAltar,enchantPool,infusionMaterial} from './infusions.js?v=38';
 const roman=['','I','II','III','IV','V'];
 export function infusionTooltip(state,name){const r=state.infusions?.[name];return r?`${INFUSION_TIERS[r.tier-1]} · Tier ${roman[r.tier]}\n`+Object.entries(r.enchants).map(([id,lv])=>`${ENCHANTS[id].name} ${roman[lv]} — ${enchantText(id,lv)}`).join('\n'):'';}
 const resultMarkup=roll=>roll?`<strong>${INFUSION_TIERS[roll.tier-1]} · TIER ${roman[roll.tier]}</strong><ul>${Object.entries(roll.enchants).map(([id,level],i)=>`<li style="--reveal:${i}" title="${enchantText(id,level)}">${ENCHANTS[id].name} ${roman[level]}<small>${enchantText(id,level)}</small></li>`).join('')}</ul>`:'<p>No infusion yet.</p>';

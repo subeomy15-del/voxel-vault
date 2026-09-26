@@ -10,6 +10,7 @@ export const NEW_ANIMALS={
  gold_watermelon_stag:creature('Gold Watermelon Stag','stag','graze',24,1.7,0,'#b49a4e',{passive:true,height:2.25,flee:7,food:['watermelon'],glow:'#e0cf77',rare:true,drops:{watermelon:[2,3],gold_ingot:[1,1]}})
 };
 export const CREATURES={
+ blaze:creature('Blaze','blaze','ranged',22,1.3,4,'#ba803d',{range:16,height:1.8,glow:'#ffd37b',drops:{blaze_rod:[1,2]}}),
  wolf:creature('Wolf','wolf','lunge',18,2.5,3,'#8a9290',{height:1.05,drops:{leather:[1,1]}}),
  wildcat:creature('Wildcat','cat','lunge',14,3.1,3,'#b69a67',{height:1.05,drops:{leather:[1,1]}}),
  bear:creature('Bear','bear','heavy',38,1.5,6,'#76634e',{height:1.7,radius:.6,drops:{raw_venison:[2,3],leather:[2,3]}}),
@@ -36,11 +37,11 @@ export const CREATURES={
 // No new guardians: the existing storyline guardian is the only guardian definition.
 export function creatureSpawn(world,x,y,z,serial,time){
  const biome=world.biomeAtHeight(x,y,z),night=time%600>330,index=Math.abs(serial);
- if(world.dimension==='nether')return ['stalker','magma_golem','crone'][index%3];
+ if(world.dimension==='nether')return Math.hypot(x-72,z+48)<35?'blaze':['stalker','enderling','magma_golem'][index%3];
  if(world.dimension==='ender')return ['enderling','void_archer','spirit_golem'][index%3];
- if(biome==='deep_cave')return ['cave_golem','magma_golem','slime','draugr_warper'][index%4];
- if(biome==='cave')return ['slime','cave_golem','draugr_zombie','draugr_skeleton'][index%4];
- if(['snow','snow_plains','frozen_badlands'].includes(biome))return ['frost_zombie','frost_skeleton','frost_golem','frost_wraith'][index%4];
+ if(biome==='deep_cave'||biome.endsWith('_cave')&&y<-28)return ['cave_golem','magma_golem','slime','draugr_warper'][index%4];
+ if(biome==='cave'||biome.endsWith('_cave'))return ['slime','cave_golem','draugr_zombie','draugr_skeleton'][index%4];
+ if(['snow','snow_plains','snow_cedar','frozen_badlands'].includes(biome))return ['frost_zombie','frost_skeleton','frost_golem','frost_wraith'][index%4];
  if(biome==='spectral_forest')return ['spirit_wolf','spirit_bear','spirit_stag','spirit_gorilla','spirit_golem'][index%5];
  if(biome==='badlands')return ['draugr_skeleton','draugr_knight','draugr_knight','draugr_huntress','draugr_reaver','draugr_warper'][index%6];
  if(night&&index%13===0)return biome==='jungle'?'spirit_gorilla':biome==='mountain'?'spirit_golem':['spirit_wolf','spirit_bear','spirit_stag'][Math.floor(index/13)%3];

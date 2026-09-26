@@ -1,7 +1,7 @@
-import {BIOME_DEFINITIONS as LEGACY_BIOMES} from './legacy-biomes.js?v=37';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=37';
-import {integerHash} from './climate.js?v=37';
-import {STRUCTURE_TYPES,buildStructure,transform} from './structure-templates.js?v=37';
+import {BIOME_DEFINITIONS as LEGACY_BIOMES} from './legacy-biomes.js?v=38';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=38';
+import {integerHash} from './climate.js?v=38';
+import {STRUCTURE_TYPES,buildStructure,transform} from './structure-templates.js?v=38';
 export const STRUCTURE_RULES=Object.freeze({cellSize:144,jitter:76,occupancy:.62,spacing:22,protectedRadius:520,maxSlope:4});
 const key=(x,y,z)=>`${x},${y},${z}`;
 const overlaps=(a,b,pad=0)=>Math.abs(a.x-b.x)<a.radius+b.radius+pad&&Math.abs(a.z-b.z)<a.radius+b.radius+pad;
@@ -10,12 +10,13 @@ export class StructureGenerator {
  constructor(world,rules=STRUCTURE_RULES){this.world=world;this.rules=rules;this.regions=new Map();this.layouts=new Map();this.registered=new Map();}
  candidate(mx,mz){
   const tag=`${mx},${mz}`;if(this.regions.has(tag))return this.regions.get(tag);
-  const {world:w,rules:r}=this,seed=w.seed;let site=null;
-  if(integerHash(mx,mz,seed+2201)<r.occupancy){
-   const x=mx*r.cellSize+Math.floor(r.cellSize/2+(integerHash(mx,mz,seed+91)-.5)*r.jitter),z=mz*r.cellSize+Math.floor(r.cellSize/2+(integerHash(mx,mz,seed+191)-.5)*r.jitter),c=w.column(x,z),pool=(w.terrain>=8?BIOME_DEFINITIONS:LEGACY_BIOMES)[c.biome]?.structures||[];
-   const rarity=integerHash(mx,mz,seed+3421);let type=pool[Math.floor(integerHash(mx,mz,seed+2731)*pool.length)];
+  const {world:w,rules:r}=this,seed=w.seed,hashAt=w.terrain>=11?(...args)=>w.hash(...args):integerHash;let site=null;
+  if(hashAt(mx,mz,seed+2201)<r.occupancy){
+   const x=mx*r.cellSize+Math.floor(r.cellSize/2+(hashAt(mx,mz,seed+91)-.5)*r.jitter),z=mz*r.cellSize+Math.floor(r.cellSize/2+(hashAt(mx,mz,seed+191)-.5)*r.jitter),c=w.column(x,z),pool=(w.terrain>=8?BIOME_DEFINITIONS:LEGACY_BIOMES)[c.biome]?.structures||[];
+   const rarity=hashAt(mx,mz,seed+3421);let type=pool[Math.floor(hashAt(mx,mz,seed+2731)*pool.length)];
    if(rarity>.96&&pool.length)type='observatory';else if(rarity>.88&&pool.length)type='fortress';
    if(w.terrain>=9&&rarity<.14)type='magma_ruin';
+   if(w.stronghold&&Math.abs(x-w.stronghold.x)<60&&Math.abs(z-w.stronghold.z)<60)type=null;
    if(type){const def=STRUCTURE_TYPES[type],radius=def.radius+2,heights=[];let wet=false;
     for(const dx of[-radius,0,radius])for(const dz of[-radius,0,radius]){const column=w.column(x+dx,z+dz);heights.push(column.h);if(column.h<6||column.biome==='ocean'||type!=='swamp_hut'&&column.biome==='marsh'&&w.noise(x+dx+91,z+dz,12)>.58)wet=true;}
     const slope=Math.max(...heights)-Math.min(...heights);let y=Math.floor(heights.toSorted((a,b)=>a-b)[4])+1;
@@ -23,7 +24,7 @@ export class StructureGenerator {
      y=null;for(let depth=-14;depth>=-46;depth--)if(w.inCave(x,depth,z,c)&&!w.inCave(x,depth-1,z,c)){y=depth;break;}
     }
     if(Math.hypot(x,z)>r.protectedRadius+radius&&y!==null&&(type==='magma_ruin'||!wet&&slope<=r.maxSlope&&y<74)){
-     site={id:`ruin:${w.seed}:${w.terrain}:${mx}:${mz}`,mx,mz,type,biome:c.biome,x,y,z,radius,rotation:Math.floor(integerHash(mx,mz,seed+409)*4),mirror:integerHash(mx,mz,seed+419)>.5,seed:(integerHash(mx,mz,seed+431)*2147483647)|0,priority:integerHash(mx,mz,seed+443),slope};
+     site={id:`ruin:${w.seed}:${w.terrain}:${mx}:${mz}`,mx,mz,type,biome:c.biome,x,y,z,radius,rotation:Math.floor(hashAt(mx,mz,seed+409)*4),mirror:hashAt(mx,mz,seed+419)>.5,seed:(hashAt(mx,mz,seed+431)*2147483647)|0,priority:hashAt(mx,mz,seed+443),slope};
     }
    }
   }

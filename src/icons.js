@@ -1,5 +1,5 @@
-import {itemAssetPath} from './item-assets.js?v=37';
-import { ITEMS, BLOCKS } from './data.js?v=37';
+import {itemAssetPath} from './item-assets.js?v=38';
+import { ITEMS, BLOCKS } from './data.js?v=38';
 const cache=new Map();let iconSerial=0;
 const shade=(hex,amount)=>'#'+[1,3,5].map(i=>Math.round(Math.max(0,Math.min(255,parseInt(hex.slice(i,i+2),16)+amount))).toString(16).padStart(2,'0')).join('');
 const path=(d,fill,stroke='',width=1.3)=>`<path d="${d}" fill="${fill}"${stroke?` stroke="${stroke}" stroke-width="${width}" stroke-linejoin="round" stroke-linecap="round"`:''}/>`;

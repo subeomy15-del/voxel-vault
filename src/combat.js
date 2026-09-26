@@ -1,8 +1,8 @@
-import {CREATURES} from './creature-registry.js?v=37';
-import { ANIMALS,updateAnimal } from './wildlife.js?v=37';
-import { visibleBetween,findMobPath } from './navigation.js?v=37';
-import { updateDragon } from './dragon.js?v=37';
-import { EntityIndex } from './entity-index.js?v=37';
+import {CREATURES} from './creature-registry.js?v=38';
+import { ANIMALS,updateAnimal } from './wildlife.js?v=38';
+import { visibleBetween,findMobPath } from './navigation.js?v=38';
+import { updateDragon } from './dragon.js?v=38';
+import { EntityIndex } from './entity-index.js?v=38';
 
 export const ENEMIES = {
   trader:{name:'Wayfarer trader',hp:20,speed:0,damage:0,color:'#497b7c',glow:'#d6b894',passive:true,height:1.8,radius:.35,xp:0},
@@ -16,7 +16,7 @@ export const ENEMIES = {
   stalker: { name:'Ember prowler', hp:14, speed:3.2, damage:3, color:'#a06443', glow:'#ffd38a', xp:20 },
   wisp: { name:'Frost wisp', hp:14, speed:1.7, damage:3, color:'#82afc2', glow:'#cef5ff', xp:22 },
   brute: { name:'Ruinbreaker', hp:38, speed:1.1, damage:6, color:'#7e718e', glow:'#e2b4ff', xp:32 },
-  enderling: { name:'Enderling', hp:24, speed:2.5, damage:4, color:'#624b77', glow:'#d5a4ee', xp:28 },
+  enderling: { name:'Enderling', hp:24, speed:2.5, damage:4, color:'#624b77', glow:'#d5a4ee', xp:28,drops:{ender_pearl:[1,2]} },
   void_archer: { name:'Void archer', hp:16, speed:1.45, damage:4, color:'#3e536c', glow:'#8dd5e6', xp:34 },
   frost_howler: { name:'Frost howler', hp:30, speed:1.3, damage:5, color:'#657a86', glow:'#c9e4f0', xp:40 },
   guardian: { name:'Vault guardian', hp:180, speed:1.6, damage:6, color:'#687b70', glow:'#a8efd9', xp:180 },

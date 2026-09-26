@@ -30,13 +30,13 @@ onmessage=async({data:m})=>{
     postMessage({id:m.id,states,issues});return;
   }
   if(m.type==='begin'){
-    const prior=worlds.get(m.key),maps=prior?.maps||new Map();if(m.reset)maps.clear();
-    jobs.set(m.id,{key:m.key,meta:m.meta,maps,replacement:m.replacement===true});return;
+    const prior=worlds.get(m.key),maps=m.reset?new Map():new Map(prior?.maps||[]);
+    jobs.set(m.id,{key:m.key,meta:m.meta,maps,touched:new Set(),replacement:m.replacement===true});return;
   }
-  if(m.type==='export'){const state=await request(db.transaction('snapshots').objectStore('snapshots').get(m.key));postMessage({id:m.id,text:JSON.stringify(state)});return;}
+  if(m.type==='export'){const state=await request(db.transaction('snapshots').objectStore('snapshots').get(m.key));postMessage({id:m.id,text:state?JSON.stringify(state):null});return;}
   if(m.type==='patch'){
     const job=jobs.get(m.id);if(!job)throw Error('Missing save transaction');
-    if(m.replace||!job.maps.has(m.dimension))job.maps.set(m.dimension,new Map());const map=job.maps.get(m.dimension);
+    if(m.replace||!job.maps.has(m.dimension))job.maps.set(m.dimension,new Map());else if(!job.touched.has(m.dimension))job.maps.set(m.dimension,new Map(job.maps.get(m.dimension)));job.touched.add(m.dimension);const map=job.maps.get(m.dimension);
     for(const[key,value,deleted]of m.entries)if(deleted)map.delete(key);else map.set(key,value);return;
   }
   if(m.type==='commit'){const job=jobs.get(m.id);jobs.delete(m.id);const metrics=await commit(job);postMessage({id:m.id,ok:true,...metrics});}

@@ -1,2 +1,2 @@
-const vectorItems=new Set(['spectral_leaf','pear_leaf','plum_leaf']);
+const vectorItems=new Set(['leaf_litter','blossom_litter','forest_moss','snow_layer','pebbles','dry_shrub','dry_grass_tuft','mud','jungle_leaf','mangrove_leaf','seagrass','kelp','reeds','vines','blaze_rod','blaze_powder','ender_pearl','eye_of_ender','end_frame','end_frame_filled','stronghold_portal','andesite','diorite','spectral_leaf','pear_leaf','plum_leaf']);
 export const itemAssetPath=name=>'../assets/items/'+name+(vectorItems.has(name)?'.svg':'.png');

@@ -1,6 +1,6 @@
-import { freshState } from './save.js?v=37';
-import { ITEMS, BLOCKS } from './data.js?v=37';
-import { MODE_RULES } from './mode-rules.js?v=37';
+import { freshState } from './save.js?v=38';
+import { ITEMS, BLOCKS } from './data.js?v=38';
+import { MODE_RULES } from './mode-rules.js?v=38';
 
 const dimensions = ['overworld', 'nether', 'ender'];
 const emptyEdits = () => Object.fromEntries(dimensions.map(d => [d, new Map()]));

@@ -1,9 +1,9 @@
-import { NETHER_END } from './nether.js?v=37';
+import { NETHER_END } from './nether.js?v=38';
 import * as THREE from '../vendor/three.module.js';
-import { OUTPOSTS } from './expeditions.js?v=37';
-import { RIFT_ANCHORS } from './realms.js?v=37';
-import { hash } from './data.js?v=37';
-import { DRAGON_TOWERS } from './dragon.js?v=37';
+import { OUTPOSTS } from './expeditions.js?v=38';
+import { RIFT_ANCHORS } from './realms.js?v=38';
+import { hash } from './data.js?v=38';
+import { DRAGON_TOWERS } from './dragon.js?v=38';
 export class RiftEffects {
   constructor(r){
     this.r=r;this.root=new THREE.Group();r.scene.add(this.root);this.epoch=-1;this.time={value:0};this.markers=[];
@@ -50,7 +50,7 @@ export class RiftEffects {
   update(g,dt){
     this.time.value+=dt;if(this.epoch!==this.r.epoch)this.rebuild(g);
     this.root.visible=!g.multiplayer?.competitive&&g.state.mode!=='parkour';if(g.multiplayer?.competitive||g.state.mode==='parkour'){this.rope.visible=false;this.markerRoot.hidden=true;return;}
-    this.rope.visible=!!g.grapple&&!g.screen;if(g.grapple){const points=this.rope.geometry.attributes.position;points.setXYZ(0,g.pos.x+.25,g.pos.y+1,g.pos.z);points.setXYZ(1,g.grapple.x,g.grapple.y-.4,g.grapple.z);points.needsUpdate=true;}
+    this.rope.visible=!!g.grapple&&!g.screen;if(g.grapple){const points=this.rope.geometry.attributes.position;this.rope.position.set(g.pos.x,0,g.pos.z);points.setXYZ(0,.25,g.pos.y+1,0);points.setXYZ(1,g.grapple.x-g.pos.x,g.grapple.y-.4,g.grapple.z-g.pos.z);points.needsUpdate=true;}
     const t=this.time.value;this.markerRoot.hidden=!!g.screen;const high=this.r.options.quality==='high'&&this.r.options.particles!=='off';this.particles.visible=high&&['ender','nether'].includes(g.state.dimension);this.particles.position.set(g.pos.x,g.pos.y-3,g.pos.z);this.particles.rotation.y=t*.012;
     for(const c of this.dragonCrystals){c.crystal.visible=g.world.get(c.x,25,c.z)==='dragon_crystal';c.crystal.rotation.y=t*.6;c.beam.visible=c.crystal.visible&&g.boss?.kind==='dragon';if(c.beam.visible){const p=c.beam.geometry.attributes.position;p.setXYZ(0,c.x+.5,25.5,c.z+.5);p.setXYZ(1,g.boss.x,g.boss.y+1.5,g.boss.z);p.needsUpdate=true;}}
     if(this.planet){this.planet.visible=high;this.planet.position.set(this.r.camera.position.x-63,this.r.camera.position.y+64,this.r.camera.position.z-126);this.planet.userData.globe.rotation.y=t*.006;}

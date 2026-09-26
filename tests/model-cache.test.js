@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {GeometryCache,ModelPool} from '../src/model-cache.js?v=37';
+import {GeometryCache,ModelPool} from '../src/model-cache.js?v=38';
 test('shared geometry survives one owner disposal and evicts only unused entries',()=>{
  let disposals=0;const cache=new GeometryCache(2),create=()=>({dispose(){disposals++;}}),a=cache.acquire('a',create),b=cache.acquire('a',create);
  assert.equal(a,b);cache.release(a);cache.acquire('b',create);cache.acquire('c',create);assert.equal(disposals,0);

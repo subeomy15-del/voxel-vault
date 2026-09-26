@@ -1,20 +1,20 @@
-import {installControlPanels} from '../src/control-panels.js?v=37';
+import {installControlPanels} from '../src/control-panels.js?v=38';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {expandedClimate,regionalClimate} from '../src/regional-climate.js?v=37';
-import {BIOME_DEFINITIONS} from '../src/biome-registry.js?v=37';
-import {freshState,saveState,loadState} from '../src/save.js?v=37';
-import {World} from '../src/world.js?v=37';
-import {Game} from '../src/game.js?v=37';
-import {hotbarIndex,applyLook,clearControls} from '../src/controls.js?v=37';
-import {normalizeSettings} from '../src/settings.js?v=37';
-import {MOB_VARIATIONS,validVariation,variationColor} from '../src/mob-variations.js?v=37';
-import {ENEMIES} from '../src/combat.js?v=37';
+import {expandedClimate,regionalClimate} from '../src/regional-climate.js?v=38';
+import {BIOME_DEFINITIONS} from '../src/biome-registry.js?v=38';
+import {freshState,saveState,loadState} from '../src/save.js?v=38';
+import {World} from '../src/world.js?v=38';
+import {Game} from '../src/game.js?v=38';
+import {hotbarIndex,applyLook,clearControls} from '../src/controls.js?v=38';
+import {normalizeSettings} from '../src/settings.js?v=38';
+import {MOB_VARIATIONS,validVariation,variationColor} from '../src/mob-variations.js?v=38';
+import {ENEMIES} from '../src/combat.js?v=38';
 const storage=()=>{const data=new Map();return {getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)};};
 test('all expanded surface biomes generate deterministically and old terrain retains its climate',()=>{
  const found=new Set();
  for(const seed of[7821,42])for(let x=-6000;x<=6000;x+=96)for(let z=-6000;z<=6000;z+=96){const c=expandedClimate(seed,x,z);found.add(c.biome);assert.ok(Number.isFinite(c.h));}
- assert.deepEqual([...found].sort(),Object.keys(BIOME_DEFINITIONS).sort());
+ assert.deepEqual([...found].sort(),Object.keys(BIOME_DEFINITIONS).filter(id=>(BIOME_DEFINITIONS[id].introduced||0)<=10).sort());
  for(const [x,z] of[[1900,730],[-3200,900],[750,2500]]){
   assert.deepEqual(expandedClimate(42,x,z),expandedClimate(42,x,z));
   assert.equal(new World(42,[],9).biome(x,z),regionalClimate(42,x,z).biome);

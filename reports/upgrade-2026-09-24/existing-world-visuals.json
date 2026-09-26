@@ -1,0 +1,130 @@
+{
+  "results": [
+    {
+      "name": "ocean",
+      "position": {
+        "x": -1768,
+        "z": -200,
+        "y": 8
+      },
+      "terrain": 10,
+      "decor": 72,
+      "aquaticInstances": 346,
+      "telemetry": {
+        "p95Ms": 17.600000381469727,
+        "heapBytes": 41425016,
+        "meshes": 270,
+        "materials": 68,
+        "geometries": 138,
+        "textures": 3,
+        "entities": 9,
+        "longTasks": 0,
+        "chunkInstallMs": 0.7999999970197678,
+        "save": {
+          "status": "unknown",
+          "durationMs": 0,
+          "bytes": 0
+        },
+        "fps": 59.92406297569834,
+        "frameMs": 16.687787014801398,
+        "drawCalls": 94,
+        "triangles": 33382,
+        "chunks": 81,
+        "queued": 0,
+        "particles": 0,
+        "pixelRatio": 1,
+        "quality": "medium",
+        "workerMs": 5.5999999940395355,
+        "adaptive": false
+      }
+    },
+    {
+      "name": "underwater",
+      "position": {
+        "x": -1768,
+        "z": -200,
+        "y": 0
+      },
+      "terrain": 10,
+      "decor": 20,
+      "aquaticInstances": 94,
+      "telemetry": {
+        "p95Ms": 17.5,
+        "heapBytes": 47404664,
+        "meshes": 189,
+        "materials": 68,
+        "geometries": 119,
+        "textures": 3,
+        "entities": 9,
+        "longTasks": 0,
+        "chunkInstallMs": 0.09999999403953552,
+        "save": {
+          "status": "unknown",
+          "durationMs": 0,
+          "bytes": 0
+        },
+        "fps": 59.91234749795968,
+        "frameMs": 16.691050205202778,
+        "drawCalls": 66,
+        "triangles": 55742,
+        "chunks": 49,
+        "queued": 0,
+        "particles": 0,
+        "pixelRatio": 1,
+        "quality": "medium",
+        "workerMs": 23.5,
+        "adaptive": false
+      }
+    },
+    {
+      "name": "forest",
+      "position": {
+        "x": -1512,
+        "z": 1240,
+        "y": 11
+      },
+      "terrain": 10,
+      "decor": 71,
+      "aquaticInstances": 4,
+      "telemetry": {
+        "p95Ms": 17.600000381469727,
+        "heapBytes": 69137290,
+        "meshes": 211,
+        "materials": 60,
+        "geometries": 146,
+        "textures": 3,
+        "entities": 6,
+        "longTasks": 0,
+        "chunkInstallMs": 0.8999999910593033,
+        "save": {
+          "status": "unknown",
+          "durationMs": 0,
+          "bytes": 0
+        },
+        "fps": 59.97361201268663,
+        "frameMs": 16.673999888291924,
+        "drawCalls": 100,
+        "triangles": 94840,
+        "chunks": 81,
+        "queued": 0,
+        "particles": 0,
+        "pixelRatio": 1,
+        "quality": "medium",
+        "workerMs": 10.299999997019768,
+        "adaptive": false
+      }
+    }
+  ],
+  "restored": {
+    "terrain": 10,
+    "seed": 7821,
+    "diamond": 17,
+    "chest": "chest",
+    "build": "gold_block",
+    "contents": {
+      "wood": 9
+    }
+  },
+  "errors": [],
+  "failed": []
+}

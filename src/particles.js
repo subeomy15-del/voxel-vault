@@ -4,7 +4,7 @@ import * as THREE from '../vendor/three.module.js';
 export class ParticlePool {
   constructor(scene, capacity = 384) {
     this.capacity = capacity; this.count = 0; this.limit = 320;
-    this.position = new Float32Array(capacity * 3); this.velocity = new Float32Array(capacity * 3);
+    this.position = new Float64Array(capacity * 3); this.velocity = new Float32Array(capacity * 3);
     this.rotation = new Float32Array(capacity * 3); this.spin = new Float32Array(capacity * 3);
     this.life = new Float32Array(capacity); this.age = new Float32Array(capacity); this.size = new Float32Array(capacity);
     this.glow = new Float32Array(capacity); this.alpha = new Float32Array(capacity); this.colors = new Float32Array(capacity * 3);
@@ -28,6 +28,7 @@ export class ParticlePool {
     this.mesh.renderOrder = 2; scene.add(this.mesh);
     this.dummy = new THREE.Object3D(); this.color = new THREE.Color(); this.colorDirty = false;
   }
+  setOrigin(x,z){this.mesh.position.set(x,0,z);}
   get length() { return this.count; }
   configure(level, scale = 1) {
     this.limit = level === 'off' ? 0 : Math.min(this.capacity, Math.max(0, Math.round((level === 'low' ? 112 : 320) * scale)));
@@ -81,7 +82,7 @@ export class ParticlePool {
       const j = i * 3, remaining = 1 - this.age[i] / this.life[i];
       this.velocity[j + 1] -= dt * 9;
       for (let axis = 0; axis < 3; axis++) { this.position[j + axis] += this.velocity[j + axis] * dt; this.rotation[j + axis] += this.spin[j + axis] * dt; }
-      this.dummy.position.set(this.position[j], this.position[j + 1], this.position[j + 2]);
+      this.dummy.position.set(this.position[j]-this.mesh.position.x, this.position[j + 1], this.position[j + 2]-this.mesh.position.z);
       this.dummy.rotation.set(this.rotation[j], this.rotation[j + 1], this.rotation[j + 2]);
       this.dummy.scale.setScalar(this.size[i] * (.45 + remaining * .55)); this.dummy.updateMatrix();
       this.mesh.setMatrixAt(i, this.dummy.matrix); this.alpha[i] = Math.min(1, remaining * 2) * remaining * (this.glow[i] ? .75+.25*Math.sin(this.age[i]*35+i) : 1);

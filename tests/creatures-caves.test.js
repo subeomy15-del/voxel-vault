@@ -1,16 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from '../vendor/three.module.js';
-import {World} from '../src/world.js?v=37';
-import {CREATURES,NEW_ANIMALS,creatureSpawn} from '../src/creature-registry.js?v=37';
-import {ANIMALS,animalKind} from '../src/wildlife.js?v=37';
-import {ENEMIES,warpCreature,updateEnemies} from '../src/combat.js?v=37';
-import {creatureModel,animateCreature} from '../src/creature-model.js?v=37';
-import {ITEMS,BLOCKS} from '../src/data.js?v=37';
-import {ParticlePool} from '../src/particles.js?v=37';
-import {freshState,saveState,loadState} from '../src/save.js?v=37';
-import {transform} from '../src/structure-templates.js?v=37';
-import {Game} from '../src/game.js?v=37';
+import {World} from '../src/world.js?v=38';
+import {CREATURES,NEW_ANIMALS,creatureSpawn} from '../src/creature-registry.js?v=38';
+import {ANIMALS,animalKind} from '../src/wildlife.js?v=38';
+import {ENEMIES,warpCreature,updateEnemies} from '../src/combat.js?v=38';
+import {creatureModel,animateCreature} from '../src/creature-model.js?v=38';
+import {ITEMS,BLOCKS} from '../src/data.js?v=38';
+import {ParticlePool} from '../src/particles.js?v=38';
+import {freshState,saveState,loadState} from '../src/save.js?v=38';
+import {transform} from '../src/structure-templates.js?v=38';
+import {Game} from '../src/game.js?v=38';
 const storage=()=>{const m=new Map();return {getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v)};};
 const game=()=>new Game({setWorld(){},burst(){},stream(){},firework(){}},{play(){},quiet(){}},storage());
 const cells=w=>[...w.structures].sort(([a],[b])=>a.localeCompare(b));
@@ -52,7 +52,7 @@ test('magma cache opens once and stores mined blocks, defeated guards and world 
  const g=game(),s=g.world.ruins.find({radius:18,type:'magma_ruin'})[0],l=g.world.ruins.layout(s),[dx,dz]=transform(l.loot.x,l.loot.z,s.rotation,s.mirror);
  const x=s.x+dx,y=s.y+l.loot.y,z=s.z+dz;g.world.prepare(Math.floor(x/16),Math.floor(z/16));g.pos={x:x+1.5,y,z:z+.5};g.screen=null;g.target={x,y,z,type:'treasure_chest'};
  g.interact();assert.ok(g.state.opened.includes(s.id));const inv={...g.state.inv};g.interact();assert.deepEqual(g.state.inv,inv);
- const st=storage();g.state.ruinDefeated=[s.id+':guard:0'];saveState(st,g.state);const loaded=loadState(st);assert.equal(loaded.terrain,10);assert.deepEqual(loaded.opened,g.state.opened);assert.deepEqual(loaded.ruinDefeated,g.state.ruinDefeated);
+ const st=storage();g.state.ruinDefeated=[s.id+':guard:0'];saveState(st,g.state);const loaded=loadState(st);assert.equal(loaded.terrain,12);assert.deepEqual(loaded.opened,g.state.opened);assert.deepEqual(loaded.ruinDefeated,g.state.ruinDefeated);
 });
 test('distant terrain remains seeded, editable and bounded in both directions',()=>{
  for(const x of [-1000000,1000000]){const a=new World(7821,[],9),b=new World(7821,[],9);assert.deepEqual(a.column(x,x),b.column(x,x));assert.ok(a.set(x,60,x,'plank'));const c=new World(7821,[...a.edits],9);assert.equal(c.get(x,60,x),'plank');a.prepare(Math.floor(x/16),Math.floor(x/16));a.pruneCache(0,0,3);assert.ok(a.columns.size<6000);}
@@ -68,8 +68,8 @@ test('all requested non-guardian creatures have working models, valid drops and 
 });
 test('spawn tables expose every hostile family without cross-realm leakage',()=>{
  const kinds=new Set();for(const biome of ['deep_cave','cave','snow','badlands','jungle','mountain','marsh','forest','conifer','meadow'])for(let n=0;n<300;n++)kinds.add(creatureSpawn({dimension:'overworld',biomeAtHeight:()=>biome},0,0,0,n,450));
- for(const id of Object.keys(CREATURES))assert.ok(kinds.has(id),id);
- for(let n=0;n<100;n++)assert.ok(['stalker','magma_golem','crone'].includes(creatureSpawn({dimension:'nether',biomeAtHeight:()=>''},0,0,0,n,100)));
+ for(const id of Object.keys(CREATURES))if(id!=='blaze')assert.ok(kinds.has(id),id);assert.ok(!kinds.has('blaze'));assert.equal(creatureSpawn({dimension:'nether',biomeAtHeight:()=>''},72,25,-48,0,100),'blaze');
+ for(let n=0;n<100;n++)assert.ok(['stalker','magma_golem','enderling'].includes(creatureSpawn({dimension:'nether',biomeAtHeight:()=>''},0,0,0,n,100)));
 });
 test('new ranged enemies fire real projectiles; warps refuse overlap and obstruction',()=>{
  const g=game();g.pos={x:.5,y:60,z:8.5};g.mobs=[];for(let x=-5;x<6;x++)for(let z=-5;z<15;z++)g.world.set(x,59,z,'stone');

@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js?v=37';
-import { World } from '../src/world.js?v=37';
-import { findMobPath,visibleBetween } from '../src/navigation.js?v=37';
-import { ANIMALS } from '../src/wildlife.js?v=37';
-import { targetMob } from '../src/combat.js?v=37';
-import { freshState,loadState,saveState } from '../src/save.js?v=37';
+import { Game } from '../src/game.js?v=38';
+import { World } from '../src/world.js?v=38';
+import { findMobPath,visibleBetween } from '../src/navigation.js?v=38';
+import { ANIMALS } from '../src/wildlife.js?v=38';
+import { targetMob } from '../src/combat.js?v=38';
+import { freshState,loadState,saveState } from '../src/save.js?v=38';
 const storage=()=>{const map=new Map();return {getItem:k=>map.get(k),setItem:(k,v)=>map.set(k,v)};};
 const make=()=>{const g=new Game({setWorld(){},stream(){},burst(){}},{play(){}},storage());g.screen=null;g.pos={x:.5,y:7,z:9.5};g.yaw=0;g.pitch=0;g.mobs=[];return g;};
 
@@ -34,7 +34,7 @@ test('version 5 worlds retain their terrain and new worlds use the smoother gene
   const st=storage(),old=freshState(481);old.terrain=5;old.pos={x:.5,y:7,z:9.5};saveState(st,old);const loaded=loadState(st),g=new Game({setWorld(){},stream(){},burst(){}},{play(){}},st);assert.equal(loaded.terrain,5);assert.equal(g.world.terrain,5);
   const legacy=new World(481,[],5),modern=new World(481,[],6);let different=0;
   for(let x=-250;x<=250;x+=25)for(let z=-250;z<=250;z+=25){assert.equal(g.world.height(x,z),legacy.height(x,z));if(legacy.height(x,z)!==modern.height(x,z))different++;}
-  assert.ok(different>100);assert.equal(freshState().terrain,10);
+  assert.ok(different>100);assert.equal(freshState().terrain,12);
 });
 test('terrain transitions stay smooth away from coastlines and river valleys',()=>{
   const w=new World(481,[],6);let worst=0;

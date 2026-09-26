@@ -10,8 +10,8 @@ export const EXPANDED_BIOMES=Object.freeze({
  plum_forest:entry('Plum Forest','forest',['plum'],'#859152'),
  bluebell_forest:entry('Bluebell Forest','forest',['oak'],'#787ecc'),
  cedar_forest:entry('Cedar Forest','conifer',['tall_conifer'],'#487649'),
- many_cactus_desert:entry('Many Cactus Desert','desert',[],'#d4c383'),
- red_sand_desert:entry('Red Sand Desert','desert',[],'#ce8050'),
+ many_cactus_desert:entry('Cactus Fields','desert',[],'#d4c383'),
+ red_sand_desert:entry('Red Desert','desert',[],'#ce8050'),
  spectral_forest:entry('Spectral Forest','dense_forest',['spectral'],'#5c7d92'),
  oasis:entry('Oasis','desert',['palm'],'#7ec18c')
 });

@@ -1,5 +1,6 @@
-import {EXPANDED_BIOMES} from './expanded-biomes.js?v=37';
+import {EXPANDED_BIOMES} from './expanded-biomes.js?v=38';
 const ecology={
+ snow_cedar:{animals:['deer','rabbit'],enemies:['frost_howler','wisp'],feature:'Snow-laden cedar boughs and buried halls',resource:'pinewood'},
  meadow:{animals:['cow','sheep','rabbit'],enemies:['zombie','skeleton'],feature:'Open grasslands and fallen ramparts',resource:'wheat'},
  forest:{animals:['deer','pig','rabbit'],enemies:['zombie','skeleton'],feature:'Branching oaks and hidden homesteads',resource:'apple'},
  dense_forest:{animals:['deer','pig'],enemies:['spider','sentinel'],feature:'Great oaks above moss-covered chambers',resource:'mushroom'},

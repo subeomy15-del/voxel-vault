@@ -1,5 +1,5 @@
-import {ITEMS} from './data.js?v=37';
-import {ENCHANTS,ALTARS,OFFERS,itemTags,enchantUnlocked} from './infusion-registry.js?v=37';
+import {ITEMS} from './data.js?v=38';
+import {ENCHANTS,ALTARS,OFFERS,itemTags,enchantUnlocked} from './infusion-registry.js?v=38';
 export const secureRandom=()=>crypto.getRandomValues(new Uint32Array(1))[0]/4294967296;
 export function enchantPool(state,name,altar){const tags=itemTags(ITEMS[name]);return Object.entries(ENCHANTS).filter(([,d])=>d.minAltar<=altar&&d.tags.some(t=>tags.includes(t))&&enchantUnlocked(state,d.unlock));}
 export function rollInfusion(state,name,altar,offer,rng=secureRandom){

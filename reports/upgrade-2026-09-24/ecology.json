@@ -1,0 +1,42 @@
+{
+  "results": [
+    {
+      "name": "jungle",
+      "position": {
+        "x": -5000,
+        "y": 46,
+        "z": -3176
+      },
+      "biome": "jungle",
+      "ready": true,
+      "fish": 0,
+      "chunks": 49
+    },
+    {
+      "name": "marsh",
+      "position": {
+        "x": -4840,
+        "y": 8,
+        "z": 1144
+      },
+      "biome": "marsh",
+      "ready": true,
+      "fish": 0,
+      "chunks": 49
+    },
+    {
+      "name": "seabed",
+      "position": {
+        "x": -5000,
+        "y": -2,
+        "z": 1112
+      },
+      "biome": "ocean",
+      "ready": true,
+      "fish": 7,
+      "chunks": 25
+    }
+  ],
+  "errors": [],
+  "failed": []
+}

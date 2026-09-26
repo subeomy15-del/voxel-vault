@@ -2,6 +2,8 @@
 
 Play: https://subeomy15-del.github.io/voxel-vault/
 
+Latest: [ocean visuals, existing-save preservation and explorable shipwrecks](docs/ocean-release.md).
+
 A browser voxel adventure with an Overworld → Nether → Ender Dragon journey, building, crafting, farming, gliding and local saves. Joinable lobbies support shared Creative worlds, Bed Wars and Manhunt. Natural green foliage, textured blocks and soft shadows; no bloom.
 
 ## Living Wilds update

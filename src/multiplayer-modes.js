@@ -1,5 +1,5 @@
-import { ITEMS } from './data.js?v=37';
-import { BEDWARS_BEDS, BEDWARS_BLOCKS, BEDWARS_SHOP, MODE_RULES } from './mode-rules.js?v=37';
+import { ITEMS } from './data.js?v=38';
+import { BEDWARS_BEDS, BEDWARS_BLOCKS, BEDWARS_SHOP, MODE_RULES } from './mode-rules.js?v=38';
 
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const number = value => Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;

@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=37';
-import {freshState,loadState,slotKey} from '../src/save.js?v=37';
-import {ITEMS} from '../src/data.js?v=37';
-import {ALTARS,OFFERS,ENCHANTS,enchantUnlocked} from '../src/infusion-registry.js?v=37';
-import {rollInfusion,normalizeRoll,infusionValue,nearbyAltar} from '../src/infusions.js?v=37';
-import {weaponPower,miningPower,armorProtection,awardAura} from '../src/enchanting.js?v=37';
+import {Game} from '../src/game.js?v=38';
+import {freshState,loadState,slotKey} from '../src/save.js?v=38';
+import {ITEMS} from '../src/data.js?v=38';
+import {ALTARS,OFFERS,ENCHANTS,enchantUnlocked} from '../src/infusion-registry.js?v=38';
+import {rollInfusion,normalizeRoll,infusionValue,nearbyAltar} from '../src/infusions.js?v=38';
+import {weaponPower,miningPower,armorProtection,awardAura} from '../src/enchanting.js?v=38';
 const make=()=>{const data=new Map(),storage={getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};const g=new Game({setWorld(){},stream(){},burst(){}},{play(){},quiet(){}},storage);g.pos={x:100.5,y:80,z:100.5};g.screen='enchant';g.state.aura=1000;g.world.set(101,80,100,'basic_altar');return g;};
 const rng=()=>{let seed=321;return()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};};
 test('75,000 rolls follow all 15 configured distributions and obey budgets, levels and conflicts',()=>{

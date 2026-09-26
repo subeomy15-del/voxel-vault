@@ -1,32 +1,32 @@
-import {bagRoom,bagCount,BAG_CAPACITY,STACK_SIZE} from './bag-capacity.js?v=37';
-import {creatureSpawn} from './creature-registry.js?v=37';
-import {tickRuinEncounters,defeatRuinGuard,ruinEquipment} from './ruin-encounters.js?v=37';
-import {biomeEnemy} from './biome-ecology.js?v=37';
-import {useRod,claimSeaCache,activateWaystone,travelWaystone,trade,tickExploration} from './exploration.js?v=37';
-import {infuse,infusionValue,armorInfusion,secureRandom} from './infusions.js?v=37';
-import {ALTARS} from './infusion-registry.js?v=37';
-import {drinkPotion,potionFor,potionPower,potionDamageMultiplier} from './potions.js?v=37';
-import { armBlast,cancelDelayedActions } from './delayed-actions.js?v=37';
-import { saveHealth,preserveBeforeReplacement } from './save-health.js?v=37';
-import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=37';
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=37';
-import { canonicalItem,normalizeResources } from './resource-map.js?v=37';
-import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=37';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=37';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP,SEA_LEVEL } from './world.js?v=37';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,maxCraft,hash,dailySeed } from './data.js?v=37';
-import { freshState,loadState,saveState,slotKey,importLegacy } from './save.js?v=37';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=37';
-import { movePlayer,requestJump } from './movement.js?v=37';
-import { overlapsBlock } from './shapes.js?v=37';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=37';
-import { ANIMALS,animalKind } from './wildlife.js?v=37';
-import { CHAPTERS,journeyStage } from './journey.js?v=37';
-import { enchantGear,weaponPower,miningPower,armorProtection,awardAura } from './enchanting.js?v=37';
-import { tickTraps,trapAt } from './traps.js?v=37';
+import {bagRoom,bagCount,BAG_CAPACITY,STACK_SIZE} from './bag-capacity.js?v=38';
+import {creatureSpawn} from './creature-registry.js?v=38';
+import {tickRuinEncounters,defeatRuinGuard,ruinEquipment} from './ruin-encounters.js?v=38';
+import {biomeEnemy} from './biome-ecology.js?v=38';
+import {useRod,claimSeaCache,activateWaystone,travelWaystone,trade,tickExploration} from './exploration.js?v=38';
+import {infuse,infusionValue,armorInfusion,secureRandom} from './infusions.js?v=38';
+import {ALTARS} from './infusion-registry.js?v=38';
+import {drinkPotion,potionFor,potionPower,potionDamageMultiplier} from './potions.js?v=38';
+import { armBlast,cancelDelayedActions } from './delayed-actions.js?v=38';
+import { saveHealth,preserveBeforeReplacement } from './save-health.js?v=38';
+import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=38';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=38';
+import { canonicalItem,normalizeResources } from './resource-map.js?v=38';
+import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=38';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=38';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP,SEA_LEVEL } from './world.js?v=38';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,maxCraft,hash,dailySeed } from './data.js?v=38';
+import { freshState,loadState,saveState,slotKey,importLegacy } from './save.js?v=38';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=38';
+import { movePlayer,requestJump } from './movement.js?v=38';
+import { overlapsBlock } from './shapes.js?v=38';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=38';
+import { ANIMALS,animalKind,tickAquaticLife } from './wildlife.js?v=38';
+import { CHAPTERS,journeyStage } from './journey.js?v=38';
+import { enchantGear,weaponPower,miningPower,armorProtection,awardAura } from './enchanting.js?v=38';
+import { tickTraps,trapAt } from './traps.js?v=38';
 
 export class Game {
-  constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];this.state=loadState(storage)||freshState();this.loadWorld();}
+  constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];const saved=loadState(storage);if(!saved&&saveHealth(storage,slotKey('adventure')).blocked)throw Error('The saved world is unreadable. Its data has been preserved; no replacement world was started.');this.state=saved||freshState();this.loadWorld();}
   resetRuntime(){
     this.fishing=null;this.tradingSite=null;this.waystoneSource=null;this.traderTimer=0;
     this.movementInputHeld=new Set();this.jumpActive=false;this.jumpIntent=0;this.touchSprint=false;this.mantle=null;this.padFlight=0;this.jumpReleased=false;this.sprintToggle=false;this.crouchToggle=false;this.landingImpulse=0;this.jumpImpulse=0;
@@ -123,6 +123,7 @@ export class Game {
     if(reset&&!preserveBeforeReplacement(this.storage,slotKey(mode))){this.toast('Could not preserve your world','Export a backup or free storage before replacing it.');return false;}
     cancelDelayedActions(this);
     let state=reset?null:loadState(this.storage,mode);
+    if(!reset&&!state&&saveHealth(this.storage,slotKey(mode)).blocked){this.toast('Your world could not be opened','Its stored data is preserved. Export a backup or retry after fixing storage.');return false;}
     if(!state){state=freshState(mode==='daily'?dailySeed():Math.floor(Math.random()*2147483646)+1,mode);if(mode==='adventure'&&!reset)importLegacy(this.storage,state);}
     this.state=state;this.loadWorld();this.screen=null;this.save();this.toast(this.state.dimension==='ender'?'Ender Islands':this.creative?'Creative world':'Make this place your own',this.state.dimension==='ender'?'L to glide · Use Moonstone Orbs to blink · Use the arrival gate or pause menu to return.':this.creative?'Every material is available in your backpack.':'A new clearing, a new beginning. Gather timber, plant a garden, and build a place to return to.');
   }
@@ -464,7 +465,7 @@ export class Game {
     if(lava)this.hurt(4,false,'fire');else if(magma&&this.grounded)this.hurt(1,false,this.state.dimension==='nether'?'ash':'fire');
   }
   update(dt){
-    this.renderer.stream(this.pos);if(this.screen){this.state.potionCooldown=Math.max(0,(this.state.potionCooldown||0)-dt);return;}
+    this.renderer.stream(this.pos,{x:this.vx,z:this.vz});if(this.renderer.awaitingLanding){if(!this.renderer.landingReady(this.pos))return;this.renderer.awaitingLanding=false;}if(this.screen){this.state.potionCooldown=Math.max(0,(this.state.potionCooldown||0)-dt);return;}
     if(this.state.mode==='parkour'){
       this.state.time+=dt;this.state.elapsed+=dt;this.stamina=100;
       if(!this.parkour?.respawnTime)this.move(dt);
@@ -472,7 +473,7 @@ export class Game {
     }
     this.state.time+=dt;this.state.elapsed+=dt;if(!this.multiplayer?.competitive)tickSurvival(this,dt);this.updateDrops(dt);for(const k of['grappleCooldown','attackCooldown','hurtCooldown','dashCooldown','dashTime','firecrackerCooldown','blastCooldown'])this[k]=Math.max(0,this[k]-dt);
     this.cropTimer+=dt;if(this.cropTimer>1){this.cropTimer=0;this.growCrops();this.updateJourney();}
-    this.move(dt);tickExploration(this,dt);if(!this.multiplayer?.competitive){tickTraps(this,dt);this.updateHeat();}if(this.screen)return;this.updateFortress();if(this.tickRift(dt))return;this.updateMobs(dt);if(this.screen)return;
+    this.move(dt);tickExploration(this,dt);if(!this.multiplayer?.competitive){tickTraps(this,dt);this.updateHeat();}if(this.screen)return;this.updateFortress();if(this.tickRift(dt))return;this.updateMobs(dt);tickAquaticLife(this,dt);if(this.screen)return;
     this.target=this.world.raycast({x:this.pos.x,y:this.pos.y+(this.crouching?1.15:1.58),z:this.pos.z},this.direction(),6);
     if(this.placeHeld){this.placeTimer-=dt;if(this.placeTimer<=0){this.place();this.placeTimer=.16;}}
     if(this.drawState){if(this.drawState.item!==this.held)this.drawState=null;else this.drawState.time+=dt;}
@@ -500,7 +501,7 @@ export class Game {
       if(CROP_BLOCKS.includes(t.type)){this.harvest(t);this.mineProgress=0;return;}
       if(t.type==='chest'){const store=this.state.containers[key]||{};for(const[k,n]of Object.entries(store))this.add(k,n);delete this.state.containers[key];}
       const dropX=t.x+.5,dropY=t.y+.5,dropZ=t.z+.5;
-      this.world.set(t.x,t.y,t.z,null);this.state.stats.mined++;const ore=['diamond','moonstone','coal','iron','gold'].includes(t.type);if(natural&&ore){awardAura(this,(['diamond','moonstone'].includes(t.type)?8:4)*(1+infusionValue(this.state,this.held,'miners_aura')));if(secureRandom()<infusionValue(this.state,this.held,'fortune'))this.dropItem(BLOCKS[t.type].drop||t.type,1,dropX,dropY,dropZ);const sight=infusionValue(this.state,this.held,'vein_sense');if(sight)this.state.effects.xray=Math.max(this.state.effects.xray||0,sight);}this.miningChain=this.state.elapsed-(this.lastMinedAt||0)<2?Math.min(5,(this.miningChain||0)+1):1;this.lastMinedAt=this.state.elapsed;this.state.exhaustion+=.025;
+      this.world.set(t.x,t.y,t.z,BLOCKS[t.type]?.waterlogged?'water':null);this.state.stats.mined++;const ore=['diamond','moonstone','coal','iron','gold'].includes(t.type);if(natural&&ore){awardAura(this,(['diamond','moonstone'].includes(t.type)?8:4)*(1+infusionValue(this.state,this.held,'miners_aura')));if(secureRandom()<infusionValue(this.state,this.held,'fortune'))this.dropItem(BLOCKS[t.type].drop||t.type,1,dropX,dropY,dropZ);const sight=infusionValue(this.state,this.held,'vein_sense');if(sight)this.state.effects.xray=Math.max(this.state.effects.xray||0,sight);}this.miningChain=this.state.elapsed-(this.lastMinedAt||0)<2?Math.min(5,(this.miningChain||0)+1):1;this.lastMinedAt=this.state.elapsed;this.state.exhaustion+=.025;
       if(this.held==='moonstone_pickaxe'){this.dropItem(BLOCKS[t.type].drop||t.type,1,dropX,dropY,dropZ);}else if(['leaf','pine','autumnleaf'].includes(t.type)){this.dropItem('leaf',1,dropX,dropY,dropZ);this.dropItem('fiber',1,dropX,dropY,dropZ);if(hash(t.x+t.y,t.z,this.state.seed)<.22)this.dropItem('apple',1,dropX,dropY,dropZ);}else {this.dropItem(BLOCKS[t.type].drop||t.type,1,dropX,dropY,dropZ);if(t.type==='fern'){this.dropItem('fiber',2,dropX,dropY,dropZ);this.dropItem('seeds',1,dropX,dropY,dropZ);}}
 
       this.renderer.burst(t.x+.5,t.y+.5,t.z+.5,BLOCKS[t.type].color,8);this.renderer.swing=1;this.audio.play('mine',t.type);this.mineProgress=0;this.mineKey='';this.emit('hud');
@@ -516,7 +517,7 @@ export class Game {
   moveMob(m,dx,dz){
     if(trapAt(this,m)?.snare){dx*=.2;dz*=.2;}
     const info=ENEMIES[m.kind]||{},height=info.height||1.7,radius=info.radius||.25;
-    if(info.aquatic){const x=m.x+dx,z=m.z+dz;if(this.world.get(Math.floor(x),Math.floor(m.y),Math.floor(z))==='water'){m.x=x;m.z=z;m.angle=Math.atan2(dx,dz);}return;}
+    if(info.aquatic){const x=m.x+dx,z=m.z+dz;if(this.world.waterAt(x,m.y,z)&&this.world.waterAt(x,m.y+height,z)&&!this.world.intersects(x,m.y,z,height,radius)){m.x=x;m.z=z;m.angle=Math.atan2(dx,dz);}return;}
     for(const[a,b]of[[dx,dz],[dx,0],[0,dz]]){
       const x=m.x+a,z=m.z+b,y=this.world.ground(x,z,m.y+1.1);
       if(Math.abs(x)>WORLD_LIMIT-1||Math.abs(z)>WORLD_LIMIT-1||info.passive&&this.world.waterAt(x,y,z))continue;

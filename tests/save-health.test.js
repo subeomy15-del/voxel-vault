@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {saveHealth,readDocument,writeDocument,preserveBeforeReplacement} from '../src/save-health.js?v=37';
-import {parseWorldBackup,exportWorld} from '../src/world-backup.js?v=37';
+import {saveHealth,readDocument,writeDocument,preserveBeforeReplacement} from '../src/save-health.js?v=38';
+import {parseWorldBackup,exportWorld} from '../src/world-backup.js?v=38';
 const memory=()=>{const data=new Map();return{data,getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)};};
 const valid=s=>s?.version===2;
 test('rotating recovery snapshots survive malformed and interrupted primary writes',()=>{
@@ -25,4 +25,16 @@ test('pre-upgrade fixture survives validated backup round trips with all realm a
  assert.equal(loaded.inv.diamond,fixture.inv.diamond);assert.deepEqual(loaded.opened,fixture.opened);assert.deepEqual(loaded.pos,fixture.pos);
  assert.throws(()=>parseWorldBackup('{broken'),/valid JSON/);assert.throws(()=>parseWorldBackup(JSON.stringify({...fixture,version:999})),/supported/);
  assert.throws(()=>parseWorldBackup(JSON.stringify({...fixture,edits:[['0,1,2','missing_block']]})),/invalid world edits/);
+});
+
+test('unrecoverable saves never launch a fresh world or replace the active slot',async()=>{
+ const {Game}=await import('../src/game.js?v=38');
+ const renderer={setWorld(){},stream(){},burst(){}},audio={play(){},quiet(){}},s=memory();
+ s.setItem('voxel-vault-v2-adventure','{broken');
+ assert.throws(()=>new Game(renderer,audio,s),/no replacement world/);
+ assert.equal(s.getItem('voxel-vault-v2-adventure'),'{broken');
+ const healthy=memory(),g=new Game(renderer,audio,healthy),state=g.state,world=g.world;
+ healthy.setItem('voxel-vault-v2-creative','{broken');
+ assert.equal(g.start('creative'),false);assert.equal(g.state,state);assert.equal(g.world,world);
+ assert.equal(healthy.getItem('voxel-vault-v2-creative'),'{broken');
 });

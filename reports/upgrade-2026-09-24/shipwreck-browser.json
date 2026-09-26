@@ -1,0 +1,41 @@
+{
+  "site": {
+    "id": "wreck:7821:-15:-3",
+    "x": -2779,
+    "y": -12,
+    "z": -433,
+    "rotation": 1
+  },
+  "terrain": 10,
+  "blocks": 944,
+  "chests": 1,
+  "performance": {
+    "p95Ms": 16.899999618530273,
+    "heapBytes": 27453033,
+    "meshes": 136,
+    "materials": 67,
+    "geometries": 113,
+    "textures": 3,
+    "entities": 9,
+    "longTasks": 1,
+    "chunkInstallMs": 0.09999999403953552,
+    "save": {
+      "status": "saved",
+      "durationMs": 0.29999999701976776,
+      "bytes": 34081,
+      "workerMs": 0.7999999970197678,
+      "message": ""
+    },
+    "fps": 58.32099207836972,
+    "frameMs": 17.14648472811016,
+    "drawCalls": 54,
+    "triangles": 71210,
+    "chunks": 25,
+    "queued": 0,
+    "particles": 0,
+    "pixelRatio": 1,
+    "quality": "medium",
+    "workerMs": 22.799999997019768,
+    "adaptive": false
+  }
+}

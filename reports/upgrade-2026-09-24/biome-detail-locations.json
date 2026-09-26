@@ -1,0 +1,835 @@
+{
+  "seed": 7821,
+  "terrain": 12,
+  "rows": [
+    {
+      "biome": "meadow",
+      "location": {
+        "x": -6000,
+        "z": -5856,
+        "y": 25
+      },
+      "profile": {
+        "cover": [
+          "dry_grass_tuft",
+          "daisy"
+        ],
+        "density": 0.08,
+        "rock": "limestone",
+        "logs": false,
+        "fog": 1
+      },
+      "generated": {
+        "daisy": 13,
+        "dry_grass_tuft": 20,
+        "leaf": 5
+      }
+    },
+    {
+      "biome": "grassy_plains",
+      "location": {
+        "x": -6000,
+        "z": -3696,
+        "y": 21
+      },
+      "profile": {
+        "cover": [
+          "fern",
+          "dry_grass_tuft",
+          "flower_blue"
+        ],
+        "density": 0.23,
+        "rock": "limestone",
+        "logs": false,
+        "fog": 1
+      },
+      "generated": {
+        "dry_grass_tuft": 36,
+        "fern": 62,
+        "flower_blue": 25
+      }
+    },
+    {
+      "biome": "hilly_plains",
+      "location": {
+        "x": -6000,
+        "z": -3840,
+        "y": 31
+      },
+      "profile": {
+        "cover": [
+          "dry_grass_tuft",
+          "daisy"
+        ],
+        "density": 0.12,
+        "rock": "limestone",
+        "logs": false,
+        "fog": 1
+      },
+      "generated": {
+        "daisy": 27,
+        "dry_grass_tuft": 6,
+        "cotton_crop": 6,
+        "wood": 8,
+        "leaf": 94,
+        "limestone": 36
+      }
+    },
+    {
+      "biome": "flower_meadow",
+      "location": {
+        "x": -6000,
+        "z": -4800,
+        "y": 9
+      },
+      "profile": {
+        "cover": [
+          "daisy",
+          "flower_blue",
+          "flower_red",
+          "lavender"
+        ],
+        "density": 0.33,
+        "rock": "limestone",
+        "logs": false,
+        "fog": 1
+      },
+      "generated": {
+        "flower_red": 21,
+        "flower_blue": 18,
+        "daisy": 11,
+        "lavender": 20,
+        "pebbles": 4,
+        "dry_grass_tuft": 9,
+        "wood": 5
+      }
+    },
+    {
+      "biome": "forest",
+      "location": {
+        "x": -5328,
+        "z": 4656,
+        "y": 10
+      },
+      "profile": {
+        "cover": [
+          "leaf_litter",
+          "fern",
+          "mushroom"
+        ],
+        "density": 0.2,
+        "rock": "moss",
+        "logs": true,
+        "fog": 1
+      },
+      "generated": {
+        "fern": 39,
+        "mushroom": 43,
+        "berries_crop": 1,
+        "wood": 23,
+        "leaf": 180,
+        "forest_moss": 3
+      }
+    },
+    {
+      "biome": "maple_forest",
+      "location": {
+        "x": -6000,
+        "z": -5712,
+        "y": 21
+      },
+      "profile": {
+        "cover": [
+          "leaf_litter",
+          "fern",
+          "flower_red"
+        ],
+        "density": 0.25,
+        "rock": "moss",
+        "logs": true,
+        "fog": 1
+      },
+      "generated": {
+        "leaf_litter": 1,
+        "fern": 7,
+        "moss": 5,
+        "flower_red": 11,
+        "wood": 18,
+        "leaf": 111,
+        "autumnleaf": 97
+      }
+    },
+    {
+      "biome": "aspen_forest",
+      "location": {
+        "x": -5952,
+        "z": -5712,
+        "y": 24
+      },
+      "profile": {
+        "cover": [
+          "leaf_litter",
+          "daisy",
+          "fern"
+        ],
+        "density": 0.18,
+        "rock": "limestone",
+        "logs": true,
+        "fog": 1,
+        "log": "birch"
+      },
+      "generated": {
+        "daisy": 24,
+        "fern": 2,
+        "birch": 5,
+        "leaf": 78,
+        "limestone": 41,
+        "mushroom": 1
+      }
+    },
+    {
+      "biome": "pear_forest",
+      "location": {
+        "x": -6000,
+        "z": 4512,
+        "y": 13
+      },
+      "profile": {
+        "cover": [
+          "leaf_litter",
+          "fern",
+          "berries_crop"
+        ],
+        "density": 0.24,
+        "rock": "moss",
+        "logs": true,
+        "fog": 1
+      },
+      "generated": {
+        "leaf_litter": 33,
+        "cotton_crop": 11,
+        "fern": 15,
+        "wood": 13,
+        "pear_leaf": 225,
+        "autumnleaf": 2,
+        "berries_crop": 8,
+        "moss": 44
+      }
+    },
+    {
+      "biome": "plum_forest",
+      "location": {
+        "x": -5952,
+        "z": -3888,
+        "y": 21
+      },
+      "profile": {
+        "cover": [
+          "leaf_litter",
+          "mushroom",
+          "berries_crop"
+        ],
+        "density": 0.24,
+        "rock": "moss",
+        "logs": true,
+        "fog": 1
+      },
+      "generated": {
+        "mushroom": 67,
+        "daisy": 13,
+        "wood": 5,
+        "forest_moss": 3,
+        "fern": 1,
+        "cotton_crop": 6,
+        "berries_crop": 3
+      }
+    },
+    {
+      "biome": "bluebell_forest",
+      "location": {
+        "x": -6000,
+        "z": -4944,
+        "y": 13
+      },
+      "profile": {
+        "cover": [
+          "flower_blue",
+          "flower_blue",
+          "leaf_litter"
+        ],
+        "density": 0.36,
+        "rock": "moss",
+        "logs": true,
+        "fog": 1
+      },
+      "generated": {
+        "flower_blue": 124,
+        "wood": 10,
+        "leaf": 141
+      }
+    },
+    {
+      "biome": "autumn_forest",
+      "location": {
+        "x": -6000,
+        "z": -4320,
+        "y": 17
+      },
+      "profile": {
+        "cover": [
+          "leaf_litter",
+          "leaf_litter",
+          "mushroom"
+        ],
+        "density": 0.35,
+        "rock": "granite",
+        "logs": true,
+        "fog": 1
+      },
+      "generated": {
+        "autumnleaf": 282,
+        "leaf_litter": 8,
+        "mushroom": 18,
+        "wood": 19
+      }
+    },
+    {
+      "biome": "cherry",
+      "location": {
+        "x": -6000,
+        "z": -3888,
+        "y": 29
+      },
+      "profile": {
+        "cover": [
+          "blossom_litter",
+          "blossom_litter",
+          "daisy"
+        ],
+        "density": 0.3,
+        "rock": "moss",
+        "logs": true,
+        "fog": 1
+      },
+      "generated": {
+        "daisy": 31,
+        "blossom_litter": 92,
+        "wood": 21,
+        "cherry_leaf": 193,
+        "plum_leaf": 10,
+        "mushroom": 1,
+        "moss": 3
+      }
+    },
+    {
+      "biome": "conifer",
+      "location": {
+        "x": -6000,
+        "z": -5664,
+        "y": 14
+      },
+      "profile": {
+        "cover": [
+          "leaf_litter",
+          "forest_moss",
+          "mushroom"
+        ],
+        "density": 0.25,
+        "rock": "granite",
+        "logs": true,
+        "fog": 0.9,
+        "log": "pinewood"
+      },
+      "generated": {
+        "pine": 345,
+        "forest_moss": 54,
+        "leaf_litter": 63,
+        "pinewood": 32
+      }
+    },
+    {
+      "biome": "cedar_forest",
+      "location": {
+        "x": -6000,
+        "z": -4992,
+        "y": 9
+      },
+      "profile": {
+        "cover": [
+          "forest_moss",
+          "fern",
+          "mushroom"
+        ],
+        "density": 0.32,
+        "rock": "moss",
+        "logs": true,
+        "fog": 0.85,
+        "log": "pinewood"
+      },
+      "generated": {
+        "mushroom": 5,
+        "seagrass": 23,
+        "reeds": 1,
+        "wood": 22,
+        "mangrove_leaf": 63,
+        "fern": 24,
+        "pine": 577,
+        "pinewood": 28,
+        "forest_moss": 4,
+        "pebbles": 3
+      }
+    },
+    {
+      "biome": "dense_forest",
+      "location": {
+        "x": -6000,
+        "z": -5616,
+        "y": 11
+      },
+      "profile": {
+        "cover": [
+          "forest_moss",
+          "fern",
+          "mushroom"
+        ],
+        "density": 0.34,
+        "rock": "moss",
+        "logs": true,
+        "fog": 0.78
+      },
+      "generated": {
+        "fern": 80,
+        "berries_crop": 9,
+        "forest_moss": 1,
+        "leaf": 25,
+        "mushroom": 13,
+        "moss": 1
+      }
+    },
+    {
+      "biome": "spectral_forest",
+      "location": {
+        "x": -6000,
+        "z": -5520,
+        "y": 11
+      },
+      "profile": {
+        "cover": [
+          "forest_moss",
+          "lavender",
+          "mushroom"
+        ],
+        "density": 0.22,
+        "rock": "slate",
+        "logs": true,
+        "fog": 0.72
+      },
+      "generated": {
+        "lavender": 63,
+        "forest_moss": 19,
+        "wood": 65,
+        "spectral_leaf": 316,
+        "mushroom": 21,
+        "flower_blue": 2
+      }
+    },
+    {
+      "biome": "jungle",
+      "location": {
+        "x": -6000,
+        "z": -2928,
+        "y": 14
+      },
+      "profile": {
+        "cover": [
+          "forest_moss",
+          "fern",
+          "berries_crop"
+        ],
+        "density": 0.35,
+        "rock": "moss",
+        "logs": true,
+        "fog": 0.82
+      },
+      "generated": {
+        "jungle_leaf": 853,
+        "vines": 55,
+        "fern": 100,
+        "mushroom": 6,
+        "berries_crop": 5,
+        "wood": 177,
+        "leaf": 268,
+        "forest_moss": 30
+      }
+    },
+    {
+      "biome": "desert",
+      "location": {
+        "x": -5952,
+        "z": -6000,
+        "y": 21
+      },
+      "profile": {
+        "cover": [
+          "dry_shrub",
+          "pebbles"
+        ],
+        "density": 0.045,
+        "rock": "sandstone",
+        "logs": false,
+        "fog": 1
+      },
+      "generated": {
+        "pebbles": 13,
+        "cactus": 2,
+        "dry_shrub": 4
+      }
+    },
+    {
+      "biome": "many_cactus_desert",
+      "location": {
+        "x": -6000,
+        "z": -6000,
+        "y": 27
+      },
+      "profile": {
+        "cover": [
+          "dry_shrub",
+          "pebbles"
+        ],
+        "density": 0.08,
+        "rock": "sandstone",
+        "logs": false,
+        "fog": 1,
+        "cactus": true
+      },
+      "generated": {
+        "cactus": 3,
+        "dry_shrub": 17,
+        "pebbles": 4
+      }
+    },
+    {
+      "biome": "red_sand_desert",
+      "location": {
+        "x": -5904,
+        "z": -3504,
+        "y": 20
+      },
+      "profile": {
+        "cover": [
+          "dry_shrub",
+          "pebbles"
+        ],
+        "density": 0.055,
+        "rock": "red_terracotta",
+        "logs": false,
+        "fog": 1
+      },
+      "generated": {
+        "pebbles": 11,
+        "dry_shrub": 3,
+        "red_terracotta": 4
+      }
+    },
+    {
+      "biome": "badlands",
+      "location": {
+        "x": -5952,
+        "z": -3312,
+        "y": 24
+      },
+      "profile": {
+        "cover": [
+          "pebbles",
+          "dry_shrub"
+        ],
+        "density": 0.1,
+        "rock": "red_terracotta",
+        "logs": false,
+        "fog": 1
+      },
+      "generated": {
+        "dry_shrub": 18,
+        "pebbles": 8
+      }
+    },
+    {
+      "biome": "oasis",
+      "location": {
+        "x": -5904,
+        "z": -3456,
+        "y": 22
+      },
+      "profile": {
+        "cover": [
+          "fern",
+          "dry_grass_tuft",
+          "cane"
+        ],
+        "density": 0.21,
+        "rock": "sandstone",
+        "logs": true,
+        "fog": 1
+      },
+      "generated": {
+        "dry_grass_tuft": 19,
+        "cane": 20,
+        "wood": 23,
+        "leaf": 125,
+        "carrot_crop": 9,
+        "flower_blue": 7,
+        "sandstone": 24,
+        "fern": 29
+      }
+    },
+    {
+      "biome": "savanna",
+      "location": {
+        "x": -6000,
+        "z": -3216,
+        "y": 11
+      },
+      "profile": {
+        "cover": [
+          "dry_grass_tuft",
+          "dry_shrub"
+        ],
+        "density": 0.24,
+        "rock": "granite",
+        "logs": true,
+        "fog": 1
+      },
+      "generated": {
+        "dry_grass_tuft": 13,
+        "dry_shrub": 3,
+        "carrot_crop": 12,
+        "leaf": 10,
+        "daisy": 2
+      }
+    },
+    {
+      "biome": "marsh",
+      "location": {
+        "x": -6000,
+        "z": -384,
+        "y": 15
+      },
+      "profile": {
+        "cover": [
+          "forest_moss",
+          "reeds",
+          "mushroom"
+        ],
+        "density": 0.18,
+        "rock": "moss",
+        "logs": true,
+        "fog": 0.8
+      },
+      "generated": {
+        "forest_moss": 46,
+        "reeds": 16,
+        "mushroom": 5,
+        "fern": 10,
+        "pebbles": 1
+      }
+    },
+    {
+      "biome": "snow_plains",
+      "location": {
+        "x": -6000,
+        "z": 1968,
+        "y": 18
+      },
+      "profile": {
+        "cover": [
+          "snow_layer"
+        ],
+        "density": 0.08,
+        "rock": "granite",
+        "logs": false,
+        "fog": 1
+      },
+      "generated": {
+        "basalt": 119,
+        "null": 133,
+        "furnace": 1,
+        "stonebrick": 3,
+        "lantern": 1,
+        "snow": 16
+      }
+    },
+    {
+      "biome": "snow",
+      "location": {
+        "x": -6000,
+        "z": -48,
+        "y": 29
+      },
+      "profile": {
+        "cover": [
+          "snow_layer",
+          "snow_layer",
+          "pebbles"
+        ],
+        "density": 0.17,
+        "rock": "granite",
+        "logs": true,
+        "fog": 1,
+        "log": "pinewood"
+      },
+      "generated": {
+        "snow_layer": 10,
+        "pinewood": 25,
+        "pine": 400,
+        "snow": 2,
+        "leaf_litter": 80,
+        "mushroom": 2,
+        "autumnleaf": 242,
+        "flower_red": 10,
+        "wood": 20
+      }
+    },
+    {
+      "biome": "snow_cedar",
+      "location": {
+        "x": -5808,
+        "z": 5472,
+        "y": 18
+      },
+      "profile": {
+        "cover": [
+          "snow_layer",
+          "snow_layer",
+          "pebbles"
+        ],
+        "density": 0.2,
+        "rock": "granite",
+        "logs": true,
+        "fog": 1,
+        "log": "pinewood"
+      },
+      "generated": {
+        "snow_layer": 15,
+        "mushroom": 1,
+        "pinewood": 60,
+        "pine": 686,
+        "snow": 15,
+        "pebbles": 3
+      }
+    },
+    {
+      "biome": "frozen_badlands",
+      "location": {
+        "x": -6000,
+        "z": 2208,
+        "y": 35
+      },
+      "profile": {
+        "cover": [
+          "snow_layer",
+          "pebbles"
+        ],
+        "density": 0.13,
+        "rock": "chalk",
+        "logs": false,
+        "fog": 1
+      },
+      "generated": {
+        "snow_layer": 41,
+        "pebbles": 6
+      }
+    },
+    {
+      "biome": "mountain",
+      "location": {
+        "x": -6000,
+        "z": -960,
+        "y": 44
+      },
+      "profile": {
+        "cover": [
+          "pebbles",
+          "snow_layer"
+        ],
+        "density": 0.09,
+        "rock": "stone",
+        "logs": false,
+        "fog": 1
+      },
+      "generated": {
+        "pebbles": 23
+      }
+    },
+    {
+      "biome": "beach",
+      "location": {
+        "x": -6000,
+        "z": -4416,
+        "y": 10
+      },
+      "profile": {
+        "cover": [
+          "pebbles",
+          "dry_grass_tuft"
+        ],
+        "density": 0.07,
+        "rock": "gravel",
+        "logs": true,
+        "fog": 1,
+        "driftwood": true
+      },
+      "generated": {
+        "dry_grass_tuft": 3,
+        "leaf": 13,
+        "pebbles": 2,
+        "wood": 1
+      }
+    },
+    {
+      "biome": "river",
+      "location": {
+        "x": -6000,
+        "z": 2640,
+        "y": 12
+      },
+      "profile": {
+        "cover": [
+          "pebbles",
+          "reeds"
+        ],
+        "density": 0.18,
+        "rock": "gravel",
+        "logs": true,
+        "fog": 1,
+        "driftwood": true
+      },
+      "generated": {
+        "leaf": 57,
+        "pebbles": 14,
+        "blossom_litter": 71,
+        "daisy": 26,
+        "wood": 8,
+        "cherry_leaf": 14
+      }
+    },
+    {
+      "biome": "ocean",
+      "location": {
+        "x": -6000,
+        "z": -2160,
+        "y": -15
+      },
+      "profile": {
+        "cover": [],
+        "density": 0,
+        "rock": "gravel",
+        "logs": false,
+        "fog": 1
+      },
+      "generated": {
+        "kelp": 262
+      }
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {DurableStorage} from '../src/durable-storage.js?v=37';
-import {EditMap} from '../src/edit-map.js?v=37';
-import {freshState,slotKey} from '../src/save.js?v=37';
-import {saveHealth} from '../src/save-health.js?v=37';
+import {DurableStorage} from '../src/durable-storage.js?v=38';
+import {EditMap} from '../src/edit-map.js?v=38';
+import {freshState,slotKey} from '../src/save.js?v=38';
+import {saveHealth} from '../src/save-health.js?v=38';
 function setup(){const messages=[],worker={postMessage(m){messages.push(m);if(m.type==='commit')queueMicrotask(()=>worker.onmessage({data:worker.fail?{id:m.id,ok:false,error:'Full',name:'QuotaExceededError'}:{id:m.id,ok:true,bytes:200,workerMs:1}}));},terminate(){}};return {messages,worker,storage:new DurableStorage({getItem:()=>null,setItem(){}},worker)};}
 test('debounced saves coalesce metadata and transfer large edits in bounded batches',async()=>{
  const {storage,messages}=setup(),state=freshState(),world={edits:new EditMap(Array.from({length:1200},(_,i)=>[`${i},4,0`,'stone']))};
@@ -21,4 +21,25 @@ test('failed durable writes retain dirty edits for retry and never report saved'
 test('same-seed imports explicitly preserve the previous durable world and retries retain that intent',async()=>{
  const {storage,messages,worker}=setup(),state=freshState();worker.fail=true;assert.equal(await storage.replaceState(state),false);assert.equal(messages.find(m=>m.type==='begin').replacement,true);
  messages.length=0;worker.fail=false;await storage.replaceState(state);assert.equal(messages.find(m=>m.type==='begin').replacement,true);assert.equal(storage.replacements.size,0);storage.dispose();
+});
+
+test('queued metadata and edits describe the same checkpoint despite later mutations',async()=>{
+ const {storage,messages}=setup(),state=freshState(),world={edits:new EditMap([['0,5,0','stone']])};
+ state.inv.stone=1;storage.queueWorld(state,world);
+ world.edits.set('0,5,0',null);world.edits.set('2,5,0','plank');state.inv.stone=2;
+ assert.equal(await storage.flush(),true);
+ assert.equal(messages[0].meta.inv.stone,1);
+ assert.deepEqual(messages.find(m=>m.type==='patch').entries,[['0,5,0','stone']]);
+ assert.equal(world.edits.pending.size,2,'later mutations remain dirty');
+ messages.length=0;storage.queueWorld(state,world);await storage.flush();
+ assert.equal(messages[0].meta.inv.stone,2);assert.equal(world.edits.pending.size,0);
+ assert.equal(world.edits.snapshots.size,0);storage.dispose();
+});
+test('coalescing checkpoints releases snapshot leases and export falls back for an unmigrated legacy save',async()=>{
+ const {storage,worker}=setup(),state=freshState(),world={edits:new EditMap()};
+ for(let i=0;i<20;i++){world.edits.set('0,4,0',i%2?'stone':null);storage.queueWorld(state,world);}
+ assert.equal(world.edits.snapshots.size,1);await storage.flush();assert.equal(world.edits.snapshots.size,0);
+ storage.local.getItem=()=>'{"legacy":true}';const send=worker.postMessage;
+ worker.postMessage=m=>{if(m.type==='export')queueMicrotask(()=>worker.onmessage({data:{id:m.id,text:null}}));else send(m);};
+ assert.equal(await storage.exportStored('old'),' {"legacy":true}'.trim());storage.dispose();
 });

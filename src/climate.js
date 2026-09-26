@@ -1,9 +1,9 @@
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=37';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=38';
 export const smooth=(a,b,v)=>{const t=Math.max(0,Math.min(1,(v-a)/(b-a)));return t*t*(3-2*t);};
 export function integerHash(x,z,seed){let n=Math.imul(x|0,374761393)^Math.imul(z|0,668265263)^Math.imul(seed|0,1442695041);n=Math.imul(n^(n>>>13),1274126177);return((n^(n>>>16))>>>0)/4294967296;}
-export function noise2(x,z,seed,scale){const a=Math.floor(x/scale),b=Math.floor(z/scale),u=smooth(0,1,x/scale-a),v=smooth(0,1,z/scale-b);return (integerHash(a,b,seed)*(1-u)+integerHash(a+1,b,seed)*u)*(1-v)+(integerHash(a,b+1,seed)*(1-u)+integerHash(a+1,b+1,seed)*u)*v;}
-export function climateAt(seed,x,z){
- const n=(a,b,s,offset)=>noise2(a,b,seed+offset,s);
+export function noise2(x,z,seed,scale,hashFn=integerHash){const a=Math.floor(x/scale),b=Math.floor(z/scale),u=smooth(0,1,x/scale-a),v=smooth(0,1,z/scale-b);return (hashFn(a,b,seed)*(1-u)+hashFn(a+1,b,seed)*u)*(1-v)+(hashFn(a,b+1,seed)*(1-u)+hashFn(a+1,b+1,seed)*u)*v;}
+export function climateAt(seed,x,z,hashFn=integerHash){
+ const n=(a,b,s,offset)=>noise2(a,b,seed+offset,s,hashFn);
  const wx=x+(n(x,z,420,91)-.5)*170,wz=z+(n(x,z,420,193)-.5)*170;
  const temperature=n(wx,wz,680,171),moisture=n(wx,wz,590,811),continental=n(wx,wz,920,127),ridge=1-Math.abs(n(wx,wz,370,331)*2-1);
  const mountain=smooth(.68,.9,n(wx,wz,780,499))*smooth(.39,.56,continental);

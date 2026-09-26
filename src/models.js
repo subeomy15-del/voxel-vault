@@ -1,6 +1,6 @@
-import {variationColor} from './mob-variations.js?v=37';
+import {variationColor} from './mob-variations.js?v=38';
 import * as THREE from '../vendor/three.module.js';
-import { ANIMALS } from './wildlife.js?v=37';
+import { ANIMALS } from './wildlife.js?v=38';
 const sailTextures=new Map();
 function sailTexture(color){
   if(sailTextures.has(color))return sailTextures.get(color);

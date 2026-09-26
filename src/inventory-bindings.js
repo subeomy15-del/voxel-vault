@@ -1,10 +1,10 @@
-import {bagCount,BAG_CAPACITY} from './bag-capacity.js?v=37';
-import {infusionTooltip} from './infusion-ui.js?v=37';
-import {ITEMS,RECIPES,SMELTING,canCraft,maxCraft,ingredientCount,ingredientKeys} from './data.js?v=37';
-import {icon} from './icons.js?v=37';
-import {packSlot} from './inventory-layout.js?v=37';
-import {enchantRow} from './workshop-ui.js?v=37';
-import {enchantKind,enchantLevel,enchantCost} from './enchanting.js?v=37';
+import {bagCount,BAG_CAPACITY} from './bag-capacity.js?v=38';
+import {infusionTooltip} from './infusion-ui.js?v=38';
+import {ITEMS,RECIPES,SMELTING,canCraft,maxCraft,ingredientCount,ingredientKeys} from './data.js?v=38';
+import {icon} from './icons.js?v=38';
+import {packSlot} from './inventory-layout.js?v=38';
+import {enchantRow} from './workshop-ui.js?v=38';
+import {enchantKind,enchantLevel,enchantCost} from './enchanting.js?v=38';
 const text=(node,value)=>{if(node&&node.textContent!==String(value))node.textContent=String(value);};
 const flag=(node,name,value)=>{if(node.classList.contains(name)!==!!value)node.classList.toggle(name,!!value);};
 const attr=(node,name,value)=>{if(node.getAttribute(name)!==String(value))node.setAttribute(name,String(value));};

@@ -1,4 +1,4 @@
-import {BLOCKS} from './data.js?v=37';
+import {BLOCKS} from './data.js?v=38';
 export function trapAt(g,p){
  for(const dy of [.03,-.05]){const b=BLOCKS[g.world.get(Math.floor(p.x),Math.floor(p.y+dy),Math.floor(p.z))];if(b?.snare||b?.trapDamage)return b;}
  return null;

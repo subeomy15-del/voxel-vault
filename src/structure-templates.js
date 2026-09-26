@@ -1,5 +1,5 @@
-import {REGIONAL_STRUCTURES,buildRegionalRoom,embellishRuin} from './regional-structures.js?v=37';
-import {integerHash} from './climate.js?v=37';
+import {REGIONAL_STRUCTURES,buildRegionalRoom,embellishRuin} from './regional-structures.js?v=38';
+import {integerHash} from './climate.js?v=38';
 const key=(x,y,z)=>`${x},${y},${z}`;
 export class StructureTemplate {
  constructor(seed){this.seed=seed;this.cells=new Map();this.protected=new Set();this.footprint=new Set();}
@@ -32,7 +32,7 @@ export const STRUCTURE_TYPES=Object.freeze({...REGIONAL_STRUCTURES,
 export function structurePalette(biome){
  if(['desert','savanna','beach'].includes(biome))return {stone:'sandstone',floor:'limestone',wood:'plank',moss:0};
  if(biome==='badlands')return {stone:'red_terracotta',floor:'ochre_terracotta',wood:'pine_plank',moss:0};
- if(['snow','snow_plains','mountain','frozen_badlands'].includes(biome))return {stone:'stonebrick',floor:'cobblestone',wood:'pine_plank',moss:.08};
+ if(['snow','snow_plains','snow_cedar','mountain','frozen_badlands'].includes(biome))return {stone:'stonebrick',floor:'cobblestone',wood:'pine_plank',moss:.08};
  return {stone:'stonebrick',floor:'cobblestone',wood:'plank',moss:['jungle','dense_forest','marsh'].includes(biome)?.5:.23};
 }
 export function buildStructure(type,seed,biome,version=7){

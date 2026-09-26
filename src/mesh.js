@@ -1,6 +1,6 @@
-import { BLOCKS } from './data.js?v=37';
-import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=37';
-import { TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=37';
+import { BLOCKS } from './data.js?v=38';
+import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=38';
+import { TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=38';
 export const BLOCK_TYPES=Object.keys(BLOCKS);
 const ids=Object.fromEntries(BLOCK_TYPES.map((t,i)=>[t,i+1]));
 const faces=[
@@ -16,6 +16,7 @@ const isGlass=type=>type==='glass'||type?.endsWith('_glass');
 const empty=()=>({position:[],normal:[],uv:[],color:[],index:[]});
 export function meshChunk(world,cx,cz,underground=false,options={}){
   const solid=empty(),water=empty(),glass=empty(),low=underground?WORLD_BOTTOM:-10;
+  water.waterDepth=[];
   let high=world.dimension==='overworld'?6:0;for(let x=-1;x<=16;x++)for(let z=-1;z<=16;z++)high=Math.max(high,world.height(cx*16+x,cz*16+z)+13);
   for(const[k,t]of world.edits.chunkEntries?.(cx,cz)||world.edits){if(!t)continue;const[x,y,z]=k.split(',').map(Number);if(Math.floor(x/16)===cx&&Math.floor(z/16)===cz)high=Math.max(high,y+2);}
   world.prepare(cx,cz);high=Math.max(high,world.chunkTops?.get(`${cx},${cz}`)||0);
@@ -26,7 +27,7 @@ export function meshChunk(world,cx,cz,underground=false,options={}){
   for(let x=1;x<17;x++)for(let z=1;z<17;z++)for(let y=1;y<depth-1;y++){
     const id=vox[at(x,y,z)];if(!id)continue;const type=BLOCK_TYPES[id-1],out=type==='water'?water:isGlass(type)?glass:solid;
     if(BLOCKS[type].renderOnly)continue;
-    const wx=cx*16+x-1,wy=low+y-1,wz=cz*16+z-1,small=type==='torch'||type==='lantern',ladder=type==='ladder';
+    const wx=(options.localCoordinates?0:cx*16)+x-1,wy=low+y-1,wz=(options.localCoordinates?0:cz*16)+z-1,small=type==='torch'||type==='lantern',ladder=type==='ladder';
     if(BLOCKS[type].plant||type==='campfire'){
       const tile=(id-1)*3,u=tile%ATLAS_COLS*TILE/ATLAS_WIDTH,v=1-(Math.floor(tile/ATLAS_COLS)+1)*TILE/ATLAS_HEIGHT;
       for(const points of [[[.08,0,.08],[.92,0,.92],[.92,1,.92],[.08,1,.08]],[[.92,0,.08],[.08,0,.92],[.08,1,.92],[.92,1,.08]]]){
@@ -45,6 +46,7 @@ export function meshChunk(world,cx,cz,underground=false,options={}){
       }
       continue;
     }
+    let waterDepth=0;if(type==='water')for(let j=y;j>=0&&waterDepth<32;j--){const below=BLOCK_TYPES[vox[at(x,j,z)]-1];if(below!=='water'&&!BLOCKS[below]?.waterlogged)break;waterDepth++;}
     for(let f=0;f<6;f++){
       const face=faces[f],[nx,ny,nz]=face.n,neighbor=vox[at(x+nx,y+ny,z+nz)];
       if(type==='water'&&neighbor||(type==='lava'||isGlass(type))&&neighbor===id)continue;
@@ -54,7 +56,7 @@ export function meshChunk(world,cx,cz,underground=false,options={}){
         const p=face.v[k];let px=p[0],py=p[1],pz=p[2];
         if(small){px=.35+px*.3;pz=.35+pz*.3;py*=.8;}if(ladder)pz=.43+pz*.14;
         if((type==='water'||type==='lava')&&py===1)py=.88;
-        out.position.push(wx+px,wy+py,wz+pz);out.normal.push(nx,ny,nz);
+        out.position.push(wx+px,wy+py,wz+pz);out.normal.push(nx,ny,nz);if(type==='water')out.waterDepth.push(waterDepth);
         let ao=0;if(options.ambientOcclusion!==false&&type!=='water'&&!small&&!ladder){const [a,b]=face.axes,base=at(x+nx,y+ny,z+nz),da=(p[a]?1:-1)*strides[a],db=(p[b]?1:-1)*strides[b];ao=Number(!transparent(vox[base+da]))+Number(!transparent(vox[base+db]))+Number(!transparent(vox[base+da+db]));}
         const shade=face.shade*(1-ao*.115);if(isGlass(type)){const tint=parseInt(BLOCKS[type].color.slice(1),16);out.color.push(...[16,8,0].map(shift=>shade*Math.pow(((tint>>shift)&255)/255,2.2)));}else out.color.push(shade,shade,shade);out.uv.push(u+(k===1||k===2?TILE-.4:.4)/ATLAS_WIDTH,v+(k>1?TILE-.4:.4)/ATLAS_HEIGHT);
       }

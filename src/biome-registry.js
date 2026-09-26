@@ -1,6 +1,7 @@
-import {EXPANDED_BIOMES} from './expanded-biomes.js?v=37';
+import {EXPANDED_BIOMES} from './expanded-biomes.js?v=38';
 const biome=(name,color,top,temperature,moisture,hills,trees,density,structures,extra={})=>Object.freeze({name,color,top,temperature,moisture,hills,trees:Object.freeze(trees),density,structures:Object.freeze(structures),subsurface:'dirt',roughness:1.8,...extra});
 const definitions={
+ snow_cedar:biome('Snowy Cedar Forest','#b8cfcb','snow',.17,.67,18,['snow_cedar'],.68,['watchtower','buried','mine'],{introduced:11,parent:'snow',subsurface:'dirt'}),
  conifer:biome('Pine Forest','#527064','grass',.4,.62,17,['conifer','tall_conifer'],.69,['house','watchtower','mine']),
  cherry:biome('Cherry Blossom Forest','#c7a2ac','grass',.37,.55,9,['cherry'],.42,['shrine','house']),
  frozen_badlands:biome('Frozen Badlands','#aeb9c8','snow',.17,.3,26,[],0,['watchtower','fortress','buried'],{subsurface:'chalk'}),
@@ -22,7 +23,9 @@ const definitions={
 };
 for(const [id,extra] of Object.entries(EXPANDED_BIOMES)){const parent=definitions[extra.parent];definitions[id]=Object.freeze({...parent,...extra,trees:Object.freeze(extra.trees),density:id==='oasis'?.65:parent.density,top:id==='red_sand_desert'?'red_sand':id==='oasis'?'grass':parent.top});}
 export const BIOME_DEFINITIONS=Object.freeze(definitions);
-export const WORLDGEN_VERSION=10;
+export const BIOME_ALIASES=Object.freeze({'Cactus Fields':'many_cactus_desert','Many Cactus Desert':'many_cactus_desert','Red Desert':'red_sand_desert','Red Sand Desert':'red_sand_desert'});
+export const normalizeBiomeId=value=>BIOME_ALIASES[value]||value;
+export const WORLDGEN_VERSION=12;
 export const SAVE_SCHEMA_VERSION=2;
 
-export const UNDERGROUND_BIOMES=Object.freeze({cave:{name:'Caves',color:'#6a7976',top:'stone'},deep_cave:{name:'Deep Caves',color:'#555d70',top:'slate'}});
+export const UNDERGROUND_BIOMES=Object.freeze({stony_cave:{name:'Stony Caves',color:'#84918e',top:'stone'},andesite_cave:{name:'Andesite Caves',color:'#818b91',top:'andesite'},granite_cave:{name:'Granite Caves',color:'#a7958b',top:'granite'},diorite_cave:{name:'Diorite Caves',color:'#c6ccc6',top:'diorite'},cave:{name:'Caves',color:'#6a7976',top:'stone'},deep_cave:{name:'Deep Caves',color:'#555d70',top:'slate'}});

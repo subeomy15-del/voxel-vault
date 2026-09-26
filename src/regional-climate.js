@@ -1,8 +1,8 @@
-import {BIOME_FAMILIES} from './expanded-biomes.js?v=37';
-import {climateAt,noise2,smooth,integerHash} from './climate.js?v=37';
+import {BIOME_FAMILIES} from './expanded-biomes.js?v=38';
+import {climateAt,noise2,smooth,integerHash} from './climate.js?v=38';
 // Version eight is separate: saved version-seven terrain never changes underneath builds.
-export function regionalClimate(seed,x,z){
- const c=climateAt(seed,x,z),n=(s,o)=>noise2(c.wx,c.wz,seed+o,s),t=c.temperature,m=c.moisture;
+export function regionalClimate(seed,x,z,hashFn=integerHash){
+ const c=climateAt(seed,x,z,hashFn),n=(s,o)=>noise2(c.wx,c.wz,seed+o,s,hashFn),t=c.temperature,m=c.moisture;
  if(c.biome==='forest'&&t<.51&&m>.54)c.biome='conifer';
  else if(c.biome==='autumn_forest'&&n(540,2109)>.5)c.biome='cherry';
  else if(c.biome==='snow_plains'&&n(610,2203)>.53)c.biome='frozen_badlands';
@@ -33,7 +33,7 @@ export function regionalSurface(c,x,z,seed){
  if(c.biome==='river')return n>.5?'gravel':'sand';
  if(c.biome==='ocean'||c.biome==='beach')return c.h<-9?'gravel':'sand';
  if(c.biome==='desert')return 'sand';
- if(['snow','snow_plains'].includes(c.biome))return 'snow';
+ if(['snow','snow_plains','snow_cedar'].includes(c.biome))return 'snow';
  if(c.biome==='mountain')return c.h>58?'snow':n>.72?'gravel':'stone';
  if(c.biome==='marsh')return n>.64?'clay':'grass';
  if(c.biome==='savanna')return n>.25?'dry_grass':'grass';

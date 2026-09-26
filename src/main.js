@@ -1,24 +1,24 @@
-import {potionFor} from './potions.js?v=37';
-import {installWorldDebug} from './world-debug.js?v=37';
-import {openDurableStorage} from './durable-storage.js?v=37';
-import {showStartupFailure} from './startup-errors.js?v=37';
-import { MultiplayerModes } from './multiplayer-modes.js?v=37';
-import { Parkour } from './parkour.js?v=37';
-import { ParkourUI } from './parkour-ui.js?v=37';
-import { ParkourView } from './parkour-view.js?v=37';
-import { movementInput,releaseJump } from './movement.js?v=37';
-import { applyLook, clearControls, hotbarIndex } from './controls.js?v=37';
-import { installControlPanels } from './control-panels.js?v=37';
-import { Multiplayer } from './multiplayer.js?v=37';
-import { MultiplayerUI } from './multiplayer-ui.js?v=37';
-import { MultiplayerPlayers } from './multiplayer-players.js?v=37';
-import { FieldGoals } from './field-goals.js?v=37';
-import { ITEMS,BLOCKS } from './data.js?v=37';
-import { Renderer } from './render.js?v=37';
-import { Game } from './game.js?v=37';
-import { Audio } from './audio.js?v=37';
-import { UI } from './ui.js?v=37';
-import { loadSettings,saveSettings } from './save.js?v=37';
+import {potionFor} from './potions.js?v=38';
+import {installWorldDebug} from './world-debug.js?v=38';
+import {openDurableStorage} from './durable-storage.js?v=38';
+import {showStartupFailure} from './startup-errors.js?v=38';
+import { MultiplayerModes } from './multiplayer-modes.js?v=38';
+import { Parkour } from './parkour.js?v=38';
+import { ParkourUI } from './parkour-ui.js?v=38';
+import { ParkourView } from './parkour-view.js?v=38';
+import { movementInput,releaseJump } from './movement.js?v=38';
+import { applyLook, clearControls, hotbarIndex } from './controls.js?v=38';
+import { installControlPanels } from './control-panels.js?v=38';
+import { Multiplayer } from './multiplayer.js?v=38';
+import { MultiplayerUI } from './multiplayer-ui.js?v=38';
+import { MultiplayerPlayers } from './multiplayer-players.js?v=38';
+import { FieldGoals } from './field-goals.js?v=38';
+import { ITEMS,BLOCKS } from './data.js?v=38';
+import { Renderer } from './render.js?v=38';
+import { Game } from './game.js?v=38';
+import { Audio } from './audio.js?v=38';
+import { UI } from './ui.js?v=38';
+import { loadSettings,saveSettings } from './save.js?v=38';
 let storage;try{storage=localStorage;}catch{storage={getItem:()=>null,setItem:()=>{throw Error('Storage unavailable');}};}
 export const settings=loadSettings(storage);
 if(matchMedia('(prefers-reduced-motion: reduce)').matches){settings.bobbing=false;settings.cameraEffects=false;}
@@ -27,7 +27,7 @@ let renderer,game,ui,multiplayer,multiplayerUI,multiplayerPlayers,fieldGoals,par
 try{
   renderer=new Renderer(document.querySelector('#world'),settings);
   startupStage='save';
-  try{storage=await openDurableStorage(storage);}catch(error){document.querySelector('#save-state').textContent='Recovery storage unavailable · using local saves';}
+  storage=await openDurableStorage(storage);
   game=new Game(renderer,new Audio(settings),storage);startupStage='interface';ui=new UI(game,settings);installWorldDebug(game,renderer);
   multiplayer=new Multiplayer(game);multiplayerUI=new MultiplayerUI(game,ui,multiplayer);multiplayerPlayers=new MultiplayerPlayers(renderer,multiplayer);fieldGoals=new FieldGoals(game);game.fieldGoals=fieldGoals;new MultiplayerModes(game,ui,multiplayer);multiplayer.restore();
   parkour=new Parkour(game);parkourUI=new ParkourUI(game,ui,parkour);parkourView=new ParkourView(renderer,parkour);
@@ -80,7 +80,7 @@ try{
   for(const button of document.querySelectorAll('[data-touch]')){button.addEventListener('pointerdown',e=>{e.preventDefault();if(game.screen)return;game.audio.start();button.setPointerCapture(e.pointerId);if(button.dataset.touch==='attack'){game.attackHeld=true;game.attack();}if(button.dataset.touch==='jump'){if(game.creative&&performance.now()-lastSpace<300){game.flying=!game.flying;game.toast(game.flying?'Flight enabled':'Flight disabled','Hold jump to rise.');}lastSpace=performance.now();game.jump();game.keys.add('Space');}if(button.dataset.touch==='glide')game.toggleGlide();if(button.dataset.touch==='firecracker')game.useFirecracker();if(button.dataset.touch==='dash'){if(parkour.active)game.touchSprint=!game.touchSprint;else game.dash();}if(button.dataset.touch==='heal')game.eatAvailable();if(button.dataset.touch==='interact')use();});for(const name of ['pointerup','pointercancel'])button.addEventListener(name,e=>{e.stopPropagation();if(button.dataset.touch==='attack'){if(name==='pointerup')game.releaseAttack();else game.drawState=null;game.attackHeld=false;}if(button.dataset.touch==='interact')game.placeHeld=false;if(button.dataset.touch==='jump'){game.keys.delete('Space');releaseJump(game);}});}
   addEventListener('pagehide',()=>{game.save();storage.flush?.();game.audio.quiet();});
   let last=performance.now(),hudTimer=0,loaded=false,loadedEpoch=0;
-  function frame(now){if(loadedEpoch!==renderer.epoch){loadedEpoch=renderer.epoch;loaded=false;document.querySelector('#loading').hidden=false;}const dt=Math.min(.05,(now-last)/1000);game.frameElapsed=Math.min(.25,Math.max(0,(now-last)/1000));last=now;multiplayer.modes?.update(dt);game.update(dt);multiplayer.update(dt);fieldGoals.update(dt);game.audio.update(game,dt);multiplayerPlayers.update(game,dt);parkourView.update(dt);parkourUI.updateFade();renderer.update(game,dt);hudTimer+=dt;if(hudTimer>.09){hudTimer=0;ui.update();multiplayerUI.update();multiplayer.modes?.renderHud();parkourUI.update();}if(!loaded&&renderer.chunks.size>=9){loaded=true;document.querySelector('#loading').hidden=true;}requestAnimationFrame(frame);}
+  function frame(now){if(loadedEpoch!==renderer.epoch){loadedEpoch=renderer.epoch;loaded=false;document.querySelector('#loading').hidden=false;}const dt=Math.min(.05,(now-last)/1000);game.frameElapsed=Math.min(.25,Math.max(0,(now-last)/1000));last=now;multiplayer.modes?.update(dt);game.update(dt);multiplayer.update(dt);fieldGoals.update(dt);game.audio.update(game,dt);multiplayerPlayers.update(game,dt);parkourView.update(dt);parkourUI.updateFade();renderer.update(game,dt);hudTimer+=dt;if(hudTimer>.09){hudTimer=0;ui.update();multiplayerUI.update();multiplayer.modes?.renderHud();parkourUI.update();}if(!loaded&&renderer.landingReady(game.pos)){loaded=true;document.querySelector('#loading').hidden=true;}requestAnimationFrame(frame);}
   requestAnimationFrame(frame);
 }catch(error){console.error(error);const el=document.querySelector('#loading');showStartupFailure(el,error,startupStage);}
 export { game, renderer, ui, multiplayer, multiplayerUI, multiplayerPlayers, fieldGoals, parkour, parkourUI };

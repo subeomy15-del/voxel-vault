@@ -1,13 +1,15 @@
-import {BLOCKS,hash} from './data.js?v=37';
-import {TRADE_OFFERS} from './exploration-content.js?v=37';
+import {tickShipwrecks} from './shipwrecks.js?v=38';
+import {BLOCKS,hash} from './data.js?v=38';
+import {TRADE_OFFERS} from './exploration-content.js?v=38';
 const key=p=>`${p.x},${p.y},${p.z}`;
 const validPosition=p=>p&&['x','y','z'].every(k=>Number.isInteger(p[k])&&Math.abs(p[k])<1000000)&&p.y>-64&&p.y<94;
 export function readExploration(raw={}){
  if(!raw||typeof raw!=='object')raw={};
- const n={catches:Number.isSafeInteger(raw.catches)?Math.max(0,Math.min(10000000,raw.catches)):0,casts:Number.isSafeInteger(raw.casts)?Math.max(0,Math.min(10000000,raw.casts)):0,stones:[],caches:[],trades:{}};
+ const n={catches:Number.isSafeInteger(raw.catches)?Math.max(0,Math.min(10000000,raw.catches)):0,casts:Number.isSafeInteger(raw.casts)?Math.max(0,Math.min(10000000,raw.casts)):0,stones:[],caches:[],wrecks:[],trades:{}};
  for(const p of (Array.isArray(raw.stones)?raw.stones:[]).slice(0,32))if(validPosition(p)&&['overworld','nether','ender'].includes(p.dimension)){const id=p.dimension+':'+key(p);if(!n.stones.some(s=>s.id===id))n.stones.push({id,x:p.x,y:p.y,z:p.z,dimension:p.dimension});}
  for(const p of (Array.isArray(raw.caches)?raw.caches:[]).slice(-32))if(validPosition(p)&&typeof p.id==='string'&&/^sea-\d+$/.test(p.id)&&!n.caches.some(c=>c.id===p.id))n.caches.push({id:p.id,x:p.x,y:p.y,z:p.z,claimed:p.claimed===true});
  for(const[id,record]of Object.entries(raw.trades||{}))if(['lodge','tower','ruins'].includes(id)&&Number.isSafeInteger(record?.day)&&record.day>=0){n.trades[id]={day:record.day,bought:{}};for(const offer of TRADE_OFFERS)n.trades[id].bought[offer.id]=Math.max(0,Math.min(offer.stock,Math.floor(Number.isFinite(record.bought?.[offer.id])?record.bought[offer.id]:0)));}
+ for(const p of (Array.isArray(raw.wrecks)?raw.wrecks:[]).slice(0,512))if(p&&typeof p.id==='string'&&/^wreck:-?\d+:-?\d+:-?\d+$/.test(p.id)&&[p.x,p.y,p.z].every(Number.isSafeInteger)&&Math.abs(p.x)<=2**40&&Math.abs(p.z)<=2**40&&p.y>-64&&p.y<4&&!n.wrecks.some(s=>s.id===p.id))n.wrecks.push({id:p.id,x:p.x,y:p.y,z:p.z,rotation:p.rotation===1?1:0});
  return n;
 }
 const allowed=g=>!g.multiplayer?.active&&g.state.mode!=='parkour';
@@ -64,6 +66,7 @@ export function trade(g,offerId){
 }
 export function tickExploration(g,dt){
  if(!allowed(g))return;
+ tickShipwrecks(g,dt);
  if(g.fishing){const f=g.fishing;f.time+=dt;if(g.held!=='fishing_rod'||Math.hypot(g.pos.x-f.x,g.pos.z-f.z)>12||f.time>f.bite+2.2){g.fishing=null;g.toast('The fish slipped away','Cast again when you are ready.');}
   else if(!f.announced&&f.time>=f.bite){f.announced=true;g.audio.play('checkpoint');g.renderer.burst(f.x+.5,f.y+1,f.z+.5,'#d7e7c7',12);g.toast('Bite! Reel in now','Press E or tap Use.');}}
  g.traderTimer=(g.traderTimer||0)-dt;if(g.traderTimer>0)return;g.traderTimer=2;

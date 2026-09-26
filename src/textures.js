@@ -1,5 +1,5 @@
-import {paintBlockStyle} from './block-style.js?v=37';
-import { BLOCKS, hash } from './data.js?v=37';
+import {paintBlockStyle} from './block-style.js?v=38';
+import { BLOCKS, hash } from './data.js?v=38';
 export const TILE=32,ATLAS_COLS=16;
 export const ATLAS_ROWS=2**Math.ceil(Math.log2(Math.ceil(Object.keys(BLOCKS).length*3/ATLAS_COLS)));
 export const ATLAS_WIDTH=TILE*ATLAS_COLS,ATLAS_HEIGHT=TILE*ATLAS_ROWS;
@@ -13,7 +13,13 @@ export function textureCanvas(){
     const stroke=(color,points,width=1)=>{ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();};
     if(b.plant){
       const sprout=type.includes('sprout'),wheat=type.startsWith('wheat'),carrot=type.startsWith('carrot');
-      if(type==='cane'){for(let x=5;x<32;x+=10){fill('#748d4f',x,1,4,31);fill('#b3bf7e',x,1,1,31);for(let y=6;y<32;y+=8)fill('#c1cd8e',x-1,y,6,2);}stroke('#7e9d57',[[8,13],[2,5]],2);stroke('#96af66',[[18,11],[26,4]],2);
+      if(type==='dry_shrub'){
+        for(const points of [[[16,31],[16,12],[11,5]],[[16,23],[7,15],[4,9]],[[16,20],[25,12],[27,5]]])stroke('#9c8258',points,2);fill('#c4a77a',15,14,2,15);
+      }else if(type==='dry_grass_tuft'){
+        for(let i=0;i<7;i++){const x=4+i*4;stroke(i%2?'#a9b274':'#858f54',[[16,32],[x,15-Math.abs(i-3)*2]],2);}
+      }else if(['seagrass','kelp','reeds','vines'].includes(type)){
+        for(let i=0;i<3;i++){const x=5+i*10;fill(b.color,x, type==='seagrass'?8+i*3:0,2,32);for(let y=4;y<30;y+=7){const side=(i+y)%2?1:-1;fill(i%2?'#91aa61':'#588653',x+(side<0?-4:1),y,5,3);}if(type==='reeds')fill('#715236',x-1,2,4,9);}
+      }else if(type==='cane'){for(let x=5;x<32;x+=10){fill('#748d4f',x,1,4,31);fill('#b3bf7e',x,1,1,31);for(let y=6;y<32;y+=8)fill('#c1cd8e',x-1,y,6,2);}stroke('#7e9d57',[[8,13],[2,5]],2);stroke('#96af66',[[18,11],[26,4]],2);
       }else if(type==='mushroom'){
         fill('#b5a183',13,18,6,14);fill('#ead9b8',14,19,2,12);
         fill('#9b8167',5,11,23,10);fill('#b49c7a',8,7,17,12);fill('#c7b18e',12,5,9,4);

@@ -1,7 +1,7 @@
-import {NEW_ANIMALS} from './creature-registry.js?v=37';
-import {BIOME_ECOLOGY} from './biome-ecology.js?v=37';
-import { hash } from './data.js?v=37';
-import { findMobPath } from './navigation.js?v=37';
+import {NEW_ANIMALS} from './creature-registry.js?v=38';
+import {BIOME_ECOLOGY} from './biome-ecology.js?v=38';
+import { hash } from './data.js?v=38';
+import { findMobPath } from './navigation.js?v=38';
 export const ANIMALS={
   deer:{name:'Deer',passive:true,hp:12,speed:1.15,flee:5.4,height:1.6,radius:.38,color:'#a88b68',glow:'#d9c6a4',food:['wheat','carrot'],drops:{raw_venison:[2,3],leather:[1,2]}},
   pig:{name:'Pig',passive:true,hp:12,speed:.95,flee:3.9,height:.9,radius:.4,color:'#c79f95',glow:'#dec0ac',food:['carrot','potato'],drops:{raw_pork:[2,3]}},
@@ -26,7 +26,20 @@ export function animalKind(world,x,z,salt=0){
 }
 export function updateAnimal(game,m,dt){
   const info=ANIMALS[m.kind]||ANIMALS.deer,dx=game.pos.x-m.x,dz=game.pos.z-m.z,d=Math.hypot(dx,dz),invisible=game.effect('invisibility')&&game.revealTime<=0;
-  if(info.aquatic){m.brain=(m.brain||0)-dt;if(m.brain<=0){m.brain=1.2+hash(m.id,Math.floor(game.state.time),game.state.seed)*1.5;m.swimAngle=hash(m.id,Math.floor(game.state.time/2),game.state.seed+11)*Math.PI*2;}const step=dt*info.speed,dx2=Math.sin(m.swimAngle)*step,dz2=Math.cos(m.swimAngle)*step;game.moveMob(m,dx2,dz2);m.walk+=step*2;m.angle=Math.atan2(dx2,dz2);m.grazing=false;return;}
+  if(info.aquatic){
+    m.brain=(m.brain||0)-dt;
+    if(m.brain<=0){
+      m.brain=1.5+hash(m.id,Math.floor(game.state.time),game.state.seed);
+      const neighbor=game.mobs.find(o=>o!==m&&o.kind===m.kind&&Math.hypot(o.x-m.x,o.z-m.z)>1&&Math.hypot(o.x-m.x,o.z-m.z)<7);
+      m.swimAngle=d<3&&!invisible?Math.atan2(-dx,-dz):neighbor?Math.atan2(neighbor.x-m.x,neighbor.z-m.z):hash(m.id,Math.floor(game.state.time/3),game.state.seed+11)*Math.PI*2;
+    }
+    const step=dt*(d<3?info.flee:info.speed),a=m.swimAngle||0,oldX=m.x,oldZ=m.z;
+    game.moveMob(m,Math.sin(a)*step,Math.cos(a)*step);
+    if(m.x===oldX&&m.z===oldZ){m.swimAngle=a+Math.PI*.65;m.brain=.35;}
+    const y=m.y+Math.sin(game.state.time*.8+m.id)*dt*.18;
+    if(game.world.waterAt(m.x,y,m.z)&&game.world.waterAt(m.x,y+info.height,m.z))m.y=y;
+    m.walk+=Math.hypot(m.x-oldX,m.z-oldZ)*2;m.grazing=false;return;
+  }
   m.panic=Math.max(0,(m.panic||0)-dt);m.slow=Math.max(0,(m.slow||0)-dt);m.brain=(m.brain||0)-dt;
   if(m.brain<=0){
     m.brain=1+hash(m.id,Math.floor(game.state.time),game.state.seed)*.7;let target=null;
@@ -48,4 +61,20 @@ export function updateAnimal(game,m,dt){
     m.angle=before.angle+Math.atan2(Math.sin(angle-before.angle),Math.cos(angle-before.angle))*Math.min(1,dt*9);
     if(Math.hypot(m.x-before.x,m.z-before.z)<step*.15){m.brain=Math.min(m.brain,.15);m.path=[];}
   }else m.walkSpeed=0;
+}
+
+// Small local schools, including at night. Ordinary fish are bounded by distance.
+export function tickAquaticLife(game,dt){
+ if(game.multiplayer?.active||game.state.dimension!=='overworld')return;
+ game.aquaticTimer=(game.aquaticTimer||0)+dt;if(game.aquaticTimer<3)return;game.aquaticTimer=0;
+ game.mobs=game.mobs.filter(m=>!ANIMALS[m.kind]?.aquatic||m.name||m.tamed||Math.hypot(m.x-game.pos.x,m.z-game.pos.z)<72);
+ const count=game.mobs.filter(m=>ANIMALS[m.kind]?.aquatic).length;if(count>=12)return;
+ for(let i=0;i<8;i++){
+  const a=hash(game.serial+i,Math.floor(game.state.time/3),game.state.seed)*Math.PI*2;
+  const x=game.pos.x+Math.sin(a)* (8+i*2),z=game.pos.z+Math.cos(a)*(8+i*2),y=2.2;
+  if(Math.abs(game.pos.y-y)>18||!game.world.waterAt(x,y,z)||!game.world.waterAt(x,y+.6,z))continue;
+  const biome=game.world.biome(x,z),kind=['ocean','beach'].includes(biome)?(i%4===0?'pufferfish':'tropical_fish'):'river_fish';
+  for(let j=0;j<Math.min(3,12-count);j++){const fx=x+j*.8,fz=z+j*.6;if(game.world.waterAt(fx,y,fz)&&game.world.waterAt(fx,y+.6,fz)&&!game.world.intersects(fx,y,fz,.6,.3))game.spawnMob(fx,fz,kind,y);}
+  return;
+ }
 }

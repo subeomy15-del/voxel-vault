@@ -1,12 +1,26 @@
-import {installExploration} from './exploration-content.js?v=37';
-import {installAltars} from './infusion-registry.js?v=37';
-import {installPotions} from './potion-content.js?v=37';
-import {BIOME_DEFINITIONS,UNDERGROUND_BIOMES} from './biome-registry.js?v=37';
-import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=37';
-import { installContent } from './badlands-content.js?v=37';
+import {installExploration} from './exploration-content.js?v=38';
+import {installAltars} from './infusion-registry.js?v=38';
+import {installPotions} from './potion-content.js?v=38';
+import {BIOME_DEFINITIONS,UNDERGROUND_BIOMES} from './biome-registry.js?v=38';
+import { RESOURCE_ALIASES,canonicalItem } from './resource-map.js?v=38';
+import { installContent } from './badlands-content.js?v=38';
 export const VERSION = 2;
 export const BLOCKS = {
   grass: { name: 'Grass block', color: '#6c944f', solid: true, hardness: .65 },
+  leaf_litter:{name:'Fallen leaves',color:'#9c7346',solid:false,hardness:.1,drop:'fiber',boxes:[[0,0,0,1,.045,1]]},
+  blossom_litter:{name:'Fallen blossoms',color:'#d49aae',solid:false,hardness:.1,drop:'fiber',boxes:[[0,0,0,1,.035,1]]},
+  forest_moss:{name:'Forest moss',color:'#537541',solid:false,hardness:.1,drop:'fiber',boxes:[[0,0,0,1,.08,1]]},
+  snow_layer:{name:'Settled snow',color:'#d5e8e3',solid:false,hardness:.1,drop:'snow',texture:'snow',boxes:[[0,0,0,1,.14,1]]},
+  pebbles:{name:'River pebbles',color:'#96958c',solid:false,hardness:.2,drop:'gravel',texture:'gravel',boxes:[[.1,0,.1,.36,.13,.4],[.55,0,.4,.86,.18,.76],[.25,0,.7,.45,.09,.88]]},
+  dry_shrub:{name:'Dry brush',color:'#9f8858',solid:false,plant:true,hardness:.15,drop:'fiber'},
+  dry_grass_tuft:{name:'Wild grasses',color:'#a4a66c',solid:false,plant:true,hardness:.1,drop:'fiber'},
+  mud:{name:'Wet mud',color:'#645c43',solid:true,hardness:.45},
+  jungle_leaf:{name:'Jungle leaves',color:'#356c38',solid:true,hardness:.3},
+  mangrove_leaf:{name:'Mangrove leaves',color:'#648448',solid:true,hardness:.3},
+  seagrass:{name:'Seagrass',color:'#4e9872',solid:false,plant:true,waterlogged:true,hardness:.1},
+  kelp:{name:'Kelp',color:'#648a43',solid:false,plant:true,waterlogged:true,hardness:.1},
+  reeds:{name:'Marsh reeds',color:'#87934e',solid:false,plant:true,hardness:.15},
+  vines:{name:'Hanging vines',color:'#427641',solid:false,plant:true,hardness:.15},
   dirt: { name: 'Earth', color: '#967451', solid: true, hardness: .6 },
   stone: { name: 'Stone', color: '#84918e', solid: true, hardness: 1.3 },
   sand: { name: 'Sunstone sand', color: '#d9bc7b', solid: true, hardness: .55 },
@@ -34,6 +48,7 @@ export const BLOCKS = {
 };
 const extraBlocks = {
   copper:['Copper ore','#9c8c77',1.7],coal:['Coal ore','#6b7478',1.4],diamond:['Diamond ore','#799da2',2.5],
+  andesite:['Andesite','#818b91',1.6],diorite:['Diorite','#c6ccc6',1.6],
   granite:['Granite','#a7958b',1.6],limestone:['Limestone','#b4b5a4',1.3],slate:['Deepslate','#5d6570',2],
   birch:['Birch log','#c9c9b8',1],pinewood:['Pine log','#6d5742',1.1],birch_plank:['Birch planks','#c6b58b',.7],pine_plank:['Pine planks','#786650',.7],
   stonebrick:['Stone bricks','#85908d',1.5],brick:['Clay bricks','#a47562',1.3],clay:['Clay','#9aadae',.7],tile:['Terracotta tiles','#b37e60',1],
@@ -78,7 +93,7 @@ for(const[id,name,color,hardness]of [
  ['cyan_wool','Cyan Wool','#37b9c7',.5],['black_wool','Black Wool','#343745',.5],
  ['white_concrete','White Concrete','#e0e5ec',1.2],['blue_concrete','Blue Concrete','#3e74b6',1.2],
  ['purple_concrete','Purple Concrete','#7655a5',1.2],['moonstone_chest','Moonstone Chest','#8a75be',1.5],
- ['ender_gate','Ender Gate','#875ac8',2],['violet_crystal','Violet Crystal','#d78aff',1.8]
+ ['ender_gate','Nether Portal Kit','#875ac8',2],['violet_crystal','Violet Crystal','#d78aff',1.8]
 ])BLOCKS[id]={name,color,hardness,solid:true};
 BLOCKS.ender_gate.solid=false;
 BLOCKS.launch_pad={name:'Launch Pad',color:'#4bcfd7',hardness:1.5,solid:true};
@@ -100,6 +115,7 @@ for(const[id,name,color,hardness]of [
 ])BLOCKS[id]={name,color,hardness,solid:true};
 BLOCKS.lava={name:'Lava',color:'#dc681f',hardness:Infinity,solid:false,liquid:true,description:'Molten rock. Damages on contact; available for placement in Creative.'};
 BLOCKS.magma.description='Hot volcanic rock. Damages anyone standing on it.';
+for(const[id,name,color]of[['end_frame','End portal frame','#48675a'],['end_frame_filled','Filled End portal frame','#75b798'],['stronghold_portal','End portal','#233630']])BLOCKS[id]={name,color,hardness:Infinity,solid:id!=='stronghold_portal',hidden:true};
 export const ITEMS = {
   ...Object.fromEntries(Object.entries(BLOCKS).map(([k,v]) => [k,{ ...v, place: true }])),
   wood_sword: { name: 'Trail sword', color: '#c2a47a', kind: 'sword', damage: 3, tier: 1, description: 'A trusty start. Left click to attack.' },
@@ -257,7 +273,10 @@ Object.assign(ITEMS,{
 ITEMS.firecracker={name:'Firecracker',color:'#c96958',kind:'firecracker',description:'Press E for a celebration burst. While gliding, it boosts you forward and upward.'};
 ITEMS.blast_charge={name:'Blast Charge',color:'#d88658',kind:'explosive',description:'A compact mining charge. Press E to place it ahead, then sprint clear before it detonates.'};
 Object.assign(ITEMS,{dawnblade:{name:'Dawnblade',color:'#f0c878',kind:'sword',damage:22,leech:2,tier:6,description:'Sacred sunsteel blade. Hits restore two health.'},aegis_armor:{name:'Aegis Armor',color:'#d8c996',kind:'armor',reduction:.78,description:'Sacred armor that reduces incoming damage by 78%.'},seraph_glider:{name:'Seraph Glider',color:'#e2c58e',kind:'glider',ore:'gold',glideSpeed:21,sink:.5,description:'Sacred wings with exceptional speed and gentle descent.'},sacred_orb:{name:'Sacred Orb',color:'#f0d18c',kind:'orb',description:'A sacred focus orb. Use it to blink safely across the islands.'}});
+Object.assign(ITEMS,{blaze_rod:{name:'Blaze rod',color:'#e9ae4e',kind:'material'},blaze_powder:{name:'Blaze powder',color:'#d5803f',kind:'material'},ender_pearl:{name:'Ender pearl',color:'#529d92',kind:'material'},eye_of_ender:{name:'Eye of Ender',color:'#83c4a5',kind:'eye',description:'Use in the Overworld to seek a stronghold. Every throw consumes one Eye; use on an empty portal frame to insert it.'}});
 export const RECIPES = [
+  {item:'blaze_powder',count:2,cost:{blaze_rod:1},category:'Materials'},
+  {item:'eye_of_ender',cost:{blaze_powder:1,ender_pearl:1},category:'Materials'},
   { item:'firecracker', count:4, cost:{coal:1,sand:2}, category:'Supplies' },
   { item:'blast_charge', count:1, cost:{coal:3,iron_ingot:2,sand:2}, category:'Supplies' },
   { item: 'stone_sword', cost: { stone: 6, wood: 2 }, category: 'Gear' },
@@ -369,7 +388,7 @@ RECIPES.push(
  {item:'moonstone_chest',cost:{moonstone:2,plank:6},category:'Building'},
  {item:'end_bricks',count:4,cost:{end_stone:4},category:'Building'},
  {item:'moonstone_block',cost:{moonstone:4},category:'Building'},
- {item:'ender_gate',cost:{obsidian:6,moonstone:3},category:'Building'}
+ {item:'ender_gate',cost:{obsidian:18,iron_ingot:2},station:'bench',category:'Building'}
 );
 for(const material of ['purple_wool','cyan_wool','black_wool'])RECIPES.push({item:material,count:4,cost:{cotton_cloth:2,violet_crystal:1},category:'Building'});
 for(const material of ['white_concrete','blue_concrete','purple_concrete'])RECIPES.push({item:material,count:8,cost:{sand:4,gravel:4},category:'Building'});
