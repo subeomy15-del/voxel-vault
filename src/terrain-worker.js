@@ -1,5 +1,5 @@
-import { World } from './world.js?v=38';
-import { meshChunk } from './mesh.js?v=38';
+import { World } from './world.js?v=39';
+import { meshChunk } from './mesh.js?v=39';
 let world,epoch=0;
 self.onmessage=({data})=>{
   if(data.type==='init'){world=new World(data.seed,data.edits,data.terrain,data.dimension);epoch=data.epoch;return;}

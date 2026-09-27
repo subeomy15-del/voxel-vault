@@ -1,0 +1,125 @@
+{
+  "device": {
+    "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+    "cores": 10,
+    "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)"
+  },
+  "rows": [
+    {
+      "name": "ocean",
+      "position": {
+        "x": -1768,
+        "z": -200,
+        "y": 0
+      },
+      "biome": "ocean",
+      "metrics": {
+        "p95Ms": 17.5,
+        "heapBytes": 31337027,
+        "meshes": 103,
+        "materials": 58,
+        "geometries": 100,
+        "textures": 3,
+        "entities": 9,
+        "longTasks": 3,
+        "chunkInstallMs": 0.10000000894069672,
+        "save": {
+          "status": "unknown",
+          "durationMs": 0,
+          "bytes": 0
+        },
+        "fps": 59.96421115183305,
+        "frameMs": 16.676613946741313,
+        "drawCalls": 45,
+        "triangles": 47046,
+        "chunks": 25,
+        "queued": 0,
+        "particles": 0,
+        "pixelRatio": 1,
+        "quality": "medium",
+        "workerMs": 22.600000008940697,
+        "adaptive": false
+      },
+      "p50": 16.700000762939453,
+      "p99": 17.799999237060547
+    },
+    {
+      "name": "forest",
+      "position": {
+        "x": -1512,
+        "z": 1240,
+        "y": 11
+      },
+      "biome": "forest",
+      "metrics": {
+        "p95Ms": 17.399999618530273,
+        "heapBytes": 59643468,
+        "meshes": 211,
+        "materials": 60,
+        "geometries": 140,
+        "textures": 3,
+        "entities": 9,
+        "longTasks": 3,
+        "chunkInstallMs": 1.0999999940395355,
+        "save": {
+          "status": "unknown",
+          "durationMs": 0,
+          "bytes": 0
+        },
+        "fps": 59.96327149460674,
+        "frameMs": 16.67687527839342,
+        "drawCalls": 82,
+        "triangles": 74112,
+        "chunks": 81,
+        "queued": 0,
+        "particles": 0,
+        "pixelRatio": 1,
+        "quality": "medium",
+        "workerMs": 12.399999991059303,
+        "adaptive": false
+      },
+      "p50": 16.700000762939453,
+      "p99": 17.700000762939453
+    },
+    {
+      "name": "snow",
+      "position": {
+        "x": -1800,
+        "z": -712,
+        "y": 32
+      },
+      "biome": "snow",
+      "metrics": {
+        "p95Ms": 17.600000381469727,
+        "heapBytes": 69942614,
+        "meshes": 227,
+        "materials": 60,
+        "geometries": 151,
+        "textures": 3,
+        "entities": 9,
+        "longTasks": 3,
+        "chunkInstallMs": 1.1000000089406967,
+        "save": {
+          "status": "unknown",
+          "durationMs": 0,
+          "bytes": 0
+        },
+        "fps": 59.91427325590754,
+        "frameMs": 16.69051372331217,
+        "drawCalls": 99,
+        "triangles": 66146,
+        "chunks": 81,
+        "queued": 0,
+        "particles": 0,
+        "pixelRatio": 1,
+        "quality": "medium",
+        "workerMs": 14.5,
+        "adaptive": false
+      },
+      "p50": 16.700000762939453,
+      "p99": 17.799999237060547
+    }
+  ],
+  "errors": [],
+  "failed": []
+}

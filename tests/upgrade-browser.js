@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {writeFile,copyFile} from 'node:fs/promises';
 import {connect,sleep} from './cdp.js';
 const c=await connect(),ev=c.evaluate,label=process.env.UPGRADE_LABEL||'after',duration=Number(process.env.UPGRADE_SECONDS||120),samples=[];
-const imports=`(async()=>{const m=await import(document.querySelector('script[type=module]').src);window.g=m.game;window.v=m.renderer;window.ui=m.ui;const {freshState}=await import('/src/save.js?v=38');g.state=freshState(7821,'creative');g.loadWorld();g.screen=null;g.flying=true;g.pos={x:640.5,y:84,z:640.5};g.yaw=-Math.PI/2;g.pitch=-.5;g.state.time=100;const {applyQualityPreset}=await import('/src/settings.js?v=38');applyQualityPreset(m.settings,'low');v.applySettings();ui.render();})()`;
+const imports=`(async()=>{const m=await import(document.querySelector('script[type=module]').src);window.g=m.game;window.v=m.renderer;window.ui=m.ui;const {freshState}=await import('/src/save.js?v=39');g.state=freshState(7821,'creative');g.loadWorld();g.screen=null;g.flying=true;g.pos={x:640.5,y:84,z:640.5};g.yaw=-Math.PI/2;g.pitch=-.5;g.state.time=100;const {applyQualityPreset}=await import('/src/settings.js?v=39');applyQualityPreset(m.settings,'low');v.applySettings();ui.render();})()`;
 try{
  await c.send('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:1,mobile:false});await ev(imports);
  for(let i=0;i<400;i++){if(await ev('v.chunks.size>=9&&!v.inflight&&!v.queue.length&&!v.ready.length'))break;await sleep(100);}

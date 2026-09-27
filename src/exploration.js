@@ -1,6 +1,6 @@
-import {tickShipwrecks} from './shipwrecks.js?v=38';
-import {BLOCKS,hash} from './data.js?v=38';
-import {TRADE_OFFERS} from './exploration-content.js?v=38';
+import {tickShipwrecks} from './shipwrecks.js?v=39';
+import {BLOCKS,hash} from './data.js?v=39';
+import {TRADE_OFFERS} from './exploration-content.js?v=39';
 const key=p=>`${p.x},${p.y},${p.z}`;
 const validPosition=p=>p&&['x','y','z'].every(k=>Number.isInteger(p[k])&&Math.abs(p[k])<1000000)&&p.y>-64&&p.y<94;
 export function readExploration(raw={}){

@@ -1,16 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from '../vendor/three.module.js';
-import {World} from '../src/world.js?v=38';
-import {CREATURES,NEW_ANIMALS,creatureSpawn} from '../src/creature-registry.js?v=38';
-import {ANIMALS,animalKind} from '../src/wildlife.js?v=38';
-import {ENEMIES,warpCreature,updateEnemies} from '../src/combat.js?v=38';
-import {creatureModel,animateCreature} from '../src/creature-model.js?v=38';
-import {ITEMS,BLOCKS} from '../src/data.js?v=38';
-import {ParticlePool} from '../src/particles.js?v=38';
-import {freshState,saveState,loadState} from '../src/save.js?v=38';
-import {transform} from '../src/structure-templates.js?v=38';
-import {Game} from '../src/game.js?v=38';
+import {World} from '../src/world.js?v=39';
+import {CREATURES,NEW_ANIMALS,creatureSpawn} from '../src/creature-registry.js?v=39';
+import {ANIMALS,animalKind} from '../src/wildlife.js?v=39';
+import {ENEMIES,warpCreature,updateEnemies} from '../src/combat.js?v=39';
+import {creatureModel,animateCreature} from '../src/creature-model.js?v=39';
+import {ITEMS,BLOCKS} from '../src/data.js?v=39';
+import {ParticlePool} from '../src/particles.js?v=39';
+import {freshState,saveState,loadState} from '../src/save.js?v=39';
+import {transform} from '../src/structure-templates.js?v=39';
+import {Game} from '../src/game.js?v=39';
 const storage=()=>{const m=new Map();return {getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v)};};
 const game=()=>new Game({setWorld(){},burst(){},stream(){},firework(){}},{play(){},quiet(){}},storage());
 const cells=w=>[...w.structures].sort(([a],[b])=>a.localeCompare(b));
@@ -93,4 +93,10 @@ test('buried landmarks are discovered at cave depth, not by walking over their s
  const g=game();g.start('creative',true);g.screen=null;g.flying=true;g.move=()=>{};g.updateMobs=()=>{};g.spawnTimer=0;
  const site=g.world.ruins.find({radius:18,type:'magma_ruin'})[0],l=g.world.ruins.layout(site),[dx,dz]=transform(l.loot.x,l.loot.z,site.rotation,site.mirror);g.world.prepare(Math.floor((site.x+dx)/16),Math.floor((site.z+dz)/16));
  g.pos={x:site.x+.5,y:g.world.height(site.x,site.z)+2,z:site.z+.5};g.update(.01);assert.ok(!g.state.discovered.includes(site.id));g.pos.y=site.y;g.update(.01);assert.ok(g.state.discovered.includes(site.id));
+});
+test('reef rays have animated paired fins and fit their aquatic collision bounds',()=>{
+ const r={part(color,w,h,d,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial({color}));m.position.set(x,y,z);return m;}},mob={kind:'reef_ray',id:3,walk:0,windup:0,flash:0},def=ANIMALS.reef_ray,g=creatureModel(r,mob,def);
+ assert.equal(g.userData.creature.limbs.length,2);animateCreature(g,mob,1);const before=g.userData.creature.limbs[0].rotation.z;animateCreature(g,mob,2);assert.notEqual(g.userData.creature.limbs[0].rotation.z,before);
+ g.updateMatrixWorld(true);const b=new THREE.Box3().setFromObject(g);assert.ok(b.min.y>=0&&b.max.y<=def.height);assert.ok(Math.max(Math.abs(b.min.x),Math.abs(b.max.x),Math.abs(b.min.z),Math.abs(b.max.z))<=def.radius);
+ g.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});
 });

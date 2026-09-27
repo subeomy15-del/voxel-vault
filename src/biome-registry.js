@@ -1,4 +1,4 @@
-import {EXPANDED_BIOMES} from './expanded-biomes.js?v=38';
+import {EXPANDED_BIOMES} from './expanded-biomes.js?v=39';
 const biome=(name,color,top,temperature,moisture,hills,trees,density,structures,extra={})=>Object.freeze({name,color,top,temperature,moisture,hills,trees:Object.freeze(trees),density,structures:Object.freeze(structures),subsurface:'dirt',roughness:1.8,...extra});
 const definitions={
  snow_cedar:biome('Snowy Cedar Forest','#b8cfcb','snow',.17,.67,18,['snow_cedar'],.68,['watchtower','buried','mine'],{introduced:11,parent:'snow',subsurface:'dirt'}),

@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Renderer} from '../src/render.js?v=38';
-import {World} from '../src/world.js?v=38';
-import {freshState,saveState,loadState} from '../src/save.js?v=38';
+import {Renderer} from '../src/render.js?v=39';
+import {World} from '../src/world.js?v=39';
+import {freshState,saveState,loadState} from '../src/save.js?v=39';
 
 test('1,000 streamed boundaries bound renderer state and preserve an edited, looted region on return',()=>{
  const world=new World(7821,[],10),state=freshState(),data=new Map(),storage={getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)};

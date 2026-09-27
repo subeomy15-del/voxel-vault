@@ -1,7 +1,7 @@
-import {BIOME_DEFINITIONS as LEGACY_BIOMES} from './legacy-biomes.js?v=38';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=38';
-import {integerHash} from './climate.js?v=38';
-import {STRUCTURE_TYPES,buildStructure,transform} from './structure-templates.js?v=38';
+import {BIOME_DEFINITIONS as LEGACY_BIOMES} from './legacy-biomes.js?v=39';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=39';
+import {integerHash} from './climate.js?v=39';
+import {STRUCTURE_TYPES,buildStructure,transform} from './structure-templates.js?v=39';
 export const STRUCTURE_RULES=Object.freeze({cellSize:144,jitter:76,occupancy:.62,spacing:22,protectedRadius:520,maxSlope:4});
 const key=(x,y,z)=>`${x},${y},${z}`;
 const overlaps=(a,b,pad=0)=>Math.abs(a.x-b.x)<a.radius+b.radius+pad&&Math.abs(a.z-b.z)<a.radius+b.radius+pad;

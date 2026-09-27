@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {coordinateHash} from '../src/coordinate-hash.js?v=38';
-import {continentalClimate,CAVE_REGIONS} from '../src/terrain-v11.js?v=38';
-import {World} from '../src/world.js?v=38';
-import {BIOME_DEFINITIONS,normalizeBiomeId} from '../src/biome-registry.js?v=38';
-import {BLOCKS} from '../src/data.js?v=38';
-import {regionalTree} from '../src/regional-trees.js?v=38';
+import {coordinateHash} from '../src/coordinate-hash.js?v=39';
+import {continentalClimate,CAVE_REGIONS} from '../src/terrain-v11.js?v=39';
+import {World} from '../src/world.js?v=39';
+import {BIOME_DEFINITIONS,normalizeBiomeId} from '../src/biome-registry.js?v=39';
+import {BLOCKS} from '../src/data.js?v=39';
+import {regionalTree} from '../src/regional-trees.js?v=39';
 
 test('coordinate hashes use high words, seed and signs instead of repeating every 2^32',()=>{
  const samples=[];for(const x of[-(2**40),-(2**32),-1,0,1,2**32,2**40])for(const z of[-(2**32),0,2**32])samples.push(coordinateHash(x,z,42));

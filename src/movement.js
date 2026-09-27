@@ -1,9 +1,9 @@
-import {armorInfusion} from './infusions.js?v=38';
-import {potionPower} from './potions.js?v=38';
-import { trapAt } from './traps.js?v=38';
-import { BLOCKS, ITEMS } from './data.js?v=38';
-import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=38';
-import { CROUCH_KEYS } from './controls.js?v=38';
+import {armorInfusion} from './infusions.js?v=39';
+import {potionPower} from './potions.js?v=39';
+import { trapAt } from './traps.js?v=39';
+import { BLOCKS, ITEMS } from './data.js?v=39';
+import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=39';
+import { CROUCH_KEYS } from './controls.js?v=39';
 
 export const MOVEMENT = Object.freeze({ walk: 4.8, sprint: 7.4, jump: 8.8, gravity: 24, coyote: .11, buffer: .14, step: .52, mantle: 1.25 });
 const approach = (current, target, amount) => current < target ? Math.min(target, current + amount) : Math.max(target, current - amount);

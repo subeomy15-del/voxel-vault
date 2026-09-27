@@ -1,4 +1,4 @@
-import {coordinateHash} from './coordinate-hash.js?v=38';
+import {coordinateHash} from './coordinate-hash.js?v=39';
 export const FRAME_OFFSETS=Object.freeze([-1,0,1].flatMap(n=>[[n,-2],[n,2],[-2,n],[2,n]]));
 export function locateStronghold(world){
  let best=null;

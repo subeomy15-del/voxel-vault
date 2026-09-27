@@ -1,6 +1,6 @@
-import {variationColor} from './mob-variations.js?v=38';
+import {variationColor} from './mob-variations.js?v=39';
 import * as THREE from '../vendor/three.module.js';
-import { ANIMALS } from './wildlife.js?v=38';
+import { ANIMALS } from './wildlife.js?v=39';
 const sailTextures=new Map();
 function sailTexture(color){
   if(sailTextures.has(color))return sailTextures.get(color);
@@ -16,12 +16,12 @@ function sailTexture(color){
 export function animalModel(r,mob){
   const g=new THREE.Group(),info=ANIMALS[mob.kind],c=variationColor(mob,info.color),dark='#665b4b',cream=mob.kind==='sheep'?variationColor(mob,info.glow):info.glow;
   const add=(color,w,h,d,x,y,z,parent=g)=>{const p=r.part(color,w,h,d,x,y,z);parent.add(p);return p;};
-  const head=new THREE.Group();g.add(head);g.userData.head=head;g.userData.legs=[];
+  const head=new THREE.Group();g.add(head);g.userData.head=head;g.userData.legs=[];g.userData.ears=[];g.userData.wings=[];
   const leg=(x,y,z,length,width=.14)=>{const pivot=new THREE.Group();pivot.position.set(x,y,z);add(dark,width,length,width,0,-length/2,0,pivot);add('#48483d',width+.015,.1,width+.02,0,-length+.05,.01,pivot);g.add(pivot);g.userData.legs.push(pivot);};
   const eyes=(x,y,z)=>{for(const side of [-1,1]){add('#f2e5c9',.055,.09,.075,x*side,y,z,head);add('#29372f',.061,.057,.038,x*side,y,z+.031,head);}};
   if(mob.kind==='chicken'){
     add(c,.38,.34,.46,0,.31,0);head.position.set(0,.48,.18);add(c,.25,.25,.24,0,0,0,head);add('#cbb05e',.16,.08,.17,0,-.02,.17,head);add('#bc7460',.07,.1,.13,0,.17,0,head);add('#bc7460',.075,.1,.05,0,-.15,.13,head);eyes(.125,.035,.09);
-    for(const x of [-.24,.24])add(cream,.1,.27,.34,x,.33,-.035);add(cream,.21,.23,.1,0,.48,-.26);for(const x of [-.1,.1])leg(x,.18,0,.17,.045);
+    for(const x of [-.24,.24]){const wing=add(cream,.1,.27,.34,x,.33,-.035);g.userData.wings.push(wing);}add(cream,.21,.23,.1,0,.48,-.26);for(const x of [-.1,.1])leg(x,.18,0,.17,.045);
   }else if(mob.kind==='rabbit'){
     add(c,.4,.31,.48,0,.26,-.06);head.position.set(0,.38,.21);add(c,.28,.25,.26,0,0,0,head);add(cream,.2,.1,.06,0,-.07,.15,head);add('#a87c70',.05,.04,.03,0,-.04,.19,head);eyes(.14,.03,.09);
     for(const x of [-.09,.09]){add(c,.085,.34,.1,x,.27,-.025,head);add('#cfb29b',.043,.24,.015,x,.29,.034,head);}add(cream,.16,.16,.14,0,.32,-.34);for(const x of [-.13,.13]){leg(x,.17,.13,.13,.075);leg(x,.17,-.21,.14,.12);}
@@ -32,11 +32,14 @@ export function animalModel(r,mob){
     for(const[x,z]of [[-.25,.33],[.25,-.33],[.25,.33],[-.25,-.33]])leg(x,legH,z,legH,cow?.17:.13);
     head.position.set(0,deer?1.24:pig?.67:cow?1.02:.91,bodyD/2+.08);add(sheep?dark:c,deer?.32:.42,deer?.4:.36,.39,0,0,0,head);
     add(pig?'#ba887f':cream,pig?.32:.29,pig?.19:.16,.12,0,-.08,.25,head);eyes(deer?.165:.215,.04,.14);
-    for(const side of [-1,1]){const ear=add(c,.16,deer?.25:.12,.11,side*.25,.2,0,head);ear.rotation.z=side*(deer?-.35:.35);if(deer&&mob.id%3!==0){add('#c6b18a',.065,.37,.06,side*.13,.43,-.09,head);add('#c6b18a',.21,.06,.06,side*.18,.48,-.09,head);add('#c6b18a',.06,.17,.06,side*.27,.55,-.09,head);}if(cow)add('#dcd3b7',.1,.2,.1,side*.2,.27,-.06,head);}
-    if(pig){for(const x of [-.08,.08])add('#815e58',.055,.055,.012,x,-.07,.318,head);add('#c89c8d',.08,.12,.14,0,.65,-.52);}
-    if(cow){for(const[x,y,z,w,h,d]of [[-.42,.91,-.22,.015,.32,.36],[.42,.8,.27,.015,.37,.29],[.13,1.207,-.2,.31,.015,.39]])add('#665e4e',w,h,d,x,y,z);add('#ceb1a0',.27,.19,.29,0,.48,-.2);add(dark,.06,.48,.07,.25,.66,-.61);}
-    if(sheep){for(const x of [-.36,.36])add(cream,.12,.45,.77,x,.72,-.03);add(cream,.55,.09,.84,0,1.03,0);add(cream,.24,.25,.1,0,.74,-.51);}
-    if(deer){add(cream,.43,.15,.74,0,.6,-.03);add(cream,.21,.2,.09,0,.88,-.55);}
+    for(const side of [-1,1]){const ear=add(c,.16,deer?.25:.12,.11,side*.25,.2,0,head);ear.rotation.z=side*(deer?-.35:.35);ear.userData.rest=ear.rotation.z;g.userData.ears.push(ear);if(deer&&mob.id%3!==0){add('#c6b18a',.065,.37,.06,side*.13,.43,-.09,head);add('#c6b18a',.21,.06,.06,side*.18,.48,-.09,head);add('#c6b18a',.06,.17,.06,side*.27,.55,-.09,head);}if(cow)add('#dcd3b7',.1,.2,.1,side*.2,.27,-.06,head);}
+    if(pig){for(const x of [-.08,.08])add('#815e58',.055,.055,.012,x,-.07,.318,head);}
+    if(cow){for(const[x,y,z,w,h,d]of [[-.42,.91,-.22,.015,.32,.36],[.42,.8,.27,.015,.37,.29],[.13,1.207,-.2,.31,.015,.39]])add('#665e4e',w,h,d,x,y,z);add('#ceb1a0',.27,.19,.29,0,.48,-.2);}
+    if(sheep){for(const x of [-.36,.36])add(cream,.12,.45,.77,x,.72,-.03);add(cream,.55,.09,.84,0,1.03,0);}
+    if(deer){add(cream,.43,.15,.74,0,.6,-.03);}
+  }
+  if(!['chicken','rabbit'].includes(mob.kind)){
+    const tail=new THREE.Group();tail.position.set(0,mob.kind==='pig'?.63:.86,-.57);g.add(tail);add(cream,.07,mob.kind==='cow'?.48:.19,.08,0,mob.kind==='cow'?-.2:-.06,-.05,tail);g.userData.tail=tail;
   }
   g.userData.animal=true;g.userData.body=g.children.find(c=>c.isMesh);return g;
 }

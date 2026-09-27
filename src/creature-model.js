@@ -1,6 +1,6 @@
-import {variationColor} from './mob-variations.js?v=38';
+import {variationColor} from './mob-variations.js?v=39';
 import * as THREE from '../vendor/three.module.js';
-import {CREATURES,NEW_ANIMALS} from './creature-registry.js?v=38';
+import {CREATURES,NEW_ANIMALS} from './creature-registry.js?v=39';
 
 // Original silhouettes share cached box geometry and per-model materials.
 export function creatureModel(renderer,mob,descriptor){
@@ -8,7 +8,12 @@ export function creatureModel(renderer,mob,descriptor){
  const part=(color,w,h,d,x,y,z,parent=g)=>{const mesh=renderer.part(color,w,h,d,x,y,z);parent.add(mesh);return mesh;};
  const joint=(x,y,z,w,h,d,color=base)=>{const pivot=new THREE.Group();pivot.position.set(x,y,z);g.add(pivot);part(color,w,h,d,0,-h/2,0,pivot);limbs.push(pivot);return pivot;};
  let head,body,tail;
- if(def.model==='blaze'){
+ if(def.model==='ray'){
+  body=part(base,.55,.18,.82,0,.22,0);part(trim,.45,.035,.65,0,.12,0);
+  for(const side of[-1,1]){const wing=new THREE.Group();wing.position.set(side*.25,.23,0);g.add(wing);part(base,.55,.07,.65,side*.25,0,-.06,wing);part(base,.24,.045,.4,side*.62,0,-.14,wing);limbs.push(wing);}
+  tail=new THREE.Group();tail.position.set(0,.22,-.4);g.add(tail);part(base,.055,.055,.85,0,0,-.4,tail);
+  head=new THREE.Group();head.position.set(0,.29,.3);g.add(head);for(const side of[-1,1])part('#213c43',.045,.045,.06,side*.16,.02,0,head);
+ }else if(def.model==='blaze'){
   head=new THREE.Group();head.position.set(0,1.45,0);g.add(head);body=part(base,.52,.48,.5,0,0,0,head);for(const x of[-.13,.13])part('#ffe6a0',.08,.06,.03,x,.03,.26,head);
   for(let i=0;i<8;i++){const a=i*Math.PI/4,pivot=new THREE.Group();pivot.position.set(Math.cos(a)*.55,.65+(i%2)*.4,Math.sin(a)*.55);g.add(pivot);part(trim,.12,.55,.12,0,0,0,pivot);limbs.push(pivot);}
  }else if(def.model==='fish'){
@@ -69,9 +74,10 @@ export function animateCreature(group,mob,time){
  const {def,limbs,head,body,tail}=group.userData.creature,wind=mob.windup>0?mob.windup/Math.max(.01,mob.windupMax):0;
  for(let i=0;i<limbs.length;i++)limbs[i].rotation.x=Math.sin(mob.walk*7+i%2*Math.PI)*.35-(wind&&i>=2?wind*.7:0);
  if(head)head.rotation.x=mob.grazing?.2:wind*.16;
- if(tail)tail.rotation.y=Math.sin(time*9+mob.id)*.45;
+ if(tail)tail.rotation.y=Math.sin(time*(def.model==='ray'?2:9)+mob.id)*(def.model==='ray'?.15:.45);
  if(def.model==='slime'){const hop=Math.abs(Math.sin(mob.walk*5));group.scale.set(1+(1-hop)*.12,.86+hop*.22,1+(1-hop)*.12);group.position.y+=hop*.2;}
  if(def.model==='blaze'){limbs.forEach((p,i)=>{const a=time*.9+i*Math.PI/4;p.position.x=Math.cos(a)*.55;p.position.z=Math.sin(a)*.55;p.rotation.z=Math.sin(time+i)*.2;});head.rotation.y=Math.sin(time)*.2;}
+ if(def.model==='ray')limbs.forEach((p,i)=>{p.rotation.x=0;p.rotation.z=Math.sin(time*2.8+mob.id)*(i?1:-1)*.24;});
  if(def.model==='wraith')group.position.y+=.13+Math.sin(time*2+mob.id)*.1;
  body.material.emissive.set(mob.flash>0?'#89463b':wind?'#492e1c':'#000000');
 }

@@ -1,4 +1,4 @@
-import {coordinateHash} from './coordinate-hash.js?v=38';
+import {coordinateHash} from './coordinate-hash.js?v=39';
 const cell=(x,y,z)=>`${x},${y},${z}`;
 export function wreckAnchor(world,rx,rz){
  const x=rx*192+32+Math.floor(coordinateHash(rx,rz,world.seed+9511)*128),z=rz*192+32+Math.floor(coordinateHash(rz,rx,world.seed+9517)*128);

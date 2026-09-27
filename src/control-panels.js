@@ -1,6 +1,6 @@
-import {ENEMIES} from './combat.js?v=38';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=38';
-import {MOB_VARIATIONS,validVariation} from './mob-variations.js?v=38';
+import {ENEMIES} from './combat.js?v=39';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=39';
+import {MOB_VARIATIONS,validVariation} from './mob-variations.js?v=39';
 const button=(action,label)=>`<button data-action="${action}">${label}</button>`;
 const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function installControlPanels(game,ui,multiplayer){

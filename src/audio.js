@@ -50,13 +50,14 @@ export class Audio {
     this.scheduleMusic(); this.ambientTimer -= dt; this.birdTimer -= dt;
     if (this.ambientTimer > 0) return; this.ambientTimer = .4;
     const c = this.context, active = !game.screen, column = game.world?.column?.(Math.floor(game.pos.x), Math.floor(game.pos.z));
+    const underwater=game.world?.waterAt?.(game.pos.x,game.pos.y+1.5,game.pos.z),ocean=['ocean','beach'].includes(column?.biome),rain=game.weather?.kind==='rain'?(game.weather.intensity||0):0;
     const surface = column && game.pos.y > column.h - 3, river = surface && column.river < 13;
     this.musicDuck = active ? 1 : .45; this.applySettings();
-    this.windGain.gain.setTargetAtTime(active ? game.gliding ? .13 : river ? .095 : surface ? .033 : .006 : 0, c.currentTime, .8);
-    this.windFilter.frequency.setTargetAtTime(game.gliding ? 1100 : river ? 1600 : surface ? 650 : 140, c.currentTime, .8);
+    this.windGain.gain.setTargetAtTime(active ? underwater ? .035 : game.gliding ? .13 : rain>.05 ? .04+rain*.16 : ocean ? .045+Math.sin(game.state.time*.3)*.018 : river ? .095 : surface ? .033 : .006 : 0, c.currentTime, .8);
+    this.windFilter.frequency.setTargetAtTime(underwater ? 180 : game.gliding ? 1100 : rain>.05 ? 2300 : ocean ? 950 : river ? 1600 : surface ? 650 : 140, c.currentTime, .8);
     if (this.birdTimer <= 0) {
       this.birdTimer = 8 + Math.random() * 13;
-      if (active && surface && game.state.time % 600 < 330 && !['desert', 'snow'].includes(column.biome)) {
+      if (active && surface && !underwater && !ocean && rain<.1 && game.state.time % 600 < 330 && !['desert', 'snow'].includes(column.biome)) {
         this.tone(1900, .09, 'sine', .016, 750); this.tone(2300, .09, 'sine', .01, -650, 'effects', .16);
       }
     }

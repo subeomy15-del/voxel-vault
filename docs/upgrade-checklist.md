@@ -42,3 +42,5 @@ No complete upgrade, fresh survival victory, or measured 60 fps claim is made by
 Generator 11 now adds wide-coordinate hashes, Snowy Cedar Forest, four cave rock variants, coherent biome subfamilies, wetland basins and denser jungle ecology. Tests locate every surface biome and cave variant on three seeds. Versions 5–10 remain pinned. The biome-coverage audit document still describes the earlier version-10 baseline.
 
 Stronghold stamping and portal-policy helpers have been drafted but gameplay transition call sites remain unconnected; do not treat the new progression ingredients as a completed survival route.
+
+Latest visual/ecology release and evidence: [realism-release.md](realism-release.md).

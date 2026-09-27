@@ -1,6 +1,6 @@
-import { BLOCKS } from './data.js?v=38';
-import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=38';
-import { TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=38';
+import { BLOCKS } from './data.js?v=39';
+import { WORLD_BOTTOM, WORLD_TOP } from './world.js?v=39';
+import { TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=39';
 export const BLOCK_TYPES=Object.keys(BLOCKS);
 const ids=Object.fromEntries(BLOCK_TYPES.map((t,i)=>[t,i+1]));
 const faces=[
@@ -30,9 +30,10 @@ export function meshChunk(world,cx,cz,underground=false,options={}){
     const wx=(options.localCoordinates?0:cx*16)+x-1,wy=low+y-1,wz=(options.localCoordinates?0:cz*16)+z-1,small=type==='torch'||type==='lantern',ladder=type==='ladder';
     if(BLOCKS[type].plant||type==='campfire'){
       const tile=(id-1)*3,u=tile%ATLAS_COLS*TILE/ATLAS_WIDTH,v=1-(Math.floor(tile/ATLAS_COLS)+1)*TILE/ATLAS_HEIGHT;
+      const naturalPlant=['fern','mushroom','flower_red','flower_blue','daisy','lavender','dry_shrub','dry_grass_tuft'].includes(type),plantScale=naturalPlant?(type==='mushroom'?.38:.58)+world.hash(cx*16+x-1,cz*16+z-1,world.seed+9231)*.25:1;
       for(const points of [[[.08,0,.08],[.92,0,.92],[.92,1,.92],[.08,1,.08]],[[.92,0,.08],[.08,0,.92],[.08,1,.92],[.92,1,.08]]]){
         const start=out.position.length/3;
-        for(let k=0;k<4;k++){const p=points[k];out.position.push(wx+p[0],wy+p[1],wz+p[2]);out.normal.push(0,1,0);out.color.push(1,1,1);out.uv.push(u+(k===1||k===2?TILE-.4:.4)/ATLAS_WIDTH,v+(k>1?TILE-.4:.4)/ATLAS_HEIGHT);}
+        for(let k=0;k<4;k++){const p=points[k];out.position.push(wx+.5+(p[0]-.5)*plantScale,wy+p[1]*plantScale,wz+.5+(p[2]-.5)*plantScale);out.normal.push(0,1,0);out.color.push(1,1,1);out.uv.push(u+(k===1||k===2?TILE-.4:.4)/ATLAS_WIDTH,v+(k>1?TILE-.4:.4)/ATLAS_HEIGHT);}
         out.index.push(start,start+1,start+2,start,start+2,start+3,start+2,start+1,start,start+3,start+2,start);
       }
       continue;

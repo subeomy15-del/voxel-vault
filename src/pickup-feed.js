@@ -1,5 +1,5 @@
-import {ITEMS} from './data.js?v=38';
-import {icon} from './icons.js?v=38';
+import {ITEMS} from './data.js?v=39';
+import {icon} from './icons.js?v=39';
 export class PickupFeed {
  constructor(){this.rows=new Map();this.root=document.createElement('aside');this.root.id='pickup-feed';this.root.setAttribute('aria-label','Recently collected items');this.root.setAttribute('aria-live','polite');document.body.append(this.root);}
  add(name,count,now=performance.now()){

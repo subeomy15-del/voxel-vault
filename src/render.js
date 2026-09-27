@@ -1,39 +1,40 @@
-import {FloatingOrigin} from './floating-origin.js?v=38';
-import {variationColor} from './mob-variations.js?v=38';
-import {creatureModel,animateCreature} from './creature-model.js?v=38';
-import {GeometryCache,ModelPool} from './model-cache.js?v=38';
-import {AutoQuality} from './auto-quality.js?v=38';
+import {TerrainLighting} from './terrain-lighting.js?v=39';
+import {FloatingOrigin} from './floating-origin.js?v=39';
+import {variationColor} from './mob-variations.js?v=39';
+import {creatureModel,animateCreature} from './creature-model.js?v=39';
+import {GeometryCache,ModelPool} from './model-cache.js?v=39';
+import {AutoQuality} from './auto-quality.js?v=39';
 import * as THREE from '../vendor/three.module.js';
-import { BLOCKS, ITEMS, hash } from './data.js?v=38';
-import { ENEMIES } from './combat.js?v=38';
-import { textureCanvas,TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=38';
-import { Scenery } from './scenery.js?v=38';
-import { boxesFor } from './shapes.js?v=38';
-import { animalModel,bowModel,arrowModel,toolModel } from './models.js?v=38';
-import { itemModel } from './item-model.js?v=38';
-import { dragonModel,animateDragon } from './dragon-model.js?v=38';
-import { RiftEffects } from './rift-effects.js?v=38';
-import { PostProcess } from './post-process.js?v=38';
-import { PlayerModel } from './player-model.js?v=38';
-import { cameraPosition } from './perspective.js?v=38';
-import { ViewEffects } from './view-effects.js?v=38';
-import { undeadModel } from './undead-model.js?v=38';
-import { ParticlePool } from './particles.js?v=38';
-import { CameraMotion } from './camera-motion.js?v=38';
-import { FrameBudget,renderOptions } from './render-performance.js?v=38';
-import { Diagnostics } from './diagnostics.js?v=38';
-import { MovementEffects } from './movement-effects.js?v=38';
+import { BLOCKS, ITEMS, hash } from './data.js?v=39';
+import { ENEMIES } from './combat.js?v=39';
+import { textureCanvas,TILE,ATLAS_COLS,ATLAS_WIDTH,ATLAS_HEIGHT } from './textures.js?v=39';
+import { Scenery } from './scenery.js?v=39';
+import { boxesFor } from './shapes.js?v=39';
+import { animalModel,bowModel,arrowModel,toolModel } from './models.js?v=39';
+import { itemModel } from './item-model.js?v=39';
+import { dragonModel,animateDragon } from './dragon-model.js?v=39';
+import { RiftEffects } from './rift-effects.js?v=39';
+import { PostProcess } from './post-process.js?v=39';
+import { PlayerModel } from './player-model.js?v=39';
+import { cameraPosition } from './perspective.js?v=39';
+import { ViewEffects } from './view-effects.js?v=39';
+import { undeadModel } from './undead-model.js?v=39';
+import { ParticlePool } from './particles.js?v=39';
+import { CameraMotion } from './camera-motion.js?v=39';
+import { FrameBudget,renderOptions } from './render-performance.js?v=39';
+import { Diagnostics } from './diagnostics.js?v=39';
+import { MovementEffects } from './movement-effects.js?v=39';
 export class Renderer {
   constructor(container,settings){
     this.renderOrigin=new FloatingOrigin();this.geometryCache=new GeometryCache();this.mobPool=new ModelPool(g=>this.disposeGroup(g));this.projectilePool=new ModelPool(g=>this.disposeGroup(g),50);this.autoQuality=new AutoQuality();this.crosshair=document.querySelector('#crosshair');this.projectedPoint=new THREE.Vector3();this.handMaterials=[];this.bowBindings=[];this.shadowTimer=0;this.diagnostics=new Diagnostics();this.settings=settings;this.options=renderOptions(settings,this.autoQuality.level);this.performance=new FrameBudget();this.cameraMotion=new CameraMotion();this.telemetry={fps:60,frameMs:16.7,drawCalls:0,triangles:0,chunks:0,queued:0,particles:0,pixelRatio:1,quality:this.options.quality,workerMs:0};this.scene=new THREE.Scene();this.scene.background=new THREE.Color('#b6cddd');this.scene.fog=new THREE.Fog('#b6cddd',62,125);
     this.camera=new THREE.PerspectiveCamera(74,innerWidth/innerHeight,.05,220);this.camera.rotation.order='YXZ';
     this.renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});this.renderer.setSize(innerWidth,innerHeight);this.renderer.setPixelRatio(Math.min(devicePixelRatio,this.options.maxPixelRatio));this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1;this.renderer.info.autoReset=false;container.append(this.renderer.domElement);
     this.ambient=new THREE.HemisphereLight('#e1ecff','#525b48',1.3);this.scene.add(this.ambient);this.sun=new THREE.DirectionalLight('#fff6e4',1.8);this.sun.position.set(-40,75,35);this.scene.add(this.sun);this.sun.castShadow=true;this.sun.shadow.mapSize.set(2048,2048);Object.assign(this.sun.shadow.camera,{left:-40,right:40,top:40,bottom:-40,near:1,far:170});this.sun.shadow.bias=-.0007;this.sun.shadow.normalBias=.04;this.sun.shadow.autoUpdate=false;this.renderer.shadowMap.enabled=settings.quality==='high';this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.scene.add(this.sun.target);
-    this.material=new THREE.MeshStandardMaterial({map:this.atlas(),vertexColors:true,alphaTest:.45,roughness:.94,metalness:.02});this.chunks=new Map();this.queue=[];this.center='';this.decor=new THREE.Group();this.scene.add(this.decor);this.particles=new ParticlePool(this.scene);this.movementEffects=new MovementEffects(this.camera,this.particles);this.effects=this.particles;this.beacons=[];this.mobMeshes=new Map();this.chestMeshes=new Map();
+    this.material=new THREE.MeshStandardMaterial({map:this.atlas(),vertexColors:true,alphaTest:.45,roughness:.94,metalness:.02});this.terrainLighting=new TerrainLighting(this.material);this.material.bumpMap=this.material.map;this.material.bumpScale=.022;this.chunks=new Map();this.queue=[];this.center='';this.decor=new THREE.Group();this.scene.add(this.decor);this.particles=new ParticlePool(this.scene);this.movementEffects=new MovementEffects(this.camera,this.particles);this.effects=this.particles;this.beacons=[];this.mobMeshes=new Map();this.chestMeshes=new Map();
     this.waterMaterial=new THREE.MeshStandardMaterial({color:'#42a7dd',roughness:.28,metalness:.08,transparent:true,opacity:.64,vertexColors:true,depthWrite:false,side:THREE.DoubleSide});
     this.glassMaterial=new THREE.MeshLambertMaterial({color:'#ffffff',transparent:true,opacity:.28,vertexColors:true});
     this.epoch=0;this.revision=0;this.chunkVersions=new Map();this.ready=[];this.inflight=false;this.underground=false;
-    this.worker=new Worker(new URL('./terrain-worker.js?v=38',import.meta.url),{type:'module'});
+    this.worker=new Worker(new URL('./terrain-worker.js?v=39',import.meta.url),{type:'module'});
     this.worker.onmessage=({data})=>this.receiveChunk(data);
     this.worker.onerror=e=>{console.error('Terrain worker failed',e);document.querySelector('#loading').hidden=false;document.querySelector('#loading').textContent='Terrain could not load. Reload the page to try again.';};
     this.projectileMeshes=new Map();
@@ -61,7 +62,7 @@ export class Renderer {
   }
   applySettings(settings=this.settings){
     this.settings=settings;const previous=this.options;this.options=renderOptions(settings,this.autoQuality.level);this.center='';
-    this.renderer.shadowMap.enabled=!!this.options.shadows;this.postProcess?.setEnabled(this.options.antialias);
+    this.renderer.shadowMap.enabled=!!this.options.shadows;this.material.bumpScale=this.options.quality==='low'?0:.022;this.postProcess?.setEnabled(this.options.antialias);
     if(previous&&previous.shadows!==this.options.shadows)this.scene.traverse(object=>{for(const material of Array.isArray(object.material)?object.material:object.material?[object.material]:[])material.needsUpdate=true;});
     const span=this.options.quality==='high'?32:24;Object.assign(this.sun.shadow.camera,{left:-span,right:span,top:span,bottom:-span});this.sun.shadow.camera.updateProjectionMatrix();this.sun.shadow.needsUpdate=true;
     const mapSize=this.options.quality==='low'||this.options.quality==='medium'||this.performance.scale<.9?1024:2048;
@@ -220,7 +221,7 @@ export class Renderer {
     const crosshair=this.crosshair;
     if(perspective===1&&!menu){const d=game.direction(),distance=game.target?.distance||6,p=this.projectedPoint.set(game.pos.x+d.x*distance,game.pos.y+1.58+d.y*distance,game.pos.z+d.z*distance).project(this.camera);crosshair.style.left=(p.x+1)*50+'%';crosshair.style.top=(1-p.y)*50+'%';}else{crosshair.style.left='50%';crosshair.style.top='50%';}
     crosshair.style.visibility=perspective===2?'hidden':'visible';
-    this.scenery.update(game,inCave,dt);this.updateShadows(game,dt);this.updatePlacement(game);this.cracks.visible=!game.screen&&!!game.target&&game.mineProgress>0&&!BLOCKS[game.target.type].plant;if(this.cracks.visible){this.updateCracks(game.mineProgress);this.cracks.position.set(game.target.x+.5,game.target.y+.5,game.target.z+.5);}
+    this.scenery.update(game,inCave,dt);this.terrainLighting.update(game,this,dt);this.updateShadows(game,dt);this.updatePlacement(game);this.cracks.visible=!game.screen&&!!game.target&&game.mineProgress>0&&!BLOCKS[game.target.type].plant;if(this.cracks.visible){this.updateCracks(game.mineProgress);this.cracks.position.set(game.target.x+.5,game.target.y+.5,game.target.z+.5);}
     this.outline.scale.set(1,1,1);this.outline.material.color.set(game.mobTarget?'#f2d495':'#f7edc5');this.outline.material.opacity=.48+(this.options.cameraEffects?Math.sin(t*3)*.07:0);
     if(game.mobTarget){const m=game.mobTarget.mob,info=ENEMIES[m.kind],radius=(info.radius||.35)+.15,height=(info.height||1.8)+.12;this.outline.scale.set(radius*2,height,radius*2);this.outline.position.set(m.x,m.y+height/2,m.z);}
     else if(game.target){const height=BLOCKS[game.target.type].shape==='slab'?.5:1;this.outline.scale.y=height;this.outline.position.set(game.target.x+.5,game.target.y+height/2,game.target.z+.5);this.cracks.scale.y=height;this.cracks.position.y=game.target.y+height/2;}
@@ -233,7 +234,7 @@ export class Renderer {
       g.position.set(mob.x,mob.y+hop+(mob.kind==='wisp'?.35+Math.sin(t*3)*.18:0),mob.z);g.rotation.y=mob.angle;
       if(mob.kind==='dragon'){animateDragon(g,mob,t);continue;}
       if(g.userData.creature){animateCreature(g,mob,t);continue;}
-      if(animal){g.userData.legs.forEach((leg,i)=>leg.rotation.x=mob.walkSpeed>0?Math.sin(mob.walk*8+(i%2)*Math.PI)*.45:0);g.userData.head.rotation.x=mob.grazing?.22+Math.sin(t*1.5+mob.id)*.09:0;}
+      if(animal){if(g.userData.tail)g.userData.tail.rotation.z=Math.sin(t*2+mob.id)*.15;for(const ear of g.userData.ears||[])ear.rotation.z=ear.userData.rest+Math.sin(t*1.2+mob.id)*.045;for(let i=0;i<(g.userData.wings||[]).length;i++)g.userData.wings[i].rotation.z=Math.sin(t*5+mob.id)*.06;g.userData.head.rotation.y=Math.sin(t*.6+mob.id)*.08;g.userData.legs.forEach((leg,i)=>leg.rotation.x=mob.walkSpeed>0?Math.sin(mob.walk*8+(i%2)*Math.PI)*.45:0);g.userData.head.rotation.x=mob.grazing?.22+Math.sin(t*1.5+mob.id)*.09:0;}
       else{g.children[2].rotation.x=Math.sin(mob.walk*7)*.5;g.children[3].rotation.x=-Math.sin(mob.walk*7)*.5;}
       g.rotation.z=mob.flash>0?Math.sin(mob.flash*70)*.06:0;(animal?g.userData.body:g.children[0])?.material.emissive.set(mob.flash>0?'#89463b':'#000000');
     }

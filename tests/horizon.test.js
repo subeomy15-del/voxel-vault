@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js?v=38';
-import { World } from '../src/world.js?v=38';
-import { findMobPath,visibleBetween } from '../src/navigation.js?v=38';
-import { ANIMALS } from '../src/wildlife.js?v=38';
-import { targetMob } from '../src/combat.js?v=38';
-import { freshState,loadState,saveState } from '../src/save.js?v=38';
+import { Game } from '../src/game.js?v=39';
+import { World } from '../src/world.js?v=39';
+import { findMobPath,visibleBetween } from '../src/navigation.js?v=39';
+import { ANIMALS } from '../src/wildlife.js?v=39';
+import { targetMob } from '../src/combat.js?v=39';
+import { freshState,loadState,saveState } from '../src/save.js?v=39';
 const storage=()=>{const map=new Map();return {getItem:k=>map.get(k),setItem:(k,v)=>map.set(k,v)};};
 const make=()=>{const g=new Game({setWorld(){},stream(){},burst(){}},{play(){}},storage());g.screen=null;g.pos={x:.5,y:7,z:9.5};g.yaw=0;g.pitch=0;g.mobs=[];return g;};
 

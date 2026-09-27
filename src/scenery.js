@@ -1,22 +1,30 @@
-import {habitatInstances} from './visual-habitat.js?v=38';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=38';
-import {BIOME_DETAIL} from './biome-detail.js?v=38';
-import {ATMOSPHERES} from './atmosphere-profiles.js?v=38';
+import {weatherAt} from './weather.js?v=39';
+import {WeatherView} from './weather-view.js?v=39';
+import {habitatInstances} from './visual-habitat.js?v=39';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=39';
+import {BIOME_DETAIL} from './biome-detail.js?v=39';
+import {ATMOSPHERES} from './atmosphere-profiles.js?v=39';
 import * as THREE from '../vendor/three.module.js';
-import { hash } from './data.js?v=38';
+import { hash } from './data.js?v=39';
 export class Scenery {
   constructor(renderer){
     this.atmospheres=Object.fromEntries(Object.entries(ATMOSPHERES).map(([id,p])=>[id,Object.fromEntries(Object.entries(p).map(([k,color])=>[k,new THREE.Color(color)]))]));this.targetZenith=new THREE.Color();this.targetHorizon=new THREE.Color();
-    this.owner=renderer;this.time={value:0};this.wind={value:1};
+    this.weatherView=new WeatherView(renderer);this.owner=renderer;this.time={value:0};this.wind={value:1};
     this.palette=Object.fromEntries(Object.entries({day:'#6aa6cf',horizon:'#c4d8df',dusk:'#c8b598',cloud:'#f6f0dd',cave:'#162128',sun:'#edf1f3',sunset:'#dfbfab'}).map(([key,color])=>[key,new THREE.Color(color)]));
-    this.skyUniforms={sunDirection:{value:new THREE.Vector3(-.5,.8,.3)},zenith:{value:new THREE.Color('#6eabcb')},horizon:{value:new THREE.Color('#d6dbca')},night:{value:0},rift:{value:0},time:this.time};
+    this.skyUniforms={sunDirection:{value:new THREE.Vector3(-.5,.8,.3)},zenith:{value:new THREE.Color('#6eabcb')},horizon:{value:new THREE.Color('#d6dbca')},night:{value:0},rift:{value:0},cloudCover:{value:.35},time:this.time};
     const skyMaterial=new THREE.ShaderMaterial({uniforms:this.skyUniforms,side:THREE.BackSide,depthWrite:false,
       vertexShader:'varying vec3 vSky;void main(){vSky=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
-      fragmentShader:`varying vec3 vSky;uniform vec3 sunDirection,zenith,horizon;uniform float night,rift,time;
+      fragmentShader:`varying vec3 vSky;uniform vec3 sunDirection,zenith,horizon;uniform float night,rift,time,cloudCover;
       float rand(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
+      float cloudNoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(rand(vec3(i,1.)),rand(vec3(i+vec2(1.,0.),1.)),f.x),mix(rand(vec3(i+vec2(0.,1.),1.)),rand(vec3(i+vec2(1.),1.)),f.x),f.y);}
       void main(){vec3 d=normalize(vSky);float h=max(d.y,0.0);vec3 col=mix(horizon,zenith,pow(h,.58));
       float sun=max(dot(d,sunDirection),0.0);col+=vec3(1.0,.74,.37)*pow(sun,26.)*.22*(1.-night);
       col+=vec3(1.,.88,.59)*smoothstep(.9992,.9996,sun)*(1.-night)*1.1;
+      vec2 cloudUV=d.xz/max(.09,d.y)*1.4+vec2(time*.003,time*.0008);
+      float cloudField=cloudNoise(cloudUV)*.55+cloudNoise(cloudUV*2.1)*.3+cloudNoise(cloudUV*4.3)*.15;
+      float cloudMask=smoothstep(.76-cloudCover*.35,.87-cloudCover*.35,cloudField)*smoothstep(.025,.2,d.y)*(1.-rift);
+      vec3 cloudColor=mix(vec3(.10,.15,.21),mix(vec3(.53,.62,.67),vec3(.96,.94,.84),cloudField),1.-night);
+      col=mix(col,cloudColor,cloudMask*.9);
       float moon=max(dot(d,-sunDirection),0.0);col+=vec3(.62,.75,.86)*smoothstep(.9993,.9996,moon)*night;
       vec3 cell=floor(d*370.);float star=step(.9988,rand(cell))*pow(max(0.,1.-length(fract(d*370.)-.5)*1.6),3.);
       col+=vec3(.77,.88,1.)*star*night*smoothstep(.05,.4,h);
@@ -34,6 +42,7 @@ export class Scenery {
       for(let j=0;j<5;j++){m.compose(new THREE.Vector3(x+(j-2)*5,y+hash(i,j)*2,z+(hash(i,j+3)-.5)*6),q,new THREE.Vector3(6+hash(i,j+4)*7,1.5+hash(i,j+8)*2,5+hash(i,j+5)*6));this.clouds.setMatrixAt(count++,m);}
     }
     renderer.scene.add(this.clouds);
+    this.stoneMaterial=new THREE.MeshLambertMaterial({color:'#ffffff'});
     this.grassMaterial=new THREE.MeshLambertMaterial({color:'#ffffff',side:THREE.DoubleSide});
     this.grassMaterial.onBeforeCompile=shader=>{
       shader.uniforms.uWindTime=this.time;shader.uniforms.uWind=this.wind;
@@ -75,9 +84,9 @@ export class Scenery {
   }
   addGroundDetail(group,cx,cz,world){
     if(this.owner.underground||world.dimension!=='overworld')return;
-    const {ground,water}=habitatInstances(world,cx,cz,this.owner.options.quality);
+    const {ground,water,canopy,stones}=habitatInstances(world,cx,cz,this.owner.options.quality);
     const up=new THREE.Vector3(0,1,0);
-    for(const [aquatic,points,tall]of[[false,ground,false],[true,water.filter(p=>!p.tall),false],[true,water.filter(p=>p.tall),true]]){
+    for(const [aquatic,points,tall,fan]of[[false,ground,false],[true,water.filter(p=>!p.tall&&!p.fan),false,false],[true,water.filter(p=>p.fan),false,true],[true,water.filter(p=>p.tall),true],[false,canopy,false]]){
       if(!points.length)continue;
       // Tapered leaf ribbons, with several bends rather than a tall rectangular card.
       const positions=[];
@@ -95,21 +104,35 @@ export class Scenery {
           positions.push(x,y,0,tip,y+.025,z,tip-side*.04,y+.075,z,x,y,0,tip-side*.04,y+.075,z,x,y+.05,0);
         }
       }
+      if(fan){
+        positions.length=0;
+        for(let branch=0;branch<7;branch++){
+          const x=(branch-3)*.12,y=.4+(.35-Math.abs(branch-3)*.06);
+          positions.push(-.015,0,0,.015,0,0,x+.025,y,0,-.015,0,0,x+.025,y,0,x-.025,y,0);
+          for(let k=1;k<4;k++){const t=k/4,bx=x*t,by=y*t;positions.push(bx,by,0,bx-.1,by+.08,0,bx-.08,by+.1,0,bx,by,0,bx+.08,by+.1,0,bx+.1,by+.08,0);}
+        }
+      }
       const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.computeVertexNormals();
       const mesh=new THREE.InstancedMesh(geometry,aquatic?this.aquaticMaterial:this.grassMaterial,points.length);
-      points.forEach((p,i)=>{this.rotation.setFromAxisAngle(up,p.angle);this.scratch.compose(new THREE.Vector3(p.x-cx*16,p.y,p.z-cz*16),this.rotation,new THREE.Vector3(tall?Math.min(2,p.scale):p.scale,p.scale,tall?Math.min(2,p.scale):p.scale));mesh.setMatrixAt(i,this.scratch);this.tint.set(p.color);mesh.setColorAt(i,this.tint);});
+      points.forEach((p,i)=>{this.rotation.setFromAxisAngle(up,p.angle);this.scratch.compose(new THREE.Vector3(p.x-cx*16,p.y,p.z-cz*16),this.rotation,new THREE.Vector3(tall?Math.min(2,p.scale):p.scale,p.scale,tall?Math.min(2,p.scale):p.scale));mesh.setMatrixAt(i,this.scratch);this.tint.set(fan?'#b39278':p.color);mesh.setColorAt(i,this.tint);});
+      if(points===canopy)mesh.userData.canopy=true;
       mesh.position.set(cx*16,0,cz*16);mesh.receiveShadow=true;mesh.computeBoundingSphere();mesh.userData.visualHabitat=true;mesh.userData.aquatic=aquatic;group.add(mesh);
+    }
+    if(stones.length){
+      const geometry=new THREE.IcosahedronGeometry(.18,0),mesh=new THREE.InstancedMesh(geometry,this.stoneMaterial,stones.length);
+      stones.forEach((p,i)=>{this.rotation.setFromAxisAngle(up,p.angle);this.scratch.compose(new THREE.Vector3(p.x-cx*16,p.y+.055,p.z-cz*16),this.rotation,new THREE.Vector3(.8+p.scale,.3+p.scale*.3,.7+p.scale));mesh.setMatrixAt(i,this.scratch);mesh.setColorAt(i,this.tint.set(p.color));});mesh.position.set(cx*16,0,cz*16);mesh.receiveShadow=true;mesh.computeBoundingSphere();mesh.userData.visualHabitat=true;group.add(mesh);
     }
   }
   update(game,inCave,dt=1/60){
     const t=game.state.time,phase=t/600*Math.PI*2,elevation=Math.sin(phase),day=THREE.MathUtils.smoothstep(elevation,-.22,.35),dusk=(1-Math.abs(elevation))**5;
+    const weather=weatherAt(game.state.seed,t,game.world.biome(game.pos.x,game.pos.z));game.weather=weather;this.weatherView.update(game,dt,weather);this.skyUniforms.cloudCover.value=weather.cloud;
     this.time.value=t;this.wind.value=this.owner.settings.bobbing?1:0;
     const uniforms=this.skyUniforms;uniforms.sunDirection.value.set(-Math.cos(phase)*.8,elevation,.25).normalize();uniforms.night.value=1-day;uniforms.rift.value=game.state.dimension==='ender'?1:0;
     const biome=game.world.biome(game.pos.x,game.pos.z),profile=this.atmospheres[biome]||this.atmospheres[BIOME_DEFINITIONS[biome]?.parent]||this.atmospheres.meadow,blend=1-Math.exp(-dt*1.4);
     this.targetZenith.set('#16283e').lerp(profile.day,day);this.targetHorizon.set('#354654').lerp(profile.horizon,day).lerp(this.palette.dusk,dusk*.35);
     uniforms.zenith.value.lerp(this.targetZenith,blend);uniforms.horizon.value.lerp(this.targetHorizon,blend);
     this.sky.visible=!inCave;this.sky.position.copy(this.owner.camera.position);
-    this.clouds.visible=!inCave;this.clouds.position.set(game.pos.x+Math.sin(t*.002)*10,0,game.pos.z);this.clouds.material.color.set('#8b9ba5').lerp(profile.cloud,day);this.clouds.material.opacity=.7*day+.22;
+    this.clouds.visible=false;this.clouds.position.set(game.pos.x+Math.sin(t*.002)*10,0,game.pos.z);this.clouds.material.color.set('#8b9ba5').lerp(profile.cloud,day);this.clouds.material.opacity=.7*day+.22;
     const r=this.owner;r.scene.background.copy(inCave?this.palette.cave:uniforms.horizon.value);r.scene.fog.color.copy(r.scene.background);
     this.clouds.count=r.options.quality==='low'?40:r.options.quality==='medium'?80:120;
     const distance=r.options.renderDistance*16*(BIOME_DETAIL[biome]?.fog||1);r.scene.fog.near=inCave?20:distance*.7;r.scene.fog.far=inCave?45:distance+16;
@@ -142,6 +165,7 @@ export class Scenery {
         r.sun.intensity*=.65;r.ambient.color.set('#aed8d4');
       }
     }
+    if(game.state.dimension==='overworld'&&!inCave){r.sun.intensity*=1-weather.intensity*.7;r.ambient.intensity*=1-weather.intensity*.18;r.scene.fog.far*=1-weather.intensity*.25;}
     const direction=uniforms.sunDirection.value;r.sun.position.set(game.pos.x+direction.x*50,game.pos.y+Math.max(.3,Math.abs(direction.y))*70,game.pos.z+direction.z*60);r.sun.target.position.set(game.pos.x,game.pos.y,game.pos.z);
   }
 }

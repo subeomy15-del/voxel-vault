@@ -1,8 +1,9 @@
-import {NEW_ANIMALS} from './creature-registry.js?v=38';
-import {BIOME_ECOLOGY} from './biome-ecology.js?v=38';
-import { hash } from './data.js?v=38';
-import { findMobPath } from './navigation.js?v=38';
+import {NEW_ANIMALS} from './creature-registry.js?v=39';
+import {BIOME_ECOLOGY} from './biome-ecology.js?v=39';
+import { hash } from './data.js?v=39';
+import { findMobPath } from './navigation.js?v=39';
 export const ANIMALS={
+  reef_ray:{name:'Reef Ray',passive:true,aquatic:true,model:'ray',hp:8,speed:.7,flee:1.8,height:.42,radius:1.25,color:'#648c98',glow:'#c7d8cf',food:[],drops:{sea_fish:[1,2]}},
   deer:{name:'Deer',passive:true,hp:12,speed:1.15,flee:5.4,height:1.6,radius:.38,color:'#a88b68',glow:'#d9c6a4',food:['wheat','carrot'],drops:{raw_venison:[2,3],leather:[1,2]}},
   pig:{name:'Pig',passive:true,hp:12,speed:.95,flee:3.9,height:.9,radius:.4,color:'#c79f95',glow:'#dec0ac',food:['carrot','potato'],drops:{raw_pork:[2,3]}},
   cow:{name:'Cow',passive:true,hp:16,speed:.8,flee:3.5,height:1.45,radius:.47,color:'#b6aa8f',glow:'#e0d8bd',food:['wheat'],drops:{raw_beef:[2,3],leather:[1,2]}},
@@ -73,8 +74,8 @@ export function tickAquaticLife(game,dt){
   const a=hash(game.serial+i,Math.floor(game.state.time/3),game.state.seed)*Math.PI*2;
   const x=game.pos.x+Math.sin(a)* (8+i*2),z=game.pos.z+Math.cos(a)*(8+i*2),y=2.2;
   if(Math.abs(game.pos.y-y)>18||!game.world.waterAt(x,y,z)||!game.world.waterAt(x,y+.6,z))continue;
-  const biome=game.world.biome(x,z),kind=['ocean','beach'].includes(biome)?(i%4===0?'pufferfish':'tropical_fish'):'river_fish';
-  for(let j=0;j<Math.min(3,12-count);j++){const fx=x+j*.8,fz=z+j*.6;if(game.world.waterAt(fx,y,fz)&&game.world.waterAt(fx,y+.6,fz)&&!game.world.intersects(fx,y,fz,.6,.3))game.spawnMob(fx,fz,kind,y);}
+  const biome=game.world.biome(x,z),kind=['ocean','beach'].includes(biome)?(i%5===0?'reef_ray':i%4===0?'pufferfish':'tropical_fish'):'river_fish';
+  for(let j=0;j<Math.min(kind==='reef_ray'?1:3,12-count);j++){const fx=x+j*.8,fz=z+j*.6;if(game.world.waterAt(fx,y,fz)&&game.world.waterAt(fx,y+.6,fz)&&!game.world.intersects(fx,y,fz,ANIMALS[kind].height,ANIMALS[kind].radius))game.spawnMob(fx,fz,kind,y);}
   return;
  }
 }
