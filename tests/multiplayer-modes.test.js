@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { createServer } from '../server.js';
-import { BEDWARS_BEDS, BEDWARS_SPAWNS, MODE_RULES, mapEdits } from '../src/mode-rules.js?v=39';
+import { BEDWARS_BEDS, BEDWARS_SPAWNS, MODE_RULES, mapEdits } from '../src/mode-rules.js?v=42';
 
 async function fixture(t, mode, count = 2) {
   let clock = 1000;
@@ -44,11 +44,8 @@ async function fixture(t, mode, count = 2) {
   return { request, actors, code, action, state, start, advance, self, move };
 }
 
-test('competitive modes require two players, balance teams and supply a protected arena', async t => {
+test('competitive modes fill a solo match with AI, balance teams and supply a protected arena', async t => {
   const api = await fixture(t, 'bedwars', 1), [host] = api.actors;
-  assert.equal((await api.start()).status, 409);
-  const guest = (await api.request(`/api/rooms/${api.code}/join`, { playerName: 'Tide' })).body;
-  await api.action(guest, 'ready', { ready: true });
   const started = await api.start();
   assert.equal(started.status, 200);
   const { room, snapshot } = started.body;
@@ -261,5 +258,26 @@ test('leaving forfeits a competitive team or role without blocking host migratio
   const result = await api.state(hunter);
   assert.equal(result.room.hostId, hunter.playerId);
   assert.equal(result.room.match.winner, 'hunters');
-  assert.equal((await api.action(hunter, 'rematch')).status, 409);
+  const rematch=await api.action(hunter, 'rematch');
+  assert.equal(rematch.status,200);
+  assert.equal(rematch.body.room.match.players.filter(p=>p.bot).length,1);
+});
+
+test('solo Bed Wars AI moves, builds synchronized bridges, spends supplies, and stays in the room',async t=>{
+ const api=await fixture(t,'bedwars',1);const started=await api.start();assert.equal(started.status,200);
+ const bot=started.body.room.match.players.find(p=>p.bot);assert.ok(bot);let state;
+ for(let i=0;i<100;i++){api.advance(250);state=await api.state();}
+ const moved=state.room.match.players.find(p=>p.id===bot.id);
+ assert.ok(Math.abs(moved.pose.x-bot.pose.x)>5,'AI advances toward the opposing island');
+ assert.ok(state.snapshot.edits.ender.some(([k,b])=>b==='blue_wool'&&Math.abs(Number(k.split(',')[0]))<40),'AI builds bridges across the gap');
+ assert.ok(moved.blocks<64,'AI uses finite block supplies');
+ assert.ok(state.room.players.some(p=>p.bot));
+ await api.action(api.actors[0],'leave');
+ assert.equal((await api.request('/api/rooms')).body.rooms.some(r=>r.code===api.code),false,'bots do not keep abandoned rooms alive');
+});
+test('solo Manhunt AI respects the head start and pursues the human runner',async t=>{
+ const api=await fixture(t,'manhunt',1);const started=(await api.start()).body;const bot=started.room.match.players.find(p=>p.bot);assert.ok(bot);
+ api.advance(10000);assert.deepEqual((await api.state()).room.match.players.find(p=>p.bot).pose,bot.pose);
+ api.advance(11000);await api.state();api.advance(600);const state=await api.state();
+ assert.ok(state.room.match.players.find(p=>!p.bot).hp<20,'AI attacks the runner after release');
 });

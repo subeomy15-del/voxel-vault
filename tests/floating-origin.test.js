@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from '../vendor/three.module.js';
-import {FloatingOrigin} from '../src/floating-origin.js?v=39';
-import {ParticlePool} from '../src/particles.js?v=39';
-import {World} from '../src/world.js?v=39';
-import {meshChunk} from '../src/mesh.js?v=39';
+import {FloatingOrigin} from '../src/floating-origin.js?v=42';
+import {ParticlePool} from '../src/particles.js?v=42';
+import {World} from '../src/world.js?v=42';
+import {meshChunk} from '../src/mesh.js?v=42';
 
 test('render rebasing keeps hierarchy, shadows and camera relative while restoring logical positions even on failure',()=>{
  const scene=new THREE.Scene(),origin=new FloatingOrigin(),camera=new THREE.PerspectiveCamera(),mob=new THREE.Group(),wing=new THREE.Object3D();

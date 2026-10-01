@@ -4,7 +4,7 @@ import {connect,sleep} from './cdp.js';
 const c=await connect(),ev=c.evaluate,results=[];
 try{
  await c.send('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:1,mobile:false});
- await ev(`(async()=>{const m=await import(document.querySelector('script[type=module]').src);window.g=m.game;window.v=m.renderer;const {freshState}=await import('/src/save.js?v=39');g.state=freshState(7821,'creative');g.loadWorld();g.screen=null;g.flying=true;g.state.time=100;const {applyQualityPreset}=await import('/src/settings.js?v=39');applyQualityPreset(m.settings,'low');v.applySettings();m.ui.render();})()`);
+ await ev(`(async()=>{const m=await import(document.querySelector('script[type=module]').src);window.g=m.game;window.v=m.renderer;const {freshState}=await import('/src/save.js?v=42');g.state=freshState(7821,'creative');g.loadWorld();g.screen=null;g.flying=true;g.state.time=100;const {applyQualityPreset}=await import('/src/settings.js?v=42');applyQualityPreset(m.settings,'low');v.applySettings();m.ui.render();})()`);
  for(const [name,x,y,z,pitch]of[['jungle',-5000,46,-3176,-.45],['marsh',-4840,8,1144,-.25],['seabed',-5000,-2,1112,-.25]]){
   await ev(`g.pos={x:${x},y:${y},z:${z}};g.pitch=${pitch};g.yaw=.5;g.vx=0;g.vy=0;g.vz=0;g.mobs=[];g.aquaticTimer=3;`);
   for(let i=0;i<400;i++){if(await ev('v.landingReady(g.pos)&&!v.inflight&&!v.queue.length&&!v.ready.length'))break;await sleep(100);}

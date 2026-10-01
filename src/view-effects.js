@@ -1,8 +1,8 @@
-import {itemAssetPath} from './item-assets.js?v=39';
+import {itemAssetPath} from './item-assets.js?v=42';
 import * as THREE from '../vendor/three.module.js';
-import { ITEMS } from './data.js?v=39';
-import { icon } from './icons.js?v=39';
-import { gliderModel } from './models.js?v=39';
+import { ITEMS } from './data.js?v=42';
+import { icon } from './icons.js?v=42';
+import { gliderModel } from './models.js?v=42';
 const ORES={moonstone:'#baa1f2',coal:'#a0a6a0',iron:'#dfd8c6',gold:'#f5d67c',diamond:'#9bc8d0'};
 const cells=[];for(let x=-14;x<=14;x++)for(let y=-14;y<=14;y++)for(let z=-14;z<=14;z++)if(x*x+y*y+z*z<=196)cells.push([x,y,z]);cells.sort((a,b)=>a[0]**2+a[1]**2+a[2]**2-b[0]**2-b[1]**2-b[2]**2);
 export class ViewEffects {
@@ -24,7 +24,7 @@ export class ViewEffects {
   reset(){for(const mesh of this.drops.values())this.r.disposeGroup(mesh);this.drops.clear();this.ores.count=0;this.scan=null;this.scanKey='';this.scanTime=0;}
   update(game,dt){
     const r=this.r,t=game.state.time,ids=new Set();
-    for(const d of game.state.drops){ids.add(d.id);let mesh=this.drops.get(d.id);if(!mesh){mesh=new THREE.Sprite(new THREE.SpriteMaterial({map:this.texture(d.item),color:'#ffffff',alphaTest:.1}));mesh.scale.setScalar(.48);r.scene.add(mesh);this.drops.set(d.id,mesh);}mesh.position.set(d.x,d.y+.16+Math.sin(t*2.5+d.id)*.06,d.z);}
+    for(const d of game.state.drops){ids.add(d.id);let mesh=this.drops.get(d.id);if(!mesh){mesh=new THREE.Sprite(new THREE.SpriteMaterial({map:this.texture(d.item),color:'#ffffff',alphaTest:.1}));mesh.scale.setScalar(.56);const halo=new THREE.Mesh(new THREE.RingGeometry(.19,.27,24),new THREE.MeshBasicMaterial({color:ITEMS[d.item]?.color||'#b7ecd8',transparent:true,opacity:.32,side:THREE.DoubleSide,depthWrite:false}));halo.rotation.x=-Math.PI/2;halo.position.y=-.12;mesh.add(halo);r.scene.add(mesh);this.drops.set(d.id,mesh);}mesh.position.set(d.x,d.y+.16+Math.sin(t*2.5+d.id)*.06,d.z);}
     for(const[id,mesh]of this.drops)if(!ids.has(id)){r.disposeGroup(mesh);this.drops.delete(id);}
     if(game.state.glider!==this.wingName){if(this.wing)r.disposeGroup(this.wing);this.wingName=game.state.glider;this.wing=ITEMS[this.wingName]?gliderModel(r,ITEMS[this.wingName]):null;if(this.wing)r.camera.add(this.wing);}
     if(this.wing){const third=Number(r.settings.perspective)>0;if(third){r.player.group.add(this.wing);this.wing.position.set(0,1.5,.8);}else{r.camera.add(this.wing);this.wing.position.set(0,0,0);}this.wing.visible=game.gliding&&!game.screen;this.wing.rotation.z=r.settings.bobbing?Math.sin(t*1.7)*.012+(game.keys.has('KeyA')?.035:game.keys.has('KeyD')?-.035:0):0;}

@@ -1,6 +1,6 @@
 {
   "name": "voxel-vault",
-  "version": "16.2.0",
+  "version": "17.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,6 +12,7 @@
     "test:infinite": "node tests/infinite-browser.js",
     "test:multiplayer": "node tests/multiplayer-browser.js",
     "preview": "PORT=3002 node server.js",
+    "test:arcade": "node tests/arcade-browser.js",
     "test:competitive": "node tests/competitive-browser.js",
     "test:parkour": "node tests/parkour-browser.js",
     "test:settings": "node tests/settings-browser.js",

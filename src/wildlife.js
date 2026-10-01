@@ -1,7 +1,7 @@
-import {NEW_ANIMALS} from './creature-registry.js?v=39';
-import {BIOME_ECOLOGY} from './biome-ecology.js?v=39';
-import { hash } from './data.js?v=39';
-import { findMobPath } from './navigation.js?v=39';
+import {NEW_ANIMALS} from './creature-registry.js?v=42';
+import {BIOME_ECOLOGY} from './biome-ecology.js?v=42';
+import { hash } from './data.js?v=42';
+import { findMobPath } from './navigation.js?v=42';
 export const ANIMALS={
   reef_ray:{name:'Reef Ray',passive:true,aquatic:true,model:'ray',hp:8,speed:.7,flee:1.8,height:.42,radius:1.25,color:'#648c98',glow:'#c7d8cf',food:[],drops:{sea_fish:[1,2]}},
   deer:{name:'Deer',passive:true,hp:12,speed:1.15,flee:5.4,height:1.6,radius:.38,color:'#a88b68',glow:'#d9c6a4',food:['wheat','carrot'],drops:{raw_venison:[2,3],leather:[1,2]}},

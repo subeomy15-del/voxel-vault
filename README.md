@@ -1,10 +1,16 @@
-# Voxel Vault — Living Wilds
+# Voxel Vault — Skybound Arcade
 
 Play: https://subeomy15-del.github.io/voxel-vault/
 
-Latest: [ocean visuals, existing-save preservation and explorable shipwrecks](docs/ocean-release.md).
+Latest: [Skybound Arcade — 12 parkour courses, six arcade games, and active AI](docs/skybound-release.md).
 
 A browser voxel adventure with an Overworld → Nether → Ender Dragon journey, building, crafting, farming, gliding and local saves. Joinable lobbies support shared Creative worlds, Bed Wars and Manhunt. Natural green foliage, textured blocks and soft shadows; no bloom.
+
+## Living Earth atmosphere
+
+The Overworld now has continuous weather fronts, wind-driven rain and vegetation, dawn mist and warmer sunrise/sunset horizons. Distant birds circle during fair daylight. Forest birds, coastal calls and nighttime insects follow local habitat and daylight; shelter muffles rain. The location readout shows the local solar clock and weather. These are procedural wilderness conditions, not real-world geography or live weather.
+
+Existing terrain, builds and saves are unchanged. Bird silhouettes use one fixed buffer and disappear with particles off, underground, underwater, at night and in heavy rain. Run `node tests/living-earth-browser.js` with the local preview server and a Chrome debugging session on port 9234 for the atmosphere checks.
 
 ## Living Wilds update
 
@@ -166,3 +172,13 @@ Ruins include camps, fallen walls, shrines, broken bridges, homesteads, towers/w
 **Existing worlds retain their saved terrain version (5, 6 or 7).** Those saves have no historical explored-chunk ledger, so automatically switching even distant chunks could replace terrain you previously visited. This release deliberately does not migrate their generator or erase builds. The new regions are available in newly created worlds; export an existing world before choosing the game's replace-world action. Version 7 worlds retain their original procedural ruins.
 
 Local development: `voxelDebug.ruins(type)` finds bounded nearby sites; `voxelDebug.visit(type)` visits one; `voxelDebug.bounds()` shows footprints. Debug commands are disabled on the public page unless explicitly enabled with `?debug`.
+
+### Inventory and personal travel update
+
+Nearby ground drops collect automatically after a short delay. Depleted backpack stacks disappear, and hotbar slots show an empty space rather than a zero-count item. A full backpack leaves excess drops on the ground.
+
+Open the backpack with Tab to drag items into any hotbar slot, swap hotbar slots, or rearrange backpack stacks. Drag outside the dialog to drop a stack (up to 999); hold Shift to drop one item. Backpack order saves with the world. Ground-item dropping is available in solo worlds.
+
+Open the map with M to save up to three personal teleport sites. Stand on safe, dry ground to save a location. Teleporting checks that the landing remains clear and supported. Sites persist with the world and work within their saved realm; use portals to change realms first. Personal teleporting is available in solo worlds.
+
+The menu wordmark, brand emblem, and favicon use flat 2D branding. The backpack, travel cards, pickup feed, and ground-item markers have refreshed visuals.

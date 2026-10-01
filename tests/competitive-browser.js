@@ -58,7 +58,7 @@ async function crew(mode) {
   await fill(host, 'mp-max-players', '4');
   await host.evaluate(`document.querySelector('[data-mp-form="create"]').requestSubmit()`);
   await until(host, `mp.status==='connected'&&mp.room?.mode===${JSON.stringify(mode)}&&!mui.pending`, 'Mode lobby creation failed');
-  assert.equal(await host.evaluate(`document.querySelector('[data-mp-action="start"]').disabled`), true, 'Competitive lobbies need two players');
+  assert.equal(await host.evaluate(`document.querySelector('[data-mp-action="start"]').disabled`), false, 'Solo matches can start with an AI opponent');
   assert.equal(await host.evaluate(`!!document.querySelector('.mp-team-goals')`), false, 'Creative milestones should not appear in competitive lobbies');
   const code = await host.evaluate('mp.room.code');
   const guest = await page(base + '/?room=' + code);

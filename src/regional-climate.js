@@ -1,5 +1,5 @@
-import {BIOME_FAMILIES} from './expanded-biomes.js?v=39';
-import {climateAt,noise2,smooth,integerHash} from './climate.js?v=39';
+import {BIOME_FAMILIES} from './expanded-biomes.js?v=42';
+import {climateAt,noise2,smooth,integerHash} from './climate.js?v=42';
 // Version eight is separate: saved version-seven terrain never changes underneath builds.
 export function regionalClimate(seed,x,z,hashFn=integerHash){
  const c=climateAt(seed,x,z,hashFn),n=(s,o)=>noise2(c.wx,c.wz,seed+o,s,hashFn),t=c.temperature,m=c.moisture;

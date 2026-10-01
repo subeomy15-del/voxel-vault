@@ -1,29 +1,29 @@
-import {bagRoom,bagCount,BAG_CAPACITY,STACK_SIZE} from './bag-capacity.js?v=39';
-import {creatureSpawn} from './creature-registry.js?v=39';
-import {tickRuinEncounters,defeatRuinGuard,ruinEquipment} from './ruin-encounters.js?v=39';
-import {biomeEnemy} from './biome-ecology.js?v=39';
-import {useRod,claimSeaCache,activateWaystone,travelWaystone,trade,tickExploration} from './exploration.js?v=39';
-import {infuse,infusionValue,armorInfusion,secureRandom} from './infusions.js?v=39';
-import {ALTARS} from './infusion-registry.js?v=39';
-import {drinkPotion,potionFor,potionPower,potionDamageMultiplier} from './potions.js?v=39';
-import { armBlast,cancelDelayedActions } from './delayed-actions.js?v=39';
-import { saveHealth,preserveBeforeReplacement } from './save-health.js?v=39';
-import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=39';
-import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=39';
-import { canonicalItem,normalizeResources } from './resource-map.js?v=39';
-import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=39';
-import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=39';
-import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP,SEA_LEVEL } from './world.js?v=39';
-import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,maxCraft,hash,dailySeed } from './data.js?v=39';
-import { freshState,loadState,saveState,slotKey,importLegacy } from './save.js?v=39';
-import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=39';
-import { movePlayer,requestJump } from './movement.js?v=39';
-import { overlapsBlock } from './shapes.js?v=39';
-import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=39';
-import { ANIMALS,animalKind,tickAquaticLife } from './wildlife.js?v=39';
-import { CHAPTERS,journeyStage } from './journey.js?v=39';
-import { enchantGear,weaponPower,miningPower,armorProtection,awardAura } from './enchanting.js?v=39';
-import { tickTraps,trapAt } from './traps.js?v=39';
+import {bagRoom,bagCount,BAG_CAPACITY,STACK_SIZE} from './bag-capacity.js?v=42';
+import {creatureSpawn} from './creature-registry.js?v=42';
+import {tickRuinEncounters,defeatRuinGuard,ruinEquipment} from './ruin-encounters.js?v=42';
+import {biomeEnemy} from './biome-ecology.js?v=42';
+import {useRod,claimSeaCache,activateWaystone,travelWaystone,trade,tickExploration} from './exploration.js?v=42';
+import {infuse,infusionValue,armorInfusion,secureRandom} from './infusions.js?v=42';
+import {ALTARS} from './infusion-registry.js?v=42';
+import {drinkPotion,potionFor,potionPower,potionDamageMultiplier} from './potions.js?v=42';
+import { armBlast,cancelDelayedActions } from './delayed-actions.js?v=42';
+import { saveHealth,preserveBeforeReplacement } from './save-health.js?v=42';
+import { NETHER_EXIT,NETHER_END,realmDestination } from './nether.js?v=42';
+import { installOutposts,FORGE_OFFERS } from './expeditions.js?v=42';
+import { canonicalItem,normalizeResources } from './resource-map.js?v=42';
+import { installDragonArena,summonDragon,defeatDragon,DRAGON_ALTAR } from './dragon.js?v=42';
+import { captureRealm,emptyRealm,RIFT_ANCHORS } from './realms.js?v=42';
+import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP,SEA_LEVEL } from './world.js?v=42';
+import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,maxCraft,hash,dailySeed } from './data.js?v=42';
+import { freshState,loadState,saveState,slotKey,importLegacy } from './save.js?v=42';
+import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=42';
+import { movePlayer,requestJump } from './movement.js?v=42';
+import { overlapsBlock } from './shapes.js?v=42';
+import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=42';
+import { ANIMALS,animalKind,tickAquaticLife } from './wildlife.js?v=42';
+import { CHAPTERS,journeyStage } from './journey.js?v=42';
+import { enchantGear,weaponPower,miningPower,armorProtection,awardAura } from './enchanting.js?v=42';
+import { tickTraps,trapAt } from './traps.js?v=42';
 
 export class Game {
   constructor(renderer,audio,storage){this.renderer=renderer;this.audio=audio;this.storage=storage;this.keys=new Set();this.screen='menu';this.serial=0;this.touch={x:0,z:0};this.events=[];const saved=loadState(storage);if(!saved&&saveHealth(storage,slotKey('adventure')).blocked)throw Error('The saved world is unreadable. Its data has been preserved; no replacement world was started.');this.state=saved||freshState();this.loadWorld();}
@@ -197,6 +197,17 @@ export class Game {
     const draw=this.drawState;this.drawState=null;this.attackHeld=false;
     if(draw&&draw.item===this.held&&draw.time>.08)this.attack({release:true,charge:Math.min(1,draw.time/(ITEMS[draw.item].drawTime*(1-infusionValue(this.state,draw.item,'quick_draw'))))});
   }
+  assignHotbar(name,index,sourceIndex=null){
+    if(!ITEMS[name]||ITEMS[name].hidden||!(this.state.inv[name]>0)||!Number.isInteger(index)||index<0||index>=this.state.bar.length||this.multiplayer?.competitive)return false;
+    if(Number.isInteger(sourceIndex)&&sourceIndex>=0&&sourceIndex<this.state.bar.length){const other=this.state.bar[index];this.state.bar[index]=name;this.state.bar[sourceIndex]=other;}else{this.state.bar[index]=name;}
+    this.select(index);this.save();return true;
+  }
+  dropInventoryItem(item,one=false){
+    if(this.screen&&this.screen!=='inventory'||this.multiplayer?.active||this.state.mode==='parkour'||!ITEMS[item]||!(this.state.inv[item]>0))return false;
+    const count=one?1:Math.min(STACK_SIZE,this.state.inv[item]),x=this.pos.x-Math.sin(this.yaw)*3,z=this.pos.z-Math.cos(this.yaw)*3;
+    if(!this.creative)this.state.inv[item]-=count;
+    this.dropItem(item,count,x,this.pos.y,z);this.emit('hud');this.save();return true;
+  }
   dropHeld(stack=false){
     if(this.screen||this.multiplayer?.active||this.state.mode==='parkour')return false;
     const item=this.held,available=this.state.inv[item]||0;if(!available)return false;
@@ -215,6 +226,11 @@ export class Game {
       d.age+=dt;if(d.age>600)return false;
       return true;
     });
+    if(this.screen||this.state.mode==='parkour'||this.multiplayer?.competitive)return;
+    for(const drop of [...this.state.drops]){
+      if(drop.age<.65||Math.hypot(drop.x-this.pos.x,drop.z-this.pos.z)>2.25||Math.abs(drop.y-this.pos.y)>2.5||!bagRoom(this.state.inv,drop.item)&&!this.creative)continue;
+      this.pickupDrop(drop);
+    }
   }
   nearestDrop(reach=2.25){
     if(this.state.mode==='parkour'||this.multiplayer?.competitive)return null;
@@ -232,7 +248,7 @@ export class Game {
     const accepted=this.add(current.item,current.count,false);
     if(!accepted){this.toast('Backpack full',`Make room before picking up ${ITEMS[current.item]?.name||current.item}.`);return false;}
     current.count-=accepted;if(current.count<=0)this.state.drops=this.state.drops.filter(d=>d.id!==current.id);
-    this.emit('collected',{name:current.item,count:accepted});this.audio.play('pickup');this.save();this.emit('hud');return true;
+    this.audio.play('pickup');this.save();this.emit('hud');return true;
   }
   dash(){if(this.state.mode==='parkour'||this.dashCooldown>0||this.stamina<25)return;this.dashTime=.2;this.dashCooldown=1.2;this.stamina-=25;}
   jump(){requestJump(this);}
@@ -404,6 +420,7 @@ export class Game {
   }
   rotateBuilding(){if(ITEMS[this.held]?.shape!=='stairs')return;this.buildRotation=(this.buildRotation+1)%4;this.audio.play('click');}
   attack({release=false,charge=1}={}){
+    if(this.arcade?.active){this.arcade.attack();return;}
     if(this.state.mode==='parkour')return;
     if(this.multiplayer?.modes?.attack())return;
     if(this.attackCooldown>0||this.eating)return;const item=ITEMS[this.held];
@@ -438,6 +455,22 @@ export class Game {
     }
   }
   hurt(amount,combat=false,source=combat?'combat':'physical'){if(this.state.mode==='parkour'||this.multiplayer?.competitive||this.creative||this.hurtCooldown>0||this.dashTime>0)return;const reduction=(1-armorProtection(this.state))*potionDamageMultiplier(this,source)*(1-Math.min(.5,source==='fall'?armorInfusion(this.state,'featherstep'):source==='fire'||source==='ash'?armorInfusion(this.state,'ash_ward'):source==='void'||source==='combat'&&this.state.dimension==='ender'?armorInfusion(this.state,'void_ward'):0));this.state.hp=Math.max(0,this.state.hp-amount*reduction*(combat&&this.hardAdventure?1.65:1));this.hurtCooldown=.7;this.audio.play('hurt');this.emit('hurt');if(this.state.hp<=0){this.state.stats.deaths++;this.pause('death');this.emit('screen');}}
+  saveTravelSite(index){
+    if(!Number.isInteger(index)||index<0||index>2||this.multiplayer?.active||this.state.mode==='parkour')return false;
+    if(!this.grounded||this.world.intersects(this.pos.x,this.pos.y,this.pos.z)||this.world.waterAt(this.pos.x,this.pos.y+.5,this.pos.z)){this.toast('Find safe ground','Stand on a clear, dry landing spot to save this site.');return false;}
+    this.state.travelSites??=[null,null,null];
+    this.state.travelSites[index]={...this.pos,dimension:this.state.dimension,yaw:this.yaw,pitch:this.pitch};
+    this.save();this.toast('Site '+(index+1)+' saved','Open your map to teleport back here.','reward');return true;
+  }
+  teleportToSite(index){
+    if(!Number.isInteger(index)||index<0||index>2||this.multiplayer?.active||this.state.mode==='parkour')return false;
+    const site=this.state.travelSites?.[index];if(!site)return false;
+    if(site.dimension!==this.state.dimension){this.toast('Visit this realm first','Use a portal to reach '+site.dimension+', then teleport to this site.');return false;}
+    if(this.world.intersects(site.x,site.y,site.z)||!this.world.solid(Math.floor(site.x),Math.floor(site.y-.1),Math.floor(site.z))||this.world.waterAt(site.x,site.y+.5,site.z)||['lava','fire'].includes(this.world.get(Math.floor(site.x),Math.floor(site.y-.1),Math.floor(site.z)))){this.toast('Landing spot changed','This site is no longer safe. Save a new location in its slot.');return false;}
+    cancelDelayedActions(this);this.pos={x:site.x,y:site.y,z:site.z};this.yaw=site.yaw;this.pitch=site.pitch;
+    this.vx=this.vz=this.velocity=0;this.gliding=this.flying=false;this.grapple=this.mantle=this.drawState=this.eating=null;this.jumpBuffer=this.jumpIntent=this.padFlight=this.dashTime=0;this.attackHeld=this.placeHeld=false;this.keys.clear();this.grounded=true;
+    this.renderer.stream(this.pos,{x:0,z:0});this.save();this.audio.play('portal');this.renderer.burst?.(site.x,site.y+.5,site.z,'#9de8dc',18);this.toast('Site '+(index+1),'You have arrived.','reward');return true;
+  }
   returnHome(){this.pos={...(this.state.spawn||this.state.origin||{x:.5,y:7,z:20.5})};if(this.world.intersects(this.pos.x,this.pos.y,this.pos.z))this.pos.y=this.world.ground(this.pos.x,this.pos.z);this.velocity=0;this.vx=this.vz=0;this.gliding=false;}
   respawn(){this.state.hp=20;this.state.food=20;this.state.saturation=5;this.state.effects={};this.state.brews={};this.state.breath=20;this.returnHome();this.projectiles=[];this.mobs=this.mobs.filter(m=>ENEMIES[m.kind]?.passive);this.boss=null;this.slam=null;if(this.state.dragon){this.state.dragon.active=false;this.state.dragon.hp=420;}this.hurtCooldown=3;this.resume();this.save();}
   spawnMob(x,z,kind='sentinel',y=null){if(kind==='grazer')kind='deer';const info=ENEMIES[kind]||ENEMIES.sentinel;const m={id:++this.serial,x,z,y:y??this.world.ground(x,z),kind,hp:Math.ceil(info.hp*(this.hardAdventure&&!info.passive&&kind!=='dragon'?1.4:1)),maxHp:Math.ceil(info.hp*(this.hardAdventure&&!info.passive&&kind!=='dragon'?1.4:1)),cooldown:1,flash:0,windup:0,stun:0,angle:0,walk:0,wander:hash(x|0,z|0,this.state.seed)*6};this.mobs.push(m);return m;}
@@ -468,7 +501,7 @@ export class Game {
     this.renderer.stream(this.pos,{x:this.vx,z:this.vz});if(this.renderer.awaitingLanding){if(!this.renderer.landingReady(this.pos))return;this.renderer.awaitingLanding=false;}if(this.screen){this.state.potionCooldown=Math.max(0,(this.state.potionCooldown||0)-dt);return;}
     if(this.state.mode==='parkour'){
       this.state.time+=dt;this.state.elapsed+=dt;this.stamina=100;
-      if(!this.parkour?.respawnTime)this.move(dt);
+      if(!this.parkour?.respawnTime&&(!this.arcade?.active||this.arcade.round.countdown<=0&&this.arcade.round.players[0].alive))this.move(dt);
       this.target=null;this.mobTarget=null;this.parkour?.update(dt);return;
     }
     this.state.time+=dt;this.state.elapsed+=dt;if(!this.multiplayer?.competitive)tickSurvival(this,dt);this.updateDrops(dt);for(const k of['grappleCooldown','attackCooldown','hurtCooldown','dashCooldown','dashTime','firecrackerCooldown','blastCooldown'])this[k]=Math.max(0,this[k]-dt);

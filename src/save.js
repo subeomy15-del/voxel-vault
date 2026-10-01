@@ -1,22 +1,22 @@
-import {validVariation} from './mob-variations.js?v=39';
-import {readExploration} from './exploration.js?v=39';
-import {normalizeRoll,recoverInfusion} from './infusions.js?v=39';
-import {ENCHANTS} from './infusion-registry.js?v=39';
-import {normalizeBrews,DRINK_COOLDOWN} from './potions.js?v=39';
-import {WORLDGEN_VERSION} from './biome-registry.js?v=39';
-import { recoverDelayedActions } from './delayed-actions.js?v=39';
-import { readDocument,writeDocument,setSaveHealth,storageFailure } from './save-health.js?v=39';
-import { VERSION, ITEMS, STARTER_BAR, starterInventory, dailySeed, BLOCKS,CROPS,EFFECTS } from './data.js?v=39';
-import { ANIMALS } from './wildlife.js?v=39';
-import { normalizeResources } from './resource-map.js?v=39';
-import { REALM_FIELDS,captureRealm } from './realms.js?v=39';
-import { defaultSettings, normalizeSettings } from './settings.js?v=39';
-export { defaultSettings } from './settings.js?v=39';
+import {validVariation} from './mob-variations.js?v=42';
+import {readExploration} from './exploration.js?v=42';
+import {normalizeRoll,recoverInfusion} from './infusions.js?v=42';
+import {ENCHANTS} from './infusion-registry.js?v=42';
+import {normalizeBrews,DRINK_COOLDOWN} from './potions.js?v=42';
+import {WORLDGEN_VERSION} from './biome-registry.js?v=42';
+import { recoverDelayedActions } from './delayed-actions.js?v=42';
+import { readDocument,writeDocument,setSaveHealth,storageFailure } from './save-health.js?v=42';
+import { VERSION, ITEMS, STARTER_BAR, starterInventory, dailySeed, BLOCKS,CROPS,EFFECTS } from './data.js?v=42';
+import { ANIMALS } from './wildlife.js?v=42';
+import { normalizeResources } from './resource-map.js?v=42';
+import { REALM_FIELDS,captureRealm } from './realms.js?v=42';
+import { defaultSettings, normalizeSettings } from './settings.js?v=42';
+export { defaultSettings } from './settings.js?v=42';
 const prefix='voxel-vault-v2-';
 export function freshState(seed=7821,mode='adventure') {
   const inv=starterInventory();if(mode==='creative')for(const k of Object.keys(ITEMS))inv[k]=999;
   if(mode==='ender')Object.assign(inv,{end_stone:128,moonstone_orb:9,moonstone_pickaxe:1,moonstone_sword:1,moonstone_glider:1,ender_berry:16,obsidian:32,moonstone_chest:1,ender_gate:1});
-  return {version:VERSION,seed,mode,dimension:mode==='ender'?'ender':'overworld',realms:{},gate:null,outposts:[],ruinDefeated:[],rift:{collected:[],started:0,finished:0,best:0,rewarded:false,kit:false,runs:0},moonChest:{},inv,bar:mode==='ender'?['moonstone_sword','moonstone_pickaxe','moonstone_orb','end_stone','obsidian','ender_berry','torch','moonstone_chest','ender_gate']:[...STARTER_BAR],selected:0,hp:20,armor:null,armorParts:{},aura:0,enchants:{},exploration:readExploration(),infusions:{},infusionSeq:0,enchantCodex:[],pos:null,yaw:0,pitch:0,time:70,elapsed:0,seals:[],opened:[],discovered:['camp'],edits:[],victory:false,stats:{mined:0,built:0,kills:0,crafted:0,deaths:0,smelted:0,harvested:0},waypoint:'home',spawn:null,origin:null,containers:{},crops:{},terrain:WORLDGEN_VERSION,food:20,saturation:5,exhaustion:0,effects:{},brews:{},potionCooldown:0,breath:20,glider:mode==='ender'?'moonstone_glider':null,ammo:'arrows',drops:[],animals:[]};
+  return {version:VERSION,seed,mode,dimension:mode==='ender'?'ender':'overworld',realms:{},travelSites:[null,null,null],inventoryOrder:[],gate:null,outposts:[],ruinDefeated:[],rift:{collected:[],started:0,finished:0,best:0,rewarded:false,kit:false,runs:0},moonChest:{},inv,bar:mode==='ender'?['moonstone_sword','moonstone_pickaxe','moonstone_orb','end_stone','obsidian','ender_berry','torch','moonstone_chest','ender_gate']:[...STARTER_BAR],selected:0,hp:20,armor:null,armorParts:{},aura:0,enchants:{},exploration:readExploration(),infusions:{},infusionSeq:0,enchantCodex:[],pos:null,yaw:0,pitch:0,time:70,elapsed:0,seals:[],opened:[],discovered:['camp'],edits:[],victory:false,stats:{mined:0,built:0,kills:0,crafted:0,deaths:0,smelted:0,harvested:0},waypoint:'home',spawn:null,origin:null,containers:{},crops:{},terrain:WORLDGEN_VERSION,food:20,saturation:5,exhaustion:0,effects:{},brews:{},potionCooldown:0,breath:20,glider:mode==='ender'?'moonstone_glider':null,ammo:'arrows',drops:[],animals:[]};
 }
 export function slotKey(mode){return prefix+mode+(mode==='daily'?'-'+dailySeed():'');}
 export function loadState(storage,mode='adventure') {
@@ -26,6 +26,8 @@ export function loadState(storage,mode='adventure') {
     for(const [k,n]of Object.entries(raw.inv||{}))if(ITEMS[k]&&Number.isFinite(n))s.inv[k]=Math.max(0,Math.min(999999,Math.floor(n)));
     if(Array.isArray(raw.bar)&&[9,10].includes(raw.bar.length))s.bar=Array.from({length:9},(_,i)=>ITEMS[raw.bar[i]]?raw.bar[i]:STARTER_BAR[i]);
     if(mode==='creative')for(const k of Object.keys(ITEMS))s.inv[k]=Math.max(999,s.inv[k]||0);
+    s.inventoryOrder=[...new Set((Array.isArray(raw.inventoryOrder)?raw.inventoryOrder:[]).filter(k=>ITEMS[k]))];
+    s.travelSites=Array.from({length:3},(_,i)=>{const p=raw.travelSites?.[i];return p&&['x','y','z','yaw','pitch'].every(k=>Number.isFinite(p[k]))&&Math.abs(p.x)<=2**40&&Math.abs(p.z)<=2**40&&p.y>-64&&p.y<95&&['overworld','nether','ender'].includes(p.dimension)?{x:p.x,y:p.y,z:p.z,yaw:p.yaw,pitch:Math.max(-1.5,Math.min(1.5,p.pitch)),dimension:p.dimension}:null;});
     s.selected=Math.max(0,Math.min(s.bar.length-1,raw.selected|0));s.hp=Math.max(1,Math.min(20,Number(raw.hp)||20));s.armor=ITEMS[raw.armor]?.kind==='armor'&&s.inv[raw.armor]?raw.armor:null;
     for(const k of ['yaw','pitch','time','elapsed'])if(Number.isFinite(raw[k]))s[k]=raw[k];
     if(raw.pos&&['x','y','z'].every(k=>Number.isFinite(raw.pos[k])))s.pos={x:raw.pos.x,y:Math.max(-63,Math.min(94,raw.pos.y)),z:raw.pos.z};

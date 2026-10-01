@@ -1,6 +1,6 @@
-import {variationColor} from './mob-variations.js?v=39';
+import {variationColor} from './mob-variations.js?v=42';
 import * as THREE from '../vendor/three.module.js';
-import {CREATURES,NEW_ANIMALS} from './creature-registry.js?v=39';
+import {CREATURES,NEW_ANIMALS} from './creature-registry.js?v=42';
 
 // Original silhouettes share cached box geometry and per-model materials.
 export function creatureModel(renderer,mob,descriptor){

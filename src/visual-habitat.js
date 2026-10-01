@@ -1,5 +1,5 @@
-import {coordinateHash} from './coordinate-hash.js?v=39';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=39';
+import {coordinateHash} from './coordinate-hash.js?v=42';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=42';
 const palettes={
  meadow:['#829756','#a4ad69'],forest:['#577c40','#82964e'],dense_forest:['#426e40','#66834a'],jungle:['#367447','#668b43'],
  autumn_forest:['#a48549','#b49a59'],cherry:['#bd8b9d','#d7acb7'],desert:['#a18b61','#c0a874'],badlands:['#9b7b53','#b39a70'],

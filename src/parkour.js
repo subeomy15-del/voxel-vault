@@ -1,6 +1,6 @@
-import { CLOUDSTEP,COURSES } from './parkour-course.js?v=39';
-import { GameTimer } from './game-timer.js?v=39';
-import { freshState } from './save.js?v=39';
+import { CLOUDSTEP,COURSES } from './parkour-course.js?v=42';
+import { GameTimer } from './game-timer.js?v=42';
+import { freshState } from './save.js?v=42';
 
 export class Parkour {
   constructor(game){this.game=game;game.parkour=this;this.timer=new GameTimer();this.course=CLOUDSTEP;this.checkpoint=0;this.respawnTime=0;this.pulse=0;}
@@ -14,7 +14,7 @@ export class Parkour {
     const g=this.game;if(g.multiplayer?.room||!COURSES[id])return false;
     if(!this.active){g.save(true);this.soloState=structuredClone(g.state);}
     this.course=COURSES[id];this.best=this.readBest();this.previousBest=this.best;
-    const state=freshState(91347,'parkour');state.dimension='parkour';state.pos={...this.course.spawn};state.origin={...state.pos};state.spawn={...state.pos};state.yaw=this.course.spawn.yaw;state.pitch=0;state.time=95;state.inv={};state.glider=null;
+    const state=freshState(this.course.seed,'parkour');state.dimension='parkour';state.pos={...this.course.spawn};state.origin={...state.pos};state.spawn={...state.pos};state.yaw=this.course.spawn.yaw;state.pitch=0;state.time=95;state.inv={};state.glider=null;
     g.state=state;g.events.length=0;g.loadWorld();g.screen=null;g.grounded=true;
     this.timer.reset();this.checkpoint=0;this.falls=0;this.respawnTime=0;this.padCooldown=0;this.pulse=0;this.newBest=false;this.storageFailed=false;
     g.toast(this.course.name,'Follow the ivory platforms. Shift to sprint · Space to jump · R to retry a checkpoint.');
@@ -36,6 +36,7 @@ export class Parkour {
     g.pos={x:cp.x,y:cp.y,z:cp.z};g.yaw=cp.yaw;g.pitch=0;g.velocity=g.vx=g.vz=0;g.cameraOffset=0;g.grounded=true;g.crouching=false;g.mantle=null;g.jumpBuffer=0;g.coyote=0;g.jumpReleased=false;g.jumpActive=false;g.jumpIntent=0;g.padFlight=0;g.gliding=false;g.flying=false;
   }
   update(dt){
+    if(this.game.arcade?.active){this.game.arcade.update(dt);return;}
     if(!this.active||this.game.screen||this.timer.finished)return;
     const g=this.game;
     if(!this.timer.running&&(Math.hypot(g.pos.x-this.course.spawn.x,g.pos.z-this.course.spawn.z)>.15||!g.grounded))this.timer.start();

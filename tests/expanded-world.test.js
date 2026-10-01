@@ -1,15 +1,15 @@
-import {installControlPanels} from '../src/control-panels.js?v=39';
+import {installControlPanels} from '../src/control-panels.js?v=42';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {expandedClimate,regionalClimate} from '../src/regional-climate.js?v=39';
-import {BIOME_DEFINITIONS} from '../src/biome-registry.js?v=39';
-import {freshState,saveState,loadState} from '../src/save.js?v=39';
-import {World} from '../src/world.js?v=39';
-import {Game} from '../src/game.js?v=39';
-import {hotbarIndex,applyLook,clearControls} from '../src/controls.js?v=39';
-import {normalizeSettings} from '../src/settings.js?v=39';
-import {MOB_VARIATIONS,validVariation,variationColor} from '../src/mob-variations.js?v=39';
-import {ENEMIES} from '../src/combat.js?v=39';
+import {expandedClimate,regionalClimate} from '../src/regional-climate.js?v=42';
+import {BIOME_DEFINITIONS} from '../src/biome-registry.js?v=42';
+import {freshState,saveState,loadState} from '../src/save.js?v=42';
+import {World} from '../src/world.js?v=42';
+import {Game} from '../src/game.js?v=42';
+import {hotbarIndex,applyLook,clearControls} from '../src/controls.js?v=42';
+import {normalizeSettings} from '../src/settings.js?v=42';
+import {MOB_VARIATIONS,validVariation,variationColor} from '../src/mob-variations.js?v=42';
+import {ENEMIES} from '../src/combat.js?v=42';
 const storage=()=>{const data=new Map();return {getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)};};
 test('all expanded surface biomes generate deterministically and old terrain retains its climate',()=>{
  const found=new Set();

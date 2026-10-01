@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { World } from '../src/world.js?v=39';
-import { movePlayer, requestJump, releaseJump, movementInput, startMantle, MOVEMENT } from '../src/movement.js?v=39';
+import { World } from '../src/world.js?v=42';
+import { movePlayer, requestJump, releaseJump, movementInput, startMantle, MOVEMENT } from '../src/movement.js?v=42';
 
 function player(options = {}) {
   const world = new World();

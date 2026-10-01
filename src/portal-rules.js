@@ -1,4 +1,4 @@
-import {endPortalPoint,framesComplete,FRAME_OFFSETS} from './stronghold.js?v=39';
+import {endPortalPoint,framesComplete,FRAME_OFFSETS} from './stronghold.js?v=42';
 export function portalAtPlayer(g){
  const candidates=[g.state.gate,endPortalPoint(g.world.stronghold),g.target].filter(Boolean);
  if(g.state.dimension==='nether')candidates.push({x:72,y:25,z:-48});

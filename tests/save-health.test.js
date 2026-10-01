@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {saveHealth,readDocument,writeDocument,preserveBeforeReplacement} from '../src/save-health.js?v=39';
-import {parseWorldBackup,exportWorld} from '../src/world-backup.js?v=39';
+import {saveHealth,readDocument,writeDocument,preserveBeforeReplacement} from '../src/save-health.js?v=42';
+import {parseWorldBackup,exportWorld} from '../src/world-backup.js?v=42';
 const memory=()=>{const data=new Map();return{data,getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)};};
 const valid=s=>s?.version===2;
 test('rotating recovery snapshots survive malformed and interrupted primary writes',()=>{
@@ -28,7 +28,7 @@ test('pre-upgrade fixture survives validated backup round trips with all realm a
 });
 
 test('unrecoverable saves never launch a fresh world or replace the active slot',async()=>{
- const {Game}=await import('../src/game.js?v=39');
+ const {Game}=await import('../src/game.js?v=42');
  const renderer={setWorld(){},stream(){},burst(){}},audio={play(){},quiet(){}},s=memory();
  s.setItem('voxel-vault-v2-adventure','{broken');
  assert.throws(()=>new Game(renderer,audio,s),/no replacement world/);

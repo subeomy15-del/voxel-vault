@@ -45,7 +45,7 @@ export function createLobbyService(options = {}) {
     if (bucket.balance < 1) fail(429, message);
     bucket.balance--;
   }
-  function publicPlayer(player) { return { id: player.id, name: player.name, color: player.color, ready: player.ready, pose: player.pose }; }
+  function publicPlayer(player) { return { id: player.id, bot: !!player.bot, name: player.name, color: player.color, ready: player.ready, pose: player.pose }; }
   function roomView(room) {
     return { code: room.code, name: room.name, public: room.public, mode: room.mode, match: matches.view(room), maxPlayers: room.maxPlayers, status: room.status, hostId: room.hostId, players: [...room.players.values()].map(publicPlayer), seed: room.seed, buildCount: room.buildCount };
   }
@@ -64,8 +64,9 @@ export function createLobbyService(options = {}) {
     room.tokens.delete(player.token);
     player.stream?.end();
     matches.leave(room, player);
+    if (![...room.players.values()].some(p=>!p.bot)){for(const p of room.players.values())if(p.bot)room.players.delete(p.id);}
     if (room.hostId === player.id) {
-      room.hostId = room.players.keys().next().value || null;
+      room.hostId = [...room.players.values()].find(p=>!p.bot)?.id || null;
       if (room.hostId) room.players.get(room.hostId).ready = true;
     }
     if (!room.players.size) rooms.delete(room.code);
@@ -74,6 +75,7 @@ export function createLobbyService(options = {}) {
   function sweep() {
     const time = now();
     for (const room of rooms.values()) for (const player of room.players.values()) {
+      if(player.bot)continue;
       const connected = player.stream && !player.stream.destroyed && !player.stream.writableEnded;
       if (!connected && time - player.lastSeen >= reconnectGraceMs) remove(room, player);
       else if (connected) {
@@ -97,7 +99,7 @@ export function createLobbyService(options = {}) {
   // Requests enforce expiry too, without writing heartbeats on every request.
   function sweepExpired() {
     const time = now();
-    for (const room of rooms.values()) for (const player of room.players.values()) if ((!player.stream || player.stream.destroyed || player.stream.writableEnded) && time - player.lastSeen >= reconnectGraceMs) remove(room, player);
+    for (const room of rooms.values()) for (const player of room.players.values()) if (!player.bot && (!player.stream || player.stream.destroyed || player.stream.writableEnded) && time - player.lastSeen >= reconnectGraceMs) remove(room, player);
   }
   function authenticate(code, token) {
     const room = findRoom(code);

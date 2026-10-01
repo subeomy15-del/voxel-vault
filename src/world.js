@@ -1,28 +1,28 @@
-import {biomeDetail,detailedSurface} from './biome-detail.js?v=39';
-import {wetlandPlants} from './wetland-plants.js?v=39';
-import {locateStronghold,stampStronghold} from './stronghold.js?v=39';
-import {coordinateHash} from './coordinate-hash.js?v=39';
-import {continentalClimate,caveRegion} from './terrain-v11.js?v=39';
-import {SpatialLights} from './spatial-lights.js?v=39';
-import {expandedClimate,regionalClimate,regionalSurface} from './regional-climate.js?v=39';
-import {StructureGenerator} from './structure-generator.js?v=39';
-import {climateAt,blendedSurface,smooth} from './climate.js?v=39';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=39';
-import {EditMap} from './edit-map.js?v=39';
-import { netherHeight,netherBlock } from './nether.js?v=39';
-import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=39';
-import { canonicalItem } from './resource-map.js?v=39';
-import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=39';
-import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=39';
-import { CLOUDSTEP,courseGeometry } from './parkour-course.js?v=39';
+import {biomeDetail,detailedSurface} from './biome-detail.js?v=42';
+import {wetlandPlants} from './wetland-plants.js?v=42';
+import {locateStronghold,stampStronghold} from './stronghold.js?v=42';
+import {coordinateHash} from './coordinate-hash.js?v=42';
+import {continentalClimate,caveRegion} from './terrain-v11.js?v=42';
+import {SpatialLights} from './spatial-lights.js?v=42';
+import {expandedClimate,regionalClimate,regionalSurface} from './regional-climate.js?v=42';
+import {StructureGenerator} from './structure-generator.js?v=42';
+import {climateAt,blendedSurface,smooth} from './climate.js?v=42';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=42';
+import {EditMap} from './edit-map.js?v=42';
+import { netherHeight,netherBlock } from './nether.js?v=42';
+import { BLOCKS, BIOMES, LANDMARKS, hash } from './data.js?v=42';
+import { canonicalItem } from './resource-map.js?v=42';
+import { terrainHeight,treeAt,growTree,plantAt } from './landscape.js?v=42';
+import { boxesFor,overlapsBlock,rayShape } from './shapes.js?v=42';
+import { CLOUDSTEP,courseGeometry,courseForSeed } from './parkour-course.js?v=42';
 export const CHUNK=16, WORLD_LIMIT=2**40, WORLD_BOTTOM=-64, WORLD_TOP=95, SEA_LEVEL=4;
 export const cellKey=(x,y,z)=>`${x},${y},${z}`;
 export class World {
   constructor(seed=7821,edits=[],terrain=6,dimension='overworld') {
     this.seed=seed;this.terrain=terrain;this.dimension=dimension;this.edits=new EditMap(edits);this.structures=new Map();this.structureLights=new SpatialLights();this.columns=new Map();this.prepared=new Set();this.dirty=new Set();this.chests=[];this.changes=[];
-    this.course=dimension==='parkour'?courseGeometry():null;
+    this.course=dimension==='parkour'?courseGeometry(seed):null;
     this.landmarks=LANDMARKS.map(l=>({...l,y:this.height(l.x,l.z)+1}));
-    if(this.course)this.landmarks=CLOUDSTEP.checkpoints.map((cp,i)=>({...cp,id:'course-'+i,type:'landscape',subtitle:'Cloudstep checkpoint',color:'#a9e8ce'}));
+    if(this.course)this.landmarks=courseForSeed(seed).checkpoints.map((cp,i)=>({...cp,id:'course-'+i,type:'landscape',subtitle:'Sky campaign checkpoint',color:'#a9e8ce'}));
     if(dimension==='overworld')for(const [id,name,x,z,color]of [['badlands','Badlands · Draugr Knights',240,180,'#b77745'],['savanna','Savanna',220,-60,'#a2a063'],['marsh','Marsh',-240,200,'#75815a']])this.landmarks.push({id,name,x,z,y:this.height(x,z)+1,color,type:'landscape',subtitle:id==='badlands'?'Hunt knights for Knight Hearts':'Explore a new biome'});
     if(dimension==='ender')this.landmarks=[{id:'camp',name:'Arrival island',subtitle:'Ender Gate: use E to return to Survival',x:0,y:19,z:0,type:'landscape',color:'#b9a3ff'},{id:'spire',name:'Obsidian spires',subtitle:'Moonstone and violet crystal',x:48,y:24,z:0,type:'landscape',color:'#ac83e8'}];
     if(dimension==='nether')this.landmarks=[{id:'nether-camp',name:'Nether Gate',subtitle:'Find the gateway to the Ender world',x:0,y:20,z:0,type:'landscape',color:'#e77d5d'},{id:'nether-fortress',name:'Ashen Fortress',subtitle:'A dangerous route lies beyond',x:72,y:25,z:-48,type:'landscape',color:'#d59a70'}];
@@ -73,7 +73,7 @@ export class World {
     this.ruins?.prune(cx,cz,radius);this.makeCamp();
   }
   height(x,z){return this.column(Math.floor(x),Math.floor(z)).h;}
-  findSpawn(){if(this.course)return {...CLOUDSTEP.spawn};if(this.dimension==='ender')return{x:.5,y:19,z:8.5};if(this.dimension==='nether')return{x:.5,y:25,z:8.5};
+  findSpawn(){if(this.course)return {...courseForSeed(this.seed).spawn};if(this.dimension==='ender')return{x:.5,y:19,z:8.5};if(this.dimension==='nether')return{x:.5,y:25,z:8.5};
     // A seed gives one repeatable, dry clearing. Existing saves keep their position.
     for(let i=0;i<240;i++){
       const x=Math.floor((this.hash(i*7919,173,this.seed)-.5)*560),z=Math.floor((this.hash(i*104729,941,this.seed+47)-.5)*560),y=this.height(x,z)+1;

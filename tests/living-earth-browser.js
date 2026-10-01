@@ -1,0 +1,44 @@
+import assert from 'node:assert/strict';
+import { writeFile } from 'node:fs/promises';
+
+const debugPort=process.env.VOXEL_CDP_PORT||9234,base=process.env.VOXEL_TEST_URL||'http://localhost:3002';
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const {webSocketDebuggerUrl}=await(await fetch(`http://127.0.0.1:${debugPort}/json/version`)).json();
+const ws=new WebSocket(webSocketDebuggerUrl),pending=new Map(),errors=[];
+await new Promise((resolve,reject)=>{ws.onopen=resolve;ws.onerror=reject;});
+let id=0;
+ws.onmessage=({data})=>{const message=JSON.parse(data);if(message.method==='Runtime.exceptionThrown')errors.push(message.params.exceptionDetails);if(message.method==='Runtime.consoleAPICalled'&&message.params.type==='error')errors.push(message.params.args.map(arg=>arg.value||arg.description).join(' '));if(message.id){const call=pending.get(message.id);if(call){pending.delete(message.id);clearTimeout(call.timer);message.error?call.reject(Error(JSON.stringify(message.error))):call.resolve(message.result);}}};
+const send=(method,params={},sessionId)=>new Promise((resolve,reject)=>{const callId=++id,timer=setTimeout(()=>reject(Error(`Timeout: ${method}`)),30000);pending.set(callId,{resolve,reject,timer});ws.send(JSON.stringify({id:callId,method,params,sessionId}));});
+const {browserContextId}=await send('Target.createBrowserContext');
+try{
+  const {targetId}=await send('Target.createTarget',{url:'about:blank',browserContextId});
+  const {sessionId}=await send('Target.attachToTarget',{targetId,flatten:true});
+  const call=(method,params={})=>send(method,params,sessionId);
+  const evaluate=async expression=>{const result=await call('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true,userGesture:true});if(result.exceptionDetails)throw Error(JSON.stringify(result.exceptionDetails));return result.result.value;};
+  const until=async(expression,label)=>{for(let count=0;count<160;count++){if(await evaluate(expression))return;await wait(100);}throw Error(label||expression);};
+  await call('Runtime.enable');await call('Page.enable');await call('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:1,mobile:false});
+  await call('Page.navigate',{url:base});
+  await until(`!!document.querySelector('.block-lobby')`,'The game did not load.');
+  await evaluate(`(async()=>{const m=await import(document.querySelector('script[type="module"]').src);window.g=m.game;window.r=m.renderer;window.ui=m.ui;window.settings=m.settings;})()`);
+  await until('r.chunks.size>=9');
+  await evaluate(`Object.assign(settings,{quality:'custom',renderDistance:5,shadows:false,particles:'high',debugFPS:false});r.applySettings(settings);g.screen=null;g.state.time=150;g.pos.y=g.world.height(Math.floor(g.pos.x),Math.floor(g.pos.z))+2;ui.render();`);
+  await evaluate(`(async()=>{const {weatherAt}=await import('./src/weather.js?v=42');for(let day=0;day<30;day++){const t=150+day*600;if(weatherAt(g.state.seed,t,g.world.biome(g.pos.x,g.pos.z)).intensity<.01){g.state.time=t;break;}}})()`);
+  await until('r.scenery.skyLife.mesh.visible');
+  assert.equal(await evaluate('r.scenery.skyLife.mesh.geometry.drawRange.count'),108);
+  assert.ok((await evaluate("document.querySelector('#location small').textContent")).includes('12:'));
+  await evaluate(`g.yaw=.9;g.pitch=-.15;`);
+  await wait(1000);
+  await writeFile('/private/tmp/voxel-earth-day.png',Buffer.from((await call('Page.captureScreenshot')).data,'base64'));
+  await evaluate('g.state.time=450');await until('!r.scenery.skyLife.mesh.visible');
+  assert.ok((await evaluate("document.querySelector('#location small').textContent")).includes('Night'));
+  await writeFile('/private/tmp/voxel-earth-night.png',Buffer.from((await call('Page.captureScreenshot')).data,'base64'));
+  await evaluate('g.state.time=20');await wait(1500);
+  assert.ok(await evaluate('g.conditions.mist>0'));
+  await writeFile('/private/tmp/voxel-earth-dawn.png',Buffer.from((await call('Page.captureScreenshot')).data,'base64'));
+  await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await wait(300);
+  const bounds=await evaluate(`(()=>{const e=document.querySelector('#location'),b=e.getBoundingClientRect();return {right:b.right,width:innerWidth};})()`);
+  assert.ok(bounds.right<=bounds.width,'Location readout overflows a phone screen');
+  await writeFile('/private/tmp/voxel-earth-mobile.png',Buffer.from((await call('Page.captureScreenshot')).data,'base64'));
+  assert.deepEqual(errors,[],'Living Earth rendering emitted browser or shader errors.');
+  console.log('Living Earth browser checks passed: daytime birds, night, dawn mist, mobile HUD, no rendering errors.');
+}finally{await send('Target.disposeBrowserContext',{browserContextId});ws.close();}

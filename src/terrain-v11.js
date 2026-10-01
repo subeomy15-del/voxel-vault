@@ -1,7 +1,7 @@
-import {regionalClimate} from './regional-climate.js?v=39';
-import {noise2,smooth} from './climate.js?v=39';
-import {BIOME_FAMILIES} from './expanded-biomes.js?v=39';
-import {coordinateHash} from './coordinate-hash.js?v=39';
+import {regionalClimate} from './regional-climate.js?v=42';
+import {noise2,smooth} from './climate.js?v=42';
+import {BIOME_FAMILIES} from './expanded-biomes.js?v=42';
+import {coordinateHash} from './coordinate-hash.js?v=42';
 export function continentalClimate(seed,x,z){
  const c=regionalClimate(seed,x,z,coordinateHash),family=BIOME_FAMILIES[c.biome];
  // Coherent scalar contours replace version ten's independent square cells.

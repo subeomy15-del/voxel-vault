@@ -12,7 +12,7 @@ export function createMatches({ now, broadcast, fail }) {
   function view(room) {
     const match = room.match;
     if (!match) return null;
-    return { id: match.id, revision: match.revision, serverNow: now(), mode: room.mode, phase: match.phase, winner: match.winner, title: match.title, startedAt: match.startedAt, endsAt: match.endsAt, headStartUntil: match.headStartUntil, huntersReleased: match.huntersReleased, beds: { ...match.beds }, origin: match.origin && { ...match.origin }, beacons: match.beacons.map(beacon => ({ ...beacon })), players: [...match.players.values()].map(player => ({ id: player.id, team: player.team, role: player.role, hp: player.hp, alive: player.alive, eliminated: player.eliminated, respawnAt: player.respawnAt, currency: player.currency, weapon: player.weapon, armor: player.armor, blocks: player.blocks, spawn: { ...player.spawn }, pose: { ...player.pose }, spawnSerial: player.spawnSerial })) };
+    return { id: match.id, revision: match.revision, serverNow: now(), mode: room.mode, phase: match.phase, winner: match.winner, title: match.title, startedAt: match.startedAt, endsAt: match.endsAt, headStartUntil: match.headStartUntil, huntersReleased: match.huntersReleased, beds: { ...match.beds }, origin: match.origin && { ...match.origin }, beacons: match.beacons.map(beacon => ({ ...beacon })), players: [...match.players.values()].map(player => ({ id: player.id, bot: !!player.bot, team: player.team, role: player.role, hp: player.hp, alive: player.alive, eliminated: player.eliminated, respawnAt: player.respawnAt, currency: player.currency, weapon: player.weapon, armor: player.armor, blocks: player.blocks, spawn: { ...player.spawn }, pose: { ...player.pose }, spawnSerial: player.spawnSerial })) };
   }
   function publish(room) { room.match.revision++; broadcast(room, { type: 'match', match: view(room) }); }
   function active(room, player) {
@@ -70,6 +70,9 @@ export function createMatches({ now, broadcast, fail }) {
   }
   function start(room) {
     const mode = MODE_RULES[room.mode];
+    if (room.mode !== 'creative' && room.players.size === 1) {
+      const id=randomUUID();room.players.set(id,{id,name:'Nova · AI',bot:true,color:'#9eb8ff',ready:true,pose:null,lastSeen:now(),stream:null});
+    }
     if (room.players.size < mode.minPlayers) fail(409, `${mode.name} needs at least ${mode.minPlayers} players.`);
     if (room.mode === 'creative') { room.match = null; return; }
     const time = now(), edits = mapEdits(room.mode), world = new World(room.seed, edits[mode.dimension], 6, mode.dimension);
@@ -85,7 +88,7 @@ export function createMatches({ now, broadcast, fail }) {
       const team = room.mode === 'bedwars' ? teams[index % 2] : null;
       const role = room.mode === 'manhunt' ? member.id === room.hostId ? 'runner' : 'hunter' : null;
       const spawn = team ? { ...BEDWARS_SPAWNS[team] } : { ...origin };
-      const player = { id: member.id, team, role, hp: 20, alive: true, eliminated: false, respawnAt: 0, currency: mode.initialCurrency || 0, weapon: 'wood_sword', armor: false, blocks: mode.initialBlocks, spawn, pose: poseAt(spawn), spawnSerial: 1, lastPoseAt: time, lastAttackAt: -Infinity, nextIncomeAt: time + (mode.generatorMs || 0) };
+      const player = { id: member.id, bot: !!member.bot, team, role, hp: 20, alive: true, eliminated: false, respawnAt: 0, currency: mode.initialCurrency || 0, weapon: 'wood_sword', armor: false, blocks: mode.initialBlocks, spawn, pose: poseAt(spawn), spawnSerial: 1, lastPoseAt: time, lastAttackAt: -Infinity, nextIncomeAt: time + (mode.generatorMs || 0) };
       member.pose = { ...player.pose };
       room.match.players.set(member.id, player);
       index++;
@@ -117,7 +120,47 @@ export function createMatches({ now, broadcast, fail }) {
         }
       }
     }
+    for(const bot of match.players.values())if(bot.bot&&bot.alive&&match.phase==='playing'){
+      const dt=Math.min(.5,Math.max(0,(time-(bot.botAt??time))/1000));bot.botAt=time;
+      if(dt>0&&!(room.mode==='manhunt'&&time<match.headStartUntil)){tickBot(room,bot,dt,time);changed=true;}
+    }
     if (changed) publish(room);
+  }
+  function botEdit(room,bot,point,block){
+    try{edit(room,bot,point,block);}catch{return false;}
+    const key=cellKey(point);room.edits[point.dimension].set(key,block);room.revision++;
+    broadcast(room,{type:'edit',...point,block,revision:room.revision,playerId:bot.id,buildCount:room.buildCount});
+    return true;
+  }
+  function tickBot(room,bot,dt,time){
+    const match=room.match,world=match.world;
+    const enemies=[...match.players.values()].filter(p=>p.alive&&p.id!==bot.id&&(room.mode==='bedwars'?p.team!==bot.team:p.role!==bot.role)).sort((a,b)=>distance(bot.pose,a.pose)-distance(bot.pose,b.pose));
+    const enemy=enemies[0];if(!enemy)return;
+    if(distance(bot.pose,enemy.pose)<3.7){try{action(room,bot,'attack',{targetId:enemy.id});}catch{}return;}
+    let goal=enemy.pose;
+    if(room.mode==='bedwars'){
+      if(distance(bot.pose,bot.spawn)<7){
+        if(bot.blocks<64&&bot.currency>=8)try{action(room,bot,'buy',{item:'blocks'});}catch{}
+        if(bot.currency>=24&&bot.weapon!=='iron_sword')try{action(room,bot,'buy',{item:'sword'});}catch{}
+      }
+      const team=bot.team==='ember'?'tide':'ember';
+      if(bot.blocks<2)bot.resupply=true;
+      if(bot.resupply&&bot.blocks>=32)bot.resupply=false;
+      goal=bot.resupply?bot.spawn:match.beds[team]?{...BEDWARS_BEDS[team],x:BEDWARS_BEDS[team].x+.5,z:BEDWARS_BEDS[team].z+.5}:enemy.pose;
+      if(!bot.resupply&&match.beds[team]&&distance(bot.pose,goal)<4){botEdit(room,bot,BEDWARS_BEDS[team],null);return;}
+      // Bridge across the gap on a single readable lane, then turn toward the bed.
+      if(Math.abs(bot.pose.x-goal.x)>6)goal={...goal,z:3.5};
+    }
+    const dx=goal.x-bot.pose.x,dz=goal.z-bot.pose.z,d=Math.hypot(dx,dz);if(d<.3)return;
+    const angle=Math.atan2(dx,dz),step=Math.min(d,dt*(room.mode==='manhunt'?4.1:3.5));
+    for(const offset of [0,.6,-.6,1.2,-1.2,1.8,-1.8]){
+      const x=bot.pose.x+Math.sin(angle+offset)*step,z=bot.pose.z+Math.cos(angle+offset)*step;
+      let y=world.ground(x,z,bot.pose.y+1);
+      if(room.mode==='bedwars'&&y<24){const point={x:Math.floor(x),y:24,z:Math.floor(z),dimension:'ender'};if(!botEdit(room,bot,point,'blue_wool'))continue;y=25;}
+      if(y<5||y>bot.pose.y+1.1||y<bot.pose.y-3||world.intersects(x,y,z))continue;
+      setPose(room,bot,{...bot.pose,x,y,z,yaw:Math.atan2(-(x-bot.pose.x),-(z-bot.pose.z)),moving:true,held:bot.weapon},time);
+      broadcast(room,{type:'pose',playerId:bot.id,pose:bot.pose});break;
+    }
   }
   function pose(room, member, incoming) {
     if (!room.match) return incoming;

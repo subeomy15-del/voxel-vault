@@ -1,6 +1,6 @@
-import {paintNaturalMaterial} from './natural-materials.js?v=39';
-import {paintBlockStyle} from './block-style.js?v=39';
-import { BLOCKS, hash } from './data.js?v=39';
+import {paintNaturalMaterial} from './natural-materials.js?v=42';
+import {paintBlockStyle} from './block-style.js?v=42';
+import { BLOCKS, hash } from './data.js?v=42';
 export const TILE=32,ATLAS_COLS=16;
 export const ATLAS_ROWS=2**Math.ceil(Math.log2(Math.ceil(Object.keys(BLOCKS).length*3/ATLAS_COLS)));
 export const ATLAS_WIDTH=TILE*ATLAS_COLS,ATLAS_HEIGHT=TILE*ATLAS_ROWS;

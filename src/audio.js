@@ -1,3 +1,5 @@
+import {localConditions} from './weather.js?v=42';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=42';
 const clamp = value => Math.max(0, Math.min(1, Number(value) || 0));
 const frequency = note => 440 * 2 ** ((note - 69) / 12);
 // An original, procedurally voiced sixteen-note phrase: no downloaded recordings.
@@ -5,7 +7,7 @@ const melody = [62, 69, 74, 78, 67, 74, 79, 83, 59, 66, 71, 74, 57, 64, 69, 73];
 export class Audio {
   constructor(settings, { contextFactory } = {}) {
     this.settings = settings; this.context = null; this.contextFactory = contextFactory;
-    this.ambientTimer = 0; this.birdTimer = 4; this.musicStep = 0; this.musicNextTime = 0;
+    this.ambientTimer = 0; this.birdTimer = 4; this.insectTimer = 0; this.musicStep = 0; this.musicNextTime = 0;
     this.voices = new Set(); this.lastHover = -Infinity; this.musicDuck = .45;
   }
   start() {
@@ -47,18 +49,26 @@ export class Audio {
   }
   update(game, dt) {
     if (!this.context) return;
-    this.scheduleMusic(); this.ambientTimer -= dt; this.birdTimer -= dt;
+    this.scheduleMusic(); this.ambientTimer -= dt; this.birdTimer -= dt; this.insectTimer -= dt;
     if (this.ambientTimer > 0) return; this.ambientTimer = .4;
     const c = this.context, active = !game.screen, column = game.world?.column?.(Math.floor(game.pos.x), Math.floor(game.pos.z));
     const underwater=game.world?.waterAt?.(game.pos.x,game.pos.y+1.5,game.pos.z),ocean=['ocean','beach'].includes(column?.biome),rain=game.weather?.kind==='rain'?(game.weather.intensity||0):0;
-    const surface = column && game.pos.y > column.h - 3, river = surface && column.river < 13;
+    const surface = column && game.pos.y > column.h - 3, earth=game.state.dimension==='overworld',river = surface && column.river < 13;
+    const conditions=localConditions(game.state.time,column?.biome,game.pos.y,game.weather),habitat=BIOME_DEFINITIONS[column?.biome]||{};
+    const sheltered=game.weatherSheltered===true;
     this.musicDuck = active ? 1 : .45; this.applySettings();
-    this.windGain.gain.setTargetAtTime(active ? underwater ? .035 : game.gliding ? .13 : rain>.05 ? .04+rain*.16 : ocean ? .045+Math.sin(game.state.time*.3)*.018 : river ? .095 : surface ? .033 : .006 : 0, c.currentTime, .8);
-    this.windFilter.frequency.setTargetAtTime(underwater ? 180 : game.gliding ? 1100 : rain>.05 ? 2300 : ocean ? 950 : river ? 1600 : surface ? 650 : 140, c.currentTime, .8);
+    this.windGain.gain.setTargetAtTime(active ? underwater ? .035 : game.gliding ? .13 : earth&&rain>.05 ? (sheltered?.012:.04)+rain*(sheltered?.025:.16) : ocean ? .045+Math.sin(game.state.time*.3)*.018 : river ? .095 : surface ? .018+(game.weather?.wind||.3)*.035 : .006 : 0, c.currentTime, .8);
+    this.windFilter.frequency.setTargetAtTime(underwater ? 180 : game.gliding ? 1100 : earth&&rain>.05 ? (sheltered?500:2300) : ocean ? 950 : river ? 1600 : surface ? 650 : 140, c.currentTime, .8);
+    if(this.insectTimer<=0){
+      this.insectTimer=2+Math.random()*4;
+      if(active&&earth&&surface&&!underwater&&!sheltered&&!ocean&&rain<.1&&conditions.daylight<.25&&(habitat.temperature??.5)>.35&&(habitat.moisture??.5)>.3)
+        for(let i=0;i<3;i++)this.tone(3800,.055,'sine',.006,-170,'effects',i*.12);
+    }
     if (this.birdTimer <= 0) {
-      this.birdTimer = 8 + Math.random() * 13;
-      if (active && surface && !underwater && !ocean && rain<.1 && game.state.time % 600 < 330 && !['desert', 'snow'].includes(column.biome)) {
-        this.tone(1900, .09, 'sine', .016, 750); this.tone(2300, .09, 'sine', .01, -650, 'effects', .16);
+      this.birdTimer = (conditions.period==='Dawn'||conditions.period==='Morning'?4:10) + Math.random() * 12;
+      if (active && earth && surface && !underwater && !sheltered && rain<.1 && conditions.daylight>.6 && (ocean||(habitat.density||0)>.1)) {
+        if(ocean){this.tone(920,.32,'sine',.012,420);this.tone(1340,.4,'sine',.008,-510,'effects',.3);}
+        else {this.tone(1900, .09, 'sine', .016, 750); this.tone(2300, .09, 'sine', .01, -650, 'effects', .16);}
       }
     }
   }

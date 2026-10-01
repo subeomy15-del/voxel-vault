@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Audio } from '../src/audio.js?v=39';
-import { normalizeSettings } from '../src/settings.js?v=39';
+import { Audio } from '../src/audio.js?v=42';
+import { normalizeSettings } from '../src/settings.js?v=42';
 class Parameter {
   constructor() { this.value = 0; this.events = []; }
   setValueAtTime(value, time) { this.value = value; this.events.push({ type: 'set', value, time }); }
@@ -63,4 +63,16 @@ test('sound initialization failure is nonfatal and disposal releases audio resou
   const { audio, context } = setup(); audio.play('pad'); audio.quiet();
   assert.equal(audio.windGain.gain.value, 0); assert.equal(audio.musicGain.gain.value, 0);
   audio.dispose(); assert.equal(audio.voices.size, 0); assert.equal(audio.context, null); assert.equal(context.closed, true);
+});
+
+test('natural calls follow daylight and stay out of caves and other dimensions',()=>{
+ const {audio}=setup({musicVolume:0}),calls=[];audio.tone=(...args)=>calls.push(args);
+ const game={screen:null,state:{dimension:'overworld',time:150},pos:{x:0,y:21,z:0},weather:{kind:'rain',intensity:0,wind:.4},world:{column:()=>({biome:'forest',h:20,river:30}),waterAt:()=>false}};
+ const tick=()=>{calls.length=0;audio.ambientTimer=0;audio.birdTimer=0;audio.insectTimer=0;audio.update(game,.5);return calls.length;};
+ assert.equal(tick(),2);
+ game.state.time=450;assert.equal(tick(),3);assert.equal(calls[0][0],3800);
+ game.state.dimension='nether';assert.equal(tick(),0);
+ game.state.dimension='overworld';game.pos.y=0;assert.equal(tick(),0);
+ game.pos.y=21;game.weatherSheltered=true;assert.equal(tick(),0);
+ audio.dispose();
 });

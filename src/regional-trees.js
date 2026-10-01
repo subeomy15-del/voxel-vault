@@ -1,4 +1,4 @@
-import {integerHash} from './climate.js?v=39';
+import {integerHash} from './climate.js?v=42';
 // Each crown grows from connected branches. No per-leaf random deletion/floating scraps.
 export function regionalTree(world,put,x,y,z,species){
  const n=world.terrain>=11?world.hash(x,z,world.seed+81):integerHash(x,z,world.seed+81),snowy=['snow','snow_plains','snow_cedar'].includes(world.biome(x,z));

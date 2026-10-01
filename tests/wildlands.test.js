@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js?v=39';
-import { World } from '../src/world.js?v=39';
-import { ITEMS,BLOCKS,CROPS,RECIPES,ORE_GLIDERS,canCraft,craft } from '../src/data.js?v=39';
-import { ANIMALS,animalKind } from '../src/wildlife.js?v=39';
-import { tickSurvival,canEat } from '../src/survival.js?v=39';
-import { updateProjectiles } from '../src/combat.js?v=39';
-import { loadState } from '../src/save.js?v=39';
+import { Game } from '../src/game.js?v=42';
+import { World } from '../src/world.js?v=42';
+import { ITEMS,BLOCKS,CROPS,RECIPES,ORE_GLIDERS,canCraft,craft } from '../src/data.js?v=42';
+import { ANIMALS,animalKind } from '../src/wildlife.js?v=42';
+import { tickSurvival,canEat } from '../src/survival.js?v=42';
+import { updateProjectiles } from '../src/combat.js?v=42';
+import { loadState } from '../src/save.js?v=42';
 const make=()=>{const data=new Map(),g=new Game({setWorld(){},stream(){},burst(){}},{play(){}},{getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)});g.screen=null;g.pos={x:.5,y:7,z:9.5};g.yaw=0;g.pitch=0;g.mobs=[];return g;};
 const ticks=(fn,seconds)=>{for(let t=0;t<seconds-1e-8;t+=.05)fn(.05);};
 

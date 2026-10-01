@@ -1,16 +1,17 @@
-import {weatherAt} from './weather.js?v=39';
-import {WeatherView} from './weather-view.js?v=39';
-import {habitatInstances} from './visual-habitat.js?v=39';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=39';
-import {BIOME_DETAIL} from './biome-detail.js?v=39';
-import {ATMOSPHERES} from './atmosphere-profiles.js?v=39';
+import {SkyLife} from './sky-life.js?v=42';
+import {weatherAt,localConditions} from './weather.js?v=42';
+import {WeatherView} from './weather-view.js?v=42';
+import {habitatInstances} from './visual-habitat.js?v=42';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=42';
+import {BIOME_DETAIL} from './biome-detail.js?v=42';
+import {ATMOSPHERES} from './atmosphere-profiles.js?v=42';
 import * as THREE from '../vendor/three.module.js';
-import { hash } from './data.js?v=39';
+import { hash } from './data.js?v=42';
 export class Scenery {
   constructor(renderer){
     this.atmospheres=Object.fromEntries(Object.entries(ATMOSPHERES).map(([id,p])=>[id,Object.fromEntries(Object.entries(p).map(([k,color])=>[k,new THREE.Color(color)]))]));this.targetZenith=new THREE.Color();this.targetHorizon=new THREE.Color();
-    this.weatherView=new WeatherView(renderer);this.owner=renderer;this.time={value:0};this.wind={value:1};
-    this.palette=Object.fromEntries(Object.entries({day:'#6aa6cf',horizon:'#c4d8df',dusk:'#c8b598',cloud:'#f6f0dd',cave:'#162128',sun:'#edf1f3',sunset:'#dfbfab'}).map(([key,color])=>[key,new THREE.Color(color)]));
+    this.skyLife=new SkyLife(renderer);this.weatherView=new WeatherView(renderer);this.owner=renderer;this.time={value:0};this.wind={value:1};
+    this.palette=Object.fromEntries(Object.entries({day:'#6aa6cf',horizon:'#c4d8df',dusk:'#edaa79',cloud:'#f6f0dd',cave:'#162128',sun:'#edf1f3',sunset:'#dfbfab'}).map(([key,color])=>[key,new THREE.Color(color)]));
     this.skyUniforms={sunDirection:{value:new THREE.Vector3(-.5,.8,.3)},zenith:{value:new THREE.Color('#6eabcb')},horizon:{value:new THREE.Color('#d6dbca')},night:{value:0},rift:{value:0},cloudCover:{value:.35},time:this.time};
     const skyMaterial=new THREE.ShaderMaterial({uniforms:this.skyUniforms,side:THREE.BackSide,depthWrite:false,
       vertexShader:'varying vec3 vSky;void main(){vSky=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
@@ -25,9 +26,9 @@ export class Scenery {
       float cloudMask=smoothstep(.76-cloudCover*.35,.87-cloudCover*.35,cloudField)*smoothstep(.025,.2,d.y)*(1.-rift);
       vec3 cloudColor=mix(vec3(.10,.15,.21),mix(vec3(.53,.62,.67),vec3(.96,.94,.84),cloudField),1.-night);
       col=mix(col,cloudColor,cloudMask*.9);
-      float moon=max(dot(d,-sunDirection),0.0);col+=vec3(.62,.75,.86)*smoothstep(.9993,.9996,moon)*night;
+      float moon=max(dot(d,-sunDirection),0.0);col+=vec3(.62,.75,.86)*smoothstep(.9993,.9996,moon)*night*(1.-cloudMask);
       vec3 cell=floor(d*370.);float star=step(.9988,rand(cell))*pow(max(0.,1.-length(fract(d*370.)-.5)*1.6),3.);
-      col+=vec3(.77,.88,1.)*star*night*smoothstep(.05,.4,h);
+      col+=vec3(.77,.88,1.)*star*night*smoothstep(.05,.4,h)*(1.-cloudMask);
       float ribbon=sin(d.x*5.+sin(d.z*4.+time*.015)*1.3+d.y*9.);float nebula=pow(max(0.,1.-abs(ribbon)),3.)*pow(max(0.,d.y),.4);
       col+=rift*(vec3(.09,.035,.16)*nebula+vec3(.02,.065,.08)*pow(max(0.,1.-abs(ribbon-.4)),4.)*h);gl_FragColor=vec4(col,1.0);
       #include <tonemapping_fragment>
@@ -126,10 +127,12 @@ export class Scenery {
   update(game,inCave,dt=1/60){
     const t=game.state.time,phase=t/600*Math.PI*2,elevation=Math.sin(phase),day=THREE.MathUtils.smoothstep(elevation,-.22,.35),dusk=(1-Math.abs(elevation))**5;
     const weather=weatherAt(game.state.seed,t,game.world.biome(game.pos.x,game.pos.z));game.weather=weather;this.weatherView.update(game,dt,weather);this.skyUniforms.cloudCover.value=weather.cloud;
-    this.time.value=t;this.wind.value=this.owner.settings.bobbing?1:0;
+    const conditions=localConditions(t,game.world.biome(game.pos.x,game.pos.z),game.pos.y,weather);game.conditions=conditions;this.skyLife.update(game,conditions,weather,inCave);
+    this.time.value=t;this.wind.value=.3+weather.wind*1.8;
     const uniforms=this.skyUniforms;uniforms.sunDirection.value.set(-Math.cos(phase)*.8,elevation,.25).normalize();uniforms.night.value=1-day;uniforms.rift.value=game.state.dimension==='ender'?1:0;
     const biome=game.world.biome(game.pos.x,game.pos.z),profile=this.atmospheres[biome]||this.atmospheres[BIOME_DEFINITIONS[biome]?.parent]||this.atmospheres.meadow,blend=1-Math.exp(-dt*1.4);
-    this.targetZenith.set('#16283e').lerp(profile.day,day);this.targetHorizon.set('#354654').lerp(profile.horizon,day).lerp(this.palette.dusk,dusk*.35);
+    this.targetZenith.set('#16283e').lerp(profile.day,day);this.targetHorizon.set('#354654').lerp(profile.horizon,day).lerp(this.palette.dusk,dusk*.65);
+    if(game.state.dimension==='overworld'){this.targetZenith.lerp(this.palette.cave,weather.intensity*.35);this.targetHorizon.lerp(this.palette.horizon,conditions.mist*.5);}
     uniforms.zenith.value.lerp(this.targetZenith,blend);uniforms.horizon.value.lerp(this.targetHorizon,blend);
     this.sky.visible=!inCave;this.sky.position.copy(this.owner.camera.position);
     this.clouds.visible=false;this.clouds.position.set(game.pos.x+Math.sin(t*.002)*10,0,game.pos.z);this.clouds.material.color.set('#8b9ba5').lerp(profile.cloud,day);this.clouds.material.opacity=.7*day+.22;
@@ -165,7 +168,7 @@ export class Scenery {
         r.sun.intensity*=.65;r.ambient.color.set('#aed8d4');
       }
     }
-    if(game.state.dimension==='overworld'&&!inCave){r.sun.intensity*=1-weather.intensity*.7;r.ambient.intensity*=1-weather.intensity*.18;r.scene.fog.far*=1-weather.intensity*.25;}
+    if(game.state.dimension==='overworld'&&!inCave){r.sun.intensity*=1-weather.intensity*.7;r.ambient.intensity*=1-weather.intensity*.18;r.scene.fog.near*=1-conditions.mist*.8;r.scene.fog.far*=1-weather.intensity*.25-conditions.mist*.3;}
     const direction=uniforms.sunDirection.value;r.sun.position.set(game.pos.x+direction.x*50,game.pos.y+Math.max(.3,Math.abs(direction.y))*70,game.pos.z+direction.z*60);r.sun.target.position.set(game.pos.x,game.pos.y,game.pos.z);
   }
 }

@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js?v=39';
-import { Parkour } from '../src/parkour.js?v=39';
-import { CLOUDSTEP } from '../src/parkour-course.js?v=39';
-import { movementInput, releaseJump } from '../src/movement.js?v=39';
-import { slotKey } from '../src/save.js?v=39';
+import { Game } from '../src/game.js?v=42';
+import { Parkour } from '../src/parkour.js?v=42';
+import { CLOUDSTEP } from '../src/parkour-course.js?v=42';
+import { movementInput, releaseJump } from '../src/movement.js?v=42';
+import { slotKey } from '../src/save.js?v=42';
 
 function harness() {
   const storage = { data: new Map(), writes: [], getItem(key) { return this.data.get(key) || null; }, setItem(key, value) { this.data.set(key, value); this.writes.push(key); } };
@@ -143,4 +143,23 @@ test('holding forward over the launch pad reaches the elevated sky deck without 
     assert.ok(landed, `launch pad landing at ${Math.round(1 / dt)} FPS, final ${JSON.stringify(game.pos)}`);
     assert.equal(game.world.edits.size, 0);
   }
+});
+
+test('all expanded campaign jumps are reachable with normal movement at 60 and 20 FPS', async()=>{
+ const {CAMPAIGN}=await import('../src/parkour-course.js?v=42');const {game,course}=harness();
+ for(const c of CAMPAIGN.slice(1))for(const dt of [1/60,.05]){
+  course.start(c.id);
+  for(let i=0;i<c.platforms.length-1;i++){
+   const [a,b,z1,z2,y]=c.platforms[i],next=c.platforms[i+1],x=(a+b)/2+.5,z=(z1+z2)/2+.5,tx=(next[0]+next[1])/2+.5,tz=(next[2]+next[3])/2+.5;
+   game.pos={x,y,z};game.vx=game.vz=game.velocity=0;game.grounded=true;game.yaw=Math.atan2(-(tx-x),-(tz-z));game.keys.clear();game.keys.add('KeyW');game.keys.add('ShiftLeft');course.respawnTime=0;course.timer.finished=false;game.screen=null;game.jumpReleased=false;
+   let jumped=false,landed=false;
+   for(let frame=0;frame<3/dt;frame++){
+    if(!jumped&&game.pos.z<=z1+.6){game.jump();jumped=true;}
+    game.update(dt);
+    if(jumped&&game.grounded&&Math.abs(game.pos.y-next[4])<.01&&game.pos.z<next[3]+1.27&&game.pos.x>=next[0]-.27&&game.pos.x<=next[1]+1.27){landed=true;break;}
+    if(course.respawnTime)break;
+   }
+   assert.ok(landed,`${c.id} jump ${i} at ${1/dt} FPS, ${JSON.stringify(game.pos)}`);
+  }
+ }
 });
