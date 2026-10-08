@@ -1,6 +1,6 @@
 import {writeFile} from 'node:fs/promises';
-import {World} from '../src/world.js?v=38';
-import {BIOME_DEFINITIONS} from '../src/biome-registry.js?v=38';
+import {World} from '../src/world.js?v=43';
+import {BIOME_DEFINITIONS} from '../src/biome-registry.js?v=43';
 const baseline={Plains:'meadow','Grassy Plains':'grassy_plains',Meadows:'flower_meadow','Maple Forest':'maple_forest','Pear Forest':'pear_forest','Aspen Forest':'aspen_forest','Plum Forest':'plum_forest','Bluebell Forest':'bluebell_forest','Autumn Forest':'autumn_forest','Cherry Blossom Forest':'cherry',Desert:'desert','Cactus Fields':'many_cactus_desert','Red Desert':'red_sand_desert','Snowy Plains':'snow_plains','Snowy Pine Forest':'snow','Snowy Cedar Forest':null,'Frozen Badlands':'frozen_badlands','Spectral Forest':'spectral_forest','Pine Forest':'conifer','Cedar Forest':'cedar_forest',Jungle:'jungle'};
 const seeds=[7821,42],locations={};
 for(const seed of seeds){const w=new World(seed,[],10),found={};for(let x=-6000;x<=6000;x+=96)for(let z=-6000;z<=6000;z+=96){if(Math.hypot(x,z)<600)continue;const id=w.biome(x,z),h=w.height(x,z);if(h<6)continue;const previous=found[id];if(!previous||Math.hypot(x,z)<Math.hypot(previous.x,previous.z))found[id]={x,y:h+1,z};}locations[seed]=found;}

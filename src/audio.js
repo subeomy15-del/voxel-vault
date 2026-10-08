@@ -1,5 +1,5 @@
-import {localConditions} from './weather.js?v=42';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=42';
+import {localConditions} from './weather.js?v=43';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=43';
 const clamp = value => Math.max(0, Math.min(1, Number(value) || 0));
 const frequency = note => 440 * 2 ** ((note - 69) / 12);
 // An original, procedurally voiced sixteen-note phrase: no downloaded recordings.

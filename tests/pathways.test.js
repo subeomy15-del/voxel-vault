@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Game} from '../src/game.js?v=42';
-import {loadState} from '../src/save.js?v=42';
-import {ITEMS} from '../src/data.js?v=42';
-import {packSlot} from '../src/inventory-layout.js?v=42';
+import {Game} from '../src/game.js?v=43';
+import {loadState} from '../src/save.js?v=43';
+import {ITEMS} from '../src/data.js?v=43';
+import {packSlot} from '../src/inventory-layout.js?v=43';
 const make=()=>{const data=new Map();const g=new Game({setWorld(){},stream(){},burst(){}},{play(){}},{getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)});g.screen=null;g.mobs=[];return g;};
 test('nearby ground drops collect automatically once and respect full backpack capacity',()=>{
  const g=make();g.state.inv={};g.events=[];g.state.drops=[{id:1,item:'stone',count:3,x:g.pos.x,y:g.pos.y+.2,z:g.pos.z,age:0}];

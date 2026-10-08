@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {weatherAt} from '../src/weather.js';
-import {BIOME_DEFINITIONS} from '../src/biome-registry.js';
-import {WeatherView} from '../src/weather-view.js';
+import {weatherAt} from '../src/weather.js?v=43';
+import {BIOME_DEFINITIONS} from '../src/biome-registry.js?v=43';
+import {WeatherView} from '../src/weather-view.js?v=43';
 import * as THREE from '../vendor/three.module.js';
 test('climate weather is deterministic, bounded and dry in arid biomes',()=>{
  let rain=false,snow=false;
@@ -23,7 +23,7 @@ test('weather fronts cross period boundaries without jumps in wind or cloud',()=
 });
 
 test('clock, daylight and morning mist match the solar cycle',async()=>{
- const {localConditions}=await import('../src/weather.js');
+ const {localConditions}=await import('../src/weather.js?v=43');
  assert.equal(localConditions(0,'forest').clock,'06:00');
  assert.equal(localConditions(150,'forest').clock,'12:00');
  assert.equal(localConditions(450,'forest').clock,'00:00');
@@ -34,7 +34,7 @@ test('clock, daylight and morning mist match the solar cycle',async()=>{
 });
 
 test('sky life reuses its buffer and respects caves, night, weather and particle settings',async()=>{
- const {SkyLife}=await import('../src/sky-life.js');
+ const {SkyLife}=await import('../src/sky-life.js?v=43');
  const owner={scene:new THREE.Scene(),options:{quality:'medium',particles:'high',renderDistance:5}},view=new SkyLife(owner);
  const game={state:{dimension:'overworld',time:150,seed:41},pos:{x:0,y:20,z:0},world:{waterAt:()=>false,height:()=>19}};
  const buffer=view.positions,conditions={daylight:1},weather={intensity:0};

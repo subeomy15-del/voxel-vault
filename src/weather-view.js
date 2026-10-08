@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import {coordinateHash} from './coordinate-hash.js?v=42';
+import {coordinateHash} from './coordinate-hash.js?v=43';
 export class WeatherView{
  constructor(renderer){
   this.owner=renderer;this.positions=new Float32Array(256*6);const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(this.positions,3).setUsage(THREE.DynamicDrawUsage));

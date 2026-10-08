@@ -182,3 +182,14 @@ Open the backpack with Tab to drag items into any hotbar slot, swap hotbar slots
 Open the map with M to save up to three personal teleport sites. Stand on safe, dry ground to save a location. Teleporting checks that the landing remains clear and supported. Sites persist with the world and work within their saved realm; use portals to change realms first. Personal teleporting is available in solo worlds.
 
 The menu wordmark, brand emblem, and favicon use flat 2D branding. The backpack, travel cards, pickup feed, and ground-item markers have refreshed visuals.
+
+
+## Tower Parkour
+
+Choose **Tower Parkour → Choose your tower** on the home screen. This separate solo mode adds three worlds: **Prism Spire**, **Aurora Citadel**, and **Ember Crown**. Each winds 56 blocks upward around a colored tower, with eight distinct floors: precision stones, zigzag balance beams, crouch tunnels, launch pads, moving elevators (plus ferries in the harder worlds), crumbling steps, timed laser gates, and rotating sweepers. The worlds have different scenery, landing widths, obstacle speeds, and timing. All three are open immediately.
+
+Each floor begins with a checkpoint. Falling or touching an active hazard returns you to the last checkpoint; **R** retries it manually. **WASD** moves, **Space** jumps, **Shift** sprints, and **Ctrl / C** crouches. Touch players get a crouch button alongside jump and sprint. Pause freezes the run clock and all moving obstacles.
+
+Reach the summit pavilion after all checkpoints to earn a saved crown, a title, and 120 / 180 / 260 crystals for your first completion of each world; subsequent finishes earn 20 crystals. Gold medals require a fast run with no retries, silver allows up to three retries, and every finish earns at least bronze. Best times, fewest retries, and highest medals save on this device. Collect all three crowns to earn the **Tower Legend** title. Crystals are tower collection points. Tower rewards use a separate local profile, and leaving the mode restores your previous world.
+
+Run `npm test` for course reachability, real movement/platform collision, obstacle timing, rewards, and save restoration. `npm run test:tower` uses an isolated Chrome debugging session on port 9234 and the local preview at port 3002 (override with `VOXEL_CDP_PORT` and `VOXEL_TEST_URL`). Screenshots are written to `/private/tmp/voxel-vault-tower-*.png`.

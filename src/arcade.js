@@ -1,9 +1,9 @@
-import {PartyView} from './party-view.js?v=42';
-import {partyDash,partyObjective} from './party-rules.js?v=42';
+import {PartyView} from './party-view.js?v=43';
+import {partyDash,partyObjective} from './party-rules.js?v=43';
 import * as THREE from '../vendor/three.module.js';
-import { PlayerModel } from './player-model.js?v=42';
-import { ArcadeRound, ARCADE_MODES, TILE_COLORS, TILE_BLOCKS, tileColor } from './arcade-round.js?v=42';
-import { CAMPAIGN, ARENAS } from './parkour-course.js?v=42';
+import { PlayerModel } from './player-model.js?v=43';
+import { ArcadeRound, ARCADE_MODES, TILE_COLORS, TILE_BLOCKS, tileColor } from './arcade-round.js?v=43';
+import { CAMPAIGN, ARENAS } from './parkour-course.js?v=43';
 const colors=['#b5a1ff','#ffbc73','#ff87ac','#81d7ff','#e9ec88'];
 export class Arcade {
   constructor(game,ui,parkour){

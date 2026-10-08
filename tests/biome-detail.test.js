@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {World} from '../src/world.js';
-import {BIOME_DEFINITIONS} from '../src/biome-registry.js';
-import {BIOME_DETAIL} from '../src/biome-detail.js';
-import {BLOCKS} from '../src/data.js';
-import {freshState,saveState,loadState} from '../src/save.js';
+import {World} from '../src/world.js?v=43';
+import {BIOME_DEFINITIONS} from '../src/biome-registry.js?v=43';
+import {BIOME_DETAIL} from '../src/biome-detail.js?v=43';
+import {BLOCKS} from '../src/data.js?v=43';
+import {freshState,saveState,loadState} from '../src/save.js?v=43';
 test('all surface biomes have implemented habitat profiles with real registered resources',()=>{
  assert.deepEqual(Object.keys(BIOME_DETAIL).sort(),Object.keys(BIOME_DEFINITIONS).sort());
  for(const p of Object.values(BIOME_DETAIL)){for(const type of [...p.cover,p.rock])assert.ok(BLOCKS[type],type);assert.ok(p.density>=0&&p.density<.5);}

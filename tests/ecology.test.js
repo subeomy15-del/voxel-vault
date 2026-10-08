@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {World} from '../src/world.js';
-import {BLOCKS} from '../src/data.js';
-import {ANIMALS,tickAquaticLife} from '../src/wildlife.js';
-import {creatureModel,animateCreature} from '../src/creature-model.js';
+import {World} from '../src/world.js?v=43';
+import {BLOCKS} from '../src/data.js?v=43';
+import {ANIMALS,tickAquaticLife} from '../src/wildlife.js?v=43';
+import {creatureModel,animateCreature} from '../src/creature-model.js?v=43';
 import * as THREE from '../vendor/three.module.js';
 function patch(w,x,z){for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)w.prepare(Math.floor(x/16)+dx,Math.floor(z/16)+dz);return [...w.structures].filter(([k])=>{const[a,,b]=k.split(',').map(Number);return Math.abs(a-x)<24&&Math.abs(b-z)<24;});}
 test('real generated jungle, marsh and seabed have distinct grounded ecology',()=>{

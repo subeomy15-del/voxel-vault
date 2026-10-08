@@ -1,5 +1,5 @@
 import * as THREE from '../vendor/three.module.js';
-import {coordinateHash} from './coordinate-hash.js?v=42';
+import {coordinateHash} from './coordinate-hash.js?v=43';
 // A small, fixed buffer of distant birds. World-anchored flight paths stay put
 // when the camera turns or moves; these silhouettes have no collision or loot.
 export class SkyLife {

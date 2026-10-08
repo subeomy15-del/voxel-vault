@@ -1,4 +1,6 @@
 // Original, deterministic course geometry shared by the game and terrain worker.
+import { TOWER_WORLDS, towerGeometry } from './tower-course.js?v=43';
+export { TOWER_WORLDS };
 export const CLOUDSTEP = {
   id:'cloudstep-v1', name:'Cloudstep Circuit', subtitle:'A garden above the clouds',
   spawn:{x:.5,y:13,z:5.5,yaw:0}, fallY:5,
@@ -58,7 +60,7 @@ export const ARENAS=Object.freeze(Object.fromEntries([
   ['color-drop','Prism Arena',null],['infection','Overgrown Court',['stonebrick','green_wool']],
   ['crown-control','Crown Pavilion',['polished_marble','gold_block']],['sky-battle','Cobalt Colosseum',['stonebrick','blue_wool']],
 ].map(([id,name,floor],i)=>[id,{...ARENA,id:'arena-'+id,seed:92001+(i<8?i+6:i-8),name,floor}])));
-export const COURSES=Object.freeze(Object.fromEntries([...CAMPAIGN,ARENA,...Object.values(ARENAS)].map(c=>[c.id,c])));
+export const COURSES=Object.freeze(Object.fromEntries([...CAMPAIGN,ARENA,...Object.values(ARENAS),...TOWER_WORLDS].map(c=>[c.id,c])));
 export const courseForSeed=seed=>Object.values(COURSES).find(c=>c.seed===seed)||CLOUDSTEP;
 const geometries=new Map();
 function expandedGeometry(course){
@@ -96,6 +98,7 @@ function expandedGeometry(course){
 let geometry;
 export function courseGeometry(seed=91347){
   const course=courseForSeed(seed);
+  if(course.tower){if(!geometries.has(seed))geometries.set(seed,towerGeometry(course));return geometries.get(seed);}
   if(course!==CLOUDSTEP){if(!geometries.has(seed))geometries.set(seed,expandedGeometry(course));return geometries.get(seed);}
   if(geometry)return geometry;
   const blocks=new Map(),heights=new Map();

@@ -1,5 +1,5 @@
-import { CAMPAIGN } from './parkour-course.js?v=42';
-import { formatRunTime } from './game-timer.js?v=42';
+import { CAMPAIGN } from './parkour-course.js?v=43';
+import { formatRunTime } from './game-timer.js?v=43';
 
 export class ParkourUI {
   constructor(game,ui,parkour){

@@ -1,12 +1,12 @@
-import {SkyLife} from './sky-life.js?v=42';
-import {weatherAt,localConditions} from './weather.js?v=42';
-import {WeatherView} from './weather-view.js?v=42';
-import {habitatInstances} from './visual-habitat.js?v=42';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=42';
-import {BIOME_DETAIL} from './biome-detail.js?v=42';
-import {ATMOSPHERES} from './atmosphere-profiles.js?v=42';
+import {SkyLife} from './sky-life.js?v=43';
+import {weatherAt,localConditions} from './weather.js?v=43';
+import {WeatherView} from './weather-view.js?v=43';
+import {habitatInstances} from './visual-habitat.js?v=43';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=43';
+import {BIOME_DETAIL} from './biome-detail.js?v=43';
+import {ATMOSPHERES} from './atmosphere-profiles.js?v=43';
 import * as THREE from '../vendor/three.module.js';
-import { hash } from './data.js?v=42';
+import { hash } from './data.js?v=43';
 export class Scenery {
   constructor(renderer){
     this.atmospheres=Object.fromEntries(Object.entries(ATMOSPHERES).map(([id,p])=>[id,Object.fromEntries(Object.entries(p).map(([k,color])=>[k,new THREE.Color(color)]))]));this.targetZenith=new THREE.Color();this.targetHorizon=new THREE.Color();

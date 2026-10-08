@@ -5,7 +5,7 @@ import vm from 'node:vm';
 
 test('aborted IndexedDB transactions cannot contaminate the next incremental save',async()=>{
  const messages=[],context=vm.createContext({performance,Blob,postMessage:m=>messages.push(m)});
- vm.runInContext(readFileSync(new URL('../src/save-worker.js',import.meta.url),'utf8'),context);
+ vm.runInContext(readFileSync(new URL('../src/save-worker.js?v=43',import.meta.url),'utf8'),context);
  vm.runInContext(`worlds.set('slot',{state:{version:2},maps:new Map([['overworld',new Map([['0,5,0','stone']])]])});db={transaction(){throw Object.assign(Error('Disk full'),{name:'QuotaExceededError'});}};`,context);
  await context.onmessage({data:{type:'begin',id:1,key:'slot',meta:{dimension:'overworld',realms:{}}}});
  await context.onmessage({data:{type:'patch',id:1,dimension:'overworld',entries:[['0,5,0',null],['1,5,0','diamond']]}});

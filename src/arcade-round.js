@@ -1,4 +1,4 @@
-import {PARTY_MODES,initParty,updateParty,partyTarget,partyAttack,partyWinners} from './party-rules.js?v=42';
+import {PARTY_MODES,initParty,updateParty,partyTarget,partyAttack,partyWinners} from './party-rules.js?v=43';
 // Deterministic rules and active opponents; no DOM or renderer dependencies.
 export const ARCADE_MODES=Object.freeze([
   ...PARTY_MODES,

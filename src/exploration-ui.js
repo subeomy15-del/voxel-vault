@@ -1,6 +1,6 @@
-import {ITEMS} from './data.js?v=42';
-import {TRADE_OFFERS} from './exploration-content.js?v=42';
-import {icon} from './icons.js?v=42';
+import {ITEMS} from './data.js?v=43';
+import {TRADE_OFFERS} from './exploration-content.js?v=43';
+import {icon} from './icons.js?v=43';
 const distance=(g,p)=>Math.round(Math.hypot(g.pos.x-p.x,g.pos.z-p.z));
 export function explorationMarkup(g){
  const s=g.state,e=s.exploration;

@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {World} from '../src/world.js';
-import {habitatInstances} from '../src/visual-habitat.js';
-import {meshChunk} from '../src/mesh.js';
+import {World} from '../src/world.js?v=43';
+import {habitatInstances} from '../src/visual-habitat.js?v=43';
+import {meshChunk} from '../src/mesh.js?v=43';
 test('visual foliage works in old saves without modifying terrain or player edits',()=>{
  for(const terrain of[6,10,11,12]){
   const w=new World(7821,[],terrain),before=[...w.edits];let count=0;

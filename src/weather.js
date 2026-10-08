@@ -1,5 +1,5 @@
-import {coordinateHash} from './coordinate-hash.js?v=42';
-import {BIOME_DEFINITIONS} from './biome-registry.js?v=42';
+import {coordinateHash} from './coordinate-hash.js?v=43';
+import {BIOME_DEFINITIONS} from './biome-registry.js?v=43';
 const smooth=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t);};
 const mix=(a,b,t)=>a+(b-a)*t;
 // Fronts share a continuous clock; walking across a biome changes precipitation,

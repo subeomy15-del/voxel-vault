@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {World} from '../src/world.js';
-import {Game} from '../src/game.js';
-import {wreckAnchor,wreckLayout,installWreck,registerWreck} from '../src/shipwrecks.js';
-import {freshState,saveState,loadState} from '../src/save.js';
+import {World} from '../src/world.js?v=43';
+import {Game} from '../src/game.js?v=43';
+import {wreckAnchor,wreckLayout,installWreck,registerWreck} from '../src/shipwrecks.js?v=43';
+import {freshState,saveState,loadState} from '../src/save.js?v=43';
 const storage=()=>{const data=new Map();return {getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};};
 function setup(){const g=new Game({setWorld(){},burst(){},stream(){}},{play(){},quiet(){}},storage());g.state=freshState(7821);g.state.terrain=10;g.state.pos={x:0,y:20,z:0};g.loadWorld();g.screen=null;return g;}
 function locate(g){for(let x=-20;x<20;x++)for(let z=-20;z<20;z++){const s=wreckAnchor(g.world,x,z);if(s&&installWreck(g,s))return s;}throw Error('No reachable wreck');}

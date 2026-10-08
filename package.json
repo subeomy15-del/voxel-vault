@@ -1,6 +1,6 @@
 {
   "name": "voxel-vault",
-  "version": "17.1.0",
+  "version": "18.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,6 +15,7 @@
     "test:arcade": "node tests/arcade-browser.js",
     "test:competitive": "node tests/competitive-browser.js",
     "test:parkour": "node tests/parkour-browser.js",
+    "test:tower": "node tests/tower-browser.js",
     "test:settings": "node tests/settings-browser.js",
     "test:render": "node tests/render-browser.js"
   },

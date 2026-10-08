@@ -1,4 +1,4 @@
-import { PlayerModel } from './player-model.js?v=42';
+import { PlayerModel } from './player-model.js?v=43';
 import * as THREE from '../vendor/three.module.js';
 
 export class ParkourView {
@@ -10,9 +10,14 @@ export class ParkourView {
     for(const [i,cp]of p.course.checkpoints.entries()){
       const ring=new THREE.Mesh(new THREE.RingGeometry(1.38,1.55,32),new THREE.MeshBasicMaterial({color:'#a4ddcf',transparent:true,opacity:.6,depthWrite:false,side:THREE.DoubleSide}));
       ring.rotation.x=-Math.PI/2;ring.position.set(cp.x,cp.y+.025,cp.z);this.root.add(ring);this.rings.push(ring);
-      if(i>0)this.sign(`${String(i).padStart(2,'0')}  ${cp.name.toUpperCase()}`,cp.x,cp.y+2.7,cp.z-1.9,3.4);
+      if(i>0&&!p.course.tower)this.sign(`${String(i).padStart(2,'0')}  ${cp.name.toUpperCase()}`,cp.x,cp.y+2.7,cp.z-1.9,3.4);
     }
     this.sign(p.course.name.toUpperCase(),p.course.spawn.x,p.course.spawn.y+3,p.course.spawn.z+4,5);
+    if(p.course.tower){
+      for(const stage of p.course.stages)this.sign(stage.name.toUpperCase(),stage.checkpoint.x,stage.checkpoint.y+3,stage.checkpoint.z,4.2);
+      this.sign('SUMMIT · CLAIM YOUR TROPHY',p.course.finish.x,p.course.finish.y+3,p.course.finish.z,5);
+      return;
+    }
     this.sign('SHIFT + SPACE  •  RUN & JUMP',.5,14.6,1,3.8);
     for(const pad of p.course.pads)this.sign('JUMP PAD  •  KEEP FORWARD',pad.x,pad.y+2.8,pad.z,3.8);
     this.sign('FINISH',p.course.finish.x,p.course.finish.y+3,p.course.finish.z-1,3.2);

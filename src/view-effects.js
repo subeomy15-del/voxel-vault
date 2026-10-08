@@ -1,8 +1,8 @@
-import {itemAssetPath} from './item-assets.js?v=42';
+import {itemAssetPath} from './item-assets.js?v=43';
 import * as THREE from '../vendor/three.module.js';
-import { ITEMS } from './data.js?v=42';
-import { icon } from './icons.js?v=42';
-import { gliderModel } from './models.js?v=42';
+import { ITEMS } from './data.js?v=43';
+import { icon } from './icons.js?v=43';
+import { gliderModel } from './models.js?v=43';
 const ORES={moonstone:'#baa1f2',coal:'#a0a6a0',iron:'#dfd8c6',gold:'#f5d67c',diamond:'#9bc8d0'};
 const cells=[];for(let x=-14;x<=14;x++)for(let y=-14;y<=14;y++)for(let z=-14;z<=14;z++)if(x*x+y*y+z*z<=196)cells.push([x,y,z]);cells.sort((a,b)=>a[0]**2+a[1]**2+a[2]**2-b[0]**2-b[1]**2-b[2]**2);
 export class ViewEffects {

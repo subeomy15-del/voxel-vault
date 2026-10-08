@@ -1,7 +1,7 @@
 import * as THREE from '../vendor/three.module.js';
-import { itemModel } from './item-model.js?v=42';
-import { ITEMS } from './data.js?v=42';
-import { toolModel,bowModel } from './models.js?v=42';
+import { itemModel } from './item-model.js?v=43';
+import { ITEMS } from './data.js?v=43';
+import { toolModel,bowModel } from './models.js?v=43';
 export class PlayerModel {
   constructor(r){
     this.r=r;this.group=new THREE.Group();this.limbs=[];this.held='';this.customParts=[];

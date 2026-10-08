@@ -1,9 +1,11 @@
-import { CLOUDSTEP,COURSES } from './parkour-course.js?v=42';
-import { GameTimer } from './game-timer.js?v=42';
-import { freshState } from './save.js?v=42';
+import { CLOUDSTEP,COURSES } from './parkour-course.js?v=43';
+import { GameTimer } from './game-timer.js?v=43';
+import { freshState } from './save.js?v=43';
+import { TowerRuntime } from './tower-runtime.js?v=43';
+import { awardTowerSummit } from './tower-rewards.js?v=43';
 
 export class Parkour {
-  constructor(game){this.game=game;game.parkour=this;this.timer=new GameTimer();this.course=CLOUDSTEP;this.checkpoint=0;this.respawnTime=0;this.pulse=0;}
+  constructor(game){this.game=game;game.parkour=this;this.timer=new GameTimer();this.course=CLOUDSTEP;this.checkpoint=0;this.respawnTime=0;this.pulse=0;this.towerRuntime=new TowerRuntime(game,this);}
   get active(){return this.game.state.mode==='parkour';}
   readBest(){
     try{const best=JSON.parse(this.game.storage.getItem('voxel-vault-parkour-'+this.course.id));
@@ -12,17 +14,20 @@ export class Parkour {
   }
   start(id=CLOUDSTEP.id){
     const g=this.game;if(g.multiplayer?.room||!COURSES[id])return false;
+    this.towerRuntime.dispose();
     if(!this.active){g.save(true);this.soloState=structuredClone(g.state);}
     this.course=COURSES[id];this.best=this.readBest();this.previousBest=this.best;
     const state=freshState(this.course.seed,'parkour');state.dimension='parkour';state.pos={...this.course.spawn};state.origin={...state.pos};state.spawn={...state.pos};state.yaw=this.course.spawn.yaw;state.pitch=0;state.time=95;state.inv={};state.glider=null;
     g.state=state;g.events.length=0;g.loadWorld();g.screen=null;g.grounded=true;
     this.timer.reset();this.checkpoint=0;this.falls=0;this.respawnTime=0;this.padCooldown=0;this.pulse=0;this.newBest=false;this.storageFailed=false;
-    g.toast(this.course.name,'Follow the ivory platforms. Shift to sprint · Space to jump · R to retry a checkpoint.');
+    this.summitReward=null;this.towerRuntime.reset(this.course);
+    g.toast(this.course.name,this.course.tower?'Climb the colored floors to the summit. Each floor saves a checkpoint. Shift sprint · Space jump · Ctrl crouch.':'Follow the ivory platforms. Shift to sprint · Space to jump · R to retry a checkpoint.');
     return true;
   }
   leave(){
     if(!this.active)return;
     const g=this.game;this.timer.running=false;this.respawnTime=0;g.audio.quiet?.();
+    this.towerRuntime.dispose();
     g.state=this.soloState||freshState();this.soloState=null;g.loadWorld();g.screen='menu';
   }
   resetToCheckpoint(){
@@ -34,6 +39,7 @@ export class Parkour {
   respawn(){
     const g=this.game,cp=this.course.checkpoints[this.checkpoint];
     g.pos={x:cp.x,y:cp.y,z:cp.z};g.yaw=cp.yaw;g.pitch=0;g.velocity=g.vx=g.vz=0;g.cameraOffset=0;g.grounded=true;g.crouching=false;g.mantle=null;g.jumpBuffer=0;g.coyote=0;g.jumpReleased=false;g.jumpActive=false;g.jumpIntent=0;g.padFlight=0;g.gliding=false;g.flying=false;
+    this.towerRuntime.respawn();
   }
   update(dt){
     if(this.game.arcade?.active){this.game.arcade.update(dt);return;}
@@ -46,7 +52,10 @@ export class Parkour {
       if(this.respawnTime<=.14&&!this.didRespawn){this.respawn();this.didRespawn=true;}
       return;
     }
-    if(g.pos.y<this.course.fallY){this.resetToCheckpoint();return;}
+    this.towerRuntime.update(dt);
+    if(this.respawnTime)return;
+    const checkpointFloor=this.course.tower?this.course.checkpoints[this.checkpoint].y-4:this.course.fallY;
+    if(g.pos.y<Math.max(this.course.fallY,checkpointFloor)){this.resetToCheckpoint();return;}
     const next=this.course.checkpoints[this.checkpoint+1];
     if(next&&g.grounded&&Math.abs(g.pos.y-next.y)<.2&&Math.hypot(g.pos.x-next.x,g.pos.z-next.z)<1.8){
       this.checkpoint++;this.timer.split();this.pulse=1.1;
@@ -63,6 +72,7 @@ export class Parkour {
   finish(){
     if(this.timer.finished)return;
     const g=this.game,time=this.timer.finish();this.previousBest=this.best;this.newBest=!this.best||time<this.best.time;
+    if(this.course.tower)this.summitReward=awardTowerSummit(g.storage,this.course,{time,falls:this.falls});
     if(this.newBest){this.best={time,splits:[...this.timer.splits]};try{g.storage.setItem('voxel-vault-parkour-'+this.course.id,JSON.stringify(this.best));}catch{this.storageFailed=true;}}
     g.audio.play('finish');for(const color of['#d9b85e','#97e6c5','#f3edce'])g.renderer.burst(g.pos.x,g.pos.y+1.5,g.pos.z,color,24);
     g.pause('parkour-results');g.emit('screen');

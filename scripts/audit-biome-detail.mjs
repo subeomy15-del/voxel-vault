@@ -1,5 +1,5 @@
-import {World} from '../src/world.js';
-import {BIOME_DETAIL} from '../src/biome-detail.js';
+import {World} from '../src/world.js?v=43';
+import {BIOME_DETAIL} from '../src/biome-detail.js?v=43';
 import {writeFileSync} from 'node:fs';
 const w=new World(7821,[],12),locations={};
 for(let x=-6000;x<=6000;x+=48)for(let z=-6000;z<=6000;z+=48){const c=w.column(x,z);if(locations[c.biome]||Math.hypot(x,z)<600||c.h>65||c.biome!=='ocean'&&c.h<7)continue;locations[c.biome]={x,z,y:c.h+1};}

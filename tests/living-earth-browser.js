@@ -22,7 +22,7 @@ try{
   await evaluate(`(async()=>{const m=await import(document.querySelector('script[type="module"]').src);window.g=m.game;window.r=m.renderer;window.ui=m.ui;window.settings=m.settings;})()`);
   await until('r.chunks.size>=9');
   await evaluate(`Object.assign(settings,{quality:'custom',renderDistance:5,shadows:false,particles:'high',debugFPS:false});r.applySettings(settings);g.screen=null;g.state.time=150;g.pos.y=g.world.height(Math.floor(g.pos.x),Math.floor(g.pos.z))+2;ui.render();`);
-  await evaluate(`(async()=>{const {weatherAt}=await import('./src/weather.js?v=42');for(let day=0;day<30;day++){const t=150+day*600;if(weatherAt(g.state.seed,t,g.world.biome(g.pos.x,g.pos.z)).intensity<.01){g.state.time=t;break;}}})()`);
+  await evaluate(`(async()=>{const {weatherAt}=await import('./src/weather.js?v=43');for(let day=0;day<30;day++){const t=150+day*600;if(weatherAt(g.state.seed,t,g.world.biome(g.pos.x,g.pos.z)).intensity<.01){g.state.time=t;break;}}})()`);
   await until('r.scenery.skyLife.mesh.visible');
   assert.equal(await evaluate('r.scenery.skyLife.mesh.geometry.drawRange.count'),108);
   assert.ok((await evaluate("document.querySelector('#location small').textContent")).includes('12:'));

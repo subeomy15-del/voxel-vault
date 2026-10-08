@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game } from '../src/game.js?v=42';
-import { Parkour } from '../src/parkour.js?v=42';
-import { CLOUDSTEP } from '../src/parkour-course.js?v=42';
-import { movementInput, releaseJump } from '../src/movement.js?v=42';
-import { slotKey } from '../src/save.js?v=42';
+import { Game } from '../src/game.js?v=43';
+import { Parkour } from '../src/parkour.js?v=43';
+import { CLOUDSTEP } from '../src/parkour-course.js?v=43';
+import { movementInput, releaseJump } from '../src/movement.js?v=43';
+import { slotKey } from '../src/save.js?v=43';
 
 function harness() {
   const storage = { data: new Map(), writes: [], getItem(key) { return this.data.get(key) || null; }, setItem(key, value) { this.data.set(key, value); this.writes.push(key); } };
@@ -146,7 +146,7 @@ test('holding forward over the launch pad reaches the elevated sky deck without 
 });
 
 test('all expanded campaign jumps are reachable with normal movement at 60 and 20 FPS', async()=>{
- const {CAMPAIGN}=await import('../src/parkour-course.js?v=42');const {game,course}=harness();
+ const {CAMPAIGN}=await import('../src/parkour-course.js?v=43');const {game,course}=harness();
  for(const c of CAMPAIGN.slice(1))for(const dt of [1/60,.05]){
   course.start(c.id);
   for(let i=0;i<c.platforms.length-1;i++){

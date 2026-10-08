@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {ArcadeRound,ARCADE_MODES,tileColor} from '../src/arcade-round.js';
-import {CAMPAIGN,courseGeometry} from '../src/parkour-course.js';
-import {World} from '../src/world.js';
+import {ArcadeRound,ARCADE_MODES,tileColor} from '../src/arcade-round.js?v=43';
+import {CAMPAIGN,courseGeometry} from '../src/parkour-course.js?v=43';
+import {World} from '../src/world.js?v=43';
 const run=(r,seconds)=>{for(let i=0;i<seconds*20&&!r.ended;i++)r.update(.05);};
 const random=()=>{let n=872;return()=>((n=Math.imul(n,1664525)+1013904223>>>0)/4294967296);};
 test('all arcade rounds have active opponents and finish in bounded time',()=>{
