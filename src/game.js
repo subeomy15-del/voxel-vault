@@ -18,7 +18,7 @@ import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP,SEA_LEVEL } from './wo
 import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,maxCraft,hash,dailySeed } from './data.js?v=43';
 import { freshState,loadState,saveState,slotKey,importLegacy } from './save.js?v=43';
 import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=43';
-import { movePlayer,requestJump } from './movement.js?v=43';
+import { movePlayer,requestJump } from './movement.js?v=44';
 import { overlapsBlock } from './shapes.js?v=43';
 import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=43';
 import { ANIMALS,animalKind,tickAquaticLife } from './wildlife.js?v=43';
