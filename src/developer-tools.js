@@ -1,0 +1,69 @@
+import { ITEMS } from './data.js?v=43';
+
+export const DEVELOPER_CODE = '73918402658391047265';
+export const developerAllowed = game => !game.multiplayer?.room && !game.arcade?.active && game.state.mode !== 'parkour';
+export const developerSpeed = game => developerAllowed(game) ? Math.max(1, Math.min(10, Number(game.developer?.speed) || 1)) : 1;
+export const developerFlag = (game, flag) => developerAllowed(game) && !!game.developer?.[flag];
+const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+export function installDeveloperTools(game, ui, multiplayer) {
+  game.developer = { speed: 1, god: false, flight: false, mining: false };
+  let unlocked = false, message = '';
+  const launcher = document.createElement('button');
+  launcher.textContent = 'Developer · F8'; launcher.id = 'developer-launcher';
+  launcher.style.cssText = 'position:fixed;bottom:14px;left:14px;z-index:35;padding:9px 14px;border:1px solid #a8b982;border-radius:6px;background:#182d22;color:#f4f0d5;cursor:pointer';
+  document.body.append(launcher);
+  const open = () => { if (game.screen === 'developer') ui.resume(); else { game.pause('developer'); ui.render(); } };
+  launcher.addEventListener('click', open);
+  window.addEventListener('keydown', event => {
+    if (event.code !== 'F8' || event.repeat || event.target.closest?.('input,textarea,select')) return;
+    event.preventDefault(); event.stopImmediatePropagation(); open();
+  }, true);
+  const original = ui.render.bind(ui);
+  ui.render = (...args) => {
+    if (game.screen !== 'developer') return original(...args);
+    const solo = developerAllowed(game);
+    ui.overlay.hidden = false; ui.overlay.className = 'modal-overlay';
+    document.querySelector('#hud').hidden = true;
+    document.querySelector('#touch-controls').hidden = true;
+    document.body.dataset.screen = 'developer';
+    const button = (action, label) => `<button type="button" data-dev="${action}">${label}</button>`;
+    const toggle = (key, label) => button(key, `${game.developer[key] ? '✓ ' : ''}${label}`);
+    const body = !unlocked ? `<p>Enter your 20-digit developer code.</p><form data-dev-unlock><input name="code" aria-label="Developer code" inputmode="numeric" autocomplete="off" maxlength="20" required pattern="[0-9]{20}" style="width:100%;padding:12px;box-sizing:border-box"><button class="primary full">Unlock tools</button></form>` : `<p>${solo ? 'Cheats apply to your current solo world. Flight: Space rises, X descends.' : 'Solo cheats are disabled in multiplayer and scored modes.'}</p><fieldset ${solo ? '' : 'disabled'} style="display:grid;gap:12px;border:0;padding:0"><label>Movement speed <select data-dev-speed aria-label="Movement speed">${[1,2,3,5,10].map(n=>`<option value="${n}" ${game.developer.speed===n?'selected':''}>${n}×</option>`).join('')}</select></label><div style="display:flex;flex-wrap:wrap;gap:8px">${toggle('god','God mode')}${toggle('flight','Flight')}${toggle('mining','Instant mining')}${button('heal','Full health')}${button('home','Teleport home')}${button('day','Daytime')}${button('night','Nighttime')}${button('clear','Clear enemies')}</div><label>Give item <select data-dev-item aria-label="Item">${Object.entries(ITEMS).filter(([,item])=>!item.hidden).map(([id,item])=>`<option value="${escape(id)}">${escape(item.name)}</option>`).join('')}</select></label>${button('give','Give 999 of selected item')}</fieldset>${button('reset','Reset all cheats')}${multiplayer.room ? `<hr><h3>Lobby administration</h3>${multiplayer.isHost ? `${button('start','Start game')}${button('invite','Copy invite link')}<p>Start requires everyone to be ready.</p>` : '<p>Only the lobby host can administer this room.</p>'}` : ''}`;
+    ui.overlay.innerHTML = ui.frame('Developer tools', 'F8 · DEVELOPER / ADMIN', `${body}<p role="status">${escape(message)}</p>${button('close','Back to game')}`, true);
+    ui.overlay.querySelector('[name=code]')?.focus();
+  };
+  document.addEventListener('submit', event => {
+    if (!event.target.matches('[data-dev-unlock]')) return;
+    event.preventDefault(); unlocked = new FormData(event.target).get('code') === DEVELOPER_CODE;
+    message = unlocked ? 'Developer tools unlocked.' : 'Incorrect code.'; ui.render();
+  });
+  document.addEventListener('change', event => {
+    if (!unlocked || !developerAllowed(game) || !event.target.matches('[data-dev-speed]')) return;
+    game.developer.speed = Math.max(1, Math.min(10, Number(event.target.value) || 1));
+  });
+  document.addEventListener('click', async event => {
+    const action = event.target.closest('[data-dev]')?.dataset.dev;
+    if (!action) return;
+    if (action === 'close') return ui.resume();
+    if (!unlocked) return;
+    message = '';
+    try {
+      if (action === 'reset') { Object.assign(game.developer, {speed:1,god:false,flight:false,mining:false}); game.flying=false; game.vx=game.vz=game.velocity=0; }
+      else if (['start','invite'].includes(action)) {
+        if (!multiplayer.isHost) throw Error('Only the lobby host can use this control.');
+        if (action === 'start') await multiplayer.start(); else { await multiplayer.copyInvite(); message='Invite copied.'; }
+      } else {
+        if (!developerAllowed(game)) throw Error('Open a solo world to use cheats.');
+        if (['god','flight','mining'].includes(action)) { game.developer[action]=!game.developer[action]; if(action==='flight'){game.flying=game.developer.flight;game.gliding=false;} }
+        if (action === 'heal') { game.state.hp=20;game.state.breath=20;game.stamina=100; }
+        if (action === 'home') game.returnHome();
+        if (action === 'day') game.state.time=70;
+        if (action === 'night') game.state.time=500;
+        if (action === 'clear') { game.mobs=[];game.projectiles=[];game.boss=null;game.slam=null; }
+        if (action === 'give') { const item=ui.overlay.querySelector('[data-dev-item]').value;game.add(item,999);message=`Added ${ITEMS[item].name}.`; }
+      }
+    } catch(error) { message=error.message; }
+    ui.render();
+  });
+}

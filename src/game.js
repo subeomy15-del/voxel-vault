@@ -1,3 +1,4 @@
+import {developerFlag} from './developer-tools.js?v=43';
 import {bagRoom,bagCount,BAG_CAPACITY,STACK_SIZE} from './bag-capacity.js?v=43';
 import {creatureSpawn} from './creature-registry.js?v=43';
 import {tickRuinEncounters,defeatRuinGuard,ruinEquipment} from './ruin-encounters.js?v=43';
@@ -454,7 +455,7 @@ export class Game {
       for(const[item,[low,high]]of Object.entries(drops)){const count=low+1+Math.min(high-low,Math.floor(hash(m.id+offset,Math.floor(this.state.elapsed),this.state.seed)*(high-low+1)));this.dropItem(item,count,m.x+offset*.25,m.y,m.z);offset++;}
     }
   }
-  hurt(amount,combat=false,source=combat?'combat':'physical'){if(this.state.mode==='parkour'||this.multiplayer?.competitive||this.creative||this.hurtCooldown>0||this.dashTime>0)return;const reduction=(1-armorProtection(this.state))*potionDamageMultiplier(this,source)*(1-Math.min(.5,source==='fall'?armorInfusion(this.state,'featherstep'):source==='fire'||source==='ash'?armorInfusion(this.state,'ash_ward'):source==='void'||source==='combat'&&this.state.dimension==='ender'?armorInfusion(this.state,'void_ward'):0));this.state.hp=Math.max(0,this.state.hp-amount*reduction*(combat&&this.hardAdventure?1.65:1));this.hurtCooldown=.7;this.audio.play('hurt');this.emit('hurt');if(this.state.hp<=0){this.state.stats.deaths++;this.pause('death');this.emit('screen');}}
+  hurt(amount,combat=false,source=combat?'combat':'physical'){if(developerFlag(this,'god')||this.state.mode==='parkour'||this.multiplayer?.competitive||this.creative||this.hurtCooldown>0||this.dashTime>0)return;const reduction=(1-armorProtection(this.state))*potionDamageMultiplier(this,source)*(1-Math.min(.5,source==='fall'?armorInfusion(this.state,'featherstep'):source==='fire'||source==='ash'?armorInfusion(this.state,'ash_ward'):source==='void'||source==='combat'&&this.state.dimension==='ender'?armorInfusion(this.state,'void_ward'):0));this.state.hp=Math.max(0,this.state.hp-amount*reduction*(combat&&this.hardAdventure?1.65:1));this.hurtCooldown=.7;this.audio.play('hurt');this.emit('hurt');if(this.state.hp<=0){this.state.stats.deaths++;this.pause('death');this.emit('screen');}}
   saveTravelSite(index){
     if(!Number.isInteger(index)||index<0||index>2||this.multiplayer?.active||this.state.mode==='parkour')return false;
     if(!this.grounded||this.world.intersects(this.pos.x,this.pos.y,this.pos.z)||this.world.waterAt(this.pos.x,this.pos.y+.5,this.pos.z)){this.toast('Find safe ground','Stand on a clear, dry landing spot to save this site.');return false;}
@@ -526,7 +527,7 @@ export class Game {
     const item=ITEMS[this.held],kind=item?.kind,wood=['wood','birch','pinewood','plank','birch_plank','pine_plank','leaf','pine','autumnleaf','bookshelf','hedge'].includes(BLOCKS[t.type].texture||t.type),soil=['grass','dirt','sand','clay','snow','gravel','farmland'].includes(t.type);
     const correct=kind==='axe'&&wood||kind==='shovel'&&soil||kind==='pickaxe'&&!wood&&!soil;
     const soft=soil||wood||BLOCKS[t.type].plant,hardness=BLOCKS[t.type].hardness;
-    const natural=!this.world.edits.has(key);const before=this.mineProgress;this.mineProgress+=dt*(this.creative?40:(correct?(item.speed||1):1)*Math.max(this.effect('haste')?1.6:1,1+this.potionPower('mining'))*miningPower(this.state,this.held)*(1+(this.state.elapsed-(this.lastMinedAt||0)<2?Math.min(5,this.miningChain||0)*infusionValue(this.state,this.held,'momentum'):0)))/hardness;
+    const natural=!this.world.edits.has(key);const before=this.mineProgress;this.mineProgress+=dt*(developerFlag(this,'mining')?1000000:this.creative?40:(correct?(item.speed||1):1)*Math.max(this.effect('haste')?1.6:1,1+this.potionPower('mining'))*miningPower(this.state,this.held)*(1+(this.state.elapsed-(this.lastMinedAt||0)<2?Math.min(5,this.miningChain||0)*infusionValue(this.state,this.held,'momentum'):0)))/hardness;
     if(Math.floor(before*12)!==Math.floor(this.mineProgress*12)&&this.mineProgress<1){this.renderer.burst(t.x+.5,t.y+.65,t.z+.5,BLOCKS[t.type].color,3);this.audio.play('mine',t.type);}
     if(this.mineProgress>=1){
       if(this.multiplayer?.competitive){if(this.world.set(t.x,t.y,t.z,null)){this.renderer.burst(t.x+.5,t.y+.5,t.z+.5,BLOCKS[t.type].color,8);this.renderer.swing=1;this.audio.play('mine',t.type);}this.mineProgress=0;this.mineKey='';return;}

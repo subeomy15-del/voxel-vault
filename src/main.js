@@ -1,3 +1,4 @@
+import {installDeveloperTools} from './developer-tools.js?v=43';
 import { Arcade } from './arcade.js?v=43';
 import { TowerUI } from './tower-ui.js?v=43';
 import {potionFor} from './potions.js?v=43';
@@ -36,6 +37,7 @@ try{
   arcade=new Arcade(game,ui,parkour);
   towerUI=new TowerUI(game,ui,parkour,multiplayerUI);
   installControlPanels(game,ui,multiplayer);
+  installDeveloperTools(game,ui,multiplayer);
   const canvas=renderer.renderer.domElement;const use=()=>{if(game.interact()===true){game.placeHeld=true;game.placeTimer=.3;}};let dragging=false,lastTouch=null,lastSpace=0,expectedUnlock=false;
   const open=screen=>{if(game.screen===screen){ui.resume();return;}game.pause(screen);ui.render();};
   addEventListener('keydown',e=>{
