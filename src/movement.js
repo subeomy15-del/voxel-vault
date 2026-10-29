@@ -1,4 +1,4 @@
-import {developerSpeed,developerFlag} from './developer-tools.js?v=43';
+import {developerSpeed,developerFlag} from './developer-tools.js?v=45';
 import {armorInfusion} from './infusions.js?v=43';
 import {potionPower} from './potions.js?v=43';
 import { trapAt } from './traps.js?v=43';

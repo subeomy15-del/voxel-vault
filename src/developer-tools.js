@@ -8,12 +8,22 @@ const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<'
 
 export function installDeveloperTools(game, ui, multiplayer) {
   game.developer = { speed: 1, god: false, flight: false, mining: false };
-  let unlocked = false, message = '';
+  let unlocked = false, message = '', returnScreen = null;
   const launcher = document.createElement('button');
-  launcher.textContent = 'Developer · F8'; launcher.id = 'developer-launcher';
+  launcher.textContent = 'Developer Tools'; launcher.id = 'developer-launcher';
   launcher.style.cssText = 'position:fixed;bottom:14px;left:14px;z-index:35;padding:9px 14px;border:1px solid #a8b982;border-radius:6px;background:#182d22;color:#f4f0d5;cursor:pointer';
   document.body.append(launcher);
-  const open = () => { if (game.screen === 'developer') ui.resume(); else { game.pause('developer'); ui.render(); } };
+  const resume = ui.resume.bind(ui);
+  ui.resume = (...args) => {
+    if (game.screen === 'developer' && returnScreen === 'menu') { game.screen = 'menu'; ui.render(); return; }
+    return resume(...args);
+  };
+  const open = () => {
+    if (game.screen === 'developer') return ui.resume();
+    returnScreen = game.screen;
+    if (game.screen === 'menu') game.screen = 'developer'; else game.pause('developer');
+    ui.render();
+  };
   launcher.addEventListener('click', open);
   window.addEventListener('keydown', event => {
     if (event.code !== 'F8' || event.repeat || event.target.closest?.('input,textarea,select')) return;
@@ -21,7 +31,15 @@ export function installDeveloperTools(game, ui, multiplayer) {
   }, true);
   const original = ui.render.bind(ui);
   ui.render = (...args) => {
-    if (game.screen !== 'developer') return original(...args);
+    launcher.hidden = ['menu','developer'].includes(game.screen);
+    if (game.screen !== 'developer') {
+      const result = original(...args);
+      if (game.screen === 'menu') {
+        const top = ui.overlay.querySelector('.lobby-top');
+        if (top && !ui.overlay.querySelector('[data-dev-open]')) top.insertAdjacentHTML('afterend', `<button type="button" data-dev-open style="display:block;width:min(92%,1100px);margin:20px auto;padding:20px 24px;border:2px solid #b8d28a;border-radius:10px;background:#20382b;color:#f4f0d5;font-family:inherit;font-size:20px;font-weight:700;cursor:pointer;text-align:left">Developer Tools <span style="float:right">Unlock with code →</span></button>`);
+      }
+      return result;
+    }
     const solo = developerAllowed(game);
     ui.overlay.hidden = false; ui.overlay.className = 'modal-overlay';
     document.querySelector('#hud').hidden = true;
@@ -30,7 +48,7 @@ export function installDeveloperTools(game, ui, multiplayer) {
     const button = (action, label) => `<button type="button" data-dev="${action}">${label}</button>`;
     const toggle = (key, label) => button(key, `${game.developer[key] ? '✓ ' : ''}${label}`);
     const body = !unlocked ? `<p>Enter your 20-digit developer code.</p><form data-dev-unlock><input name="code" aria-label="Developer code" inputmode="numeric" autocomplete="off" maxlength="20" required pattern="[0-9]{20}" style="width:100%;padding:12px;box-sizing:border-box"><button class="primary full">Unlock tools</button></form>` : `<p>${solo ? 'Cheats apply to your current solo world. Flight: Space rises, X descends.' : 'Solo cheats are disabled in multiplayer and scored modes.'}</p><fieldset ${solo ? '' : 'disabled'} style="display:grid;gap:12px;border:0;padding:0"><label>Movement speed <select data-dev-speed aria-label="Movement speed">${[1,2,3,5,10].map(n=>`<option value="${n}" ${game.developer.speed===n?'selected':''}>${n}×</option>`).join('')}</select></label><div style="display:flex;flex-wrap:wrap;gap:8px">${toggle('god','God mode')}${toggle('flight','Flight')}${toggle('mining','Instant mining')}${button('heal','Full health')}${button('home','Teleport home')}${button('day','Daytime')}${button('night','Nighttime')}${button('clear','Clear enemies')}</div><label>Give item <select data-dev-item aria-label="Item">${Object.entries(ITEMS).filter(([,item])=>!item.hidden).map(([id,item])=>`<option value="${escape(id)}">${escape(item.name)}</option>`).join('')}</select></label>${button('give','Give 999 of selected item')}</fieldset>${button('reset','Reset all cheats')}${multiplayer.room ? `<hr><h3>Lobby administration</h3>${multiplayer.isHost ? `${button('start','Start game')}${button('invite','Copy invite link')}<p>Start requires everyone to be ready.</p>` : '<p>Only the lobby host can administer this room.</p>'}` : ''}`;
-    ui.overlay.innerHTML = ui.frame('Developer tools', 'F8 · DEVELOPER / ADMIN', `${body}<p role="status">${escape(message)}</p>${button('close','Back to game')}`, true);
+    ui.overlay.innerHTML = ui.frame('Developer tools', 'F8 · DEVELOPER / ADMIN', `${body}<p role="status">${escape(message)}</p>${button('close',returnScreen === 'menu' ? 'Back to main menu' : 'Back to game')}`, true);
     ui.overlay.querySelector('[name=code]')?.focus();
   };
   document.addEventListener('submit', event => {
@@ -43,6 +61,7 @@ export function installDeveloperTools(game, ui, multiplayer) {
     game.developer.speed = Math.max(1, Math.min(10, Number(event.target.value) || 1));
   });
   document.addEventListener('click', async event => {
+    if (event.target.closest('[data-dev-open]')) { open(); return; }
     const action = event.target.closest('[data-dev]')?.dataset.dev;
     if (!action) return;
     if (action === 'close') return ui.resume();
@@ -66,4 +85,5 @@ export function installDeveloperTools(game, ui, multiplayer) {
     } catch(error) { message=error.message; }
     ui.render();
   });
+  ui.render();
 }
