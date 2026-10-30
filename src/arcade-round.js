@@ -31,13 +31,14 @@ export class ArcadeRound {
     if(this.countdown>0||this.ended||!actor.alive||!target?.alive||actor.cooldown>0||distance(actor,target)>2.8||Math.abs(actor.y-target.y)>2)return false;
     if(!['infection','crown-control','sky-battle'].includes(this.mode.id))return false;
     actor.cooldown=.65;
+    if(target.developerGod)return false;
     if(this.mode.id==='infection'){if(!actor.infected||target.infected)return false;target.infected=true;actor.score+=3;this.events.push({type:'tag',player:target.id});return true;}
     const d=Math.max(.1,distance(actor,target));target.vx=(target.x-actor.x)/d*11;target.vz=(target.z-actor.z)/d*11;target.lastHit=actor.id;target.lastHitAt=this.elapsed;
     if(this.mode.id==='sky-battle'){target.hp-=5;if(target.hp<=0)this.eliminate(target);}
     this.events.push({type:'hit',player:target.id});return true;
   }
   eliminate(p){
-    if(!p.alive)return;p.alive=false;p.respawn=2;
+    if(!p.alive||p.developerGod)return;p.alive=false;p.respawn=2;
     if(this.mode.party&&!this.mode.survival){p.carry=0;}
     else if(['sky-battle','crown-control','gem-rush','infection'].includes(this.mode.id)){
       if(p.lastHit!==undefined&&this.elapsed-p.lastHitAt<5)this.players[p.lastHit].score+=this.mode.id==='sky-battle'?1:2;

@@ -281,3 +281,16 @@ test('solo Manhunt AI respects the head start and pursues the human runner',asyn
  api.advance(11000);await api.state();api.advance(600);const state=await api.state();
  assert.ok(state.room.match.players.find(p=>!p.bot).hp<20,'AI attacks the runner after release');
 });
+
+for(const mode of ['bedwars','manhunt'])test(`${mode} developer sessions permit speed and flight while god mode survives falls`,async t=>{
+ const api=await fixture(t,mode),actor=api.actors[0];await api.start();
+ assert.equal((await api.action(actor,'developer',{code:'wrong',settings:{god:true}})).status,403);
+ assert.equal((await api.action(actor,'developer',{code:'73918402658391047265',settings:{speed:10,flight:true,god:true}})).status,200);
+ const before=await api.self(actor);api.advance(1000);
+ const target={...before.pose,x:before.pose.x+100,y:before.pose.y+60,dimension:MODE_RULES[mode].dimension};
+ assert.equal((await api.action(actor,'pose',target)).status,200);
+ const after=await api.self(actor);assert.equal(after.pose.x,target.x);assert.equal(after.pose.y,target.y);
+ api.advance(1000);await api.action(actor,'pose',{...target,y:MODE_RULES[mode].fallY-1});
+ assert.equal((await api.self(actor)).alive,true);
+ assert.equal((await api.self(actor)).hp,20);
+});

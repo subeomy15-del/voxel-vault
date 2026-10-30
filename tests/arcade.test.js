@@ -33,3 +33,13 @@ test('12 distinct campaign worlds match worker geometry and provide supported ch
 test('human and AI spawn apart so no one can attack before leaving their start',()=>{
  for(const mode of ARCADE_MODES.filter(m=>m.id!=='redlight-rush')){const r=new ArcadeRound(mode.id);for(const p of r.players)for(const q of r.players)if(p!==q)assert.ok(Math.hypot(p.x-q.x,p.z-q.z)>4.5,mode.id);}
 });
+
+test('developer god mode prevents arcade damage, elimination and infection',()=>{
+ for(const mode of ['sky-battle','infection','bomb-tag','meteor-dodge']){
+  const r=new ArcadeRound(mode);r.countdown=0;const [player,bot]=r.players;
+  player.developerGod=true;bot.x=player.x+1;bot.z=player.z;
+  r.eliminate(player);assert.equal(player.alive,true,mode);
+  if(mode==='sky-battle'||mode==='infection')assert.equal(r.attack(bot,player),false);
+  assert.equal(player.hp,20);
+ }
+});

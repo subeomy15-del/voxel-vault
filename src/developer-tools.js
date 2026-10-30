@@ -1,7 +1,7 @@
 import { ITEMS } from './data.js?v=43';
 
 export const DEVELOPER_CODE = '73918402658391047265';
-export const developerAllowed = game => !game.multiplayer?.room && !game.arcade?.active && game.state.mode !== 'parkour';
+export const developerAllowed = game => !!game.state;
 export const developerSpeed = game => developerAllowed(game) ? Math.max(1, Math.min(10, Number(game.developer?.speed) || 1)) : 1;
 export const developerFlag = (game, flag) => developerAllowed(game) && !!game.developer?.[flag];
 const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -47,13 +47,14 @@ export function installDeveloperTools(game, ui, multiplayer) {
     document.body.dataset.screen = 'developer';
     const button = (action, label) => `<button type="button" data-dev="${action}">${label}</button>`;
     const toggle = (key, label) => button(key, `${game.developer[key] ? '✓ ' : ''}${label}`);
-    const body = !unlocked ? `<p>Enter your 20-digit developer code.</p><form data-dev-unlock><input name="code" aria-label="Developer code" inputmode="numeric" autocomplete="off" maxlength="20" required pattern="[0-9]{20}" style="width:100%;padding:12px;box-sizing:border-box"><button class="primary full">Unlock tools</button></form>` : `<p>${solo ? 'Cheats apply to your current solo world. Flight: Space rises, X descends.' : 'Solo cheats are disabled in multiplayer and scored modes.'}</p><fieldset ${solo ? '' : 'disabled'} style="display:grid;gap:12px;border:0;padding:0"><label>Movement speed <select data-dev-speed aria-label="Movement speed">${[1,2,3,5,10].map(n=>`<option value="${n}" ${game.developer.speed===n?'selected':''}>${n}×</option>`).join('')}</select></label><div style="display:flex;flex-wrap:wrap;gap:8px">${toggle('god','God mode')}${toggle('flight','Flight')}${toggle('mining','Instant mining')}${button('heal','Full health')}${button('home','Teleport home')}${button('day','Daytime')}${button('night','Nighttime')}${button('clear','Clear enemies')}</div><label>Give item <select data-dev-item aria-label="Item">${Object.entries(ITEMS).filter(([,item])=>!item.hidden).map(([id,item])=>`<option value="${escape(id)}">${escape(item.name)}</option>`).join('')}</select></label>${button('give','Give 999 of selected item')}</fieldset>${button('reset','Reset all cheats')}${multiplayer.room ? `<hr><h3>Lobby administration</h3>${multiplayer.isHost ? `${button('start','Start game')}${button('invite','Copy invite link')}<p>Start requires everyone to be ready.</p>` : '<p>Only the lobby host can administer this room.</p>'}` : ''}`;
+    const body = !unlocked ? `<p>Enter your 20-digit developer code.</p><form data-dev-unlock><input name="code" aria-label="Developer code" inputmode="numeric" autocomplete="off" maxlength="20" required pattern="[0-9]{20}" style="width:100%;padding:12px;box-sizing:border-box"><button class="primary full">Unlock tools</button></form>` : `<p>${solo ? 'Tools apply across all modes and stay on when you switch games. Flight: Space rises, X descends.' : 'Start a game to use developer tools.'}</p><fieldset ${solo ? '' : 'disabled'} style="display:grid;gap:12px;border:0;padding:0"><label>Movement speed <select data-dev-speed aria-label="Movement speed">${[1,2,3,5,10].map(n=>`<option value="${n}" ${game.developer.speed===n?'selected':''}>${n}×</option>`).join('')}</select></label><div style="display:flex;flex-wrap:wrap;gap:8px">${toggle('god','God mode')}${toggle('flight','Flight')}${toggle('mining','Instant mining')}${button('heal','Full health')}${button('home','Teleport home')}${button('day','Daytime')}${button('night','Nighttime')}${button('clear','Clear enemies')}</div><label>Give item <select data-dev-item aria-label="Item">${Object.entries(ITEMS).filter(([,item])=>!item.hidden).map(([id,item])=>`<option value="${escape(id)}">${escape(item.name)}</option>`).join('')}</select></label>${button('give','Give 999 of selected item')}</fieldset>${button('reset','Reset all cheats')}${multiplayer.room ? `<hr><h3>Lobby administration</h3>${multiplayer.isHost ? `${button('start','Start game')}${button('invite','Copy invite link')}<p>Start requires everyone to be ready.</p>` : '<p>Only the lobby host can administer this room.</p>'}` : ''}`;
     ui.overlay.innerHTML = ui.frame('Developer tools', 'F8 · DEVELOPER / ADMIN', `${body}<p role="status">${escape(message)}</p>${button('close',returnScreen === 'menu' ? 'Back to main menu' : 'Back to game')}`, true);
     ui.overlay.querySelector('[name=code]')?.focus();
   };
   document.addEventListener('submit', event => {
     if (!event.target.matches('[data-dev-unlock]')) return;
     event.preventDefault(); unlocked = new FormData(event.target).get('code') === DEVELOPER_CODE;
+    if(unlocked)game.developer.unlocked=true;
     message = unlocked ? 'Developer tools unlocked.' : 'Incorrect code.'; ui.render();
   });
   document.addEventListener('change', event => {
@@ -73,13 +74,13 @@ export function installDeveloperTools(game, ui, multiplayer) {
         if (!multiplayer.isHost) throw Error('Only the lobby host can use this control.');
         if (action === 'start') await multiplayer.start(); else { await multiplayer.copyInvite(); message='Invite copied.'; }
       } else {
-        if (!developerAllowed(game)) throw Error('Open a solo world to use cheats.');
+        if (!developerAllowed(game)) throw Error('Start a game to use developer tools.');
         if (['god','flight','mining'].includes(action)) { game.developer[action]=!game.developer[action]; if(action==='flight'){game.flying=game.developer.flight;game.gliding=false;} }
-        if (action === 'heal') { game.state.hp=20;game.state.breath=20;game.stamina=100; }
-        if (action === 'home') game.returnHome();
+        if (action === 'heal') { game.state.hp=20;game.state.breath=20;game.stamina=100; const player=game.arcade?.active&&game.arcade.round.players[0];if(player){player.hp=20;player.lives=3;} if(multiplayer.competitive)await multiplayer.action('developer',{code:DEVELOPER_CODE,settings:game.developer,command:'heal'}); }
+        if (action === 'home') { if(game.parkour?.active){game.parkour.respawn();}else game.returnHome(); }
         if (action === 'day') game.state.time=70;
         if (action === 'night') game.state.time=500;
-        if (action === 'clear') { game.mobs=[];game.projectiles=[];game.boss=null;game.slam=null; }
+        if (action === 'clear') { game.mobs=[];game.projectiles=[];game.boss=null;game.slam=null;if(game.arcade?.active)for(const player of game.arcade.round.players)if(player.bot)game.arcade.round.eliminate(player); }
         if (action === 'give') { const item=ui.overlay.querySelector('[data-dev-item]').value;game.add(item,999);message=`Added ${ITEMS[item].name}.`; }
       }
     } catch(error) { message=error.message; }

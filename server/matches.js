@@ -33,6 +33,7 @@ export function createMatches({ now, broadcast, fail }) {
     if (remaining.length < 2) end(room, remaining[0] || 'draw', remaining.length ? `${remaining[0] === 'ember' ? 'Ember' : 'Tide'} team wins!` : 'The round is a draw.');
   }
   function kill(room, player) {
+    if(room.players.get(player.id)?.developer?.god)return;
     const match = room.match;
     player.hp = 0;
     player.alive = false;
@@ -168,9 +169,10 @@ export function createMatches({ now, broadcast, fail }) {
     if (!player) fail(403, 'You are not in this match.');
     if (room.match.phase !== 'playing' || !player.alive) return player.pose;
     const time = now(), elapsed = Math.max(0, Math.min(2, (time - player.lastPoseAt) / 1000));
+    const developer=member.developer, speed=developer?.speed||1;
     const horizontal = Math.hypot(incoming.x - player.pose.x, incoming.z - player.pose.z);
     const frozen = room.mode === 'manhunt' && player.role === 'hunter' && time < room.match.headStartUntil;
-    if (incoming.dimension !== MODE_RULES[room.mode].dimension || horizontal > 4 + 16 * elapsed || Math.abs(incoming.y - player.pose.y) > 6 + 45 * elapsed || (frozen && distance(incoming, player.spawn) > 2)) {
+    if (incoming.dimension !== MODE_RULES[room.mode].dimension || horizontal > 4 + 16 * speed * elapsed || Math.abs(incoming.y - player.pose.y) > 6 + (developer?.flight?100*speed:45) * elapsed || (frozen && distance(incoming, player.spawn) > 2)) {
       player.spawnSerial++;
       publish(room);
       return player.pose;
@@ -234,7 +236,7 @@ export function createMatches({ now, broadcast, fail }) {
       if (time - player.lastAttackAt < 550) fail(429, 'Your next swing is not ready yet.');
       player.lastAttackAt = time;
       const damage = Math.max(1, Math.round((player.weapon === 'iron_sword' ? 8 : 5) * (target.armor ? .75 : 1)));
-      target.hp = Math.max(0, target.hp - damage);
+      target.hp = Math.max(0, target.hp - (room.players.get(target.id)?.developer?.god?0:damage));
       if (!target.hp) kill(room, target);
     } else if (type === 'fall') {
       if (player.pose.y >= MODE_RULES[room.mode].fallY) fail(403, 'You have not fallen out of the world.');

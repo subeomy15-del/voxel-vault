@@ -1,3 +1,4 @@
+import {DEVELOPER_CODE} from './developer-tools.js?v=46';
 import { freshState } from './save.js?v=43';
 import { ITEMS, BLOCKS } from './data.js?v=43';
 import { MODE_RULES } from './mode-rules.js?v=43';
@@ -356,6 +357,13 @@ export class Multiplayer extends EventTarget {
 
   update(dt) {
     if (!this.active || this.status !== 'connected') return;
+    if (this.game.developer?.unlocked) {
+      const settings=this.game.developer, signature=`${this.generation}:${this.room?.match?.id||''}:${JSON.stringify(settings)}`;
+      if(this.developerSignature!==signature&&!this.developerSyncing){
+        this.developerSyncing=true;
+        this.action('developer',{code:DEVELOPER_CODE,settings}).then(()=>{this.developerSignature=signature;}).catch(error=>{this.developerSignature=signature;this.game.toast('Developer server controls unavailable',error.message);}).finally(()=>{this.developerSyncing=false;});
+      }
+    }
     this.poseTimer += dt;
     if (this.poseTimer < .15 || this.sendingPose) return;
     this.poseTimer = 0;

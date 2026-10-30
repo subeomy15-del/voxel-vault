@@ -1,3 +1,4 @@
+import {DEVELOPER_CODE} from '../src/developer-tools.js';
 import { randomBytes, randomInt, randomUUID } from 'node:crypto';
 import { BLOCKS, ITEMS } from '../src/data.js';
 import { MODE_RULES } from '../src/mode-rules.js';
@@ -161,11 +162,19 @@ export function createLobbyService(options = {}) {
     action(code, body) {
       const { room, player } = authenticate(code, body.token);
       const type = body.type;
-      if (!['heartbeat', 'leave', 'ready', 'start', 'pose', 'edit', 'ping', 'chat', 'attack', 'fall', 'buy', 'objective', 'rematch'].includes(type)) fail(400, 'Unknown lobby action.');
+      if (!['developer', 'heartbeat', 'leave', 'ready', 'start', 'pose', 'edit', 'ping', 'chat', 'attack', 'fall', 'buy', 'objective', 'rematch'].includes(type)) fail(400, 'Unknown lobby action.');
       if (body.matchId !== undefined && !['heartbeat', 'leave', 'chat'].includes(type) && body.matchId !== room.match?.id) fail(409, 'That round has ended. Wait for the current match to load.');
       const rates = { pose: [60, 30], edit: [160, 80], ping: [4, 1], chat: [5, .5], attack: [8, 4] };
       const [capacity, rate] = rates[type] || [20, 5];
       consume(player.buckets, type, capacity, rate);
+      if(type==='developer'){
+        if(body.code!==DEVELOPER_CODE)fail(403,'Incorrect developer code.');
+        const settings=body.settings||{};
+        player.developer={speed:Math.max(1,Math.min(10,Number(settings.speed)||1)),god:settings.god===true,flight:settings.flight===true,mining:settings.mining===true};
+        const state=room.match?.players.get(player.id);
+        if(state&&(body.command==='heal'||player.developer.god)){state.hp=20;matches.publish(room);}
+        return {ok:true};
+      }
       if (type === 'heartbeat') return { ok: true };
       if (type === 'leave') { remove(room, player); return { ok: true }; }
       if (type === 'ready') {

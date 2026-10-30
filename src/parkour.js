@@ -1,7 +1,8 @@
+import {developerFlag} from './developer-tools.js?v=46';
 import { CLOUDSTEP,COURSES } from './parkour-course.js?v=43';
 import { GameTimer } from './game-timer.js?v=43';
 import { freshState } from './save.js?v=43';
-import { TowerRuntime } from './tower-runtime.js?v=43';
+import { TowerRuntime } from './tower-runtime.js?v=46';
 import { awardTowerSummit } from './tower-rewards.js?v=43';
 
 export class Parkour {
@@ -38,7 +39,7 @@ export class Parkour {
   }
   respawn(){
     const g=this.game,cp=this.course.checkpoints[this.checkpoint];
-    g.pos={x:cp.x,y:cp.y,z:cp.z};g.yaw=cp.yaw;g.pitch=0;g.velocity=g.vx=g.vz=0;g.cameraOffset=0;g.grounded=true;g.crouching=false;g.mantle=null;g.jumpBuffer=0;g.coyote=0;g.jumpReleased=false;g.jumpActive=false;g.jumpIntent=0;g.padFlight=0;g.gliding=false;g.flying=false;
+    g.pos={x:cp.x,y:cp.y,z:cp.z};g.yaw=cp.yaw;g.pitch=0;g.velocity=g.vx=g.vz=0;g.cameraOffset=0;g.grounded=true;g.crouching=false;g.mantle=null;g.jumpBuffer=0;g.coyote=0;g.jumpReleased=false;g.jumpActive=false;g.jumpIntent=0;g.padFlight=0;g.gliding=false;g.flying=developerFlag(g,'flight');
     this.towerRuntime.respawn();
   }
   update(dt){

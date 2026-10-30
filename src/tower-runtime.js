@@ -1,3 +1,4 @@
+import {developerFlag} from './developer-tools.js?v=46';
 import * as THREE from '../vendor/three.module.js';
 
 const TAU = Math.PI * 2;
@@ -123,7 +124,7 @@ export class TowerRuntime {
         o.kind === 'sweeper' && touchesSweeper(o.spec, time, position, feetHeight(g)));
     }
     this.previousPos = { ...g.pos }; this.view.update(this.obstacles, this.time); this.updateStatus();
-    if (hit) {
+    if (hit && !developerFlag(g,'god')) {
       g.renderer.burst?.(g.pos.x, g.pos.y + .8, g.pos.z, hit.spec.color || '#ff667f', 12);
       g.audio.play('hurt'); p.resetToCheckpoint();
     }

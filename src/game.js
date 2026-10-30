@@ -1,4 +1,4 @@
-import {developerFlag} from './developer-tools.js?v=45';
+import {developerFlag} from './developer-tools.js?v=46';
 import {bagRoom,bagCount,BAG_CAPACITY,STACK_SIZE} from './bag-capacity.js?v=43';
 import {creatureSpawn} from './creature-registry.js?v=43';
 import {tickRuinEncounters,defeatRuinGuard,ruinEquipment} from './ruin-encounters.js?v=43';
@@ -18,7 +18,7 @@ import { World,cellKey,WORLD_LIMIT,WORLD_BOTTOM,WORLD_TOP,SEA_LEVEL } from './wo
 import { ITEMS,BLOCKS,SMELTING,CROPS,CROP_BLOCKS,MATURE_CROPS,TIMBER,RECIPES,craft,maxCraft,hash,dailySeed } from './data.js?v=43';
 import { freshState,loadState,saveState,slotKey,importLegacy } from './save.js?v=43';
 import { ENEMIES,launchBolt,updateEnemies,targetMob } from './combat.js?v=43';
-import { movePlayer,requestJump } from './movement.js?v=45';
+import { movePlayer,requestJump } from './movement.js?v=46';
 import { overlapsBlock } from './shapes.js?v=43';
 import { activeEffect,canEat,consumeFood,tickSurvival } from './survival.js?v=43';
 import { ANIMALS,animalKind,tickAquaticLife } from './wildlife.js?v=43';

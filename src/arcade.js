@@ -1,8 +1,9 @@
+import {developerFlag} from './developer-tools.js?v=46';
 import {PartyView} from './party-view.js?v=43';
 import {partyDash,partyObjective} from './party-rules.js?v=43';
 import * as THREE from '../vendor/three.module.js';
 import { PlayerModel } from './player-model.js?v=43';
-import { ArcadeRound, ARCADE_MODES, TILE_COLORS, TILE_BLOCKS, tileColor } from './arcade-round.js?v=43';
+import { ArcadeRound, ARCADE_MODES, TILE_COLORS, TILE_BLOCKS, tileColor } from './arcade-round.js?v=46';
 import { CAMPAIGN, ARENAS } from './parkour-course.js?v=43';
 const colors=['#b5a1ff','#ffbc73','#ff87ac','#81d7ff','#e9ec88'];
 export class Arcade {
@@ -57,7 +58,7 @@ export class Arcade {
   }
   update(dt){
     if(!this.active||this.game.screen)return;
-    const g=this.game,p=this.round.players[0];if(p.alive){p.x=g.pos.x;p.y=g.pos.y;p.z=g.pos.z;}
+    const g=this.game,p=this.round.players[0];p.developerGod=developerFlag(g,'god');if(p.developerGod){p.hp=20;p.lives=3;p.invulnerable=1;if(g.pos.y<5){g.pos={x:.5,y:13,z:9.5};g.velocity=0;p.vy=0;}}if(p.alive){p.x=g.pos.x;p.y=g.pos.y;p.z=g.pos.z;}
     this.round.update(dt);
     if(p.alive){g.pos.x=p.x;g.pos.z=p.z;}
     if(g.attackHeld)this.attack();

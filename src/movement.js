@@ -1,4 +1,4 @@
-import {developerSpeed,developerFlag} from './developer-tools.js?v=45';
+import {developerSpeed,developerFlag} from './developer-tools.js?v=46';
 import {armorInfusion} from './infusions.js?v=43';
 import {potionPower} from './potions.js?v=43';
 import { trapAt } from './traps.js?v=43';
@@ -40,7 +40,7 @@ export function releaseJump(g) {
 }
 
 function tryJump(g) {
-  if (g.mantle || (g.creative || developerFlag(g, 'flight')) && g.flying || !(g.jumpBuffer > 0) || !(g.grounded || g.coyote > 0)) return false;
+  if (g.mantle || (g.creative && g.flying || developerFlag(g, 'flight')) || !(g.jumpBuffer > 0) || !(g.grounded || g.coyote > 0)) return false;
   g.velocity = Math.max(g.state.effects?.jump>0?12.7:MOVEMENT.jump,MOVEMENT.jump*(1+potionPower(g.state,'jump')+(g.state.dimension==='ender'?armorInfusion(g.state,'void_step'):0)));
   if (g.jumpReleased) g.velocity = 3.8;
   g.state.exhaustion += .18; g.grounded = false; g.coyote = 0; g.jumpBuffer = 0; g.jumpActive = true;
@@ -167,7 +167,7 @@ export function movePlayer(g, dt) {
   g.moving = inputLength > .05;
   const wantsCrouch = settings(g).crouchMode === 'toggle' ? !!g.crouchToggle : held(g, crouchKeys(g));
   g.crouching = wantsCrouch || g.world.intersects(g.pos.x, g.pos.y + .003, g.pos.z, 1.747);
-  const inWater = g.world.waterAt(g.pos.x, g.pos.y + .8, g.pos.z), flying = (g.creative || developerFlag(g, 'flight')) && g.flying;
+  const inWater = g.world.waterAt(g.pos.x, g.pos.y + .8, g.pos.z), flying = (g.creative && g.flying || developerFlag(g, 'flight'));
   if (inWater || g.grounded || !g.state.inv[g.state.glider]) g.gliding = false;
   const wantsSprint = g.touchSprint || (settings(g).sprintMode === 'toggle' ? !!g.sprintToggle : held(g, sprintKeys));
   g.sprinting = g.moving && !g.crouching && !inWater && !g.gliding && !g.eating && (g.creative || g.state.food >= 6) && g.stamina > 3 && wantsSprint;
