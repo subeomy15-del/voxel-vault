@@ -1,4 +1,4 @@
-import {developerFlag} from './developer-tools.js?v=46';
+import {developerFlag} from './developer-tools.js?v=47';
 import * as THREE from '../vendor/three.module.js';
 
 const TAU = Math.PI * 2;

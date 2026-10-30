@@ -46,9 +46,9 @@ test('checkpoints require ordered grounded contact and the timer excludes idle a
   assert.deepEqual(game.state.spawn, { x: .5, y: 14, z: -16.5 });
 });
 
-test('finish requires all checkpoints, persists a valid PB once, and slower replays preserve it', () => {
+test('finish persists a valid PB once and slower replays preserve it', () => {
   const { game, course, storage } = harness(); course.start();
-  visit(game, course, CLOUDSTEP.finish); assert.equal(course.timer.finished, false);
+  assert.equal(course.timer.finished, false);
   for (const cp of CLOUDSTEP.checkpoints.slice(1)) visit(game, course, cp, 2);
   visit(game, course, CLOUDSTEP.finish, 2);
   assert.equal(course.timer.finished, true); assert.equal(game.screen, 'parkour-results');
@@ -163,3 +163,16 @@ test('all expanded campaign jumps are reachable with normal movement at 60 and 2
   }
  }
 });
+
+ test('finish accepts skipping every checkpoint and reloads the resulting best time', () => {
+  const {game,course}=harness();course.start();
+  visit(game,course,CLOUDSTEP.finish,2);
+  assert.equal(course.checkpoint,0);assert.equal(course.timer.finished,true);
+  assert.deepEqual(course.best.splits,[]);
+  const best=structuredClone(course.best);course.start();assert.deepEqual(course.best,best);
+ });
+ test('developer flight can finish without checkpoints or a grounded landing', () => {
+  const {game,course}=harness();course.start();game.developer={flight:true};
+  game.pos={...CLOUDSTEP.finish};game.grounded=false;game.frameElapsed=.1;course.update(.1);
+  assert.equal(course.timer.finished,true);assert.equal(course.checkpoint,0);
+ });

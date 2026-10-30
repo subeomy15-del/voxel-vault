@@ -1,4 +1,4 @@
-import {DEVELOPER_CODE} from './developer-tools.js?v=46';
+import {DEVELOPER_CODE} from './developer-tools.js?v=47';
 import { freshState } from './save.js?v=43';
 import { ITEMS, BLOCKS } from './data.js?v=43';
 import { MODE_RULES } from './mode-rules.js?v=43';

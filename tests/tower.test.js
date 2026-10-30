@@ -20,11 +20,11 @@ test('tower worlds extend the course registry without replacing the 12-level cam
     assert.ok(world.finish.y>world.spawn.y+40);assert.equal(courseGeometry(world.seed),courseGeometry(world.seed));
   }
 });
-test('each tower requires every floor, awards the summit once, and restores the solo save',()=>{
+test('each tower awards the summit once and restores the solo save',()=>{
   const {game,p,storage}=harness();game.state.inv.diamond=7;game.save(true);const solo=structuredClone(game.state);
   for(const world of TOWER_WORLDS){
     assert.equal(p.start(world.id),true);assert.equal(p.towerRuntime.course,world);
-    visit(game,p,world.finish);assert.equal(p.timer.finished,false,'cannot skip floors');
+    assert.equal(p.timer.finished,false);
     for(const cp of world.checkpoints.slice(1))visit(game,p,cp);
     if(!p.timer.finished)visit(game,p,world.finish);
     assert.equal(p.timer.finished,true,world.id);assert.equal(game.screen,'parkour-results');
@@ -46,4 +46,9 @@ test('switching between tower and ordinary parkour removes dynamic collision wra
   const {game,p}=harness();p.start(TOWER_WORLDS[0].id);const world=game.world,original=p.towerRuntime.originalIntersects;
   assert.notEqual(world.intersects,original);p.start(CAMPAIGN[0].id);
   assert.equal(world.intersects,original);assert.equal(p.towerRuntime.course,null);assert.equal(p.course,CAMPAIGN[0]);
+});
+
+test('tower summit can be reached without collecting floor checkpoints',()=>{
+ const {game,p}=harness();const world=TOWER_WORLDS[0];p.start(world.id);visit(game,p,world.finish);
+ assert.equal(p.timer.finished,true);assert.equal(p.checkpoint,0);assert.equal(p.summitReward.first,true);
 });

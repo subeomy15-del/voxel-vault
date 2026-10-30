@@ -1,8 +1,8 @@
-import {developerFlag} from './developer-tools.js?v=46';
+import {developerFlag} from './developer-tools.js?v=47';
 import { CLOUDSTEP,COURSES } from './parkour-course.js?v=43';
 import { GameTimer } from './game-timer.js?v=43';
 import { freshState } from './save.js?v=43';
-import { TowerRuntime } from './tower-runtime.js?v=46';
+import { TowerRuntime } from './tower-runtime.js?v=47';
 import { awardTowerSummit } from './tower-rewards.js?v=43';
 
 export class Parkour {
@@ -10,7 +10,7 @@ export class Parkour {
   get active(){return this.game.state.mode==='parkour';}
   readBest(){
     try{const best=JSON.parse(this.game.storage.getItem('voxel-vault-parkour-'+this.course.id));
-      if(best&&Number.isFinite(best.time)&&best.time>0&&Array.isArray(best.splits)&&best.splits.length===this.course.checkpoints.length-1&&best.splits.every((t,i,a)=>Number.isFinite(t)&&t>=0&&t<=best.time&&(i===0||t>=a[i-1])))return best;
+      if(best&&Number.isFinite(best.time)&&best.time>0&&Array.isArray(best.splits)&&best.splits.length<=this.course.checkpoints.length-1&&best.splits.every((t,i,a)=>Number.isFinite(t)&&t>=0&&t<=best.time&&(i===0||t>=a[i-1])))return best;
     }catch{}return null;
   }
   start(id=CLOUDSTEP.id){
@@ -68,7 +68,7 @@ export class Parkour {
       g.audio.play('launch');g.renderer.burst(pad.x,pad.y+.1,pad.z,'#a1e6f5',28);g.jumpImpulse=.8;
     }
     const finish=this.course.finish;
-    if(this.checkpoint===this.course.checkpoints.length-1&&g.grounded&&Math.abs(g.pos.y-finish.y)<.2&&Math.hypot(g.pos.x-finish.x,g.pos.z-finish.z)<finish.radius)this.finish();
+    if((g.grounded||developerFlag(g,'flight'))&&Math.abs(g.pos.y-finish.y)<.2&&Math.hypot(g.pos.x-finish.x,g.pos.z-finish.z)<finish.radius)this.finish();
   }
   finish(){
     if(this.timer.finished)return;

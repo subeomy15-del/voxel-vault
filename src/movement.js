@@ -1,4 +1,4 @@
-import {developerSpeed,developerFlag} from './developer-tools.js?v=46';
+import {developerMovementSpeed,developerFlag} from './developer-tools.js?v=47';
 import {armorInfusion} from './infusions.js?v=43';
 import {potionPower} from './potions.js?v=43';
 import { trapAt } from './traps.js?v=43';
@@ -54,11 +54,11 @@ function approachHorizontal(g, x, z, amount) {
   g.vx += dx / length * amount; g.vz += dz / length * amount;
 }
 
-function airControl(g, x, z, speed, dt) {
+function airControl(g, x, z, speed, dt, handling = 1) {
   const input = Math.hypot(x, z);
   if (input < .01) { const drag = Math.exp(-.22 * dt); g.vx *= drag; g.vz *= drag; return; }
   const nx = x / input, nz = z / input, before = Math.hypot(g.vx, g.vz);
-  const along = g.vx * nx + g.vz * nz, gain = Math.max(0, Math.min(speed - along, 13 * dt));
+  const along = g.vx * nx + g.vz * nz, gain = Math.max(0, Math.min(speed - along, 13 * handling * dt));
   g.vx += nx * gain; g.vz += nz * gain;
   // Turning in the air redirects momentum without repeatedly creating speed.
   const after = Math.hypot(g.vx, g.vz), limit = Math.max(before, speed);
@@ -173,12 +173,13 @@ export function movePlayer(g, dt) {
   g.sprinting = g.moving && !g.crouching && !inWater && !g.gliding && !g.eating && (g.creative || g.state.food >= 6) && g.stamina > 3 && wantsSprint;
   g.stamina = Math.max(0, Math.min(100, g.stamina + dt * (g.sprinting ? -9 : 22)));
   const wing = ITEMS[g.state.glider], boost = Math.max(g.state.effects?.speed>0?1.5:1,1+potionPower(g.state,'speed')) * (1+(g.state.dimension==='nether'?armorInfusion(g.state,'ash_walker'):g.world.landmarks.some(l=>l.type==='ruin'&&Math.hypot(l.x-g.pos.x,l.z-g.pos.z)<24)?armorInfusion(g.state,'ruin_seeker'):0)) * (trapAt(g, g.pos)?.snare && !g.creative ? .25 : 1);
-  const speed = developerSpeed(g) * (g.gliding ? Math.max(7, wing.glideSpeed + Math.max(0, -g.pitch) * 7 - Math.max(0, g.pitch) * 4) : (inWater ? 3.1 : g.dashTime > 0 ? 15 : g.crouching ? 2.1 : g.sprinting ? MOVEMENT.sprint : MOVEMENT.walk) * boost * (g.grounded&&!flying&&g.world.get(Math.floor(g.pos.x),Math.floor(g.pos.y-.05),Math.floor(g.pos.z))==='mud'?.78:1) * (g.eating ? .5 : g.drawState ? .75 : 1));
+  const developerBoost=developerMovementSpeed(g,dt), handling=Math.sqrt(developerBoost);
+  const speed = developerBoost * (g.gliding ? Math.max(7, wing.glideSpeed + Math.max(0, -g.pitch) * 7 - Math.max(0, g.pitch) * 4) : (inWater ? 3.1 : g.dashTime > 0 ? 15 : g.crouching ? 2.1 : g.sprinting ? MOVEMENT.sprint : MOVEMENT.walk) * boost * (g.grounded&&!flying&&g.world.get(Math.floor(g.pos.x),Math.floor(g.pos.y-.05),Math.floor(g.pos.z))==='mud'?.78:1) * (g.eating ? .5 : g.drawState ? .75 : 1));
   if (g.dashTime > 0 && !g.moving) { forward = 1; g.moving = true; }
   const wishX = -Math.sin(g.yaw) * forward + Math.cos(g.yaw) * sideways, wishZ = -Math.cos(g.yaw) * forward - Math.sin(g.yaw) * sideways;
   if (g.gliding) { const current=Math.hypot(g.vx,g.vz),flightSpeed=current+(speed-current)*(1-Math.exp(-3*dt));g.vx=wishX*flightSpeed;g.vz=wishZ*flightSpeed; }
-  else if (!g.grounded && !inWater && !flying && g.dashTime <= 0) airControl(g, wishX, wishZ, speed, dt);
-  else approachHorizontal(g, wishX * speed, wishZ * speed, dt * (g.dashTime > 0 ? 100 : inWater ? 18 : !g.moving ? 110 : g.vx * wishX + g.vz * wishZ < 0 ? 110 : 90));
+  else if (!g.grounded && !inWater && !flying && g.dashTime <= 0) airControl(g, wishX, wishZ, speed, dt, handling);
+  else approachHorizontal(g, wishX * speed, wishZ * speed, dt * handling * (g.dashTime > 0 ? 100 : inWater ? 18 : !g.moving ? 110 : g.vx * wishX + g.vz * wishZ < 0 ? 110 : 90));
   if (g.grapple) {
     g.grapple.time -= dt; const dx = g.grapple.x - g.pos.x, dy = g.grapple.y - g.pos.y, dz = g.grapple.z - g.pos.z, distance = Math.hypot(dx, dy, dz);
     if (g.grapple.time <= 0 || distance < .8) g.grapple = null;
@@ -204,7 +205,7 @@ export function movePlayer(g, dt) {
   const ladder = [0, .5, 1].some(y => g.world.get(Math.floor(g.pos.x), Math.floor(g.pos.y + y), Math.floor(g.pos.z)) === 'ladder');
   if (flying) {
     const dy = (g.keys.has('Space') ? 1 : 0) - (wantsCrouch ? 1 : 0);
-    verticalSweep(g, Math.min(WORLD_TOP - 2, g.pos.y + dy * 8 * developerSpeed(g) * dt) - g.pos.y, height); g.velocity = 0;
+    verticalSweep(g, Math.min(WORLD_TOP - 2, g.pos.y + dy * 8 * developerBoost * dt) - g.pos.y, height); g.velocity = 0;
   } else {
     if (g.gliding) { const target = -Math.max(.65, wing.sink + Math.max(0, -g.pitch) * 7 - Math.max(0, g.pitch) * .7); g.velocity += (target-g.velocity)*(1-Math.exp(-18*dt)); }
     else { g.velocity -= dt * (inWater ? 7 : g.effect('slowfall') ? 6 : MOVEMENT.gravity); if (g.effect('slowfall')) g.velocity = Math.max(-2.4, g.velocity); }
